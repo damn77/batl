@@ -1,50 +1,135 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT
+Version: (none) → 1.0.0
+Change Type: MINOR (Initial constitution creation)
+Modified Principles: None (initial creation)
+Added Sections: All sections (initial creation)
+Removed Sections: None
+
+Templates Status:
+✅ plan-template.md - Constitution Check section aligns with principles
+✅ spec-template.md - User story structure supports Incremental Delivery principle
+✅ tasks-template.md - User story organization supports Incremental Delivery principle
+⚠️ No command files exist in .specify/templates/commands/ (only in .claude/commands/)
+
+Follow-up TODOs: None
+-->
+
+# Battle Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Specification-Driven Development
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All features MUST start with a complete specification before implementation begins. The specification must include:
+- User stories with clear priorities (P1, P2, P3, etc.)
+- Functional requirements with unique identifiers (FR-001, FR-002, etc.)
+- Success criteria that are measurable and technology-agnostic
+- Edge cases and boundary conditions
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Starting with a specification ensures shared understanding of requirements, prevents scope creep, and provides a testable contract for what success means.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Incremental Delivery
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Features MUST be decomposed into independently testable user stories, where each story:
+- Can be implemented, tested, and deployed independently
+- Delivers standalone value to users
+- Has a clear priority level (P1 = MVP, P2 = Enhanced, P3 = Future)
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Implementation MUST proceed in strict priority order: P1 → P2 → P3. Each story must be validated before proceeding to the next.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**Rationale**: Independent user stories enable early feedback, reduce integration risk, and allow stopping at any point with a functional subset. Priority-driven development ensures the most valuable features are delivered first.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### III. Design Before Implementation
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+The planning phase MUST produce complete design artifacts before task generation begins:
+- research.md: Technical research and feasibility analysis
+- data-model.md: Entity definitions and relationships
+- contracts/: API contracts or interface definitions
+- quickstart.md: End-to-end usage walkthrough
+
+Tasks (tasks.md) MUST NOT be generated until design artifacts are reviewed and approved.
+
+**Rationale**: Upfront design prevents costly rework during implementation. Complete design artifacts enable informed decision-making and provide clear guidance for implementation.
+
+### IV. Test Accountability (Optional)
+
+When tests are explicitly requested in the feature specification:
+- Tests MUST be written FIRST before any implementation
+- Tests MUST demonstrably FAIL before implementation begins
+- Red-Green-Refactor cycle is strictly enforced
+
+When tests are NOT requested in the specification, they are OPTIONAL.
+
+**Rationale**: Test-first development ensures tests validate requirements rather than implementation. Making tests optional respects project constraints while maintaining quality when tests are needed.
+
+### V. Constitution Compliance
+
+All development activities MUST comply with this constitution. When deviations are necessary:
+- Violation MUST be explicitly justified with rationale
+- Simpler alternatives MUST be documented and reasons for rejection explained
+- Justification MUST be captured in the Complexity Tracking section of plan.md
+
+The Constitution Check section in plan.md MUST be validated before Phase 0 research begins.
+
+**Rationale**: Consistent adherence to principles ensures quality and predictability. Requiring justification for violations prevents erosion of standards while allowing pragmatic exceptions.
+
+## Quality Standards
+
+### Documentation
+- All specifications must be clear, unambiguous, and testable
+- Use "NEEDS CLARIFICATION" markers for underspecified requirements
+- Update documentation when requirements change
+
+### Code Quality
+- Follow language-specific best practices defined in Technical Context
+- Maintain clear separation of concerns (models, services, APIs/CLIs)
+- Prefer simple solutions over complex ones (YAGNI principle)
+
+### Validation
+- Each user story must have clear acceptance criteria
+- Independent testing required for each user story
+- Quickstart documentation must be validated as part of implementation
+
+## Development Workflow
+
+### Feature Lifecycle
+1. **Specify** (`/speckit.specify`): Create feature specification with user stories, requirements, success criteria
+2. **Clarify** (`/speckit.clarify`): Identify and resolve underspecified areas (optional)
+3. **Plan** (`/speckit.plan`): Execute planning workflow to generate design artifacts
+4. **Analyze** (`/speckit.analyze`): Cross-artifact consistency validation (optional)
+5. **Tasks** (`/speckit.tasks`): Generate actionable task list organized by user story
+6. **Implement** (`/speckit.implement`): Execute tasks in dependency order
+
+### Review Requirements
+- Constitution Check must pass before research begins
+- Design artifacts must be reviewed before task generation
+- Each user story must be independently validated before proceeding to next priority
+- Cross-artifact consistency should be checked after task generation
+
+### Quality Gates
+- Specification completeness: All user stories have acceptance criteria
+- Design completeness: All required artifacts exist and are coherent
+- Implementation validation: Each user story delivers its promised value independently
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### Amendment Process
+- Constitution amendments require version bump per semantic versioning
+- MAJOR: Principle removal or backward-incompatible changes
+- MINOR: New principle or section additions
+- PATCH: Clarifications, wording improvements, typo fixes
+- All amendments must update LAST_AMENDED_DATE
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+### Compliance Review
+- All pull requests must verify constitution compliance
+- Violations require explicit justification in plan.md Complexity Tracking section
+- Constitution supersedes all other practices and guidelines
+
+### Versioning Policy
+This constitution follows semantic versioning. Version changes must be documented with:
+- Sync Impact Report detailing changes
+- List of affected templates and their update status
+- Follow-up actions if any placeholders remain undefined
+
+**Version**: 1.0.0 | **Ratified**: 2025-10-30 | **Last Amended**: 2025-10-30
