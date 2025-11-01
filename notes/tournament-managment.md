@@ -1,0 +1,26 @@
+## Tournament management ##
+- organizers can create/update/cancel tournaments
+- organizers and players with active accounts can register/deregister from tournaments
+- tournament data
+    - name
+    - category
+    - start date and time
+    - location
+        - club name
+        - address
+    - backup location in case of bad weather (optional)
+        - club name
+        - address
+    - number of courts
+    - max number of participants
+    - match rules
+    - points distribution (for ranking)
+    - organizer
+        - name
+        - contact info
+    - organizer deputy (Optional)
+        - name
+        - contact info
+    - entry cost (per player)
+        - fixed value
+        - calculated at tournament start

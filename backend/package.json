@@ -1,0 +1,49 @@
+{
+  "name": "battle-backend",
+  "version": "1.0.0",
+  "description": "Battle tennis tournament platform - Backend API",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "node prisma/seed.js",
+    "prisma:studio": "prisma studio",
+    "db:reset": "npm run db:clear-sessions && prisma migrate reset --force",
+    "db:clear-sessions": "node -e \"const fs = require('fs'); const path = require('path'); const dir = './sessions'; if (fs.existsSync(dir)) { fs.readdirSync(dir).forEach(f => fs.unlinkSync(path.join(dir, f))); console.log('Sessions cleared'); } else { console.log('No sessions directory'); }\""
+  },
+  "keywords": [
+    "tennis",
+    "tournament",
+    "battle",
+    "user-management"
+  ],
+  "author": "Battle Team",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@casl/ability": "^6.7.3",
+    "@prisma/client": "^6.18.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "http-errors": "^2.0.0",
+    "joi": "^18.0.1",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "prisma": "^6.18.0",
+    "session-file-store": "^1.5.0",
+    "winston": "^3.18.3"
+  }
+}

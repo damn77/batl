@@ -1,0 +1,18 @@
+## Categories ##
+- Tournament always belongs to single battle category
+- Every category has it's own ranking/s
+- Player can participate in multiple categories
+- Default category types:
+    - Singles
+    - Doubles
+- Specific category can be created by defining:
+    - category type
+        - defined above
+    - age group in years
+        - e.g. 20+, 35+, 50+
+        - only min age and up allowed
+        - player can player in younger categories but not in older ones
+    - gender
+        - Men
+        - Women
+        - Mixed

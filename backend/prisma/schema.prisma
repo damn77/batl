@@ -1,0 +1,96 @@
+// Prisma schema for Battle user management system
+// Database: SQLite via Prisma ORM
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enums
+enum Role {
+  ADMIN
+  ORGANIZER
+  PLAYER
+}
+
+// Models
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          Role
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relationships
+  sessions            Session[]
+  auditLogs           AuditLog[]
+  playerProfile       PlayerProfile?  @relation("UserProfile")
+  createdProfiles     PlayerProfile[] @relation("ProfileCreator")
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  data      String   // JSON serialized
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id         String    @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  changes    String?   // JSON serialized
+  ipAddress  String
+  userAgent  String?
+  timestamp  DateTime  @default(now())
+
+  // Relationships
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([userId, timestamp])
+}
+
+model PlayerProfile {
+  id        String    @id @default(uuid())
+  userId    String?   @unique // Nullable - profile can exist without account
+  name      String
+  email     String?   @unique // Email must be unique if provided (nullable allows multiple null values)
+  phone     String?
+  createdBy String    // Organizer who created this profile
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relationships
+  user    User? @relation("UserProfile", fields: [userId], references: [id], onDelete: SetNull)
+  creator User  @relation("ProfileCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([createdBy])
+  @@index([name])
+  @@index([email])
+}
