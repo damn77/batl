@@ -1,6 +1,6 @@
-# Battle project #
-**Battle - Bratislava Tennis League** 
-Tennis tournament and ranking management software for amateur tennis organization Battle.
+# BATL project #
+**BATL - Bratislava Tennis League** 
+Tennis tournament and ranking management software for amateur tennis organization BATL.
 
 ## Users ##
 - ADMIN - Super user

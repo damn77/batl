@@ -49,7 +49,7 @@ const NavBar = () => {
           onClick={handleHomeClick}
           style={{ cursor: 'pointer' }}
         >
-          Battle
+          BATL
         </span>
 
         <button

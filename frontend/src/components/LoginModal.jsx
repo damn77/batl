@@ -55,7 +55,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Battle Login</Modal.Title>
+        <Modal.Title>BATL Login</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -130,7 +130,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
         <div className="mt-3 text-center">
           <small className="text-muted">
             Default admin credentials:<br />
-            admin@battle.example.com / ChangeMe123!
+            admin@batl.example.com / ChangeMe123!
           </small>
         </div>
       </Modal.Body>

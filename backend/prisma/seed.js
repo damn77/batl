@@ -14,19 +14,19 @@ async function main() {
   // Define test users for all roles
   const testUsers = [
     {
-      email: process.env.ADMIN_EMAIL || 'admin@battle.example.com',
+      email: process.env.ADMIN_EMAIL || 'admin@batl.example.com',
       password: process.env.ADMIN_PASSWORD || 'ChangeMe123!',
       role: 'ADMIN',
       description: 'Admin user'
     },
     {
-      email: 'organizer@battle.example.com',
+      email: 'organizer@batl.example.com',
       password: 'Organizer123!',
       role: 'ORGANIZER',
       description: 'Test organizer user'
     },
     {
-      email: 'player@battle.example.com',
+      email: 'player@batl.example.com',
       password: 'Player123!',
       role: 'PLAYER',
       description: 'Test player user'

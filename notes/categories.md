@@ -1,5 +1,5 @@
 ## Categories ##
-- Tournament always belongs to single battle category
+- Tournament always belongs to single batl category
 - Every category has it's own ranking/s
 - Player can participate in multiple categories
 - Default category types:

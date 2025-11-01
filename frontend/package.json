@@ -1,7 +1,7 @@
 {
-  "name": "battle-frontend",
+  "name": "batl-frontend",
   "version": "1.0.0",
-  "description": "Battle tennis tournament platform - Frontend",
+  "description": "BATL (BrAtislavska Tenisova Liga) tennis tournament platform - Frontend",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,10 +13,11 @@
   "keywords": [
     "tennis",
     "tournament",
-    "battle",
+    "batl",
+    "bratislava",
     "react"
   ],
-  "author": "Battle Team",
+  "author": "BATL Team",
   "license": "ISC",
   "engines": {
     "node": ">=20.0.0"

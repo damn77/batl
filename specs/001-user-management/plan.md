@@ -7,7 +7,7 @@
 
 ## Summary
 
-User management system for Battle tennis tournament platform supporting four role types (ADMIN, ORGANIZER, PLAYER, PUBLIC) with email/password authentication. Key capabilities include admin and organizer account management, player profiles with optional accounts, role-based access control, and session management. The system must handle 100 concurrent users with sub-10-second authentication and enable player participation without requiring account creation.
+User management system for BATL tennis tournament platform supporting four role types (ADMIN, ORGANIZER, PLAYER, PUBLIC) with email/password authentication. Key capabilities include admin and organizer account management, player profiles with optional accounts, role-based access control, and session management. The system must handle 100 concurrent users with sub-10-second authentication and enable player participation without requiring account creation.
 
 ## Technical Context
 

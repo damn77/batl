@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(if [ -d specs ])",
+      "Bash(then ls -d specs/*-user-management)",
+      "Bash(else echo \"specs directory does not exist\")",
+      "Bash(fi)",
+      "Bash(powershell.exe -Command \".specify/scripts/powershell/setup-plan.ps1 -Json\")",
+      "Bash(powershell.exe -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
+      "Bash(if [ -d \"D:\\Workspace\\Battle\\specs\\001-user-management\\checklists\" ])",
+      "Bash(then ls \"D:\\Workspace\\Battle\\specs\\001-user-management\\checklists\")",
+      "Bash(else echo \"No checklists directory\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

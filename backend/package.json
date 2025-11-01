@@ -1,7 +1,7 @@
 {
-  "name": "battle-backend",
+  "name": "batl-backend",
   "version": "1.0.0",
-  "description": "Battle tennis tournament platform - Backend API",
+  "description": "BATL (BrAtislavska Tenisova Liga) tennis tournament platform - Backend API",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -17,10 +17,10 @@
   "keywords": [
     "tennis",
     "tournament",
-    "battle",
+    "batl",
     "user-management"
   ],
-  "author": "Battle Team",
+  "author": "BATL Team",
   "license": "ISC",
   "engines": {
     "node": ">=20.0.0"

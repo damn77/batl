@@ -100,7 +100,7 @@ const PublicRankingsPage = () => {
       {/* Header */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <div className="container">
-          <Link to="/" className="navbar-brand">Battle</Link>
+          <Link to="/" className="navbar-brand">BATL</Link>
           <div className="navbar-nav ms-auto">
             <button
               className="btn btn-outline-light btn-sm"

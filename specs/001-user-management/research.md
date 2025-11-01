@@ -1,6 +1,6 @@
 # Technical Research: User Management System
 
-**Feature**: User Management System for Battle Tennis Tournament Platform
+**Feature**: User Management System for BATL Tennis Tournament Platform
 **Date**: 2025-10-30
 **Status**: Complete
 
@@ -128,7 +128,7 @@ This document captures technical research and decisions for implementing the use
 **Decision**: bcrypt with work factor 12
 
 **Rationale**:
-- bcrypt is battle-tested and widely supported in Node.js ecosystem (bcryptjs library)
+- bcrypt is batl-tested and widely supported in Node.js ecosystem (bcryptjs library)
 - Work factor 12 provides strong security (2^12 = 4096 iterations)
 - Automatic salt generation per password
 - Slower than Argon2id but simpler implementation with fewer dependencies
@@ -220,7 +220,7 @@ await db.passwordResetToken.create({
 });
 
 // Send email with reset link
-const resetLink = `https://battle.example.com/reset-password?token=${token}`;
+const resetLink = `https://batl.example.com/reset-password?token=${token}`;
 ```
 
 ### Account Lockout & Rate Limiting
@@ -399,7 +399,7 @@ AuditLog
 ### Application Structure
 
 ```
-battle/
+batl/
 ├── backend/
 │   ├── src/
 │   │   ├── models/         # Prisma schema
@@ -419,7 +419,7 @@ battle/
 │   │   └── App.jsx
 │   └── package.json
 └── data/
-    └── battle.db           # SQLite database file
+    └── batl.db           # SQLite database file
 ```
 
 ### Environment Configuration
@@ -427,7 +427,7 @@ battle/
 **Required Environment Variables**:
 - `NODE_ENV`: development | production
 - `SESSION_SECRET`: Cryptographically secure random string (min 32 characters)
-- `DATABASE_URL`: SQLite file path (e.g., file:./data/battle.db)
+- `DATABASE_URL`: SQLite file path (e.g., file:./data/batl.db)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: Email server for password resets
 - `FRONTEND_URL`: Frontend URL for CORS and email links
 - `PORT`: Backend server port (default: 3000)
@@ -490,7 +490,7 @@ battle/
 
 ## 8. Migration Path for Future Scaling
 
-When Battle platform exceeds current scale (1000+ concurrent users):
+When BATL platform exceeds current scale (1000+ concurrent users):
 
 1. **Database Migration**:
    - Migrate from SQLite to PostgreSQL
@@ -524,7 +524,7 @@ When Battle platform exceeds current scale (1000+ concurrent users):
 | **ORM** | Prisma | Type-safe, migrations, database-agnostic |
 | **Frontend** | React + Bootstrap | Component reusability, rapid UI development |
 | **Authentication** | Passport.js (local) | Industry standard, extensible |
-| **Password Hashing** | bcrypt (work factor 12) | Battle-tested, automatic salting |
+| **Password Hashing** | bcrypt (work factor 12) | BATL-tested, automatic salting |
 | **Session Management** | express-session + file store | Server-side sessions, instant revocation |
 | **Authorization** | CASL | Declarative permissions, isomorphic |
 | **Security Headers** | Helmet | Comprehensive header protection |

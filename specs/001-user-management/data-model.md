@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document defines the data model for the Battle user management system, including entities, relationships, validation rules, and database schema. The model supports four user role types (ADMIN, ORGANIZER, PLAYER, PUBLIC) with email/password authentication and role-based access control.
+This document defines the data model for the BATL user management system, including entities, relationships, validation rules, and database schema. The model supports four user role types (ADMIN, ORGANIZER, PLAYER, PUBLIC) with email/password authentication and role-based access control.
 
 ---
 
@@ -548,7 +548,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@battle.example.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@batl.example.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe123!';
 
   const passwordHash = await bcrypt.hash(adminPassword, 12);

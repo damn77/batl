@@ -9,7 +9,7 @@
 
 ### User Story 1 - Admin Authentication and Management (Priority: P1)
 
-As a Battle system administrator, I need to securely log in and manage the core system settings so that I can maintain the tournament platform and oversee all operations.
+As a BATL system administrator, I need to securely log in and manage the core system settings so that I can maintain the tournament platform and oversee all operations.
 
 **Why this priority**: Admin access is the foundation for all system operations. Without admin authentication, no other users can be created or managed, and system configuration is impossible. This is the absolute minimum viable product.
 
@@ -66,7 +66,7 @@ As a tournament organizer, I need to create an account and log in so that I can 
 
 As a tournament organizer, I need to create player profiles for participants who don't have accounts so that I can register them for tournaments quickly without requiring them to create accounts first.
 
-**Why this priority**: This aligns with Battle's core principle that "a person doesn't need to have an account to be a player and participate." This enables faster tournament registration and lower barriers to entry for casual players. Equally important as organizer management for operational flow.
+**Why this priority**: This aligns with BATL's core principle that "a person doesn't need to have an account to be a player and participate." This enables faster tournament registration and lower barriers to entry for casual players. Equally important as organizer management for operational flow.
 
 **Independent Test**: Can be tested by having an organizer create player profiles with basic information (name, contact) without requiring account credentials, registering those players in tournaments, and verifying the system tracks their participation and rankings. Delivers value by streamlining tournament registration.
 
@@ -100,7 +100,7 @@ As a tennis player, I want to create my own account so that I can view my tourna
 
 ### User Story 5 - Public Access to Tournament Information (Priority: P3)
 
-As a public visitor, I want to view tournament results, rankings, and schedules without creating an account so that I can stay informed about Battle league activities.
+As a public visitor, I want to view tournament results, rankings, and schedules without creating an account so that I can stay informed about BATL league activities.
 
 **Why this priority**: Public transparency enhances community engagement and attracts new participants. However, it's not critical for core operations. This is a nice-to-have feature that builds on the foundation of user management by defining what can be accessed without authentication.
 

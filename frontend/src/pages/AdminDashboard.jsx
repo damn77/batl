@@ -16,7 +16,7 @@ const AdminDashboard = () => {
 
             <div className="alert alert-success" role="alert">
               <h4 className="alert-heading">Welcome, {user?.email}!</h4>
-              <p>You have successfully logged in to the Battle tennis tournament platform.</p>
+              <p>You have successfully logged in to the BATL tennis tournament platform.</p>
               <hr />
               <p className="mb-0">
                 This is the MVP (Minimum Viable Product) admin dashboard.

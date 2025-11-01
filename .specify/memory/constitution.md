@@ -15,7 +15,7 @@ Templates Status:
 Follow-up TODOs: None
 -->
 
-# Battle Constitution
+# BATL Constitution
 
 ## Core Principles
 

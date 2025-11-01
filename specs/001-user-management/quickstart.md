@@ -1,6 +1,6 @@
 # Quickstart Guide: User Management System
 
-**Feature**: User Management System for Battle Tennis Tournament Platform
+**Feature**: User Management System for BATL Tennis Tournament Platform
 **Date**: 2025-10-30
 **Audience**: Developers and QA testers
 
@@ -40,14 +40,14 @@ Create `.env` file in backend directory:
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE_URL=file:../data/battle.db
+DATABASE_URL=file:../data/batl.db
 SESSION_SECRET=your-32-character-or-longer-secret-here
 FRONTEND_URL=http://localhost:3001
 
 # Email configuration (for password resets)
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
-SMTP_USER=noreply@battle.example.com
+SMTP_USER=noreply@batl.example.com
 SMTP_PASS=your-smtp-password
 ```
 
@@ -73,7 +73,7 @@ npm run dev
 ### Seed Admin Credentials
 
 Default admin user created by seed script:
-- **Email**: `admin@battle.example.com`
+- **Email**: `admin@batl.example.com`
 - **Password**: `ChangeMe123!`
 - **Role**: ADMIN
 
@@ -90,7 +90,7 @@ Default admin user created by seed script:
 **Frontend**: Navigate to `http://localhost:3001/login`
 
 **UI Actions**:
-1. Enter email: `admin@battle.example.com`
+1. Enter email: `admin@batl.example.com`
 2. Enter password: `ChangeMe123!`
 3. Click "Login" button
 
@@ -99,7 +99,7 @@ Default admin user created by seed script:
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@battle.example.com",
+    "email": "admin@batl.example.com",
     "password": "ChangeMe123!"
   }' \
   -c cookies.txt
@@ -110,7 +110,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 {
   "user": {
     "id": "admin-uuid",
-    "email": "admin@battle.example.com",
+    "email": "admin@batl.example.com",
     "role": "ADMIN",
     "isActive": true,
     "emailVerified": true,
@@ -143,7 +143,7 @@ curl -X GET http://localhost:3000/api/auth/session \
 {
   "user": {
     "id": "admin-uuid",
-    "email": "admin@battle.example.com",
+    "email": "admin@batl.example.com",
     "role": "ADMIN",
     "isActive": true,
     "emailVerified": true
@@ -194,7 +194,7 @@ curl -X POST http://localhost:3000/api/auth/logout \
 **Frontend**: Navigate to `http://localhost:3001/admin/users` → Click "Create User"
 
 **UI Actions**:
-1. Enter email: `organizer@battle.example.com`
+1. Enter email: `organizer@batl.example.com`
 2. Enter temporary password: `TempPass123!`
 3. Select role: `ORGANIZER`
 4. Click "Create Account" button
@@ -205,7 +205,7 @@ curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
   -b cookies.txt \
   -d '{
-    "email": "organizer@battle.example.com",
+    "email": "organizer@batl.example.com",
     "password": "TempPass123!",
     "role": "ORGANIZER"
   }'
@@ -216,7 +216,7 @@ curl -X POST http://localhost:3000/api/users \
 {
   "user": {
     "id": "organizer-uuid",
-    "email": "organizer@battle.example.com",
+    "email": "organizer@batl.example.com",
     "role": "ORGANIZER",
     "isActive": true,
     "emailVerified": false,
@@ -227,7 +227,7 @@ curl -X POST http://localhost:3000/api/users \
 
 **Result**:
 - Organizer account created in database
-- Email verification sent to `organizer@battle.example.com`
+- Email verification sent to `organizer@batl.example.com`
 - Success message displayed to admin
 - AuditLog entry created: `USER_CREATED` by ADMIN
 
@@ -236,7 +236,7 @@ curl -X POST http://localhost:3000/api/users \
 **Frontend**: Organizer navigates to `http://localhost:3001/login`
 
 **UI Actions**:
-1. Enter email: `organizer@battle.example.com`
+1. Enter email: `organizer@batl.example.com`
 2. Enter password: `TempPass123!`
 3. Click "Login" button
 
@@ -245,7 +245,7 @@ curl -X POST http://localhost:3000/api/users \
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "organizer@battle.example.com",
+    "email": "organizer@batl.example.com",
     "password": "TempPass123!"
   }' \
   -c organizer-cookies.txt
@@ -256,7 +256,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 {
   "user": {
     "id": "organizer-uuid",
-    "email": "organizer@battle.example.com",
+    "email": "organizer@batl.example.com",
     "role": "ORGANIZER",
     "isActive": true,
     "emailVerified": false,
@@ -640,7 +640,7 @@ curl -X GET http://localhost:3000/api/tournaments/123/results
 {
   "tournament": {
     "id": "123",
-    "name": "Battle Summer Championships 2025",
+    "name": "BATL Summer Championships 2025",
     "category": "Men Singles",
     "date": "2025-08-15",
     "status": "completed"
@@ -721,7 +721,7 @@ curl -X GET http://localhost:3000/api/rankings/men-singles
 **Frontend**: Click "Forgot Password?" on login page
 
 **UI Actions**:
-1. Enter email: `organizer@battle.example.com`
+1. Enter email: `organizer@batl.example.com`
 2. Click "Send Reset Link" button
 
 **API Call**:
@@ -729,7 +729,7 @@ curl -X GET http://localhost:3000/api/rankings/men-singles
 curl -X POST http://localhost:3000/api/auth/password-reset/request \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "organizer@battle.example.com"
+    "email": "organizer@batl.example.com"
   }'
 ```
 

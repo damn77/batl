@@ -1,4 +1,4 @@
-// Prisma schema for Battle user management system
+// Prisma schema for BATL user management system
 // Database: SQLite via Prisma ORM
 
 datasource db {

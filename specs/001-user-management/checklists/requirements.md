@@ -38,7 +38,7 @@
 User selected Option A: Email and password authentication for ADMIN and ORGANIZER roles. This provides:
 - Simple implementation with full control over authentication flow
 - Standard password reset functionality
-- Lower initial complexity suitable for Battle's amateur tennis organization
+- Lower initial complexity suitable for BATL's amateur tennis organization
 - No dependency on external OAuth2 or SSO providers
 
 ### Validation Results
@@ -57,7 +57,7 @@ User selected Option A: Email and password authentication for ADMIN and ORGANIZE
 - ✅ 8 assumptions documented with clear scope boundaries
 - ✅ No framework, language, or database references in spec
 - ✅ User stories follow incremental delivery pattern (P1 MVP, P2 Enhanced, P3 Future)
-- ✅ Requirements align with Battle project context (players without accounts)
+- ✅ Requirements align with BATL project context (players without accounts)
 - ✅ Edge cases cover security, data integrity, and user experience
 - ✅ Assumptions define out-of-scope items clearly
 - ✅ Authentication method clarified (email/password)

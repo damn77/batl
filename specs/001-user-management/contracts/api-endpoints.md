@@ -8,14 +8,14 @@
 
 ## Overview
 
-This document defines all REST API endpoints for the Battle user management system. All endpoints except public-facing routes require authentication via session cookies.
+This document defines all REST API endpoints for the BATL user management system. All endpoints except public-facing routes require authentication via session cookies.
 
 ---
 
 ## Base URL
 
 ```
-Production: https://battle.example.com/api
+Production: https://batl.example.com/api
 Development: http://localhost:3000/api
 ```
 
@@ -187,7 +187,7 @@ Request password reset token via email.
 - Returns success message even if email doesn't exist (prevents email enumeration)
 - Generates 64-character random token, hashes with SHA-256
 - Stores hashed token in PasswordResetToken table (expires in 1 hour)
-- Sends email with reset link: `https://battle.example.com/reset-password?token={token}`
+- Sends email with reset link: `https://batl.example.com/reset-password?token={token}`
 - Invalidates previous unused tokens for same user
 - Logs password reset request in AuditLog
 
@@ -886,7 +886,7 @@ Rate limits are per IP address.
 ## CORS Configuration
 
 **Allowed Origins**:
-- Production: `https://battle.example.com`
+- Production: `https://batl.example.com`
 - Development: `http://localhost:3001`
 
 **Allowed Methods**: GET, POST, PATCH, DELETE, OPTIONS

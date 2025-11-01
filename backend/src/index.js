@@ -111,7 +111,7 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Battle backend server running on http://localhost:${PORT}`);
+  console.log(`BATL backend server running on http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 

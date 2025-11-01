@@ -1,4 +1,4 @@
-﻿# Battle Development Guidelines
+﻿# BATL Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-10-31
 
