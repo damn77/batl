@@ -151,18 +151,18 @@
 
 ### Implementation for User Story 4
 
-- [ ] T066 [P] [US4] Add player self-registration endpoint to auth controller in backend/src/api/authController.js: POST /api/auth/register
-- [ ] T067 [US4] Register /api/auth/register route in backend/src/api/routes/authRoutes.js with public access
-- [ ] T068 [US4] Implement player registration logic in backend/src/services/userService.js: create User with PLAYER role, search for matching PlayerProfile, link if found or create new
-- [ ] T069 [US4] Implement profile linking logic in backend/src/services/playerService.js: match by name + email, update PlayerProfile.userId, preserve tournament history
-- [ ] T070 [P] [US4] Create player registration page component in frontend/src/pages/RegisterPage.jsx with email, password, name, phone form
-- [ ] T071 [US4] Add registration link to login page in frontend/src/pages/LoginPage.jsx
-- [ ] T072 [US4] Configure React Router with /register route in frontend/src/App.jsx
-- [ ] T073 [P] [US4] Create player profile page component in frontend/src/pages/PlayerProfilePage.jsx displaying profile info and edit option
-- [ ] T074 [US4] Configure React Router with /player/profile route protected by PLAYER role in frontend/src/App.jsx
-- [ ] T075 [US4] Implement role-based redirect in frontend/src/services/authService.js: PLAYER → /player/profile
-- [ ] T076 [P] [US4] Add profile update functionality to player profile page in frontend/src/pages/PlayerProfilePage.jsx with save handler
-- [ ] T077 [US4] Implement player profile update authorization in backend/src/api/playerController.js: PLAYER can only update own linked profile
+- [x] T066 [P] [US4] Add player self-registration endpoint to auth controller in backend/src/api/authController.js: POST /api/auth/register
+- [x] T067 [US4] Register /api/auth/register route in backend/src/api/routes/authRoutes.js with public access
+- [x] T068 [US4] Implement player registration logic in backend/src/services/userService.js: create User with PLAYER role, search for matching PlayerProfile, link if found or create new
+- [x] T069 [US4] Implement profile linking logic in backend/src/services/playerService.js: match by name + email, update PlayerProfile.userId, preserve tournament history
+- [x] T070 [P] [US4] Create player registration page component in frontend/src/pages/RegisterPage.jsx with email, password, name, phone form
+- [x] T071 [US4] Add registration link to login page in frontend/src/pages/LoginPage.jsx
+- [x] T072 [US4] Configure React Router with /register route in frontend/src/App.jsx
+- [x] T073 [P] [US4] Create player profile page component in frontend/src/pages/PlayerProfilePage.jsx displaying profile info and edit option
+- [x] T074 [US4] Configure React Router with /player/profile route protected by PLAYER role in frontend/src/App.jsx
+- [x] T075 [US4] Implement role-based redirect in frontend/src/services/authService.js: PLAYER → /player/profile
+- [x] T076 [P] [US4] Add profile update functionality to player profile page in frontend/src/pages/PlayerProfilePage.jsx with save handler
+- [x] T077 [US4] Implement player profile update authorization in backend/src/api/playerController.js: PLAYER can only update own linked profile
 
 **Checkpoint**: Players can self-register, log in, view/edit their profiles. Existing tournament history is preserved when profiles are linked. Authorization prevents players from accessing organizer/admin features.
 
