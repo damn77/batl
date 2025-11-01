@@ -1,0 +1,17 @@
+## Tournaments rules ##
+- tournaments can be played in different formats
+    - knockout
+    - groups
+    - swiss system
+    - combined (groups + knockout)
+- in knockout tournaments players have guaranteed number of matches
+    - 1 match guarantee is classic knockout format
+    - 2 match guarantee mean ever player who lost their 1st match continues in separate knockout bracket
+    - until position - means player continues until his exact placement among players is clear (e.g. 16 participants means 4 matches played by everyone)
+- tournament rules can be defined per: 
+    - tournament (mandatory)
+    - round (knockout, swiss system)
+    - group (e.g. tables with less players can have different scoring rules)
+    - individual match
+- rules cascade down: Tournament -> group/bracket -> round -> match
+- tournament rules can be adjusted at any time even in the middle of the tournament
