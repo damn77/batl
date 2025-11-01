@@ -1,7 +1,7 @@
 {
   "name": "batl-frontend",
   "version": "1.0.0",
-  "description": "BATL (BrAtislavska Tenisova Liga) tennis tournament platform - Frontend",
+  "description": "BATL (Bratislavska Tenisova Liga) tennis tournament platform - Frontend",
   "private": true,
   "type": "module",
   "scripts": {
