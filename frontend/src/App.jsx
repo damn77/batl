@@ -13,6 +13,10 @@ import OrganizerDashboard from './pages/OrganizerDashboard';
 import OrganizerPlayersPage from './pages/OrganizerPlayersPage';
 import PlayerDetailPage from './pages/PlayerDetailPage';
 import PlayerProfilePage from './pages/PlayerProfilePage';
+import CategoryManagementPage from './pages/CategoryManagementPage';
+import TournamentSetupPage from './pages/TournamentSetupPage';
+import PlayerRegistrationPage from './pages/PlayerRegistrationPage';
+import CategoryRankingsPage from './pages/CategoryRankingsPage';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 
@@ -34,7 +38,7 @@ function AppContent() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/rankings" element={<PublicRankingsPage />} />
+        <Route path="/rankings" element={<CategoryRankingsPage />} />
 
           {/* Protected routes - Admin */}
           <Route
@@ -85,8 +89,32 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/organizer/categories"
+            element={
+              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+                <CategoryManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizer/tournaments"
+            element={
+              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+                <TournamentSetupPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected routes - Player */}
+          <Route
+            path="/player/register"
+            element={
+              <ProtectedRoute>
+                <PlayerRegistrationPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/player/profile"
             element={
