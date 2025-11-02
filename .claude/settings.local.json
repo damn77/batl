@@ -9,7 +9,9 @@
       "Bash(powershell.exe -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
       "Bash(if [ -d \"D:\\Workspace\\Battle\\specs\\001-user-management\\checklists\" ])",
       "Bash(then ls \"D:\\Workspace\\Battle\\specs\\001-user-management\\checklists\")",
-      "Bash(else echo \"No checklists directory\")"
+      "Bash(else echo \"No checklists directory\")",
+      "Bash(if [ -d \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\" ])",
+      "Bash(then ls \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\")"
     ],
     "deny": [],
     "ask": []

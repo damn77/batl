@@ -12,6 +12,7 @@
         - e.g. 20+, 35+, 50+
         - only min age and up allowed
         - player can player in younger categories but not in older ones
+        - "All ages" options exists if no age validations are needed for category 
     - gender
         - Men
         - Women

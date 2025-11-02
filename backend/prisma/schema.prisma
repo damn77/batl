@@ -17,6 +17,48 @@ enum Role {
   PLAYER
 }
 
+// Category System Enums (T005-T009)
+enum CategoryType {
+  SINGLES
+  DOUBLES
+}
+
+enum AgeGroup {
+  ALL_AGES
+  AGE_20
+  AGE_25
+  AGE_30
+  AGE_35
+  AGE_40
+  AGE_45
+  AGE_50
+  AGE_55
+  AGE_60
+  AGE_65
+  AGE_70
+  AGE_75
+  AGE_80
+}
+
+enum Gender {
+  MEN
+  WOMEN
+  MIXED
+}
+
+enum RegistrationStatus {
+  ACTIVE
+  WITHDRAWN
+  SUSPENDED
+}
+
+enum TournamentStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 // Models
 
 model User {
@@ -85,12 +127,110 @@ model PlayerProfile {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  // Category System Fields (T010)
+  birthDate DateTime? // Required for age validation
+  gender    Gender?   // Required for gender validation
+
   // Relationships
   user    User? @relation("UserProfile", fields: [userId], references: [id], onDelete: SetNull)
   creator User  @relation("ProfileCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  // Category System Relationships (T010)
+  categoryRegistrations CategoryRegistration[]
+  categoryRankings      CategoryRanking[]
 
   @@index([userId])
   @@index([createdBy])
   @@index([name])
   @@index([email])
+  @@index([birthDate]) // For age-based queries
+  @@index([gender])    // For gender-based queries
+}
+
+// Category System Models (T011-T014)
+
+model Category {
+  id          String        @id @default(uuid())
+  type        CategoryType  // Singles or Doubles
+  ageGroup    AgeGroup      // Age threshold or ALL_AGES
+  gender      Gender        // Men, Women, or Mixed
+  name        String        // Auto-generated display name
+  description String?       // Optional category description
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relationships
+  tournaments   Tournament[]
+  registrations CategoryRegistration[]
+  rankings      CategoryRanking[]
+
+  // Constraints (T015)
+  @@unique([type, ageGroup, gender]) // Prevent duplicate categories (FR-005)
+  @@index([type])
+  @@index([ageGroup])
+  @@index([gender])
+}
+
+model Tournament {
+  id          String           @id @default(uuid())
+  name        String           // Tournament display name
+  categoryId  String           // Required: belongs to one category (FR-006)
+  description String?          // Optional tournament details
+  location    String?          // Optional location
+  startDate   DateTime
+  endDate     DateTime
+  status      TournamentStatus @default(SCHEDULED)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relationships
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  // Constraints (T015)
+  @@index([categoryId])
+  @@index([startDate])
+  @@index([status])
+}
+
+model CategoryRegistration {
+  id           String             @id @default(uuid())
+  playerId     String             // Foreign key to PlayerProfile
+  categoryId   String             // Foreign key to Category
+  status       RegistrationStatus @default(ACTIVE)
+  registeredAt DateTime           @default(now())
+  withdrawnAt  DateTime?          // Timestamp when withdrawn
+  notes        String?            // Optional admin notes
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Relationships
+  player   PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  category Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  // Constraints (T015)
+  @@unique([playerId, categoryId]) // One registration per player per category (FR-007)
+  @@index([playerId])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model CategoryRanking {
+  id          String   @id @default(uuid())
+  playerId    String   // Foreign key to PlayerProfile
+  categoryId  String   // Foreign key to Category
+  rank        Int      // Current rank in category (1 = first place)
+  points      Float    @default(0) // Ranking points
+  wins        Int      @default(0) // Total wins in category
+  losses      Int      @default(0) // Total losses in category
+  lastUpdated DateTime @updatedAt  // When ranking was last recalculated
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  player   PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  category Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Constraints (T015)
+  @@unique([playerId, categoryId]) // One ranking per player per category (FR-013)
+  @@index([categoryId, rank])      // Fast leaderboard queries
+  @@index([playerId])
 }

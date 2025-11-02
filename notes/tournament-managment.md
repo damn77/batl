@@ -1,6 +1,7 @@
 ## Tournament management ##
 - organizers can create/update/cancel tournaments
 - organizers and players with active accounts can register/deregister from tournaments
+- players without dateOfBirth filled in (optional field) can only register to tournaments with "All ages" age group
 - tournament data
     - name
     - category

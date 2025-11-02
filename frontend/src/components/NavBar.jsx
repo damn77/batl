@@ -75,6 +75,52 @@ const NavBar = () => {
                 Rankings
               </span>
             </li>
+
+            {/* Organizer/Admin Links */}
+            {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
+              <>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/organizer/categories')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Categories
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/organizer/tournaments')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Tournaments
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/organizer/players')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Players
+                  </span>
+                </li>
+              </>
+            )}
+
+            {/* Player Link */}
+            {user && user.role === 'PLAYER' && (
+              <li className="nav-item">
+                <span
+                  className="nav-link"
+                  onClick={() => navigate('/player/register')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  Register
+                </span>
+              </li>
+            )}
           </ul>
           <ul className="navbar-nav ms-auto">
             {user ? (
