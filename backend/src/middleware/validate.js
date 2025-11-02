@@ -164,6 +164,155 @@ export const schemas = {
   passwordResetConfirm: Joi.object({
     token: Joi.string().length(64).hex().required(),
     newPassword: Joi.string().min(8).max(128).required()
+  }),
+
+  // Category schemas (002-category-system)
+  categoryCreation: Joi.object({
+    type: Joi.string().valid('SINGLES', 'DOUBLES').required()
+      .messages({
+        'any.only': 'Type must be SINGLES or DOUBLES',
+        'any.required': 'Type is required'
+      }),
+    ageGroup: Joi.string().valid(
+      'ALL_AGES',
+      'AGE_20', 'AGE_25', 'AGE_30', 'AGE_35', 'AGE_40', 'AGE_45', 'AGE_50',
+      'AGE_55', 'AGE_60', 'AGE_65', 'AGE_70', 'AGE_75', 'AGE_80'
+    ).required()
+      .messages({
+        'any.only': 'Age group must be a valid value (ALL_AGES, AGE_20...AGE_80)',
+        'any.required': 'Age group is required'
+      }),
+    gender: Joi.string().valid('MEN', 'WOMEN', 'MIXED').required()
+      .messages({
+        'any.only': 'Gender must be MEN, WOMEN, or MIXED',
+        'any.required': 'Gender is required'
+      }),
+    description: Joi.string().max(500).allow('').optional()
+      .messages({
+        'string.max': 'Description cannot exceed 500 characters'
+      })
+  }),
+
+  categoryUpdate: Joi.object({
+    description: Joi.string().max(500).allow('').optional()
+      .messages({
+        'string.max': 'Description cannot exceed 500 characters'
+      })
+  }),
+
+  categoryListQuery: Joi.object({
+    type: Joi.string().valid('SINGLES', 'DOUBLES').optional(),
+    ageGroup: Joi.string().valid(
+      'ALL_AGES',
+      'AGE_20', 'AGE_25', 'AGE_30', 'AGE_35', 'AGE_40', 'AGE_45', 'AGE_50',
+      'AGE_55', 'AGE_60', 'AGE_65', 'AGE_70', 'AGE_75', 'AGE_80'
+    ).optional(),
+    gender: Joi.string().valid('MEN', 'WOMEN', 'MIXED').optional(),
+    page: Joi.number().integer().min(1).default(1).optional(),
+    limit: Joi.number().integer().min(1).max(100).default(20).optional()
+  }),
+
+  // Tournament schemas (002-category-system)
+  tournamentCreation: Joi.object({
+    name: Joi.string().min(3).max(200).trim().required()
+      .messages({
+        'string.min': 'Tournament name must be at least 3 characters',
+        'string.max': 'Tournament name cannot exceed 200 characters',
+        'any.required': 'Tournament name is required'
+      }),
+    categoryId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Category ID must be a valid UUID',
+        'any.required': 'Category ID is required'
+      }),
+    description: Joi.string().max(1000).allow('').optional()
+      .messages({
+        'string.max': 'Description cannot exceed 1000 characters'
+      }),
+    location: Joi.string().max(200).allow('').optional()
+      .messages({
+        'string.max': 'Location cannot exceed 200 characters'
+      }),
+    startDate: Joi.date().iso().required()
+      .messages({
+        'date.base': 'Start date must be a valid date',
+        'any.required': 'Start date is required'
+      }),
+    endDate: Joi.date().iso().required()
+      .messages({
+        'date.base': 'End date must be a valid date',
+        'any.required': 'End date is required'
+      })
+  }),
+
+  tournamentUpdate: Joi.object({
+    name: Joi.string().min(3).max(200).trim().optional(),
+    categoryId: Joi.string().uuid().optional()
+      .messages({
+        'string.guid': 'Category ID must be a valid UUID'
+      }),
+    description: Joi.string().max(1000).allow('').optional(),
+    location: Joi.string().max(200).allow('').optional(),
+    startDate: Joi.date().iso().optional(),
+    endDate: Joi.date().iso().optional()
+  }).min(1),
+
+  tournamentListQuery: Joi.object({
+    categoryId: Joi.string().uuid().optional(),
+    status: Joi.string().valid('SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED').optional(),
+    startDate: Joi.date().iso().optional(),
+    page: Joi.number().integer().min(1).default(1).optional(),
+    limit: Joi.number().integer().min(1).max(100).default(20).optional()
+  }),
+
+  // Registration schemas (002-category-system)
+  registrationCreation: Joi.object({
+    playerId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Player ID must be a valid UUID',
+        'any.required': 'Player ID is required'
+      }),
+    categoryId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Category ID must be a valid UUID',
+        'any.required': 'Category ID is required'
+      })
+  }),
+
+  checkEligibility: Joi.object({
+    playerId: Joi.string().uuid().required(),
+    categoryId: Joi.string().uuid().required()
+  }),
+
+  playerRegistrationsQuery: Joi.object({
+    status: Joi.string().valid('ACTIVE', 'WITHDRAWN', 'SUSPENDED').optional(),
+    include: Joi.string().pattern(/^(category|ranking)(,category|,ranking)*$/).optional()
+  }),
+
+  categoryRegistrationsQuery: Joi.object({
+    status: Joi.string().valid('ACTIVE', 'WITHDRAWN', 'SUSPENDED').optional(),
+    include: Joi.string().pattern(/^player$/).optional(),
+    page: Joi.number().integer().min(1).default(1).optional(),
+    limit: Joi.number().integer().min(1).max(200).default(50).optional()
+  }),
+
+  withdrawalRequest: Joi.object({
+    notes: Joi.string().max(500).optional().allow('', null)
+  }),
+
+  bulkRegistration: Joi.object({
+    playerId: Joi.string().uuid().required(),
+    categoryIds: Joi.array().items(Joi.string().uuid()).min(1).max(10).required()
+      .messages({
+        'array.min': 'At least one category ID is required',
+        'array.max': 'Maximum 10 categories allowed per bulk registration'
+      })
+  }),
+
+  // Ranking schemas (002-category-system)
+  categoryLeaderboardQuery: Joi.object({
+    limit: Joi.number().integer().min(1).max(200).default(10).optional(),
+    offset: Joi.number().integer().min(0).default(0).optional()
   })
 };
 

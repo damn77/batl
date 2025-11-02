@@ -8,6 +8,10 @@ import passport from './middleware/auth.js';
 import authRoutes from './api/routes/authRoutes.js';
 import userRoutes from './api/routes/userRoutes.js';
 import playerRoutes from './api/routes/playerRoutes.js';
+import categoryRoutes from './api/routes/categoryRoutes.js';
+import tournamentRoutes from './api/routes/tournamentRoutes.js';
+import registrationRoutes from './api/routes/registrationRoutes.js';
+import rankingRoutes from './api/routes/rankingRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -102,6 +106,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/players', playerRoutes);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/tournaments', tournamentRoutes);
+app.use('/api/v1/registrations', registrationRoutes);
+app.use('/api/v1/rankings', rankingRoutes);
 
 // 404 handler - must be after all routes
 app.use(notFoundHandler);
