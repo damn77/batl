@@ -6,8 +6,12 @@
     - combined (groups + knockout)
 - in knockout tournaments players have guaranteed number of matches
     - 1 match guarantee is classic knockout format
-    - 2 match guarantee mean ever player who lost their 1st match continues in separate knockout bracket
+    - 2 match guarantee means ever player who has lost their 1st match continues in separate knockout bracket
     - until position - means player continues until his exact placement among players is clear (e.g. 16 participants means 4 matches played by everyone)
+- in group tournament size of group is selected
+    - groups are created with set group size or 1 less depending on available players
+        - e.g. group size 4, with 10 players means 1x group of 4, 2x group of 3
+        - if it isn't possible to split Y players into groups of X and X-1 show error message
 - tournament rules can be defined per: 
     - tournament (mandatory)
     - round (knockout, swiss system)
@@ -15,3 +19,29 @@
     - individual match
 - rules cascade down: Tournament -> group/bracket -> round -> match
 - tournament rules can be adjusted at any time even in the middle of the tournament
+- match score rules are defined by
+    - format
+        - sets
+            - "2 sets" match is played for 2 winning sets e.g. 6:4, 4:6, 6:1 
+            - options are 1/2 winning sets
+            - standard set is decided by standard tiebreak at 6:6
+        - tiebreaks (standard)
+            - standard tiebreak is played until player has 7 points and difference of at least 2 point
+            - options are 1/2/3 winning standard tiebreaks
+        - tiebreaks (big)
+            - standard tiebreak is played until player has 10 points and difference of at least 2 point
+            - options are 1/2 winning big tiebreaks
+        - mixed 
+            - same as sets but the last set is instead tiebreak
+            - tiebreak can be standard or big
+    - advantage rule
+        - are games played with advantage or with golden ball
+        - options ADV/NO-ADV
+    - early tiebreak rule
+        - by default standard tiebreak is played when set reaches 6:6
+        - for time saving can be modified to start tiebreak at 5:5, 4:4 or 3:3
+        - is often defined separately for: 
+            - groups with more players in group/combined tournaments
+            - remaining matches in round in "until placement" tournaments once 1 match of that round is finished
+        - organizer can change rules for specific match
+        
