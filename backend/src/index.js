@@ -12,6 +12,7 @@ import categoryRoutes from './api/routes/categoryRoutes.js';
 import tournamentRoutes from './api/routes/tournamentRoutes.js';
 import registrationRoutes from './api/routes/registrationRoutes.js';
 import rankingRoutes from './api/routes/rankingRoutes.js';
+import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -110,6 +111,7 @@ app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/tournaments', tournamentRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
+app.use('/api/tournaments', tournamentRegistrationRoutes);
 
 // 404 handler - must be after all routes
 app.use(notFoundHandler);

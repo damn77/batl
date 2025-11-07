@@ -57,7 +57,12 @@ passport.deserializeUser(async (id, done) => {
         email: true,
         role: true,
         isActive: true,
-        emailVerified: true
+        emailVerified: true,
+        playerProfile: {
+          select: {
+            id: true
+          }
+        }
       }
     });
 
@@ -74,7 +79,17 @@ passport.deserializeUser(async (id, done) => {
       return done(null, false);
     }
 
-    done(null, user);
+    // Flatten playerProfile.id to playerId for easier access
+    const userData = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      emailVerified: user.emailVerified,
+      playerId: user.playerProfile?.id || null
+    };
+
+    done(null, userData);
   } catch (error) {
     done(error);
   }

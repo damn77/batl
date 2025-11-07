@@ -26,6 +26,7 @@ const TournamentSetupPage = () => {
 
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTournament, setSelectedTournament] = useState(null);
 
   // Form state
@@ -37,6 +38,7 @@ const TournamentSetupPage = () => {
     startDate: new Date(),
     endDate: new Date()
   });
+  const [isSingleDay, setIsSingleDay] = useState(true);
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -76,8 +78,6 @@ const TournamentSetupPage = () => {
   const handleCreateClick = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
 
     setFormData({
       name: '',
@@ -85,8 +85,9 @@ const TournamentSetupPage = () => {
       description: '',
       location: '',
       startDate: tomorrow,
-      endDate: nextWeek
+      endDate: tomorrow
     });
+    setIsSingleDay(true);
     setFormError(null);
     setShowCreateModal(true);
   };
@@ -108,16 +109,81 @@ const TournamentSetupPage = () => {
       setSubmitting(true);
       setFormError(null);
 
+      // Use startDate for endDate if single day tournament
+      const endDate = isSingleDay ? formData.startDate : formData.endDate;
+
       await createTournament({
         ...formData,
         startDate: formData.startDate.toISOString(),
-        endDate: formData.endDate.toISOString()
+        endDate: endDate.toISOString()
       });
 
       setShowCreateModal(false);
       loadTournaments();
     } catch (err) {
       setFormError(err.message || 'Failed to create tournament');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSingleDayToggle = (checked) => {
+    setIsSingleDay(checked);
+    if (checked) {
+      // Auto-match end date to start date
+      setFormData({ ...formData, endDate: formData.startDate });
+    }
+  };
+
+  const handleEditClick = (tournament) => {
+    const startDate = new Date(tournament.startDate);
+    const endDate = new Date(tournament.endDate);
+    const isSameDay = startDate.toDateString() === endDate.toDateString();
+
+    setSelectedTournament(tournament);
+    setFormData({
+      name: tournament.name,
+      categoryId: tournament.categoryId,
+      description: tournament.description || '',
+      location: tournament.location || '',
+      startDate: startDate,
+      endDate: endDate
+    });
+    setIsSingleDay(isSameDay);
+    setFormError(null);
+    setShowEditModal(true);
+  };
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.categoryId) {
+      setFormError('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.endDate < formData.startDate) {
+      setFormError('End date must be after start date');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setFormError(null);
+
+      const endDate = isSingleDay ? formData.startDate : formData.endDate;
+
+      await updateTournament(selectedTournament.id, {
+        ...formData,
+        startDate: formData.startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+
+      setShowEditModal(false);
+      setSelectedTournament(null);
+      loadTournaments();
+    } catch (err) {
+      setFormError(err.message || 'Failed to update tournament');
     } finally {
       setSubmitting(false);
     }
@@ -154,7 +220,7 @@ const TournamentSetupPage = () => {
                   <Form.Label>Category</Form.Label>
                   <Form.Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
                     <option value="">All Categories</option>
-                    {categories.map(cat => (
+                    {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </Form.Select>
@@ -193,6 +259,7 @@ const TournamentSetupPage = () => {
                     <th>Location</th>
                     <th>Dates</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -208,6 +275,15 @@ const TournamentSetupPage = () => {
                         <Badge bg={STATUS_VARIANTS[tournament.status]}>
                           {STATUS_LABELS[tournament.status]}
                         </Badge>
+                      </td>
+                      <td>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleEditClick(tournament)}
+                        >
+                          Edit
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -245,19 +321,34 @@ const TournamentSetupPage = () => {
                   required
                 >
                   <option value="">Select category...</option>
-                  {categories.map(cat => (
+                  {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </Form.Select>
               </Form.Group>
 
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="checkbox"
+                  label="Single day tournament"
+                  checked={isSingleDay}
+                  onChange={(e) => handleSingleDayToggle(e.target.checked)}
+                />
+              </Form.Group>
+
               <Row>
-                <Col md={6}>
+                <Col md={isSingleDay ? 12 : 6}>
                   <Form.Group className="mb-3">
                     <Form.Label>Start Date *</Form.Label>
                     <DatePicker
                       selected={formData.startDate}
-                      onChange={(date) => setFormData({ ...formData, startDate: date })}
+                      onChange={(date) => {
+                        setFormData({
+                          ...formData,
+                          startDate: date,
+                          endDate: isSingleDay ? date : formData.endDate
+                        });
+                      }}
                       minDate={new Date()}
                       className="form-control"
                       dateFormat="yyyy-MM-dd"
@@ -265,19 +356,21 @@ const TournamentSetupPage = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>End Date *</Form.Label>
-                    <DatePicker
-                      selected={formData.endDate}
-                      onChange={(date) => setFormData({ ...formData, endDate: date })}
-                      minDate={formData.startDate}
-                      className="form-control"
-                      dateFormat="yyyy-MM-dd"
-                      required
-                    />
-                  </Form.Group>
-                </Col>
+                {!isSingleDay && (
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>End Date *</Form.Label>
+                      <DatePicker
+                        selected={formData.endDate}
+                        onChange={(date) => setFormData({ ...formData, endDate: date })}
+                        minDate={formData.startDate}
+                        className="form-control"
+                        dateFormat="yyyy-MM-dd"
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                )}
               </Row>
 
               <Form.Group className="mb-3">
@@ -307,6 +400,118 @@ const TournamentSetupPage = () => {
               </Button>
               <Button variant="primary" type="submit" disabled={submitting}>
                 {submitting ? 'Creating...' : 'Create Tournament'}
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+
+        {/* Edit Modal */}
+        <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Tournament</Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmitEdit}>
+            <Modal.Body>
+              {formError && <Alert variant="danger">{formError}</Alert>}
+
+              <Form.Group className="mb-3">
+                <Form.Label>Tournament Name *</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Summer Championship 2025"
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Category *</Form.Label>
+                <Form.Select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  required
+                >
+                  <option value="">Select category...</option>
+                  {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="checkbox"
+                  label="Single day tournament"
+                  checked={isSingleDay}
+                  onChange={(e) => handleSingleDayToggle(e.target.checked)}
+                />
+              </Form.Group>
+
+              <Row>
+                <Col md={isSingleDay ? 12 : 6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Start Date *</Form.Label>
+                    <DatePicker
+                      selected={formData.startDate}
+                      onChange={(date) => {
+                        setFormData({
+                          ...formData,
+                          startDate: date,
+                          endDate: isSingleDay ? date : formData.endDate
+                        });
+                      }}
+                      minDate={new Date()}
+                      className="form-control"
+                      dateFormat="yyyy-MM-dd"
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                {!isSingleDay && (
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>End Date *</Form.Label>
+                      <DatePicker
+                        selected={formData.endDate}
+                        onChange={(date) => setFormData({ ...formData, endDate: date })}
+                        minDate={formData.startDate}
+                        className="form-control"
+                        dateFormat="yyyy-MM-dd"
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                )}
+              </Row>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Location</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="e.g. Tennis Club Bratislava"
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Optional tournament description..."
+                />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={submitting}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit" disabled={submitting}>
+                {submitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </Modal.Footer>
           </Form>

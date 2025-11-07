@@ -59,7 +59,8 @@ export const login = async (req, res, next) => {
           role: user.role,
           isActive: user.isActive,
           emailVerified: user.emailVerified,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          playerId: req.user.playerId || null
         },
         session: {
           expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
@@ -128,7 +129,8 @@ export const checkSession = (req, res) => {
       email: req.user.email,
       role: req.user.role,
       isActive: req.user.isActive,
-      emailVerified: req.user.emailVerified
+      emailVerified: req.user.emailVerified,
+      playerId: req.user.playerId || null
     },
     session: {
       expiresAt: new Date(req.session.cookie.expires || Date.now() + 30 * 60 * 1000)

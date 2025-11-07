@@ -2,6 +2,12 @@
 - organizers can create/update/cancel tournaments
 - organizers and players with active accounts can register/deregister from tournaments
 - players without dateOfBirth filled in (optional field) can only register to tournaments with "All ages" age group
+- player gender is mandatory
+- tournament is event within category
+- when player registers to tournament in new category they are auto-registered to this category
+- if player is unregistered from tournament and they have not participated in different tournament in this category they are unregistered from this category
+- if player is not yet registered into a category they are not able to register into tournament waitlist
+    - this is meant to protect against malicious actors spamming tournament with new fake players
 - tournament data
     - name
     - category

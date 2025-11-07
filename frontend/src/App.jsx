@@ -17,6 +17,7 @@ import CategoryManagementPage from './pages/CategoryManagementPage';
 import TournamentSetupPage from './pages/TournamentSetupPage';
 import PlayerRegistrationPage from './pages/PlayerRegistrationPage';
 import CategoryRankingsPage from './pages/CategoryRankingsPage';
+import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 
@@ -112,6 +113,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <PlayerRegistrationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/player/tournaments"
+            element={
+              <ProtectedRoute requiredRole="PLAYER">
+                <TournamentRegistrationPage />
               </ProtectedRoute>
             }
           />

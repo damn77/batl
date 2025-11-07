@@ -195,6 +195,72 @@ export async function deleteCategory(id) {
 }
 
 /**
+ * T029: Determine if player should be unregistered from category
+ * FR-014: Smart category cleanup logic
+ *
+ * Returns true if category registration should be deleted:
+ * - Player has NO other active tournament registrations in this category AND
+ * - Player has NOT participated in any completed tournaments (hasParticipated = false)
+ *
+ * @param {string} playerId - Player UUID
+ * @param {string} categoryId - Category UUID
+ * @returns {Promise<{shouldUnregister: boolean, reason: string, activeTournaments: number}>}
+ */
+export async function shouldUnregisterFromCategory(playerId, categoryId) {
+  // Get the category registration
+  const categoryRegistration = await prisma.categoryRegistration.findUnique({
+    where: {
+      playerId_categoryId: {
+        playerId,
+        categoryId
+      }
+    }
+  });
+
+  if (!categoryRegistration) {
+    return {
+      shouldUnregister: false,
+      reason: 'No category registration found',
+      activeTournaments: 0
+    };
+  }
+
+  // Check if player has participated in any completed tournaments
+  if (categoryRegistration.hasParticipated) {
+    return {
+      shouldUnregister: false,
+      reason: 'Player has participated in tournaments in this category',
+      activeTournaments: null
+    };
+  }
+
+  // Count active tournament registrations in this category
+  // Active = REGISTERED or WAITLISTED (not WITHDRAWN or CANCELLED)
+  const activeTournamentCount = await prisma.tournamentRegistration.count({
+    where: {
+      playerId,
+      status: {
+        in: ['REGISTERED', 'WAITLISTED']
+      },
+      tournament: {
+        categoryId
+      }
+    }
+  });
+
+  // Should unregister if no active tournaments and never participated
+  const shouldUnregister = activeTournamentCount === 0;
+
+  return {
+    shouldUnregister,
+    reason: shouldUnregister
+      ? 'No active tournaments and no participation history'
+      : `Player has ${activeTournamentCount} active tournament(s) in this category`,
+    activeTournaments: activeTournamentCount
+  };
+}
+
+/**
  * Get category statistics
  * Implements FR-014, FR-015, FR-016
  */

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, ListGroup } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
+import { useAuth } from '../utils/AuthContext';
 import { listPlayers } from '../services/playerService';
 import { listCategories } from '../services/categoryService';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../services/registrationService';
 
 const PlayerRegistrationPage = () => {
+  const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -24,6 +26,13 @@ const PlayerRegistrationPage = () => {
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  // Auto-select player for PLAYER role users
+  useEffect(() => {
+    if (user?.role === 'PLAYER' && user?.playerId) {
+      setSelectedPlayer(user.playerId);
+    }
+  }, [user]);
 
   useEffect(() => {
     loadData();
@@ -165,28 +174,31 @@ const PlayerRegistrationPage = () => {
 
         <Row>
           <Col md={4}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Form.Group>
-                  <Form.Label>Select Player *</Form.Label>
-                  <Form.Select
-                    value={selectedPlayer}
-                    onChange={(e) => setSelectedPlayer(e.target.value)}
-                    size="lg"
-                  >
-                    <option value="">Choose a player...</option>
-                    {players.map(player => (
-                      <option key={player.id} value={player.id}>
-                        {player.name} {player.birthDate && player.gender ? '✓' : '⚠️'}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    ✓ = Complete profile | ⚠️ = Missing birthDate/gender
-                  </Form.Text>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+            {/* Only show player selector for ORGANIZER and ADMIN roles */}
+            {user?.role !== 'PLAYER' && (
+              <Card className="mb-3">
+                <Card.Body>
+                  <Form.Group>
+                    <Form.Label>Select Player *</Form.Label>
+                    <Form.Select
+                      value={selectedPlayer}
+                      onChange={(e) => setSelectedPlayer(e.target.value)}
+                      size="lg"
+                    >
+                      <option value="">Choose a player...</option>
+                      {players.map(player => (
+                        <option key={player.id} value={player.id}>
+                          {player.name} {player.birthDate && player.gender ? '✓' : '⚠️'}
+                        </option>
+                      ))}
+                    </Form.Select>
+                    <Form.Text className="text-muted">
+                      ✓ = Complete profile | ⚠️ = Missing birthDate/gender
+                    </Form.Text>
+                  </Form.Group>
+                </Card.Body>
+              </Card>
+            )}
 
             {selectedPlayer && currentRegistrations.length > 0 && (
               <Card>

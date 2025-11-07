@@ -59,6 +59,18 @@ enum TournamentStatus {
   CANCELLED
 }
 
+enum TournamentRegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  WITHDRAWN
+  CANCELLED
+}
+
+enum WaitlistDisplayOrder {
+  REGISTRATION_TIME
+  ALPHABETICAL
+}
+
 // Models
 
 model User {
@@ -136,8 +148,9 @@ model PlayerProfile {
   creator User  @relation("ProfileCreator", fields: [createdBy], references: [id], onDelete: Restrict)
 
   // Category System Relationships (T010)
-  categoryRegistrations CategoryRegistration[]
-  categoryRankings      CategoryRanking[]
+  categoryRegistrations   CategoryRegistration[]
+  categoryRankings        CategoryRanking[]
+  tournamentRegistrations TournamentRegistration[]
 
   @@index([userId])
   @@index([createdBy])
@@ -176,32 +189,57 @@ model Tournament {
   name        String           // Tournament display name
   categoryId  String           // Required: belongs to one category (FR-006)
   description String?          // Optional tournament details
-  location    String?          // Optional location
+
+  // Location & Logistics
+  location              String?          // Optional location
+  capacity              Int?             // Max registered players (null = unlimited)
+  organizerEmail        String?          // Organizer contact email
+  organizerPhone        String?          // Organizer contact phone
+  entryFee              Float?           // Entry fee (null = free)
+  rulesUrl              String?          // Link to tournament rules
+  prizeDescription      String?          // Prize/award details
+  registrationOpenDate  DateTime?        // When registration opens
+  registrationCloseDate DateTime?        // When registration closes
+  minParticipants       Int?             // Minimum required participants
+
+  // Waitlist Configuration
+  waitlistDisplayOrder WaitlistDisplayOrder @default(REGISTRATION_TIME)
+
+  // Scheduling
   startDate   DateTime
   endDate     DateTime
-  status      TournamentStatus @default(SCHEDULED)
+
+  // Lifecycle
+  status           TournamentStatus @default(SCHEDULED)
+  lastStatusChange DateTime?        // When status last changed
+
+  // Audit
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
   // Relationships
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category                Category                   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  tournamentRegistrations TournamentRegistration[]
 
   // Constraints (T015)
   @@index([categoryId])
   @@index([startDate])
   @@index([status])
+  @@index([registrationOpenDate])
+  @@index([registrationCloseDate])
 }
 
 model CategoryRegistration {
-  id           String             @id @default(uuid())
-  playerId     String             // Foreign key to PlayerProfile
-  categoryId   String             // Foreign key to Category
-  status       RegistrationStatus @default(ACTIVE)
-  registeredAt DateTime           @default(now())
-  withdrawnAt  DateTime?          // Timestamp when withdrawn
-  notes        String?            // Optional admin notes
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id              String             @id @default(uuid())
+  playerId        String             // Foreign key to PlayerProfile
+  categoryId      String             // Foreign key to Category
+  status          RegistrationStatus @default(ACTIVE)
+  hasParticipated Boolean            @default(false) // True after first completed tournament
+  registeredAt    DateTime           @default(now())
+  withdrawnAt     DateTime?          // Timestamp when withdrawn
+  notes           String?            // Optional admin notes
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   // Relationships
   player   PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
@@ -212,6 +250,7 @@ model CategoryRegistration {
   @@index([playerId])
   @@index([categoryId])
   @@index([status])
+  @@index([hasParticipated])
 }
 
 model CategoryRanking {
@@ -233,4 +272,40 @@ model CategoryRanking {
   @@unique([playerId, categoryId]) // One ranking per player per category (FR-013)
   @@index([categoryId, rank])      // Fast leaderboard queries
   @@index([playerId])
+}
+
+// Tournament Registration Model (003-tournament-registration)
+
+model TournamentRegistration {
+  id                    String                         @id @default(uuid())
+  playerId              String                         // Foreign key to PlayerProfile
+  tournamentId          String                         // Foreign key to Tournament
+  status                TournamentRegistrationStatus   @default(REGISTERED)
+
+  // Timestamps
+  registrationTimestamp DateTime                       @default(now()) // Used for waitlist ordering
+  withdrawnAt           DateTime?                      // When player withdrew (if WITHDRAWN)
+  cancelledAt           DateTime?                      // When tournament cancelled (if CANCELLED)
+
+  // Waitlist Management
+  promotedBy            String?                        // 'SYSTEM' or userId of organizer who promoted
+  promotedAt            DateTime?                      // When promoted from waitlist
+  demotedBy             String?                        // userId of organizer who demoted
+  demotedAt             DateTime?                      // When demoted to waitlist
+
+  // Audit
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+
+  // Relationships
+  player     PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  tournament Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([playerId, tournamentId]) // One registration per player per tournament
+  @@index([playerId])
+  @@index([tournamentId])
+  @@index([status])
+  @@index([tournamentId, status, registrationTimestamp]) // Critical for waitlist queries
+  @@index([registrationTimestamp])
 }

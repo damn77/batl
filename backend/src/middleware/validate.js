@@ -212,8 +212,9 @@ export const schemas = {
     limit: Joi.number().integer().min(1).max(100).default(20).optional()
   }),
 
-  // Tournament schemas (002-category-system)
+  // Tournament schemas (002-category-system, extended 003-tournament-registration)
   tournamentCreation: Joi.object({
+    // Required fields (from 002-category-system)
     name: Joi.string().min(3).max(200).trim().required()
       .messages({
         'string.min': 'Tournament name must be at least 3 characters',
@@ -225,36 +226,104 @@ export const schemas = {
         'string.guid': 'Category ID must be a valid UUID',
         'any.required': 'Category ID is required'
       }),
-    description: Joi.string().max(1000).allow('').optional()
-      .messages({
-        'string.max': 'Description cannot exceed 1000 characters'
-      }),
-    location: Joi.string().max(200).allow('').optional()
-      .messages({
-        'string.max': 'Location cannot exceed 200 characters'
-      }),
     startDate: Joi.date().iso().required()
       .messages({
         'date.base': 'Start date must be a valid date',
         'any.required': 'Start date is required'
       }),
-    endDate: Joi.date().iso().required()
+    endDate: Joi.date().iso().min(Joi.ref('startDate')).required()
       .messages({
         'date.base': 'End date must be a valid date',
-        'any.required': 'End date is required'
+        'any.required': 'End date is required',
+        'date.min': 'End date must be after start date'
+      }),
+
+    // Optional fields (existing)
+    description: Joi.string().max(1000).allow('').optional()
+      .messages({
+        'string.max': 'Description cannot exceed 1000 characters'
+      }),
+
+    // Optional fields (NEW - Enhanced Details from 003)
+    location: Joi.string().max(200).allow('').optional()
+      .messages({
+        'string.max': 'Location cannot exceed 200 characters'
+      }),
+    capacity: Joi.number().integer().min(1).max(1000).optional().allow(null)
+      .messages({
+        'number.base': 'Capacity must be a number',
+        'number.integer': 'Capacity must be an integer',
+        'number.min': 'Capacity must be at least 1',
+        'number.max': 'Capacity cannot exceed 1000'
+      }),
+    organizerEmail: Joi.string().email().lowercase().trim().optional().allow('', null)
+      .messages({
+        'string.email': 'Organizer email must be a valid email address'
+      }),
+    organizerPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null)
+      .messages({
+        'string.pattern.base': 'Organizer phone must be a valid phone number'
+      }),
+    entryFee: Joi.number().min(0).max(100000).optional().allow(null)
+      .messages({
+        'number.base': 'Entry fee must be a number',
+        'number.min': 'Entry fee cannot be negative',
+        'number.max': 'Entry fee cannot exceed 100000'
+      }),
+    rulesUrl: Joi.string().uri().max(500).optional().allow('', null)
+      .messages({
+        'string.uri': 'Rules URL must be a valid URL',
+        'string.max': 'Rules URL cannot exceed 500 characters'
+      }),
+    prizeDescription: Joi.string().max(1000).optional().allow('', null)
+      .messages({
+        'string.max': 'Prize description cannot exceed 1000 characters'
+      }),
+    registrationOpenDate: Joi.date().iso().optional().allow(null)
+      .messages({
+        'date.base': 'Registration open date must be a valid date'
+      }),
+    registrationCloseDate: Joi.date().iso().min(Joi.ref('registrationOpenDate')).optional().allow(null)
+      .messages({
+        'date.base': 'Registration close date must be a valid date',
+        'date.min': 'Registration close date must be after registration open date'
+      }),
+    minParticipants: Joi.number().integer().min(2).max(1000).optional().allow(null)
+      .messages({
+        'number.base': 'Minimum participants must be a number',
+        'number.integer': 'Minimum participants must be an integer',
+        'number.min': 'Minimum participants must be at least 2',
+        'number.max': 'Minimum participants cannot exceed 1000'
+      }),
+    waitlistDisplayOrder: Joi.string().valid('REGISTRATION_TIME', 'ALPHABETICAL').optional()
+      .messages({
+        'any.only': 'Waitlist display order must be REGISTRATION_TIME or ALPHABETICAL'
       })
   }),
 
   tournamentUpdate: Joi.object({
+    // Existing fields
     name: Joi.string().min(3).max(200).trim().optional(),
     categoryId: Joi.string().uuid().optional()
       .messages({
         'string.guid': 'Category ID must be a valid UUID'
       }),
     description: Joi.string().max(1000).allow('').optional(),
-    location: Joi.string().max(200).allow('').optional(),
     startDate: Joi.date().iso().optional(),
-    endDate: Joi.date().iso().optional()
+    endDate: Joi.date().iso().optional(),
+
+    // Enhanced fields (NEW - 003-tournament-registration)
+    location: Joi.string().max(200).allow('', null).optional(),
+    capacity: Joi.number().integer().min(1).max(1000).optional().allow(null),
+    organizerEmail: Joi.string().email().lowercase().trim().optional().allow('', null),
+    organizerPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null),
+    entryFee: Joi.number().min(0).max(100000).optional().allow(null),
+    rulesUrl: Joi.string().uri().max(500).optional().allow('', null),
+    prizeDescription: Joi.string().max(1000).optional().allow('', null),
+    registrationOpenDate: Joi.date().iso().optional().allow(null),
+    registrationCloseDate: Joi.date().iso().optional().allow(null),
+    minParticipants: Joi.number().integer().min(2).max(1000).optional().allow(null),
+    waitlistDisplayOrder: Joi.string().valid('REGISTRATION_TIME', 'ALPHABETICAL').optional()
   }).min(1),
 
   tournamentListQuery: Joi.object({
@@ -313,6 +382,53 @@ export const schemas = {
   categoryLeaderboardQuery: Joi.object({
     limit: Joi.number().integer().min(1).max(200).default(10).optional(),
     offset: Joi.number().integer().min(0).default(0).optional()
+  }),
+
+  // Tournament Registration schemas (003-tournament-registration)
+  tournamentRegistrationParams: Joi.object({
+    tournamentId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Tournament ID must be a valid UUID',
+        'any.required': 'Tournament ID is required'
+      })
+  }),
+
+  tournamentUnregistrationParams: Joi.object({
+    tournamentId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Tournament ID must be a valid UUID',
+        'any.required': 'Tournament ID is required'
+      })
+  }),
+
+  // Waitlist schemas (003-tournament-registration)
+  waitlistQuery: Joi.object({
+    orderBy: Joi.string().valid('registration', 'alphabetical').optional()
+      .messages({
+        'any.only': 'Order by must be either "registration" or "alphabetical"'
+      })
+  }),
+
+  waitlistPromotionBody: Joi.object({
+    reason: Joi.string().max(500).optional().allow('', null)
+      .messages({
+        'string.max': 'Reason cannot exceed 500 characters'
+      })
+  }),
+
+  waitlistDemotionBody: Joi.object({
+    reason: Joi.string().max(500).optional().allow('', null)
+      .messages({
+        'string.max': 'Reason cannot exceed 500 characters'
+      })
+  }),
+
+  registrationParams: Joi.object({
+    registrationId: Joi.string().uuid().required()
+      .messages({
+        'string.guid': 'Registration ID must be a valid UUID',
+        'any.required': 'Registration ID is required'
+      })
   })
 };
 
