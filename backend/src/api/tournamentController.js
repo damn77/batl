@@ -20,7 +20,21 @@ export async function listTournaments(req, res, next) {
           name: t.name,
           categoryId: t.categoryId,
           description: t.description,
-          location: t.location,
+          // Legacy fields for backward compatibility (derived from location)
+          clubName: t.location?.clubName || null,
+          address: t.location?.address || null,
+          // New relational fields
+          location: t.location ? {
+            id: t.location.id,
+            clubName: t.location.clubName,
+            address: t.location.address
+          } : null,
+          organizer: t.organizer ? {
+            id: t.organizer.id,
+            name: t.organizer.name,
+            email: t.organizer.email,
+            phone: t.organizer.phone
+          } : null,
           startDate: t.startDate,
           endDate: t.endDate,
           status: t.status,
@@ -59,7 +73,32 @@ export async function getTournamentById(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
-        location: tournament.location,
+        // Legacy fields for backward compatibility (derived from location)
+        clubName: tournament.location?.clubName || null,
+        address: tournament.location?.address || null,
+        // New relational fields
+        location: tournament.location ? {
+          id: tournament.location.id,
+          clubName: tournament.location.clubName,
+          address: tournament.location.address
+        } : null,
+        backupLocation: tournament.backupLocation ? {
+          id: tournament.backupLocation.id,
+          clubName: tournament.backupLocation.clubName,
+          address: tournament.backupLocation.address
+        } : null,
+        organizer: tournament.organizer ? {
+          id: tournament.organizer.id,
+          name: tournament.organizer.name,
+          email: tournament.organizer.email,
+          phone: tournament.organizer.phone
+        } : null,
+        deputyOrganizer: tournament.deputyOrganizer ? {
+          id: tournament.deputyOrganizer.id,
+          name: tournament.deputyOrganizer.name,
+          email: tournament.deputyOrganizer.email,
+          phone: tournament.deputyOrganizer.phone
+        } : null,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
@@ -97,7 +136,8 @@ export async function getTournamentById(req, res, next) {
 export async function createTournament(req, res, next) {
   try {
     // Request body already validated by middleware
-    const tournament = await tournamentService.createTournament(req.body);
+    // Pass current user's ID to create organizer record
+    const tournament = await tournamentService.createTournament(req.body, req.user.id);
 
     return res.status(201).json({
       success: true,
@@ -106,7 +146,21 @@ export async function createTournament(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
-        location: tournament.location,
+        // Legacy fields for backward compatibility (derived from location)
+        clubName: tournament.location?.clubName || null,
+        address: tournament.location?.address || null,
+        // New relational fields
+        location: tournament.location ? {
+          id: tournament.location.id,
+          clubName: tournament.location.clubName,
+          address: tournament.location.address
+        } : null,
+        organizer: tournament.organizer ? {
+          id: tournament.organizer.id,
+          name: tournament.organizer.name,
+          email: tournament.organizer.email,
+          phone: tournament.organizer.phone
+        } : null,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
@@ -167,7 +221,32 @@ export async function updateTournament(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
-        location: tournament.location,
+        // Legacy fields for backward compatibility (derived from location)
+        clubName: tournament.location?.clubName || null,
+        address: tournament.location?.address || null,
+        // New relational fields
+        location: tournament.location ? {
+          id: tournament.location.id,
+          clubName: tournament.location.clubName,
+          address: tournament.location.address
+        } : null,
+        backupLocation: tournament.backupLocation ? {
+          id: tournament.backupLocation.id,
+          clubName: tournament.backupLocation.clubName,
+          address: tournament.backupLocation.address
+        } : null,
+        organizer: tournament.organizer ? {
+          id: tournament.organizer.id,
+          name: tournament.organizer.name,
+          email: tournament.organizer.email,
+          phone: tournament.organizer.phone
+        } : null,
+        deputyOrganizer: tournament.deputyOrganizer ? {
+          id: tournament.deputyOrganizer.id,
+          name: tournament.deputyOrganizer.name,
+          email: tournament.deputyOrganizer.email,
+          phone: tournament.deputyOrganizer.phone
+        } : null,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
