@@ -109,17 +109,28 @@ const NavBar = () => {
               </>
             )}
 
-            {/* Player Link */}
+            {/* Player Links */}
             {user && user.role === 'PLAYER' && (
-              <li className="nav-item">
-                <span
-                  className="nav-link"
-                  onClick={() => navigate('/player/register')}
-                  style={{ cursor: 'pointer' }}
-                >
-                  Register
-                </span>
-              </li>
+              <>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/tournaments')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Tournaments
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/register')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Categories
+                  </span>
+                </li>
+              </>
             )}
           </ul>
           <ul className="navbar-nav ms-auto">

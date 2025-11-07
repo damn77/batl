@@ -26,6 +26,8 @@ logs/
 # IDE / Editor
 .vscode/
 .idea/
+.cspell/
+.windsurf/
 *.swp
 *.swo
 *~
@@ -47,6 +49,7 @@ data/*.sqlite
 # Session files
 sessions/
 *.sess
+*cookies*.txt
 
 # Prisma
 prisma/migrations/**/migration.sql.bak

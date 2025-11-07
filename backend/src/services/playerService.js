@@ -80,6 +80,8 @@ export const updatePlayerProfile = async (id, updates) => {
   if (updates.name !== undefined) data.name = updates.name.trim();
   if (updates.email !== undefined) data.email = updates.email ? updates.email.toLowerCase().trim() : null;
   if (updates.phone !== undefined) data.phone = updates.phone || null;
+  if (updates.birthDate !== undefined) data.birthDate = updates.birthDate ? new Date(updates.birthDate) : null;
+  if (updates.gender !== undefined) data.gender = updates.gender || null;
 
   const profile = await prisma.playerProfile.update({
     where: { id },
@@ -91,6 +93,13 @@ export const updatePlayerProfile = async (id, updates) => {
           email: true,
           role: true,
           isActive: true
+        }
+      },
+      creator: {
+        select: {
+          id: true,
+          email: true,
+          role: true
         }
       }
     }

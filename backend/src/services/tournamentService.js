@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import * as categoryService from './categoryService.js';
 import * as registrationService from './registrationService.js';
+import * as locationService from './locationService.js';
+import * as organizerService from './organizerService.js';
 
 const prisma = new PrismaClient();
 
@@ -29,9 +31,12 @@ async function validateCategoryExists(categoryId) {
  * T037: Create a new tournament
  * FR-006: Tournament must be assigned to exactly one category
  * categoryId is required and immutable after creation
+ *
+ * @param {Object} data - Tournament data including clubName/address (for Location) and userId (for Organizer)
+ * @param {string} userId - ID of user creating the tournament (becomes organizer)
  */
-export async function createTournament(data) {
-  const { name, categoryId, description, location, startDate, endDate } = data;
+export async function createTournament(data, userId) {
+  const { name, categoryId, description, clubName, address, startDate, endDate } = data;
 
   // T039: Validate category exists
   await validateCategoryExists(categoryId);
@@ -53,13 +58,28 @@ export async function createTournament(data) {
     });
   }
 
+  // Create or find Location if clubName provided
+  let locationId = null;
+  if (clubName) {
+    const location = await locationService.findOrCreateLocation({ clubName, address });
+    locationId = location.id;
+  }
+
+  // Create or find Organizer for the user
+  let organizerId = null;
+  if (userId) {
+    const organizer = await organizerService.findOrCreateOrganizer(userId);
+    organizerId = organizer.id;
+  }
+
   // Create tournament with SCHEDULED status
   const tournament = await prisma.tournament.create({
     data: {
       name,
       categoryId,
       description: description || null,
-      location: location || null,
+      locationId,
+      organizerId,
       startDate: start,
       endDate: end,
       status: 'SCHEDULED'
@@ -72,6 +92,21 @@ export async function createTournament(data) {
           type: true,
           ageGroup: true,
           gender: true
+        }
+      },
+      location: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      organizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
         }
       }
     }
@@ -120,6 +155,28 @@ export async function listTournaments(filters = {}) {
             ageGroup: true,
             gender: true
           }
+        },
+        location: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        backupLocation: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
         }
       },
       orderBy: [
@@ -142,7 +199,7 @@ export async function listTournaments(filters = {}) {
 }
 
 /**
- * Get tournament by ID with category details
+ * Get tournament by ID with category, location, and organizer details
  */
 export async function getTournamentById(id) {
   const tournament = await prisma.tournament.findUnique({
@@ -155,6 +212,36 @@ export async function getTournamentById(id) {
           type: true,
           ageGroup: true,
           gender: true
+        }
+      },
+      location: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      backupLocation: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      organizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
+        }
+      },
+      deputyOrganizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
         }
       }
     }
@@ -226,7 +313,7 @@ async function validateRegisteredPlayersForNewCategory(tournamentId, newCategory
 
 /**
  * Update tournament
- * Can update: name, description, location, startDate, endDate, categoryId
+ * Can update: name, description, clubName/address (location), startDate, endDate, categoryId
  *
  * Category change: Allowed if all registered players are eligible for new category
  * Reason: Organizers need flexibility for low participation or injuries
@@ -266,9 +353,17 @@ export async function updateTournament(id, data) {
   if (data.name !== undefined) updateData.name = data.name;
   if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
   if (data.description !== undefined) updateData.description = data.description || null;
-  if (data.location !== undefined) updateData.location = data.location || null;
   if (data.startDate) updateData.startDate = new Date(data.startDate);
   if (data.endDate) updateData.endDate = new Date(data.endDate);
+
+  // Handle location update - create or find location if clubName provided
+  if (data.clubName !== undefined) {
+    const location = await locationService.findOrCreateLocation({
+      clubName: data.clubName,
+      address: data.address
+    });
+    updateData.locationId = location.id;
+  }
 
   return await prisma.tournament.update({
     where: { id },
@@ -281,6 +376,36 @@ export async function updateTournament(id, data) {
           type: true,
           ageGroup: true,
           gender: true
+        }
+      },
+      location: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      backupLocation: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      organizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
+        }
+      },
+      deputyOrganizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
         }
       }
     }

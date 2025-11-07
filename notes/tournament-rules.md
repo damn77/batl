@@ -1,17 +1,21 @@
 ## Tournaments rules ##
 - tournaments can be played in different formats
     - knockout
-    - groups
+    - group (only single group, in case of multiple groups combined format is used)
     - swiss system
     - combined (groups + knockout)
 - in knockout tournaments players have guaranteed number of matches
     - 1 match guarantee is classic knockout format
     - 2 match guarantee means ever player who has lost their 1st match continues in separate knockout bracket
     - until position - means player continues until his exact placement among players is clear (e.g. 16 participants means 4 matches played by everyone)
-- in group tournament size of group is selected
+- in tournaments with groups, size of group is selected
     - groups are created with set group size or 1 less depending on available players
         - e.g. group size 4, with 10 players means 1x group of 4, 2x group of 3
         - if it isn't possible to split Y players into groups of X and X-1 show error message
+- in combined tournaments
+    - number of players that continue to knockout per group is selected
+    - multiple knockout brackets can be set
+        - e.g. 1st and 2nd player continue to main knockout, 3rd continue in different knockout bracket, 4th doesn't continue
 - tournament rules can be defined per: 
     - tournament (mandatory)
     - round (knockout, swiss system)
@@ -44,4 +48,11 @@
             - groups with more players in group/combined tournaments
             - remaining matches in round in "until placement" tournaments once 1 match of that round is finished
         - organizer can change rules for specific match
-        
+
+**View**
+- create tournament view with all relevant data visible
+- create placeholders for functionalities that aren't fully defined yet 
+
+**Note**
+- seeding will be defined in separate feature
+    - use placeholder trivial functionality when needed

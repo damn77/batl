@@ -1,21 +1,35 @@
 // T024-T030: Category Controller - HTTP handlers for category endpoints
 import * as categoryService from '../services/categoryService.js';
+import { findProfileByUserId } from '../services/playerService.js';
+import { checkEligibility } from '../services/registrationService.js';
 
 /**
  * T025: GET /api/v1/categories - List all categories with optional filtering
  * Authorization: All authenticated users (PLAYER, ORGANIZER, ADMIN)
+ * Query params: playerId (optional) - if provided, includes eligibility info for that player
  */
 export async function listCategories(req, res, next) {
   try {
     // Get validated query parameters from middleware
     const filters = req.validatedQuery || {};
+    const { playerId } = req.query;
 
     const result = await categoryService.listCategories(filters);
 
-    return res.status(200).json({
-      success: true,
-      data: {
-        categories: result.categories.map(cat => ({
+    // If playerId is provided, check eligibility for each category
+    let playerProfile = null;
+    if (playerId) {
+      try {
+        const { findPlayerById } = await import('../services/playerService.js');
+        playerProfile = await findPlayerById(playerId);
+      } catch (err) {
+        console.error('Failed to load player profile:', err);
+      }
+    }
+
+    const categoriesWithEligibility = await Promise.all(
+      result.categories.map(async (cat) => {
+        const categoryData = {
           id: cat.id,
           type: cat.type,
           ageGroup: cat.ageGroup,
@@ -29,7 +43,26 @@ export async function listCategories(req, res, next) {
             registrations: cat._count.registrations,
             rankings: cat._count.rankings
           }
-        })),
+        };
+
+        // Add eligibility info if player profile is available
+        if (playerProfile) {
+          try {
+            const eligibility = await checkEligibility(playerId, cat.id);
+            categoryData.eligibility = eligibility;
+          } catch (err) {
+            categoryData.eligibility = { eligible: false, validations: [] };
+          }
+        }
+
+        return categoryData;
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        categories: categoriesWithEligibility,
         pagination: result.pagination
       }
     });

@@ -1,0 +1,394 @@
+// T018-T031: Tournament Registration Controller
+// HTTP handlers for tournament registration endpoints (003-tournament-registration)
+import * as tournamentRegistrationService from '../services/tournamentRegistrationService.js';
+
+/**
+ * T018: POST /api/tournaments/:tournamentId/register
+ * Register authenticated player for a tournament
+ * Authorization: PLAYER or ORGANIZER
+ */
+export async function registerForTournament(req, res, next) {
+  try {
+    const { tournamentId } = req.params;
+    const playerId = req.user.playerId;
+
+    // Ensure user has a player profile
+    if (!playerId) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_PLAYER_PROFILE',
+          message: 'User must have a player profile to register for tournaments'
+        }
+      });
+    }
+
+    // Call service to register player
+    const result = await tournamentRegistrationService.registerPlayer(playerId, tournamentId);
+
+    // Format response based on API contract
+    const response = {
+      success: true,
+      data: {
+        registration: {
+          id: result.registration.id,
+          playerId: result.registration.playerId,
+          tournamentId: result.registration.tournamentId,
+          status: result.registration.status,
+          registrationTimestamp: result.registration.registrationTimestamp,
+          createdAt: result.registration.createdAt
+        },
+        categoryRegistration: result.categoryRegistration
+          ? {
+              id: result.categoryRegistration.id,
+              playerId: result.categoryRegistration.playerId,
+              categoryId: result.categoryRegistration.categoryId,
+              status: result.categoryRegistration.status,
+              hasParticipated: result.categoryRegistration.hasParticipated,
+              isNew: result.categoryRegistration.isNew
+            }
+          : null,
+        tournament: {
+          id: result.registration.tournament.id,
+          name: result.registration.tournament.name,
+          category: {
+            id: result.registration.tournament.category.id,
+            name: result.registration.tournament.category.name,
+            type: result.registration.tournament.category.type,
+            ageGroup: result.registration.tournament.category.ageGroup,
+            gender: result.registration.tournament.category.gender
+          }
+        },
+        capacityInfo: result.capacityInfo
+      },
+      message: result.message
+    };
+
+    return res.status(201).json(response);
+  } catch (err) {
+    // Handle specific error codes
+    if (err.statusCode === 404 && err.code === 'TOURNAMENT_NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'TOURNAMENT_NOT_FOUND',
+          message: err.message
+        }
+      });
+    }
+
+    if (err.statusCode === 409 && err.code === 'ALREADY_REGISTERED') {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'ALREADY_REGISTERED',
+          message: err.message,
+          details: {
+            existingRegistrationId: err.existingRegistrationId,
+            status: err.status,
+            registeredAt: err.registeredAt
+          }
+        }
+      });
+    }
+
+    if (err.statusCode === 400 && err.code === 'REGISTRATION_NOT_OPEN') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_OPEN',
+          message: err.message,
+          details: {
+            opensAt: err.opensAt
+          }
+        }
+      });
+    }
+
+    if (err.statusCode === 400 && err.code === 'REGISTRATION_CLOSED') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_CLOSED',
+          message: err.message,
+          details: {
+            closedAt: err.closedAt
+          }
+        }
+      });
+    }
+
+    if (err.statusCode === 400 && err.code === 'INVALID_TOURNAMENT_STATUS') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_TOURNAMENT_STATUS',
+          message: err.message,
+          details: {
+            currentStatus: err.currentStatus,
+            allowedStatus: err.allowedStatus
+          }
+        }
+      });
+    }
+
+    if (err.statusCode === 400 && err.code === 'CATEGORY_REGISTRATION_REQUIRED') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'CATEGORY_REGISTRATION_REQUIRED',
+          message: err.message,
+          details: {
+            categoryId: err.categoryId,
+            playerId: err.playerId
+          }
+        }
+      });
+    }
+
+    // Handle eligibility errors from category service
+    if (err.statusCode === 400 && (
+      err.code === 'INELIGIBLE_AGE' ||
+      err.code === 'INELIGIBLE_GENDER' ||
+      err.code === 'INCOMPLETE_PROFILE'
+    )) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: err.code,
+          message: err.message,
+          details: err
+        }
+      });
+    }
+
+    // Pass to error handler middleware
+    next(err);
+  }
+}
+
+/**
+ * GET /api/tournaments/:tournamentId/registration
+ * Get current user's registration for a tournament
+ */
+export async function getMyRegistration(req, res, next) {
+  try {
+    const { tournamentId } = req.params;
+    const playerId = req.user.playerId;
+
+    if (!playerId) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_PLAYER_PROFILE',
+          message: 'User must have a player profile'
+        }
+      });
+    }
+
+    const registration = await tournamentRegistrationService.getPlayerRegistration(
+      playerId,
+      tournamentId
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        registration: {
+          id: registration.id,
+          playerId: registration.playerId,
+          tournamentId: registration.tournamentId,
+          status: registration.status,
+          registrationTimestamp: registration.registrationTimestamp,
+          createdAt: registration.createdAt,
+          updatedAt: registration.updatedAt
+        },
+        player: {
+          id: registration.player.id,
+          name: registration.player.name,
+          email: registration.player.email
+        },
+        tournament: {
+          id: registration.tournament.id,
+          name: registration.tournament.name,
+          startDate: registration.tournament.startDate,
+          endDate: registration.tournament.endDate,
+          category: registration.tournament.category
+        }
+      }
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_FOUND',
+          message: 'No registration found for this tournament'
+        }
+      });
+    }
+
+    next(err);
+  }
+}
+
+/**
+ * T030: DELETE /api/tournaments/:tournamentId/register
+ * Unregister authenticated player from a tournament
+ * Authorization: PLAYER (self only) or ORGANIZER/ADMIN
+ */
+export async function unregisterFromTournament(req, res, next) {
+  try {
+    const { tournamentId } = req.params;
+    const playerId = req.user.playerId;
+
+    // Ensure user has a player profile
+    if (!playerId) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_PLAYER_PROFILE',
+          message: 'User must have a player profile to unregister from tournaments'
+        }
+      });
+    }
+
+    // Call service to unregister player
+    const result = await tournamentRegistrationService.unregisterPlayer(playerId, tournamentId);
+
+    // Format response
+    const response = {
+      success: true,
+      data: {
+        registration: {
+          id: result.registration.id,
+          playerId: result.registration.playerId,
+          tournamentId: result.registration.tournamentId,
+          status: result.registration.status,
+          withdrawnAt: result.registration.withdrawnAt
+        },
+        promotedPlayer: result.promotedPlayer,
+        categoryCleanup: result.categoryCleanup
+      },
+      message: result.message
+    };
+
+    return res.status(200).json(response);
+  } catch (err) {
+    // Handle specific error codes
+    if (err.statusCode === 404 && err.code === 'REGISTRATION_NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_FOUND',
+          message: err.message
+        }
+      });
+    }
+
+    if (err.statusCode === 400 && err.code === 'ALREADY_WITHDRAWN') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'ALREADY_WITHDRAWN',
+          message: err.message,
+          details: {
+            currentStatus: err.currentStatus
+          }
+        }
+      });
+    }
+
+    // Pass to error handler middleware
+    next(err);
+  }
+}
+
+/**
+ * GET /api/tournaments/:tournamentId/registrations
+ * Get all registrations for a tournament
+ * Authorization: ORGANIZER or ADMIN
+ */
+export async function getTournamentRegistrations(req, res, next) {
+  try {
+    const { tournamentId } = req.params;
+    const { status } = req.query;
+
+    const registrations = await tournamentRegistrationService.getTournamentRegistrations(
+      tournamentId,
+      status
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        tournamentId,
+        registrations: registrations.map(reg => ({
+          id: reg.id,
+          status: reg.status,
+          registrationTimestamp: reg.registrationTimestamp,
+          player: {
+            id: reg.player.id,
+            name: reg.player.name,
+            email: reg.player.email
+          }
+        })),
+        count: registrations.length
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/players/:playerId/tournaments
+ * Get all tournaments a player is registered for
+ * Authorization: PLAYER (self only) or ORGANIZER/ADMIN
+ */
+export async function getPlayerTournaments(req, res, next) {
+  try {
+    const { playerId } = req.params;
+    const { status } = req.query;
+
+    // Authorization: Players can only view their own registrations
+    if (req.user.role === 'PLAYER' && req.user.playerId !== playerId) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Players can only view their own tournament registrations'
+        }
+      });
+    }
+
+    const registrations = await tournamentRegistrationService.getPlayerTournaments(
+      playerId,
+      status
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        playerId,
+        registrations: registrations.map(reg => ({
+          id: reg.id,
+          status: reg.status,
+          registrationTimestamp: reg.registrationTimestamp,
+          tournament: {
+            id: reg.tournament.id,
+            name: reg.tournament.name,
+            startDate: reg.tournament.startDate,
+            endDate: reg.tournament.endDate,
+            location: reg.tournament.location,
+            status: reg.tournament.status,
+            category: reg.tournament.category
+          }
+        })),
+        count: registrations.length
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}

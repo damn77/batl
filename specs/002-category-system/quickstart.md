@@ -21,7 +21,7 @@ The following test accounts are available after running the seed script:
 
 | Email | Password | Role | Notes |
 |-------|----------|------|-------|
-| `admin@battle.example.com` | `ChangeMe123!` | ADMIN | System administrator |
+| `admin@batl.example.com` | `ChangeMe123!` | ADMIN | System administrator |
 | `organizer@batl.example.com` | `Organizer123!` | ORGANIZER | Tournament organizer |
 | `player@batl.example.com` | `Player123!` | PLAYER | Test player (M, born 1987-05-15, age 37) |
 

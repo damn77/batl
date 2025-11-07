@@ -15,7 +15,9 @@ const PlayerProfilePage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    birthDate: '',
+    gender: ''
   });
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -28,19 +30,18 @@ const PlayerProfilePage = () => {
       setLoading(true);
       setError(null);
 
-      // Find player profile by user ID
-      const response = await apiClient.get('/players');
-      const profiles = response.data.profiles;
-
-      // Find the profile linked to this user
-      const userProfile = profiles.find(p => p.userId === user.id);
+      // Get the current user's player profile directly
+      const response = await apiClient.get(`/players/${user.playerId}`);
+      const userProfile = response.data.profile;
 
       if (userProfile) {
         setProfile(userProfile);
         setFormData({
           name: userProfile.name || '',
           email: userProfile.email || '',
-          phone: userProfile.phone || ''
+          phone: userProfile.phone || '',
+          birthDate: userProfile.birthDate ? new Date(userProfile.birthDate).toISOString().split('T')[0] : '',
+          gender: userProfile.gender || ''
         });
       } else {
         setError('Profile not found');
@@ -80,6 +81,22 @@ const PlayerProfilePage = () => {
       errors.email = 'Invalid email format';
     }
 
+    // Birth Date validation (required for tournament registration)
+    if (!formData.birthDate) {
+      errors.birthDate = 'Birth date is required for tournament registration';
+    } else {
+      const birthDate = new Date(formData.birthDate);
+      const now = new Date();
+      if (birthDate >= now) {
+        errors.birthDate = 'Birth date must be in the past';
+      }
+    }
+
+    // Gender validation (required for tournament registration)
+    if (!formData.gender) {
+      errors.gender = 'Gender is required for tournament registration';
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -94,10 +111,15 @@ const PlayerProfilePage = () => {
       setError(null);
       setSuccess(null);
 
+      console.log('Frontend - Form data before save:', formData); // Debug log
       const response = await apiClient.patch(`/players/${profile.id}`, formData);
+      console.log('Frontend - Response from backend:', response.data); // Debug log
       setProfile(response.data.profile);
       setEditing(false);
       setSuccess('Profile updated successfully!');
+
+      // Refresh profile data to ensure we have the latest
+      await fetchProfile();
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
@@ -122,7 +144,9 @@ const PlayerProfilePage = () => {
     setFormData({
       name: profile.name || '',
       email: profile.email || '',
-      phone: profile.phone || ''
+      phone: profile.phone || '',
+      birthDate: profile.birthDate ? new Date(profile.birthDate).toISOString().split('T')[0] : '',
+      gender: profile.gender || ''
     });
     setValidationErrors({});
     setError(null);
@@ -239,6 +263,44 @@ const PlayerProfilePage = () => {
                     />
                   </div>
 
+                  <div className="mb-3">
+                    <label htmlFor="birthDate" className="form-label">Date of Birth *</label>
+                    <input
+                      type="date"
+                      className={`form-control ${validationErrors.birthDate ? 'is-invalid' : ''}`}
+                      id="birthDate"
+                      name="birthDate"
+                      value={formData.birthDate}
+                      onChange={handleChange}
+                      disabled={saving}
+                      max={new Date().toISOString().split('T')[0]}
+                    />
+                    {validationErrors.birthDate && (
+                      <div className="invalid-feedback">{validationErrors.birthDate}</div>
+                    )}
+                    <div className="form-text">Required for age-based tournament eligibility</div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="gender" className="form-label">Gender *</label>
+                    <select
+                      className={`form-select ${validationErrors.gender ? 'is-invalid' : ''}`}
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      disabled={saving}
+                    >
+                      <option value="">Select gender...</option>
+                      <option value="MEN">Male</option>
+                      <option value="WOMEN">Female</option>
+                    </select>
+                    {validationErrors.gender && (
+                      <div className="invalid-feedback">{validationErrors.gender}</div>
+                    )}
+                    <div className="form-text">Required for gender-based tournament eligibility</div>
+                  </div>
+
                   <div className="d-flex gap-2">
                     <button
                       className="btn btn-primary"
@@ -287,8 +349,25 @@ const PlayerProfilePage = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label text-muted">Profile Created</label>
-                    <p className="fs-5">{new Date(profile.createdAt).toLocaleDateString()}</p>
+                    <label className="form-label text-muted">Date of Birth</label>
+                    <p className="fs-5">
+                      {profile.birthDate ? (
+                        <span>{new Date(profile.birthDate).toLocaleDateString()}</span>
+                      ) : (
+                        <span className="text-muted">Not provided ⚠️</span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label text-muted">Gender</label>
+                    <p className="fs-5">
+                      {profile.gender ? (
+                        <span>{profile.gender === 'MEN' ? 'Male' : 'Female'}</span>
+                      ) : (
+                        <span className="text-muted">Not provided ⚠️</span>
+                      )}
+                    </p>
                   </div>
 
                   {profile.userId && (

@@ -42,6 +42,16 @@ export const login = async (req, res, next) => {
         data: { lastLoginAt: new Date() }
       });
 
+      // Get player profile ID if user is a PLAYER
+      let playerId = null;
+      if (user.role === 'PLAYER') {
+        const playerProfile = await prisma.playerProfile.findFirst({
+          where: { userId: user.id },
+          select: { id: true }
+        });
+        playerId = playerProfile?.id || null;
+      }
+
       // Log successful login
       await logAudit({
         userId: user.id,
@@ -59,7 +69,8 @@ export const login = async (req, res, next) => {
           role: user.role,
           isActive: user.isActive,
           emailVerified: user.emailVerified,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          playerId: playerId
         },
         session: {
           expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
@@ -112,7 +123,7 @@ export const logout = async (req, res) => {
 };
 
 // Check session status
-export const checkSession = (req, res) => {
+export const checkSession = async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({
       error: {
@@ -122,13 +133,24 @@ export const checkSession = (req, res) => {
     });
   }
 
+  // Get player profile ID if user is a PLAYER
+  let playerId = null;
+  if (req.user.role === 'PLAYER') {
+    const playerProfile = await prisma.playerProfile.findFirst({
+      where: { userId: req.user.id },
+      select: { id: true }
+    });
+    playerId = playerProfile?.id || null;
+  }
+
   res.json({
     user: {
       id: req.user.id,
       email: req.user.email,
       role: req.user.role,
       isActive: req.user.isActive,
-      emailVerified: req.user.emailVerified
+      emailVerified: req.user.emailVerified,
+      playerId: playerId
     },
     session: {
       expiresAt: new Date(req.session.cookie.expires || Date.now() + 30 * 60 * 1000)

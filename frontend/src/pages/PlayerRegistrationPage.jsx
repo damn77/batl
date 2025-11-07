@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, ListGroup } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
+import { useAuth } from '../utils/AuthContext';
 import { listPlayers } from '../services/playerService';
 import { listCategories } from '../services/categoryService';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../services/registrationService';
 
 const PlayerRegistrationPage = () => {
+  const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -32,7 +34,10 @@ const PlayerRegistrationPage = () => {
   useEffect(() => {
     if (selectedPlayer) {
       loadPlayerRegistrations();
-      checkAllEligibility();
+      // Only check eligibility if we don't already have it from the initial load
+      if (Object.keys(eligibilityResults).length === 0) {
+        checkAllEligibility();
+      }
     } else {
       setCurrentRegistrations([]);
       setEligibilityResults({});
@@ -43,13 +48,37 @@ const PlayerRegistrationPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [playersData, categoriesData] = await Promise.all([
-        listPlayers({ limit: 100 }),
-        listCategories()
-      ]);
 
+      // Load players (for organizers/admins)
+      const playersData = await listPlayers({ limit: 100 });
       setPlayers(playersData.profiles || []);
+
+      // If user is a PLAYER, find their profile ID and load categories with eligibility
+      let playerIdToUse = null;
+      if (user?.role === 'PLAYER') {
+        const userProfile = playersData.profiles?.find(p => p.userId === user.id);
+        if (userProfile) {
+          playerIdToUse = userProfile.id;
+          setSelectedPlayer(userProfile.id);
+        }
+      }
+
+      // Load categories with eligibility info if we have a player ID
+      const categoriesData = await listCategories(
+        playerIdToUse ? { playerId: playerIdToUse } : {}
+      );
       setCategories(categoriesData.categories || []);
+
+      // If categories include eligibility, populate eligibilityResults
+      if (playerIdToUse && categoriesData.categories) {
+        const results = {};
+        categoriesData.categories.forEach(cat => {
+          if (cat.eligibility) {
+            results[cat.id] = cat.eligibility;
+          }
+        });
+        setEligibilityResults(results);
+      }
     } catch (err) {
       setError('Failed to load data');
     } finally {
@@ -155,8 +184,8 @@ const PlayerRegistrationPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Player Registration</h2>
-            <p className="text-muted">Register players for tournament categories</p>
+            <h2>Category Registration</h2>
+            <p className="text-muted">Register players for tournament categories based on age and skill level</p>
           </Col>
         </Row>
 
@@ -165,28 +194,31 @@ const PlayerRegistrationPage = () => {
 
         <Row>
           <Col md={4}>
-            <Card className="mb-3">
-              <Card.Body>
-                <Form.Group>
-                  <Form.Label>Select Player *</Form.Label>
-                  <Form.Select
-                    value={selectedPlayer}
-                    onChange={(e) => setSelectedPlayer(e.target.value)}
-                    size="lg"
-                  >
-                    <option value="">Choose a player...</option>
-                    {players.map(player => (
-                      <option key={player.id} value={player.id}>
-                        {player.name} {player.birthDate && player.gender ? '✓' : '⚠️'}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    ✓ = Complete profile | ⚠️ = Missing birthDate/gender
-                  </Form.Text>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+            {/* Only show player selector for ORGANIZER and ADMIN roles */}
+            {user?.role !== 'PLAYER' && (
+              <Card className="mb-3">
+                <Card.Body>
+                  <Form.Group>
+                    <Form.Label>Select Player *</Form.Label>
+                    <Form.Select
+                      value={selectedPlayer}
+                      onChange={(e) => setSelectedPlayer(e.target.value)}
+                      size="lg"
+                    >
+                      <option value="">Choose a player...</option>
+                      {players.map(player => (
+                        <option key={player.id} value={player.id}>
+                          {player.name} {player.birthDate && player.gender ? '✓' : '⚠️'}
+                        </option>
+                      ))}
+                    </Form.Select>
+                    <Form.Text className="text-muted">
+                      ✓ = Complete profile | ⚠️ = Missing birthDate/gender
+                    </Form.Text>
+                  </Form.Group>
+                </Card.Body>
+              </Card>
+            )}
 
             {selectedPlayer && currentRegistrations.length > 0 && (
               <Card>
@@ -256,7 +288,7 @@ const PlayerRegistrationPage = () => {
                               <Badge bg="success" className="ms-4">Already Registered</Badge>
                             )}
 
-                            {!isEligible && eligibility && (
+                            {!isEligible && !alreadyRegistered && eligibility && (
                               <div className="ms-4 mt-2">
                                 {eligibility.validations?.map((validation, idx) => (
                                   <div key={idx} className="small text-danger">
@@ -267,7 +299,9 @@ const PlayerRegistrationPage = () => {
                             )}
                           </div>
 
-                          {isEligible ? (
+                          {alreadyRegistered ? (
+                            <Badge bg="info">Registered</Badge>
+                          ) : isEligible ? (
                             <Badge bg="success">Eligible</Badge>
                           ) : (
                             <Badge bg="danger">Ineligible</Badge>

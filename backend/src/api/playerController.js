@@ -10,7 +10,7 @@ import { logAudit, AuditActions } from '../services/auditService.js';
 // Create new player profile (ORGANIZER/ADMIN only)
 export const createPlayerHandler = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, birthDate, gender } = req.body;
     const createdBy = req.user.id;
 
     // Check for potential duplicates
@@ -21,6 +21,8 @@ export const createPlayerHandler = async (req, res, next) => {
       name,
       email,
       phone,
+      birthDate,
+      gender,
       createdBy
     });
 
@@ -30,7 +32,7 @@ export const createPlayerHandler = async (req, res, next) => {
       action: AuditActions.PLAYER_PROFILE_CREATED || 'PLAYER_PROFILE_CREATED',
       entityType: 'PlayerProfile',
       entityId: profile.id,
-      changes: { name, email, phone },
+      changes: { name, email, phone, birthDate, gender },
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.get('user-agent')
     });
@@ -98,6 +100,8 @@ export const updatePlayerHandler = async (req, res, next) => {
     const { id } = req.params;
     const updates = req.body;
 
+    console.log('Backend - Received updates:', updates); // Debug log
+
     // Check if profile exists
     const existingProfile = await findPlayerById(id);
     if (!existingProfile) {
@@ -124,6 +128,8 @@ export const updatePlayerHandler = async (req, res, next) => {
 
     // Update profile
     const profile = await updatePlayerProfile(id, updates);
+    
+    console.log('Backend - Updated profile:', profile); // Debug log
 
     // Log profile update
     await logAudit({
