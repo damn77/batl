@@ -34,7 +34,8 @@ const TournamentSetupPage = () => {
     name: '',
     categoryId: '',
     description: '',
-    location: '',
+    clubName: '',
+    address: '',
     startDate: new Date(),
     endDate: new Date()
   });
@@ -83,7 +84,8 @@ const TournamentSetupPage = () => {
       name: '',
       categoryId: '',
       description: '',
-      location: '',
+      clubName: '',
+      address: '',
       startDate: tomorrow,
       endDate: tomorrow
     });
@@ -95,8 +97,8 @@ const TournamentSetupPage = () => {
   const handleSubmitCreate = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.categoryId) {
-      setFormError('Please fill in all required fields');
+    if (!formData.name || !formData.categoryId || !formData.clubName) {
+      setFormError('Please fill in all required fields (Name, Category, Club Name)');
       return;
     }
 
@@ -145,7 +147,8 @@ const TournamentSetupPage = () => {
       name: tournament.name,
       categoryId: tournament.categoryId,
       description: tournament.description || '',
-      location: tournament.location || '',
+      clubName: tournament.clubName || '',
+      address: tournament.address || '',
       startDate: startDate,
       endDate: endDate
     });
@@ -157,8 +160,8 @@ const TournamentSetupPage = () => {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.categoryId) {
-      setFormError('Please fill in all required fields');
+    if (!formData.name || !formData.categoryId || !formData.clubName) {
+      setFormError('Please fill in all required fields (Name, Category, Club Name)');
       return;
     }
 
@@ -267,7 +270,10 @@ const TournamentSetupPage = () => {
                     <tr key={tournament.id}>
                       <td><strong>{tournament.name}</strong></td>
                       <td>{tournament.category?.name}</td>
-                      <td>{tournament.location || '-'}</td>
+                      <td>
+                        <div>{tournament.clubName || '-'}</div>
+                        {tournament.address && <small className="text-muted">{tournament.address}</small>}
+                      </td>
                       <td className="small">
                         {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
                       </td>
@@ -374,12 +380,23 @@ const TournamentSetupPage = () => {
               </Row>
 
               <Form.Group className="mb-3">
-                <Form.Label>Location</Form.Label>
+                <Form.Label>Club Name *</Form.Label>
                 <Form.Control
                   type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  value={formData.clubName}
+                  onChange={(e) => setFormData({ ...formData, clubName: e.target.value })}
                   placeholder="e.g. Tennis Club Bratislava"
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Address (Optional)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
                 />
               </Form.Group>
 
@@ -486,12 +503,23 @@ const TournamentSetupPage = () => {
               </Row>
 
               <Form.Group className="mb-3">
-                <Form.Label>Location</Form.Label>
+                <Form.Label>Club Name *</Form.Label>
                 <Form.Control
                   type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  value={formData.clubName}
+                  onChange={(e) => setFormData({ ...formData, clubName: e.target.value })}
                   placeholder="e.g. Tennis Club Bratislava"
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Address (Optional)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
                 />
               </Form.Group>
 

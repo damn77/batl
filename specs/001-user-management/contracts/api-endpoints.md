@@ -110,7 +110,8 @@ Authenticate user with email and password.
     "role": "ORGANIZER",
     "isActive": true,
     "emailVerified": true,
-    "lastLoginAt": "2025-10-30T10:30:00Z"
+    "lastLoginAt": "2025-10-30T10:30:00Z",
+    "playerId": "uuid or null"
   },
   "session": {
     "expiresAt": "2025-10-30T11:00:00Z"
@@ -129,6 +130,7 @@ Authenticate user with email and password.
 - Generic error message "Invalid email or password" prevents email enumeration
 - Logs authentication attempt (success/failure) in AuditLog
 - Updates User.lastLoginAt on success
+- **playerId**: For users with role `PLAYER`, this field contains the UUID of their PlayerProfile. For other roles (ADMIN, ORGANIZER), this field is `null`. This allows direct access to the player's profile without additional lookups.
 
 ---
 

@@ -1,19 +1,16 @@
 ## Bugs ##
 Create tournament modal
 - missing optional address field
-- Category selections
-    - items should be ordered alphabetically
-
-Player registration /player/register
-- player should only be able to register themselves
-- Select player form should be hidden when user is player and visible for organizer and admin
 
 Tournaments page /organizer/tournaments
 - I can see newly created tournament in the list but am not able to access it's page to modify it or update player registrations
 
 
 ## Missed requirements ##
-Create tournament modal
-- add toggle "Single day tournament"
-    - if ON the End Date field and label should be hidden and their value should auto match start date
-    - by default the toggle is ON
+
+
+## Future improvements ##
+- When creating/editing a tournament, location can be selected from list of existing locations or new location can be added on the fly (button to open location modal)
+- When viewing tournament details with location address defined show a map with the location
+- When creating/editing a tournament, capacity can be defined
+    - connect to Google Maps API to get the capacity of the location

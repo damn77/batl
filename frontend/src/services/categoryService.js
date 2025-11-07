@@ -7,8 +7,8 @@ import apiClient from './apiClient';
 
 /**
  * Get all categories with optional filters
- * @param {Object} filters - Optional filters (type, ageGroup, gender, page, limit)
- * @returns {Promise} List of categories with pagination
+ * @param {Object} filters - Optional filters (type, ageGroup, gender, playerId, page, limit)
+ * @returns {Promise} List of categories with pagination and eligibility info if playerId provided
  */
 export const listCategories = async (filters = {}) => {
   const params = new URLSearchParams();
@@ -16,6 +16,7 @@ export const listCategories = async (filters = {}) => {
   if (filters.type) params.append('type', filters.type);
   if (filters.ageGroup) params.append('ageGroup', filters.ageGroup);
   if (filters.gender) params.append('gender', filters.gender);
+  if (filters.playerId) params.append('playerId', filters.playerId);
   if (filters.page) params.append('page', filters.page);
   if (filters.limit) params.append('limit', filters.limit);
 

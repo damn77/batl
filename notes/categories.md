@@ -2,6 +2,9 @@
 - Tournament always belongs to single batl category
 - Every category has it's own ranking/s
 - Player can participate in multiple categories
+- Players register for categories via the **Category Registration** page (`/player/register`)
+  - Players can only register themselves
+  - Organizers and admins can register any player
 - Default category types:
     - Singles
     - Doubles

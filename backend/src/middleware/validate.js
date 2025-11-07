@@ -137,14 +137,32 @@ export const schemas = {
   playerProfileCreation: Joi.object({
     name: Joi.string().min(2).max(100).trim().required(),
     email: Joi.string().email().lowercase().trim().optional().allow('', null),
-    phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null)
+    phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null),
+    birthDate: Joi.date().iso().optional().allow(null)
+      .messages({
+        'date.base': 'Birth date must be a valid date',
+        'date.format': 'Birth date must be in ISO format'
+      }),
+    gender: Joi.string().valid('MEN', 'WOMEN').optional().allow(null)
+      .messages({
+        'any.only': 'Gender must be MEN or WOMEN'
+      })
   }),
 
   // Player profile update
   playerProfileUpdate: Joi.object({
     name: Joi.string().min(2).max(100).trim().optional(),
     email: Joi.string().email().lowercase().trim().optional().allow('', null),
-    phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null)
+    phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null),
+    birthDate: Joi.date().iso().optional().allow(null)
+      .messages({
+        'date.base': 'Birth date must be a valid date',
+        'date.format': 'Birth date must be in ISO format'
+      }),
+    gender: Joi.string().valid('MEN', 'WOMEN').optional().allow(null)
+      .messages({
+        'any.only': 'Gender must be MEN or WOMEN'
+      })
   }).min(1),
 
   // Player list query
@@ -208,6 +226,7 @@ export const schemas = {
       'AGE_55', 'AGE_60', 'AGE_65', 'AGE_70', 'AGE_75', 'AGE_80'
     ).optional(),
     gender: Joi.string().valid('MEN', 'WOMEN', 'MIXED').optional(),
+    playerId: Joi.string().uuid().optional(),
     page: Joi.number().integer().min(1).default(1).optional(),
     limit: Joi.number().integer().min(1).max(100).default(20).optional()
   }),
@@ -244,11 +263,19 @@ export const schemas = {
         'string.max': 'Description cannot exceed 1000 characters'
       }),
 
-    // Optional fields (NEW - Enhanced Details from 003)
-    location: Joi.string().max(200).allow('').optional()
+    // Location fields (NEW - Enhanced Details from 003)
+    clubName: Joi.string().min(2).max(200).trim().required()
       .messages({
-        'string.max': 'Location cannot exceed 200 characters'
+        'string.min': 'Club name must be at least 2 characters',
+        'string.max': 'Club name cannot exceed 200 characters',
+        'any.required': 'Club name is required'
       }),
+    address: Joi.string().max(500).allow('', null).optional()
+      .messages({
+        'string.max': 'Address cannot exceed 500 characters'
+      }),
+    
+    // Optional fields (Enhanced Details from 003)
     capacity: Joi.number().integer().min(1).max(1000).optional().allow(null)
       .messages({
         'number.base': 'Capacity must be a number',
@@ -313,7 +340,8 @@ export const schemas = {
     endDate: Joi.date().iso().optional(),
 
     // Enhanced fields (NEW - 003-tournament-registration)
-    location: Joi.string().max(200).allow('', null).optional(),
+    clubName: Joi.string().min(2).max(200).trim().optional(),
+    address: Joi.string().max(500).allow('', null).optional(),
     capacity: Joi.number().integer().min(1).max(1000).optional().allow(null),
     organizerEmail: Joi.string().email().lowercase().trim().optional().allow('', null),
     organizerPhone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).optional().allow('', null),

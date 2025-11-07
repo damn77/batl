@@ -49,6 +49,10 @@
             - remaining matches in round in "until placement" tournaments once 1 match of that round is finished
         - organizer can change rules for specific match
 
+**View**
+- create tournament view with all relevant data visible
+- create placeholders for functionalities that aren't fully defined yet 
+
 **Note**
 - seeding will be defined in separate feature
     - use placeholder trivial functionality when needed
