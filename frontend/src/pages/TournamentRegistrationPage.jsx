@@ -72,10 +72,11 @@ const TournamentRegistrationPage = () => {
     try {
       const result = await registerForTournament(tournamentId);
 
-      // Update registrations map
+      // Reload registration status to get the current state
+      const updatedReg = await getMyRegistration(tournamentId);
       setRegistrations({
         ...registrations,
-        [tournamentId]: result.registration
+        [tournamentId]: updatedReg
       });
 
       // Show success message
@@ -112,10 +113,11 @@ const TournamentRegistrationPage = () => {
     try {
       const result = await unregisterFromTournament(tournamentId);
 
-      // Update registrations map
+      // Reload registration status to get the current state
+      const updatedReg = await getMyRegistration(tournamentId);
       setRegistrations({
         ...registrations,
-        [tournamentId]: result.registration
+        [tournamentId]: updatedReg
       });
 
       // Build success message
@@ -264,9 +266,10 @@ const TournamentRegistrationPage = () => {
                         {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
                       </ListGroup.Item>
 
-                      {tournament.location && (
+                      {tournament.clubName && (
                         <ListGroup.Item>
-                          <strong>Location:</strong> {tournament.location}
+                          <strong>Location:</strong> {tournament.clubName}
+                          {tournament.address && <><br /><small className="text-muted">{tournament.address}</small></>}
                         </ListGroup.Item>
                       )}
 
