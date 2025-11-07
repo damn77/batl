@@ -108,6 +108,7 @@
 
 - [ ] T034 [P] [US3] Extend tournamentService.js with enhanced field handling in POST /tournaments in backend/src/services/tournamentService.js
 - [ ] T035 [US3] Add validation for enhanced tournament fields (capacity >= 0, valid dates, email format) in backend/src/services/tournamentService.js
+- [ ] T035a [P] [US3] Add courts field validation and handling (Integer, nullable, FR-034) in backend/src/services/tournamentService.js
 - [ ] T036 [US3] Extend tournament controller POST handler with new fields in backend/src/api/tournamentController.js
 - [ ] T037 [P] [US3] Extend TournamentSetupPage.jsx with form fields for all enhanced details in frontend/src/pages/TournamentSetupPage.jsx
 - [ ] T038 [P] [US3] Add waitlist display order dropdown (REGISTRATION_TIME or ALPHABETICAL) in frontend/src/pages/TournamentSetupPage.jsx

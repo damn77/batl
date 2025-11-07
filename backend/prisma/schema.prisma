@@ -89,6 +89,7 @@ model User {
   auditLogs           AuditLog[]
   playerProfile       PlayerProfile?  @relation("UserProfile")
   createdProfiles     PlayerProfile[] @relation("ProfileCreator")
+  organizer           Organizer?      @relation("UserOrganizer")
 
   @@index([role])
   @@index([isActive])
@@ -184,23 +185,58 @@ model Category {
   @@index([gender])
 }
 
+model Organizer {
+  id      String  @id @default(uuid())
+  userId  String  @unique
+  name    String
+  email   String
+  phone   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user                    User         @relation("UserOrganizer", fields: [userId], references: [id], onDelete: Cascade)
+  organizedTournaments    Tournament[] @relation("PrimaryOrganizer")
+  deputyTournaments       Tournament[] @relation("DeputyOrganizer")
+
+  @@index([userId])
+}
+
+model Location {
+  id        String  @id @default(uuid())
+  clubName  String
+  address   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  primaryTournaments Tournament[] @relation("PrimaryLocation")
+  backupTournaments  Tournament[] @relation("BackupLocation")
+
+  @@index([clubName])
+}
+
 model Tournament {
   id          String           @id @default(uuid())
   name        String           // Tournament display name
   categoryId  String           // Required: belongs to one category (FR-006)
   description String?          // Optional tournament details
 
-  // Location & Logistics
-  location              String?          // Optional location
-  capacity              Int?             // Max registered players (null = unlimited)
-  organizerEmail        String?          // Organizer contact email
-  organizerPhone        String?          // Organizer contact phone
-  entryFee              Float?           // Entry fee (null = free)
-  rulesUrl              String?          // Link to tournament rules
-  prizeDescription      String?          // Prize/award details
-  registrationOpenDate  DateTime?        // When registration opens
-  registrationCloseDate DateTime?        // When registration closes
-  minParticipants       Int?             // Minimum required participants
+  // Location & Logistics (FR-032 to FR-042)
+  locationId         String?          // Primary location (club/address)
+  backupLocationId   String?          // Backup location for bad weather
+  courts             Int?             // Number of courts available (FR-034)
+  capacity           Int?             // Max registered players (null = unlimited)
+  organizerId        String?          // Primary organizer (FR-037)
+  deputyOrganizerId  String?          // Deputy organizer (FR-038)
+  entryFee           Float?           // Entry fee (null = free)
+  rulesUrl           String?          // Link to tournament rules
+  prizeDescription   String?          // Prize/award details
+  registrationOpenDate  DateTime?     // When registration opens
+  registrationCloseDate DateTime?     // When registration closes
+  minParticipants    Int?             // Minimum required participants
 
   // Waitlist Configuration
   waitlistDisplayOrder WaitlistDisplayOrder @default(REGISTRATION_TIME)
@@ -219,6 +255,10 @@ model Tournament {
 
   // Relationships
   category                Category                   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  location                Location?                  @relation("PrimaryLocation", fields: [locationId], references: [id], onDelete: SetNull)
+  backupLocation          Location?                  @relation("BackupLocation", fields: [backupLocationId], references: [id], onDelete: SetNull)
+  organizer               Organizer?                 @relation("PrimaryOrganizer", fields: [organizerId], references: [id], onDelete: SetNull)
+  deputyOrganizer         Organizer?                 @relation("DeputyOrganizer", fields: [deputyOrganizerId], references: [id], onDelete: SetNull)
   tournamentRegistrations TournamentRegistration[]
 
   // Constraints (T015)
@@ -227,6 +267,8 @@ model Tournament {
   @@index([status])
   @@index([registrationOpenDate])
   @@index([registrationCloseDate])
+  @@index([locationId])
+  @@index([organizerId])
 }
 
 model CategoryRegistration {

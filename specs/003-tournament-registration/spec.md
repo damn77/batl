@@ -202,7 +202,7 @@ Organizers need to view all registered and waitlisted participants to ensure pro
 - **FR-044**: System MUST allow organizers to cancel scheduled tournaments
 - **FR-045**: System MUST prevent cancellation of tournaments that are in progress or completed
 - **FR-046**: System MUST track tournament status (SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED)
-- **FR-047**: System MUST maintain change history for tournament updates (who changed what and when)
+- ~~**FR-047**: System MUST maintain change history for tournament updates (who changed what and when)~~ *(Out of scope - moved to future feature)*
 
 #### Tournament Viewing
 
@@ -243,13 +243,13 @@ Organizers need to view all registered and waitlisted participants to ensure pro
 - **SC-005**: Organizers can create a tournament with all enhanced details (location, capacity, costs, contacts, waitlist settings) in under 3 minutes
 - **SC-006**: System enforces maximum participant capacity with automatic waitlist functionality in 100% of cases
 - **SC-007**: Tournament updates (location, dates, costs, waitlist settings) are visible to all registered and waitlisted participants within 1 minute
-- **SC-008**: 95% of players successfully understand the auto-category registration and waitlist behavior without confusion
+- **SC-008** (Aspirational): 95% of players successfully understand the auto-category registration and waitlist behavior without confusion (measured via post-launch user surveys)
 - **SC-009**: Zero incidents of players being registered for tournaments they don't meet eligibility for (applies to both registered and waitlisted)
 - **SC-010**: Organizers can view complete participant lists (registered and waitlisted) and manage capacity across 50+ simultaneous tournaments
 - **SC-011**: Entry cost, organizer contact information, and waitlist position (if applicable) are clearly displayed during registration process
 - **SC-012**: System correctly auto-promotes waitlisted players within 5 seconds when a spot becomes available
 - **SC-013**: Organizers can manually manage waitlist (promote specific players, reorder) in under 1 minute per action
-- **SC-014**: 90% of players on waitlist successfully get promoted and notified when spots become available
+- **SC-014** (Aspirational): 90% of players on waitlist successfully get promoted when spots become available (measured via tournament registration logging data)
 
 ## Assumptions
 
@@ -283,6 +283,7 @@ Organizers need to view all registered and waitlisted participants to ensure pro
 - Match scheduling and court assignments
 - Match score entry and results tracking
 - Automated points distribution and ranking updates based on tournament results
+- Change history/audit trail for tournament updates (FR-047 - planned for future feature)
 - Tournament bracket/group generation algorithms
 - Seeding logic for participant placement
 - Payment processing for entry costs (only storing and displaying the cost amount)
