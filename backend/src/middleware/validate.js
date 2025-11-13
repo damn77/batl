@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import { createValidationError } from './errorHandler.js';
 
 // Middleware to validate request body against Joi schema
 export const validateBody = (schema) => {

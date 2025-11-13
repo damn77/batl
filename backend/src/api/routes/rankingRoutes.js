@@ -5,7 +5,6 @@ import {
   getPlayerRankingInCategory,
   getPlayerAllRankings
 } from '../rankingController.js';
-import { isAuthenticated } from '../../middleware/auth.js';
 import { validateQuery, schemas } from '../../middleware/validate.js';
 
 const router = express.Router();

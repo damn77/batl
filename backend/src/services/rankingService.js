@@ -192,7 +192,7 @@ export async function getPlayerAllRankings(playerId) {
  * Note: This is a placeholder for future implementation.
  * Actual ranking calculation will depend on the tournament scoring system.
  */
-export async function updateCategoryRankings(categoryId, tournamentResults) {
+export async function updateCategoryRankings(_categoryId, _tournamentResults) {
   // T086: Calculate points from tournament results
   // T087: Upsert rankings (update existing, create new)
   // T088: Assign ranks based on points (descending order)

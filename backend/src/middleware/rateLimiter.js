@@ -79,9 +79,27 @@ export const apiLimiter = rateLimit({
   legacyHeaders: false
 });
 
+// T125: Rate limiter for tournament rules modification (20 changes per 15 minutes)
+export const ruleModificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 rule changes
+  message: {
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many rule modification requests. Please try again later.',
+      retryAfter: 900
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Only count successful requests (not errors)
+  skipFailedRequests: true
+});
+
 export default {
   loginLimiter,
   registrationLimiter,
   passwordResetLimiter,
-  apiLimiter
+  apiLimiter,
+  ruleModificationLimiter
 };

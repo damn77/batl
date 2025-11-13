@@ -10,7 +10,6 @@ import {
 } from '../tournamentRegistrationController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
-import { validateQuery, schemas } from '../../middleware/validate.js';
 
 const router = express.Router();
 

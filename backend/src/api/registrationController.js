@@ -358,12 +358,6 @@ export async function withdrawRegistration(req, res, next) {
   try {
     const { id } = req.params;
 
-    // First, fetch the registration to check ownership
-    const registration = await registrationService.getPlayerRegistrations(
-      req.user.playerId || 'check',
-      {}
-    );
-
     // Authorization check: Players can only withdraw their own registrations
     // Note: This is a simplified check. In production, you'd want to fetch the registration
     // by ID first to verify ownership before withdrawing

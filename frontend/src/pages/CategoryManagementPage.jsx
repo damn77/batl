@@ -292,8 +292,8 @@ const CategoryManagementPage = () => {
                   <Form.Label>Gender</Form.Label>
                   <Form.Select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
                     <option value="">All Genders</option>
-                    <option value="MEN">Men's</option>
-                    <option value="WOMEN">Women's</option>
+                    <option value="MEN">Men&apos;s</option>
+                    <option value="WOMEN">Women&apos;s</option>
                     <option value="MIXED">Mixed</option>
                   </Form.Select>
                 </Form.Group>
@@ -389,8 +389,8 @@ const CategoryManagementPage = () => {
                   required
                 >
                   <option value="">Select gender...</option>
-                  <option value="MEN">Men's</option>
-                  <option value="WOMEN">Women's</option>
+                  <option value="MEN">Men&apos;s</option>
+                  <option value="WOMEN">Women&apos;s</option>
                   <option value="MIXED">Mixed</option>
                 </Form.Select>
               </Form.Group>

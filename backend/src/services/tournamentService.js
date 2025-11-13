@@ -36,7 +36,7 @@ async function validateCategoryExists(categoryId) {
  * @param {string} userId - ID of user creating the tournament (becomes organizer)
  */
 export async function createTournament(data, userId) {
-  const { name, categoryId, description, clubName, address, startDate, endDate } = data;
+  const { name, categoryId, description, clubName, address, startDate, endDate, capacity } = data;
 
   // T039: Validate category exists
   await validateCategoryExists(categoryId);
@@ -78,6 +78,7 @@ export async function createTournament(data, userId) {
       name,
       categoryId,
       description: description || null,
+      capacity: capacity !== undefined ? (capacity === null ? null : parseInt(capacity)) : null,
       locationId,
       organizerId,
       startDate: start,
@@ -117,10 +118,12 @@ export async function createTournament(data, userId) {
 
 /**
  * Get all tournaments with optional filtering
- * Supports filtering by category, status, and start date
+ * Supports filtering by category, status, formatType, and start date
+ * @param {Object} filters - Filter options
+ * @param {string} [userId] - Optional user ID to include registration status
  */
-export async function listTournaments(filters = {}) {
-  const { categoryId, status, startDate, page = 1, limit = 20 } = filters;
+export async function listTournaments(filters = {}, userId = null) {
+  const { categoryId, status, formatType, startDate, page = 1, limit = 20 } = filters;
 
   const where = {};
 
@@ -130,6 +133,11 @@ export async function listTournaments(filters = {}) {
 
   if (status) {
     where.status = status;
+  }
+
+  // T121: Format type filter
+  if (formatType) {
+    where.formatType = formatType;
   }
 
   if (startDate) {
@@ -187,8 +195,60 @@ export async function listTournaments(filters = {}) {
     prisma.tournament.count({ where })
   ]);
 
+  // Fetch user's registrations if userId provided (optimization to avoid N+1 queries)
+  let userRegistrationsMap = {};
+  if (userId) {
+    const tournamentIds = tournaments.map(t => t.id);
+    const userRegistrations = await prisma.tournamentRegistration.findMany({
+      where: {
+        tournamentId: { in: tournamentIds },
+        playerId: userId
+      },
+      select: {
+        tournamentId: true,
+        status: true,
+        registrationTimestamp: true
+      }
+    });
+
+    // Create map for quick lookup
+    userRegistrations.forEach(reg => {
+      userRegistrationsMap[reg.tournamentId] = {
+        status: reg.status,
+        registeredAt: reg.registrationTimestamp
+      };
+    });
+  }
+
+  // Fetch registration statistics for all tournaments
+  const tournamentsWithStats = await Promise.all(
+    tournaments.map(async (tournament) => {
+      const [registeredCount, waitlistedCount] = await Promise.all([
+        prisma.tournamentRegistration.count({
+          where: { tournamentId: tournament.id, status: 'REGISTERED' }
+        }),
+        prisma.tournamentRegistration.count({
+          where: { tournamentId: tournament.id, status: 'WAITLISTED' }
+        })
+      ]);
+
+      const tournamentData = {
+        ...tournament,
+        registeredCount,
+        waitlistedCount
+      };
+
+      // Include user's registration status if available
+      if (userId && userRegistrationsMap[tournament.id]) {
+        tournamentData.myRegistration = userRegistrationsMap[tournament.id];
+      }
+
+      return tournamentData;
+    })
+  );
+
   return {
-    tournaments,
+    tournaments: tournamentsWithStats,
     pagination: {
       page,
       limit: take,
@@ -353,6 +413,7 @@ export async function updateTournament(id, data) {
   if (data.name !== undefined) updateData.name = data.name;
   if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
   if (data.description !== undefined) updateData.description = data.description || null;
+  if (data.capacity !== undefined) updateData.capacity = data.capacity === null ? null : parseInt(data.capacity);
   if (data.startDate) updateData.startDate = new Date(data.startDate);
   if (data.endDate) updateData.endDate = new Date(data.endDate);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../utils/AuthContext';
 import { login as loginAPI } from '../services/authService';
@@ -9,17 +9,6 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Reset form state whenever modal visibility changes
-  useEffect(() => {
-    if (!show) {
-      // Clear form when modal closes
-      setEmail('');
-      setPassword('');
-      setError('');
-      setLoading(false);
-    }
-  }, [show]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

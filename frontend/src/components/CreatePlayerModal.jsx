@@ -218,7 +218,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               ))}
             </ListGroup>
             <div className="alert alert-light border-warning mb-0">
-              <strong>⚡ Note:</strong> You can still create this profile if you're sure it's a different person.
+              <strong>⚡ Note:</strong> You can still create this profile if you&apos;re sure it&apos;s a different person.
               Please verify the name and contact information to avoid duplicate entries.
             </div>
           </Alert>

@@ -10,44 +10,59 @@ export async function listTournaments(req, res, next) {
     // Get validated query parameters from middleware
     const filters = req.validatedQuery || {};
 
-    const result = await tournamentService.listTournaments(filters);
+    // Pass user ID if authenticated (for including registration status)
+    const userId = req.user?.id || null;
+
+    const result = await tournamentService.listTournaments(filters, userId);
 
     return res.status(200).json({
       success: true,
       data: {
-        tournaments: result.tournaments.map(t => ({
-          id: t.id,
-          name: t.name,
-          categoryId: t.categoryId,
-          description: t.description,
-          // Legacy fields for backward compatibility (derived from location)
-          clubName: t.location?.clubName || null,
-          address: t.location?.address || null,
-          // New relational fields
-          location: t.location ? {
-            id: t.location.id,
-            clubName: t.location.clubName,
-            address: t.location.address
-          } : null,
-          organizer: t.organizer ? {
-            id: t.organizer.id,
-            name: t.organizer.name,
-            email: t.organizer.email,
-            phone: t.organizer.phone
-          } : null,
-          startDate: t.startDate,
-          endDate: t.endDate,
-          status: t.status,
-          createdAt: t.createdAt,
-          updatedAt: t.updatedAt,
-          category: {
-            id: t.category.id,
-            name: t.category.name,
-            type: t.category.type,
-            ageGroup: t.category.ageGroup,
-            gender: t.category.gender
+        tournaments: result.tournaments.map(t => {
+          const tournamentData = {
+            id: t.id,
+            name: t.name,
+            categoryId: t.categoryId,
+            description: t.description,
+            capacity: t.capacity,
+            registeredCount: t.registeredCount || 0,
+            waitlistedCount: t.waitlistedCount || 0,
+            // Legacy fields for backward compatibility (derived from location)
+            clubName: t.location?.clubName || null,
+            address: t.location?.address || null,
+            // New relational fields
+            location: t.location ? {
+              id: t.location.id,
+              clubName: t.location.clubName,
+              address: t.location.address
+            } : null,
+            organizer: t.organizer ? {
+              id: t.organizer.id,
+              name: t.organizer.name,
+              email: t.organizer.email,
+              phone: t.organizer.phone
+            } : null,
+            startDate: t.startDate,
+            endDate: t.endDate,
+            status: t.status,
+            createdAt: t.createdAt,
+            updatedAt: t.updatedAt,
+            category: {
+              id: t.category.id,
+              name: t.category.name,
+              type: t.category.type,
+              ageGroup: t.category.ageGroup,
+              gender: t.category.gender
+            }
+          };
+
+          // Include user's registration status if available
+          if (t.myRegistration) {
+            tournamentData.myRegistration = t.myRegistration;
           }
-        })),
+
+          return tournamentData;
+        }),
         pagination: result.pagination
       }
     });
@@ -73,6 +88,7 @@ export async function getTournamentById(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
+        capacity: tournament.capacity,
         // Legacy fields for backward compatibility (derived from location)
         clubName: tournament.location?.clubName || null,
         address: tournament.location?.address || null,
@@ -146,6 +162,7 @@ export async function createTournament(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
+        capacity: tournament.capacity,
         // Legacy fields for backward compatibility (derived from location)
         clubName: tournament.location?.clubName || null,
         address: tournament.location?.address || null,
@@ -221,6 +238,7 @@ export async function updateTournament(req, res, next) {
         name: tournament.name,
         categoryId: tournament.categoryId,
         description: tournament.description,
+        capacity: tournament.capacity,
         // Legacy fields for backward compatibility (derived from location)
         clubName: tournament.location?.clubName || null,
         address: tournament.location?.address || null,
