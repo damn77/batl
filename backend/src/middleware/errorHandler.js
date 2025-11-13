@@ -1,12 +1,12 @@
 import createError from 'http-errors';
 
 // Not Found handler - catches 404 errors
-export const notFoundHandler = (req, res, next) => {
+export const notFoundHandler = (_req, _res, next) => {
   next(createError(404, 'Resource not found'));
 };
 
 // Global error handler
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   // Set locals, only providing error in development
   let status = err.status || err.statusCode || 500;
   let message = err.message || 'Internal server error';

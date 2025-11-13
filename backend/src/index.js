@@ -13,6 +13,14 @@ import tournamentRoutes from './api/routes/tournamentRoutes.js';
 import registrationRoutes from './api/routes/registrationRoutes.js';
 import rankingRoutes from './api/routes/rankingRoutes.js';
 import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
+import {
+  tournamentRulesRouter,
+  matchRulesRouter,
+  groupRulesRouter,
+  bracketRulesRouter,
+  roundRulesRouter,
+  matchOverridesRouter
+} from './api/routes/tournamentRulesRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -112,6 +120,14 @@ app.use('/api/v1/tournaments', tournamentRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
 app.use('/api/tournaments', tournamentRegistrationRoutes);
+// Tournament rules routes with specific base paths
+app.use('/api/v1/tournament-rules', tournamentRulesRouter);
+app.use('/api/v1/match-rules', matchRulesRouter);
+// Rule override routes for different entity levels
+app.use('/api/v1/groups', groupRulesRouter);
+app.use('/api/v1/brackets', bracketRulesRouter);
+app.use('/api/v1/rounds', roundRulesRouter);
+app.use('/api/v1/matches', matchOverridesRouter);
 
 // 404 handler - must be after all routes
 app.use(notFoundHandler);

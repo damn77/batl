@@ -1,6 +1,5 @@
 // T024-T030: Category Controller - HTTP handlers for category endpoints
 import * as categoryService from '../services/categoryService.js';
-import { findProfileByUserId } from '../services/playerService.js';
 import { checkEligibility } from '../services/registrationService.js';
 
 /**
@@ -50,7 +49,7 @@ export async function listCategories(req, res, next) {
           try {
             const eligibility = await checkEligibility(playerId, cat.id);
             categoryData.eligibility = eligibility;
-          } catch (err) {
+          } catch {
             categoryData.eligibility = { eligible: false, validations: [] };
           }
         }

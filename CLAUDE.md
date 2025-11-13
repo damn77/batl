@@ -10,6 +10,7 @@ Auto-generated from all feature plans. Last updated: 2025-11-02
 - TanStack React Table 8.21 (Data Tables) (002-category-system)
 - React DatePicker 8.8 (Date Inputs) (002-category-system)
 - **Vitest** (Testing Framework) (003-tournament-registration) - Jest-compatible API, native ES modules support, Vite integration
+- Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10 (004-tournament-rules)
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -50,9 +51,9 @@ When making bugfixes, requirement adjustments, or implementation changes:
 - Prevents confusion and reduces debugging time
 
 ## Recent Changes
+- 004-tournament-rules: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10
 - 003-tournament-registration: Added Vitest testing framework (Jest-compatible API, native ES modules support, Vite integration)
 - 002-category-system: Added Node.js 20+ (ES Modules)
-- 001-user-management: Added NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration.
 
 <!-- MANUAL ADDITIONS START -->
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -15,6 +16,7 @@ import {
 import { listCategories } from '../services/categoryService';
 
 const TournamentSetupPage = () => {
+  const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ const TournamentSetupPage = () => {
   // Filters
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [formatFilter, setFormatFilter] = useState(''); // T121: Format filter
 
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -36,6 +39,7 @@ const TournamentSetupPage = () => {
     description: '',
     clubName: '',
     address: '',
+    capacity: '',
     startDate: new Date(),
     endDate: new Date()
   });
@@ -47,7 +51,7 @@ const TournamentSetupPage = () => {
   useEffect(() => {
     loadCategories();
     loadTournaments();
-  }, [categoryFilter, statusFilter]);
+  }, [categoryFilter, statusFilter, formatFilter]); // T121: Added formatFilter dependency
 
   const loadCategories = async () => {
     try {
@@ -66,6 +70,7 @@ const TournamentSetupPage = () => {
       const filters = {};
       if (categoryFilter) filters.categoryId = categoryFilter;
       if (statusFilter) filters.status = statusFilter;
+      if (formatFilter) filters.formatType = formatFilter; // T121: Format filter
 
       const data = await listTournaments(filters);
       setTournaments(data.tournaments || []);
@@ -86,6 +91,7 @@ const TournamentSetupPage = () => {
       description: '',
       clubName: '',
       address: '',
+      capacity: '',
       startDate: tomorrow,
       endDate: tomorrow
     });
@@ -116,6 +122,7 @@ const TournamentSetupPage = () => {
 
       await createTournament({
         ...formData,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null,
         startDate: formData.startDate.toISOString(),
         endDate: endDate.toISOString()
       });
@@ -149,6 +156,7 @@ const TournamentSetupPage = () => {
       description: tournament.description || '',
       clubName: tournament.clubName || '',
       address: tournament.address || '',
+      capacity: tournament.capacity || '',
       startDate: startDate,
       endDate: endDate
     });
@@ -178,6 +186,7 @@ const TournamentSetupPage = () => {
 
       await updateTournament(selectedTournament.id, {
         ...formData,
+        capacity: formData.capacity ? parseInt(formData.capacity) : null,
         startDate: formData.startDate.toISOString(),
         endDate: endDate.toISOString()
       });
@@ -218,7 +227,7 @@ const TournamentSetupPage = () => {
         <Card className="mb-3">
           <Card.Body>
             <Row>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Group>
                   <Form.Label>Category</Form.Label>
                   <Form.Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
@@ -229,7 +238,7 @@ const TournamentSetupPage = () => {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Group>
                   <Form.Label>Status</Form.Label>
                   <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -237,6 +246,19 @@ const TournamentSetupPage = () => {
                     {Object.keys(TOURNAMENT_STATUS).map(status => (
                       <option key={status} value={status}>{STATUS_LABELS[status]}</option>
                     ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                {/* T121: Format filter */}
+                <Form.Group>
+                  <Form.Label>Format</Form.Label>
+                  <Form.Select value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)}>
+                    <option value="">All Formats</option>
+                    <option value="KNOCKOUT">Knockout</option>
+                    <option value="GROUP">Group Stage</option>
+                    <option value="SWISS">Swiss</option>
+                    <option value="COMBINED">Combined</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -261,6 +283,7 @@ const TournamentSetupPage = () => {
                     <th>Category</th>
                     <th>Location</th>
                     <th>Dates</th>
+                    <th>Players</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -278,6 +301,10 @@ const TournamentSetupPage = () => {
                         {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
                       </td>
                       <td>
+                        {tournament.registeredCount || 0} / {tournament.capacity || '∞'}
+                        {tournament.waitlistedCount > 0 && ` (${tournament.waitlistedCount} waitlisted)`}
+                      </td>
+                      <td>
                         <Badge bg={STATUS_VARIANTS[tournament.status]}>
                           {STATUS_LABELS[tournament.status]}
                         </Badge>
@@ -287,8 +314,16 @@ const TournamentSetupPage = () => {
                           variant="outline-primary"
                           size="sm"
                           onClick={() => handleEditClick(tournament)}
+                          className="me-2"
                         >
                           Edit
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
+                        >
+                          Configure Rules
                         </Button>
                       </td>
                     </tr>
@@ -398,6 +433,20 @@ const TournamentSetupPage = () => {
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
                 />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Maximum Players (Optional)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="2"
+                  value={formData.capacity}
+                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                  placeholder="Leave empty for unlimited"
+                />
+                <Form.Text className="text-muted">
+                  Maximum number of registered players. Leave empty for no limit.
+                </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-3">
@@ -521,6 +570,20 @@ const TournamentSetupPage = () => {
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
                 />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Maximum Players (Optional)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="2"
+                  value={formData.capacity}
+                  onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                  placeholder="Leave empty for unlimited"
+                />
+                <Form.Text className="text-muted">
+                  Maximum number of registered players. Leave empty for no limit.
+                </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-3">

@@ -15,6 +15,8 @@ import PlayerDetailPage from './pages/PlayerDetailPage';
 import PlayerProfilePage from './pages/PlayerProfilePage';
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import TournamentSetupPage from './pages/TournamentSetupPage';
+import TournamentRulesSetupPage from './pages/TournamentRulesSetupPage';
+import TournamentRulesViewPage from './pages/TournamentRulesViewPage';
 import PlayerRegistrationPage from './pages/PlayerRegistrationPage';
 import CategoryRankingsPage from './pages/CategoryRankingsPage';
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
@@ -106,6 +108,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/organizer/tournament/:id/rules"
+            element={
+              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+                <TournamentRulesSetupPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected routes - Player */}
           <Route
@@ -129,6 +139,16 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="PLAYER">
                 <PlayerProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected routes - All authenticated users */}
+          <Route
+            path="/tournament/:id/rules"
+            element={
+              <ProtectedRoute>
+                <TournamentRulesViewPage />
               </ProtectedRoute>
             }
           />

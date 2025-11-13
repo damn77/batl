@@ -190,7 +190,7 @@ async function validateEligibility(playerId, categoryId) {
  */
 export async function registerPlayer(playerId, categoryId) {
   // Run comprehensive eligibility validation
-  const validation = await validateEligibility(playerId, categoryId);
+  await validateEligibility(playerId, categoryId);
 
   // Create registration with ACTIVE status
   const registration = await prisma.categoryRegistration.create({

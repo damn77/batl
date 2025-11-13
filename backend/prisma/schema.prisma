@@ -71,6 +71,33 @@ enum WaitlistDisplayOrder {
   ALPHABETICAL
 }
 
+// Tournament Rules Enums (T012-T015)
+enum FormatType {
+  KNOCKOUT
+  GROUP
+  SWISS
+  COMBINED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BracketType {
+  MAIN
+  CONSOLATION
+  PLACEMENT
+}
+
+enum MatchGuaranteeType {
+  MATCH_1
+  MATCH_2
+  UNTIL_PLACEMENT
+}
+
 // Models
 
 model User {
@@ -152,6 +179,11 @@ model PlayerProfile {
   categoryRegistrations   CategoryRegistration[]
   categoryRankings        CategoryRanking[]
   tournamentRegistrations TournamentRegistration[]
+
+  // Tournament Rules Relationships (T008-T009)
+  matchesAsPlayer1        Match[]            @relation("MatchPlayer1")
+  matchesAsPlayer2        Match[]            @relation("MatchPlayer2")
+  groupParticipations     GroupParticipant[]
 
   @@index([userId])
   @@index([createdBy])
@@ -241,6 +273,11 @@ model Tournament {
   // Waitlist Configuration
   waitlistDisplayOrder WaitlistDisplayOrder @default(REGISTRATION_TIME)
 
+  // Tournament Rules and Format (T004)
+  formatType           FormatType @default(KNOCKOUT) // Tournament format type
+  formatConfig         String     // JSON: Format-specific configuration
+  defaultScoringRules  String     // JSON: Default match scoring rules
+
   // Scheduling
   startDate   DateTime
   endDate     DateTime
@@ -261,12 +298,19 @@ model Tournament {
   deputyOrganizer         Organizer?                 @relation("DeputyOrganizer", fields: [deputyOrganizerId], references: [id], onDelete: SetNull)
   tournamentRegistrations TournamentRegistration[]
 
+  // Tournament Rules Relationships (T004-T009)
+  groups                  Group[]
+  brackets                Bracket[]
+  rounds                  Round[]
+  matches                 Match[]
+
   // Constraints (T015)
   @@index([categoryId])
   @@index([startDate])
   @@index([status])
   @@index([registrationOpenDate])
   @@index([registrationCloseDate])
+  @@index([formatType]) // T123: Index for format type filtering
   @@index([locationId])
   @@index([organizerId])
 }
@@ -350,4 +394,125 @@ model TournamentRegistration {
   @@index([status])
   @@index([tournamentId, status, registrationTimestamp]) // Critical for waitlist queries
   @@index([registrationTimestamp])
+}
+
+// Tournament Rules Models (T005-T009)
+
+model Group {
+  id                    String   @id @default(uuid())
+  tournamentId          String   // Foreign key to Tournament
+  groupNumber           Int      // Group number (1-indexed)
+  groupSize             Int      // Actual size of this group (may be X or X-1)
+  ruleOverrides         String?  // JSON: Group-specific rule overrides
+  advancementCriteria   String?  // JSON: For combined - who advances and to which bracket
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relationships
+  tournament            Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  matches               Match[]
+  groupParticipants     GroupParticipant[]
+
+  // Constraints
+  @@unique([tournamentId, groupNumber])
+  @@index([tournamentId])
+}
+
+model Bracket {
+  id                    String              @id @default(uuid())
+  tournamentId          String              // Foreign key to Tournament
+  bracketType           BracketType         // MAIN, CONSOLATION, PLACEMENT
+  matchGuarantee        MatchGuaranteeType  // 1_MATCH, 2_MATCH, UNTIL_PLACEMENT
+  ruleOverrides         String?             // JSON: Bracket-specific rule overrides
+  placementRange        String?             // For PLACEMENT brackets: "4-8", "9-16", etc.
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  // Relationships
+  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  rounds                Round[]
+  matches               Match[]
+
+  // Constraints
+  @@index([tournamentId])
+  @@index([bracketType])
+}
+
+model Round {
+  id                    String   @id @default(uuid())
+  tournamentId          String   // Foreign key to Tournament
+  bracketId             String?  // Foreign key to Bracket (nullable for swiss)
+  roundNumber           Int      // Round number (1-indexed)
+  ruleOverrides         String?  // JSON: Round-specific rule overrides
+  earlyTiebreakEnabled  Boolean  @default(false) // For "until placement": early tiebreak
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relationships
+  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  bracket               Bracket?   @relation(fields: [bracketId], references: [id], onDelete: Cascade)
+  matches               Match[]
+
+  // Constraints
+  @@unique([tournamentId, bracketId, roundNumber])
+  @@index([tournamentId])
+  @@index([bracketId])
+}
+
+model Match {
+  id                    String       @id @default(uuid())
+  tournamentId          String       // Foreign key to Tournament
+  groupId               String?      // Foreign key to Group (for group/combined)
+  bracketId             String?      // Foreign key to Bracket (for knockout/combined)
+  roundId               String?      // Foreign key to Round (for knockout/swiss)
+  matchNumber           Int          // Match number within tournament
+  player1Id             String       // Foreign key to PlayerProfile
+  player2Id             String       // Foreign key to PlayerProfile
+  status                MatchStatus  @default(SCHEDULED)
+  result                String?      // JSON: Match result (scores, winner)
+  ruleOverrides         String?      // JSON: Match-specific rule overrides
+  completedWithRules    String?      // JSON: Immutable snapshot of effective rules when completed
+  completedAt           DateTime?    // Timestamp when match was completed
+
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  // Relationships
+  tournament            Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  group                 Group?         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  bracket               Bracket?       @relation(fields: [bracketId], references: [id], onDelete: Cascade)
+  round                 Round?         @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player1               PlayerProfile  @relation("MatchPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
+  player2               PlayerProfile  @relation("MatchPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
+
+  // Constraints
+  @@index([tournamentId])
+  @@index([groupId])
+  @@index([bracketId])
+  @@index([roundId])
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([status])
+}
+
+model GroupParticipant {
+  id                    String   @id @default(uuid())
+  groupId               String   // Foreign key to Group
+  playerId              String   // Foreign key to PlayerProfile
+  seedPosition          Int?     // Seeding position (placeholder for future)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relationships
+  group                 Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  player                PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([groupId, playerId])
+  @@index([groupId])
+  @@index([playerId])
 }

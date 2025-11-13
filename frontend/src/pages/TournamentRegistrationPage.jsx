@@ -37,24 +37,19 @@ const TournamentRegistrationPage = () => {
       setError(null);
 
       // Load only SCHEDULED tournaments
+      // The API now includes myRegistration field for each tournament (optimization to avoid N+1 queries)
       const data = await listTournaments({ status: 'SCHEDULED', limit: 100 });
       const tournamentList = data.tournaments || [];
       setTournaments(tournamentList);
 
-      // Load registration status for each tournament
-      const regPromises = tournamentList.map(async (tournament) => {
-        try {
-          const reg = await getMyRegistration(tournament.id);
-          return { tournamentId: tournament.id, registration: reg };
-        } catch (err) {
-          return { tournamentId: tournament.id, registration: null };
-        }
-      });
-
-      const regResults = await Promise.all(regPromises);
+      // Build registration map from the tournaments (myRegistration field)
       const regMap = {};
-      regResults.forEach(({ tournamentId, registration }) => {
-        regMap[tournamentId] = registration;
+      tournamentList.forEach((tournament) => {
+        if (tournament.myRegistration) {
+          regMap[tournament.id] = {
+            registration: tournament.myRegistration
+          };
+        }
       });
       setRegistrations(regMap);
     } catch (err) {
@@ -295,10 +290,31 @@ const TournamentRegistrationPage = () => {
                         <strong>Status:</strong>{' '}
                         <Badge bg="info">{TOURNAMENT_STATUS_LABELS[tournament.status]}</Badge>
                       </ListGroup.Item>
+
+                      {/* T120, T122: Display tournament format */}
+                      {tournament.formatType && (
+                        <ListGroup.Item>
+                          <strong>Format:</strong>{' '}
+                          <Badge bg="secondary">
+                            {tournament.formatType === 'KNOCKOUT' && 'Knockout'}
+                            {tournament.formatType === 'GROUP' && 'Group Stage'}
+                            {tournament.formatType === 'SWISS' && 'Swiss'}
+                            {tournament.formatType === 'COMBINED' && 'Combined'}
+                            {!['KNOCKOUT', 'GROUP', 'SWISS', 'COMBINED'].includes(tournament.formatType) && tournament.formatType}
+                          </Badge>
+                        </ListGroup.Item>
+                      )}
                     </ListGroup>
 
-                    <div className="d-flex gap-2 align-items-center">
+                    <div className="d-flex gap-2 align-items-center flex-wrap">
                       {getRegistrationButton(tournament)}
+                      <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={() => navigate(`/tournament/${tournament.id}/rules`)}
+                      >
+                        View Rules
+                      </Button>
                     </div>
 
                     {tournament.description && (

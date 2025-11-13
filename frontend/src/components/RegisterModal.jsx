@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../utils/AuthContext';
 import { register as registerAPI } from '../services/authService';
@@ -16,24 +16,6 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [profileLinked, setProfileLinked] = useState(false);
-
-  // Reset form state whenever modal visibility changes
-  useEffect(() => {
-    if (!show) {
-      // Clear form when modal closes
-      setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        name: '',
-        phone: ''
-      });
-      setError('');
-      setValidationErrors({});
-      setLoading(false);
-      setProfileLinked(false);
-    }
-  }, [show]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

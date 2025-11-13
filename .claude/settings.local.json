@@ -11,9 +11,44 @@
       "Bash(then ls \"D:\\Workspace\\Battle\\specs\\001-user-management\\checklists\")",
       "Bash(else echo \"No checklists directory\")",
       "Bash(if [ -d \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\" ])",
-      "Bash(then ls \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\")"
+      "Bash(then ls \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\")",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"${file}\" == */backend/src/*.js ]]; then cd backend && npx eslint --fix \"${file}\" 2>&1 || true; fi",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"${file}\" == */frontend/src/*.@(js|jsx) ]]; then cd frontend && npx eslint --fix \"${file}\" 2>&1 || true; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"${file}\" == */backend/src/*.js ]]; then cd backend && npx eslint --fix \"${file}\" 2>&1 || true; fi",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "if [[ \"${file}\" == */frontend/src/*.@(js|jsx) ]]; then cd frontend && npx eslint --fix \"${file}\" 2>&1 || true; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
