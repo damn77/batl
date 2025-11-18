@@ -1,4 +1,5 @@
 // T038, T041-T045: Tournament Controller - HTTP handlers for tournament endpoints
+// T010-T011: New endpoints for tournament view feature
 import * as tournamentService from '../services/tournamentService.js';
 
 /**
@@ -45,6 +46,8 @@ export async function listTournaments(req, res, next) {
             startDate: t.startDate,
             endDate: t.endDate,
             status: t.status,
+            formatType: t.formatType,
+            formatConfig: t.formatConfig,
             createdAt: t.createdAt,
             updatedAt: t.updatedAt,
             category: {
@@ -72,14 +75,15 @@ export async function listTournaments(req, res, next) {
 }
 
 /**
- * T043: GET /api/v1/tournaments/:id - Get tournament by ID
- * Authorization: All authenticated users (PLAYER, ORGANIZER, ADMIN)
+ * T009, T043: GET /api/v1/tournaments/:id - Get tournament by ID
+ * Authorization: PUBLIC - No authentication required
+ * Enhanced to include registrationCount, waitlistCount, and ruleComplexity
  */
 export async function getTournamentById(req, res, next) {
   try {
     const { id } = req.params;
 
-    const tournament = await tournamentService.getTournamentById(id);
+    const tournament = await tournamentService.getTournamentWithRelatedData(id);
 
     return res.status(200).json({
       success: true,
@@ -115,9 +119,21 @@ export async function getTournamentById(req, res, next) {
           email: tournament.deputyOrganizer.email,
           phone: tournament.deputyOrganizer.phone
         } : null,
+        courts: tournament.courts,
+        entryFee: tournament.entryFee,
+        rulesUrl: tournament.rulesUrl,
+        prizeDescription: tournament.prizeDescription,
+        registrationOpenDate: tournament.registrationOpenDate,
+        registrationCloseDate: tournament.registrationCloseDate,
+        minParticipants: tournament.minParticipants,
+        waitlistDisplayOrder: tournament.waitlistDisplayOrder,
+        formatType: tournament.formatType,
+        formatConfig: tournament.formatConfig,
+        defaultScoringRules: tournament.defaultScoringRules,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
+        lastStatusChange: tournament.lastStatusChange,
         createdAt: tournament.createdAt,
         updatedAt: tournament.updatedAt,
         category: {
@@ -126,7 +142,11 @@ export async function getTournamentById(req, res, next) {
           type: tournament.category.type,
           ageGroup: tournament.category.ageGroup,
           gender: tournament.category.gender
-        }
+        },
+        // T008: Computed fields
+        registrationCount: tournament.registrationCount,
+        waitlistCount: tournament.waitlistCount,
+        ruleComplexity: tournament.ruleComplexity
       }
     });
   } catch (err) {
@@ -345,6 +365,82 @@ export async function deleteTournament(req, res, next) {
           code: err.code || 'TOURNAMENT_STARTED',
           message: err.message,
           currentStatus: err.currentStatus
+        }
+      });
+    }
+    next(err);
+  }
+}
+
+/**
+ * T010: GET /api/v1/tournaments/:id/format-structure - Get tournament format structure
+ * Authorization: PUBLIC - No authentication required
+ * Returns groups/brackets/rounds based on tournament format type
+ */
+export async function getFormatStructure(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const structure = await tournamentService.getFormatStructure(id);
+
+    return res.status(200).json({
+      success: true,
+      data: structure
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: err.code || 'TOURNAMENT_NOT_FOUND',
+          message: err.message
+        }
+      });
+    }
+    if (err.statusCode === 400) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: err.code || 'INVALID_FORMAT_TYPE',
+          message: err.message
+        }
+      });
+    }
+    next(err);
+  }
+}
+
+/**
+ * T011: GET /api/v1/tournaments/:id/matches - Get tournament matches with filters
+ * Authorization: PUBLIC - No authentication required
+ * Supports query filters: groupId, bracketId, roundId, status
+ */
+export async function getMatches(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    // Extract query parameters for filtering
+    const filters = {};
+    if (req.query.groupId) filters.groupId = req.query.groupId;
+    if (req.query.bracketId) filters.bracketId = req.query.bracketId;
+    if (req.query.roundId) filters.roundId = req.query.roundId;
+    if (req.query.status) filters.status = req.query.status;
+
+    const matches = await tournamentService.getMatches(id, filters);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        matches
+      }
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: err.code || 'TOURNAMENT_NOT_FOUND',
+          message: err.message
         }
       });
     }

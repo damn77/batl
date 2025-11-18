@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -291,7 +291,14 @@ const TournamentSetupPage = () => {
                 <tbody>
                   {tournaments.map(tournament => (
                     <tr key={tournament.id}>
-                      <td><strong>{tournament.name}</strong></td>
+                      <td>
+                        <Link
+                          to={`/tournaments/${tournament.id}`}
+                          className="text-decoration-none fw-bold"
+                        >
+                          {tournament.name}
+                        </Link>
+                      </td>
                       <td>{tournament.category?.name}</td>
                       <td>
                         <div>{tournament.clubName || '-'}</div>

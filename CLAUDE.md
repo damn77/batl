@@ -51,9 +51,9 @@ When making bugfixes, requirement adjustments, or implementation changes:
 - Prevents confusion and reduces debugging time
 
 ## Recent Changes
+- 005-tournament-view: Added SQLite via Prisma ORM (development/production-ready)
 - 004-tournament-rules: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10
 - 003-tournament-registration: Added Vitest testing framework (Jest-compatible API, native ES modules support, Vite integration)
-- 002-category-system: Added Node.js 20+ (ES Modules)
 
 <!-- MANUAL ADDITIONS START -->
 

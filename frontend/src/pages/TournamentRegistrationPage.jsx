@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, ListGroup, Modal } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import RegistrationStatusBadge from '../components/RegistrationStatusBadge';
+import TournamentFormatBadge from '../components/TournamentFormatBadge';
 import { listTournaments, STATUS_LABELS as TOURNAMENT_STATUS_LABELS } from '../services/tournamentService';
 import {
   registerForTournament,
@@ -250,7 +251,14 @@ const TournamentRegistrationPage = () => {
               <Col key={tournament.id} md={6} lg={4} className="mb-4">
                 <Card>
                   <Card.Body>
-                    <Card.Title>{tournament.name}</Card.Title>
+                    <Card.Title>
+                      <Link
+                        to={`/tournaments/${tournament.id}`}
+                        className="text-decoration-none text-dark"
+                      >
+                        {tournament.name}
+                      </Link>
+                    </Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
                       {tournament.category?.name || 'Unknown Category'}
                     </Card.Subtitle>
@@ -291,17 +299,14 @@ const TournamentRegistrationPage = () => {
                         <Badge bg="info">{TOURNAMENT_STATUS_LABELS[tournament.status]}</Badge>
                       </ListGroup.Item>
 
-                      {/* T120, T122: Display tournament format */}
+                      {/* Display tournament format with icon and tooltip */}
                       {tournament.formatType && (
                         <ListGroup.Item>
                           <strong>Format:</strong>{' '}
-                          <Badge bg="secondary">
-                            {tournament.formatType === 'KNOCKOUT' && 'Knockout'}
-                            {tournament.formatType === 'GROUP' && 'Group Stage'}
-                            {tournament.formatType === 'SWISS' && 'Swiss'}
-                            {tournament.formatType === 'COMBINED' && 'Combined'}
-                            {!['KNOCKOUT', 'GROUP', 'SWISS', 'COMBINED'].includes(tournament.formatType) && tournament.formatType}
-                          </Badge>
+                          <TournamentFormatBadge
+                            formatType={tournament.formatType}
+                            formatConfig={tournament.formatConfig}
+                          />
                         </ListGroup.Item>
                       )}
                     </ListGroup>
