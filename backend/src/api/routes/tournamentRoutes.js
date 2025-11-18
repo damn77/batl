@@ -1,11 +1,14 @@
 // T046-T047: Tournament Routes - Wire up tournament endpoints with auth/validation
+// T014: Add new routes for format-structure and matches endpoints
 import express from 'express';
 import {
   listTournaments,
   getTournamentById,
   createTournament,
   updateTournament,
-  deleteTournament
+  deleteTournament,
+  getFormatStructure,
+  getMatches
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -32,6 +35,27 @@ router.get(
 router.get(
   '/:id',
   getTournamentById
+);
+
+/**
+ * T014: GET /api/v1/tournaments/:id/format-structure
+ * Get tournament format structure (groups/brackets/rounds)
+ * Authorization: PUBLIC - No authentication required
+ */
+router.get(
+  '/:id/format-structure',
+  getFormatStructure
+);
+
+/**
+ * T014: GET /api/v1/tournaments/:id/matches
+ * Get tournament matches with optional filters
+ * Authorization: PUBLIC - No authentication required
+ * Query params: groupId, bracketId, roundId, status
+ */
+router.get(
+  '/:id/matches',
+  getMatches
 );
 
 /**

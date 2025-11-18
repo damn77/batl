@@ -5,6 +5,7 @@ import * as categoryService from './categoryService.js';
 import * as registrationService from './registrationService.js';
 import * as locationService from './locationService.js';
 import * as organizerService from './organizerService.js';
+import * as ruleComplexityService from './ruleComplexityService.js';
 
 const prisma = new PrismaClient();
 
@@ -312,6 +313,406 @@ export async function getTournamentById(id) {
   }
 
   return tournament;
+}
+
+/**
+ * T006-T008: Get tournament by ID with all related data and computed fields
+ * Used for tournament view page - includes full tournament details, registration counts, and rule complexity
+ *
+ * FR-001: Display all general tournament information
+ * FR-003: Calculate and display rule complexity indicator
+ *
+ * @param {string} id - Tournament ID
+ * @returns {Object} Tournament with related data and computed fields (registrationCount, waitlistCount, ruleComplexity)
+ */
+export async function getTournamentWithRelatedData(id) {
+  // T007: Fetch tournament with all related entities
+  const tournament = await prisma.tournament.findUnique({
+    where: { id },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          ageGroup: true,
+          gender: true
+        }
+      },
+      location: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      backupLocation: {
+        select: {
+          id: true,
+          clubName: true,
+          address: true
+        }
+      },
+      organizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
+        }
+      },
+      deputyOrganizer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true
+        }
+      },
+      groups: {
+        select: {
+          ruleOverrides: true
+        }
+      },
+      brackets: {
+        select: {
+          ruleOverrides: true
+        }
+      },
+      rounds: {
+        select: {
+          ruleOverrides: true
+        }
+      },
+      matches: {
+        select: {
+          ruleOverrides: true
+        }
+      }
+    }
+  });
+
+  if (!tournament) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  // T008: Add computed fields
+  const [registrationCount, waitlistCount] = await Promise.all([
+    prisma.tournamentRegistration.count({
+      where: { tournamentId: id, status: 'REGISTERED' }
+    }),
+    prisma.tournamentRegistration.count({
+      where: { tournamentId: id, status: 'WAITLISTED' }
+    })
+  ]);
+
+  // Calculate rule complexity using the groups, brackets, rounds, and matches data
+  const ruleComplexity = ruleComplexityService.calculateComplexity(
+    tournament.groups,
+    tournament.brackets,
+    tournament.rounds,
+    tournament.matches
+  );
+
+  // Remove the rule-related arrays from the response (only used for complexity calculation)
+  const { groups, brackets, rounds, matches, ...tournamentData } = tournament;
+
+  return {
+    ...tournamentData,
+    registrationCount,
+    waitlistCount,
+    ruleComplexity
+  };
+}
+
+/**
+ * T012: Get tournament format structure (groups/brackets/rounds) based on format type
+ * Returns structure for KNOCKOUT, GROUP, SWISS, or COMBINED formats
+ *
+ * FR-002: Display tournament format type and configuration
+ *
+ * @param {string} id - Tournament ID
+ * @returns {Object} Format structure based on tournament formatType
+ */
+export async function getFormatStructure(id) {
+  // First verify tournament exists and get its format type
+  const tournament = await prisma.tournament.findUnique({
+    where: { id },
+    select: { formatType: true }
+  });
+
+  if (!tournament) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  const result = {
+    formatType: tournament.formatType
+  };
+
+  // Fetch data based on format type
+  switch (tournament.formatType) {
+    case 'KNOCKOUT':
+      // Fetch brackets and rounds
+      result.brackets = await prisma.bracket.findMany({
+        where: { tournamentId: id },
+        select: {
+          id: true,
+          tournamentId: true,
+          bracketType: true,
+          matchGuarantee: true,
+          ruleOverrides: true,
+          placementRange: true,
+          _count: {
+            select: { rounds: true }
+          }
+        }
+      });
+
+      // Add roundCount for each bracket
+      result.brackets = result.brackets.map(bracket => ({
+        ...bracket,
+        roundCount: bracket._count.rounds
+      }));
+
+      result.rounds = await prisma.round.findMany({
+        where: { tournamentId: id },
+        select: {
+          id: true,
+          tournamentId: true,
+          bracketId: true,
+          roundNumber: true,
+          ruleOverrides: true,
+          earlyTiebreakEnabled: true,
+          _count: {
+            select: { matches: true }
+          }
+        },
+        orderBy: [
+          { bracketId: 'asc' },
+          { roundNumber: 'asc' }
+        ]
+      });
+
+      // Add matchCount for each round
+      result.rounds = result.rounds.map(round => ({
+        ...round,
+        matchCount: round._count.matches
+      }));
+      break;
+
+    case 'GROUP':
+      // Fetch groups with participants
+      result.groups = await prisma.group.findMany({
+        where: { tournamentId: id },
+        include: {
+          groupParticipants: {
+            include: {
+              player: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            },
+            orderBy: { seedPosition: 'asc' }
+          }
+        },
+        orderBy: { groupNumber: 'asc' }
+      });
+
+      // Transform groupParticipants to players array for frontend
+      result.groups = result.groups.map(group => ({
+        ...group,
+        players: group.groupParticipants?.map(gp => gp.player) || []
+      }));
+      break;
+
+    case 'SWISS':
+      // Fetch rounds and all registered players for standings
+      result.rounds = await prisma.round.findMany({
+        where: { tournamentId: id },
+        select: {
+          id: true,
+          tournamentId: true,
+          bracketId: true,
+          roundNumber: true,
+          ruleOverrides: true,
+          earlyTiebreakEnabled: true,
+          _count: {
+            select: { matches: true }
+          }
+        },
+        orderBy: { roundNumber: 'asc' }
+      });
+
+      // Add matchCount for each round
+      result.rounds = result.rounds.map(round => ({
+        ...round,
+        matchCount: round._count.matches
+      }));
+
+      // Fetch all registered players for Swiss standings
+      const registrations = await prisma.tournamentRegistration.findMany({
+        where: {
+          tournamentId: id,
+          status: 'REGISTERED'
+        },
+        include: {
+          player: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        },
+        orderBy: { registrationTimestamp: 'asc' }
+      });
+
+      result.players = registrations.map(reg => reg.player);
+      break;
+
+    case 'COMBINED':
+      // Fetch groups, brackets, and rounds
+      result.groups = await prisma.group.findMany({
+        where: { tournamentId: id },
+        include: {
+          groupParticipants: {
+            include: {
+              player: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              }
+            },
+            orderBy: { seedPosition: 'asc' }
+          }
+        },
+        orderBy: { groupNumber: 'asc' }
+      });
+
+      // Transform groupParticipants to players array for frontend
+      result.groups = result.groups.map(group => ({
+        ...group,
+        players: group.groupParticipants?.map(gp => gp.player) || []
+      }));
+
+      result.brackets = await prisma.bracket.findMany({
+        where: { tournamentId: id },
+        select: {
+          id: true,
+          tournamentId: true,
+          bracketType: true,
+          matchGuarantee: true,
+          ruleOverrides: true,
+          placementRange: true,
+          _count: {
+            select: { rounds: true }
+          }
+        }
+      });
+
+      // Add roundCount for each bracket
+      result.brackets = result.brackets.map(bracket => ({
+        ...bracket,
+        roundCount: bracket._count.rounds
+      }));
+
+      result.rounds = await prisma.round.findMany({
+        where: { tournamentId: id },
+        select: {
+          id: true,
+          tournamentId: true,
+          bracketId: true,
+          roundNumber: true,
+          ruleOverrides: true,
+          earlyTiebreakEnabled: true,
+          _count: {
+            select: { matches: true }
+          }
+        },
+        orderBy: [
+          { bracketId: 'asc' },
+          { roundNumber: 'asc' }
+        ]
+      });
+
+      // Add matchCount for each round
+      result.rounds = result.rounds.map(round => ({
+        ...round,
+        matchCount: round._count.matches
+      }));
+      break;
+
+    default:
+      throw createHttpError(400, `Invalid format type: ${tournament.formatType}`, {
+        code: 'INVALID_FORMAT_TYPE'
+      });
+  }
+
+  return result;
+}
+
+/**
+ * T013: Get matches for a tournament with optional filtering
+ * Supports filtering by groupId, bracketId, roundId, and status
+ *
+ * FR-004: Display player list with format-specific information
+ *
+ * @param {string} tournamentId - Tournament ID
+ * @param {Object} filters - Optional filters { groupId, bracketId, roundId, status }
+ * @returns {Array} Matches with player details
+ */
+export async function getMatches(tournamentId, filters = {}) {
+  // Verify tournament exists
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { id: true }
+  });
+
+  if (!tournament) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  const where = { tournamentId };
+
+  // Apply filters
+  if (filters.groupId) {
+    where.groupId = filters.groupId;
+  }
+
+  if (filters.bracketId) {
+    where.bracketId = filters.bracketId;
+  }
+
+  if (filters.roundId) {
+    where.roundId = filters.roundId;
+  }
+
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
+  const matches = await prisma.match.findMany({
+    where,
+    include: {
+      player1: {
+        select: {
+          id: true,
+          name: true
+        }
+      },
+      player2: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: { matchNumber: 'asc' }
+  });
+
+  return matches;
 }
 
 /**

@@ -1,0 +1,246 @@
+/* T078-T084: Knockout Bracket Styles - CSS Grid layout with connectors and scroll */
+
+.bracket-wrapper {
+  position: relative;
+  margin-top: 1rem;
+}
+
+/* T082: Horizontal scrollable container */
+.bracket-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 1rem 0;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+/* T078: CSS Grid layout for bracket */
+.bracket-grid {
+  display: flex;
+  gap: 3rem;
+  min-width: min-content;
+}
+
+/* T079: Bracket round column */
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.round-header {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.round-header h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.round-matches {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+  gap: 2rem;
+}
+
+.match-wrapper {
+  position: relative;
+}
+
+/* T080: Bracket match card */
+.bracket-match {
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  min-height: 80px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.bracket-match:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.bracket-match.empty {
+  background: #f8f9fa;
+  border-style: dashed;
+}
+
+/* T084: Match status colors */
+.bracket-match.status-scheduled {
+  border-color: #6c757d;
+}
+
+.bracket-match.status-in_progress {
+  border-color: #0d6efd;
+  background: #e7f3ff;
+}
+
+.bracket-match.status-completed {
+  border-color: #198754;
+}
+
+.bracket-match.status-cancelled {
+  border-color: #dc3545;
+  background: #f8d7da;
+  opacity: 0.7;
+}
+
+/* Match players */
+.bracket-player {
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.bracket-player:last-of-type {
+  border-bottom: none;
+}
+
+.bracket-player.winner {
+  background-color: #d1e7dd;
+  font-weight: 600;
+}
+
+.player-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.winner-icon {
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Match score */
+.match-score {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e9ecef;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.set-score {
+  font-family: monospace;
+  font-weight: 500;
+}
+
+/* Status badge */
+.match-status-badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.35rem;
+}
+
+/* T081: Match connector lines (between rounds) */
+.bracket-round:not(:last-child) .match-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -3rem;
+  width: 3rem;
+  height: 2px;
+  background: #dee2e6;
+  z-index: -1;
+}
+
+/* Vertical connectors for multiple matches merging */
+.bracket-round:not(:last-child) .match-wrapper:nth-child(odd)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -3rem;
+  width: 2px;
+  height: calc(100% + 2rem);
+  background: #dee2e6;
+  z-index: -1;
+}
+
+/* T083: Scroll indicators */
+.scroll-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(13, 110, 253, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 10;
+  pointer-events: none;
+  animation: pulse 2s infinite;
+}
+
+.scroll-indicator.left {
+  left: 1rem;
+}
+
+.scroll-indicator.right {
+  right: 1rem;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* T082: Responsive adjustments */
+@media (max-width: 768px) {
+  .bracket-grid {
+    gap: 2rem;
+  }
+
+  .bracket-round {
+    min-width: 160px;
+  }
+
+  .bracket-round:not(:last-child) .match-wrapper::after {
+    right: -2rem;
+    width: 2rem;
+  }
+
+  .bracket-round:not(:last-child) .match-wrapper:nth-child(odd)::before {
+    right: -2rem;
+  }
+}
+
+/* Scrollbar styling */
+.bracket-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bracket-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.bracket-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.bracket-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -20,6 +20,7 @@ import TournamentRulesViewPage from './pages/TournamentRulesViewPage';
 import PlayerRegistrationPage from './pages/PlayerRegistrationPage';
 import CategoryRankingsPage from './pages/CategoryRankingsPage';
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
+import TournamentViewPage from './pages/TournamentViewPage';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 
@@ -42,6 +43,8 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/rankings" element={<CategoryRankingsPage />} />
+        {/* T023: Tournament view page - public access, no authentication required */}
+        <Route path="/tournaments/:id" element={<TournamentViewPage />} />
 
           {/* Protected routes - Admin */}
           <Route

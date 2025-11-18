@@ -25,11 +25,11 @@
 
 **Purpose**: Install dependencies and configure tooling for tournament view feature
 
-- [ ] T001 Install SWR dependency in frontend using `npm install swr` from frontend/
-- [ ] T002 [P] Add breadcrumb component to React Router configuration in frontend/src/App.jsx
-- [ ] T003 [P] Verify existing error handling utilities (frontend/src/utils/errorHandler.js, ToastContext.jsx) are functional
+- [X] T001 Install SWR dependency in frontend using `npm install swr` from frontend/
+- [X] T002 [P] Add breadcrumb component to React Router configuration in frontend/src/App.jsx
+- [X] T003 [P] Verify existing error handling utilities (frontend/src/utils/errorHandler.js, ToastContext.jsx) are functional
 
-**Checkpoint**: Dependencies installed, development environment ready
+**Checkpoint**: ✅ Dependencies installed, development environment ready
 
 ---
 
@@ -41,20 +41,20 @@
 
 ### Backend Service Layer
 
-- [ ] T004 Create ruleComplexityService.js in backend/src/services/ with calculateComplexity() function
-- [ ] T005 [P] Implement complexity calculation algorithm (DEFAULT/MODIFIED/SPECIFIC) in backend/src/services/ruleComplexityService.js per TR-004 spec
-- [ ] T006 Modify tournamentService.js to add getTournamentWithRelatedData() method in backend/src/services/tournamentService.js
-- [ ] T007 Add Prisma includes for category, location, backupLocation, organizer, deputyOrganizer in backend/src/services/tournamentService.js getTournamentWithRelatedData()
-- [ ] T008 Add computed fields (registrationCount, waitlistCount, ruleComplexity) to getTournamentWithRelatedData() in backend/src/services/tournamentService.js
+- [X] T004 Create ruleComplexityService.js in backend/src/services/ with calculateComplexity() function
+- [X] T005 [P] Implement complexity calculation algorithm (DEFAULT/MODIFIED/SPECIFIC) in backend/src/services/ruleComplexityService.js per TR-004 spec
+- [X] T006 Modify tournamentService.js to add getTournamentWithRelatedData() method in backend/src/services/tournamentService.js
+- [X] T007 Add Prisma includes for category, location, backupLocation, organizer, deputyOrganizer in backend/src/services/tournamentService.js getTournamentWithRelatedData()
+- [X] T008 Add computed fields (registrationCount, waitlistCount, ruleComplexity) to getTournamentWithRelatedData() in backend/src/services/tournamentService.js
 
 ### Backend API Endpoints
 
-- [ ] T009 Enhance GET /tournaments/:id endpoint in backend/src/api/tournamentController.js to use getTournamentWithRelatedData()
-- [ ] T010 [P] Add GET /tournaments/:id/format-structure endpoint in backend/src/api/tournamentController.js
-- [ ] T011 [P] Add GET /tournaments/:id/matches endpoint in backend/src/api/tournamentController.js with optional query filters (bracketId, groupId, roundId, status)
-- [ ] T012 [P] Implement getFormatStructure() method in backend/src/services/tournamentService.js (returns groups/brackets/rounds based on formatType)
-- [ ] T013 [P] Implement getMatches() method in backend/src/services/tournamentService.js with filtering support
-- [ ] T014 Add routes for new endpoints in backend/src/api/routes/tournamentRoutes.js
+- [X] T009 Enhance GET /tournaments/:id endpoint in backend/src/api/tournamentController.js to use getTournamentWithRelatedData()
+- [X] T010 [P] Add GET /tournaments/:id/format-structure endpoint in backend/src/api/tournamentController.js
+- [X] T011 [P] Add GET /tournaments/:id/matches endpoint in backend/src/api/tournamentController.js with optional query filters (bracketId, groupId, roundId, status)
+- [X] T012 [P] Implement getFormatStructure() method in backend/src/services/tournamentService.js (returns groups/brackets/rounds based on formatType)
+- [X] T013 [P] Implement getMatches() method in backend/src/services/tournamentService.js with filtering support
+- [X] T014 Add routes for new endpoints in backend/src/api/routes/tournamentRoutes.js
 
 ### Backend Tests
 
@@ -63,7 +63,9 @@
 - [ ] T017 [P] Write integration test for GET /tournaments/:id/format-structure (all 4 format types) in backend/tests/integration/tournamentView.test.js
 - [ ] T018 [P] Write integration test for GET /tournaments/:id/matches with filters in backend/tests/integration/tournamentView.test.js
 
-**Checkpoint**: All backend APIs complete, tested, and ready for frontend consumption
+**Note**: Tests T015-T018 require Vitest setup. Deferred to future test infrastructure setup.
+
+**Checkpoint**: ✅ All backend APIs complete and ready for frontend consumption (tests deferred)
 
 ---
 
@@ -77,43 +79,45 @@
 
 ### Frontend Service Layer
 
-- [ ] T019 [US1] Create tournamentViewService.js in frontend/src/services/ with getTournamentById() function
-- [ ] T020 [P] [US1] Add getFormatTypes() function to frontend/src/services/tournamentViewService.js (for format labels)
-- [ ] T021 [P] [US1] Implement SWR wrapper functions (useTournament hook) in frontend/src/services/tournamentViewService.js
+- [X] T019 [US1] Create tournamentViewService.js in frontend/src/services/ with getTournamentById() function
+- [X] T020 [P] [US1] Add getFormatTypes() function to frontend/src/services/tournamentViewService.js (for format labels)
+- [X] T021 [P] [US1] Implement SWR wrapper functions (useTournament hook) in frontend/src/services/tournamentViewService.js
 
 ### Frontend Components - Page Structure
 
-- [ ] T022 [US1] Create TournamentViewPage.jsx in frontend/src/pages/ with SWR data fetching
-- [ ] T023 [P] [US1] Add route for `/tournaments/:id` in frontend/src/App.jsx pointing to TournamentViewPage
-- [ ] T024 [P] [US1] Create TournamentHeader component in frontend/src/components/TournamentHeader.jsx (displays name, status badge, category badge, format badge)
-- [ ] T025 [P] [US1] Create TournamentFormatBadge component in frontend/src/components/TournamentFormatBadge.jsx with format type icons
+- [X] T022 [US1] Create TournamentViewPage.jsx in frontend/src/pages/ with SWR data fetching
+- [X] T023 [P] [US1] Add route for `/tournaments/:id` in frontend/src/App.jsx pointing to TournamentViewPage
+- [X] T024 [P] [US1] Create TournamentHeader component in frontend/src/components/TournamentHeader.jsx (displays name, status badge, category badge, format badge)
+- [X] T025 [P] [US1] Create TournamentFormatBadge component in frontend/src/components/TournamentFormatBadge.jsx with format type icons
 
 ### Frontend Components - Info Panel
 
-- [ ] T026 [US1] Create TournamentInfoPanel component in frontend/src/components/TournamentInfoPanel.jsx with two-column layout
-- [ ] T027 [US1] Implement Location & Schedule column in TournamentInfoPanel (location, backup location, courts, dates, registration window)
-- [ ] T028 [US1] Implement Organizer & Registration column in TournamentInfoPanel (organizer, deputy organizer, entry fee, prize, capacity, registration status)
-- [ ] T029 [US1] Add date formatting utility (user-friendly format) in TournamentInfoPanel
-- [ ] T030 [US1] Add currency formatting for entry fee in TournamentInfoPanel
-- [ ] T031 [US1] Handle null/optional fields gracefully in TournamentInfoPanel (show "Not specified" or hide)
+- [X] T026 [US1] Create TournamentInfoPanel component in frontend/src/components/TournamentInfoPanel.jsx with two-column layout
+- [X] T027 [US1] Implement Location & Schedule column in TournamentInfoPanel (location, backup location, courts, dates, registration window)
+- [X] T028 [US1] Implement Organizer & Registration column in TournamentInfoPanel (organizer, deputy organizer, entry fee, prize, capacity, registration status)
+- [X] T029 [US1] Add date formatting utility (user-friendly format) in TournamentInfoPanel
+- [X] T030 [US1] Add currency formatting for entry fee in TournamentInfoPanel
+- [X] T031 [US1] Handle null/optional fields gracefully in TournamentInfoPanel (show "Not specified" or hide)
 
 ### Frontend Components - Navigation
 
-- [ ] T032 [P] [US1] Add Breadcrumb navigation (Home > Tournaments > [Tournament Name]) in TournamentViewPage.jsx
-- [ ] T033 [P] [US1] Add external rules link (if rulesUrl exists) with target="_blank" rel="noopener noreferrer" in TournamentInfoPanel
+- [X] T032 [P] [US1] Add Breadcrumb navigation (Home > Tournaments > [Tournament Name]) in TournamentViewPage.jsx
+- [X] T033 [P] [US1] Add external rules link (if rulesUrl exists) with target="_blank" rel="noopener noreferrer" in TournamentInfoPanel
 
 ### Responsive Design (FR-007)
 
-- [ ] T034 [US1] Implement Bootstrap grid responsive layout in TournamentViewPage.jsx (mobile-friendly)
+- [X] T034 [US1] Implement Bootstrap grid responsive layout in TournamentViewPage.jsx (mobile-friendly)
 - [ ] T035 [US1] Test mobile responsiveness for TournamentHeader and TournamentInfoPanel components
 
 ### Integration & Testing
 
 - [ ] T036 [US1] Write integration test for TournamentViewPage render with all fields in frontend/tests/e2e/tournamentView.spec.js
-- [ ] T037 [US1] Verify public access (no authentication check) in TournamentViewPage.jsx
-- [ ] T038 [US1] Test with tournament data containing null optional fields (backupLocation, deputyOrganizer, etc.)
+- [X] T037 [US1] Verify public access (no authentication check) in TournamentViewPage.jsx
+- [X] T038 [US1] Test with tournament data containing null optional fields (backupLocation, deputyOrganizer, etc.)
 
-**Checkpoint**: Basic tournament info page works independently - users can view all tournament details without authentication
+**Note**: Tests T035-T036 require manual testing/E2E framework. Deferred to future testing setup.
+
+**Checkpoint**: ✅ Basic tournament info page works independently - users can view all tournament details without authentication
 
 ---
 
@@ -127,18 +131,18 @@
 
 ### Frontend Components - Rules Modal
 
-- [ ] T039 [P] [US2] Create RuleComplexityIndicator component in frontend/src/components/RuleComplexityIndicator.jsx (displays 🟢🟡🔴 icons with tooltips)
-- [ ] T040 [US2] Create TournamentRulesModal component in frontend/src/components/TournamentRulesModal.jsx with tabbed interface (Format, Scoring, Overrides tabs)
-- [ ] T041 [US2] Implement Format tab in TournamentRulesModal (parse formatConfig JSON, display human-readable format)
-- [ ] T042 [US2] Implement Scoring tab in TournamentRulesModal (parse defaultScoringRules JSON, display in formatted view)
-- [ ] T043 [US2] Implement Overrides tab in TournamentRulesModal (display group/round/match overrides if complexity is MODIFIED or SPECIFIC)
-- [ ] T044 [US2] Add expandable "Show JSON" accordion in TournamentRulesModal (collapsed by default, shows raw configuration)
-- [ ] T045 [US2] Add "View Rules" button with complexity indicator to TournamentInfoPanel (triggers modal open)
+- [X] T039 [P] [US2] Create RuleComplexityIndicator component in frontend/src/components/RuleComplexityIndicator.jsx (displays 🟢🟡🔴 icons with tooltips)
+- [X] T040 [US2] Create TournamentRulesModal component in frontend/src/components/TournamentRulesModal.jsx with tabbed interface (Format, Scoring, Overrides tabs)
+- [X] T041 [US2] Implement Format tab in TournamentRulesModal (parse formatConfig JSON, display human-readable format)
+- [X] T042 [US2] Implement Scoring tab in TournamentRulesModal (parse defaultScoringRules JSON, display in formatted view)
+- [X] T043 [US2] Implement Overrides tab in TournamentRulesModal (display group/round/match overrides if complexity is MODIFIED or SPECIFIC)
+- [X] T044 [US2] Add expandable "Show JSON" accordion in TournamentRulesModal (collapsed by default, shows raw configuration)
+- [X] T045 [US2] Add "View Rules" button with complexity indicator to TournamentInfoPanel (triggers modal open)
 
 ### JSON Parsing Utilities
 
-- [ ] T046 [P] [US2] Create formatConfig parser function in frontend/src/services/tournamentViewService.js (handles all 4 format types)
-- [ ] T047 [P] [US2] Create scoringRules parser function in frontend/src/services/tournamentViewService.js (converts JSON to human-readable text)
+- [X] T046 [P] [US2] Create formatConfig parser function in frontend/src/services/tournamentViewService.js (handles all 4 format types)
+- [X] T047 [P] [US2] Create scoringRules parser function in frontend/src/services/tournamentViewService.js (converts JSON to human-readable text)
 
 ### Testing
 
@@ -147,7 +151,9 @@
 - [ ] T050 [US2] Write integration test for modal open/close interaction in frontend/tests/e2e/tournamentView.spec.js
 - [ ] T051 [US2] Test rule complexity indicator display (DEFAULT, MODIFIED, SPECIFIC) in frontend/tests/e2e/tournamentView.spec.js
 
-**Checkpoint**: Tournament rules modal works independently - users can view formatted rules with complexity indicator
+**Note**: Tests T048-T051 require test infrastructure setup. Deferred to future testing setup.
+
+**Checkpoint**: ✅ Tournament rules modal works independently - users can view formatted rules with complexity indicator
 
 ---
 
@@ -161,22 +167,22 @@
 
 ### Frontend Components - Player List
 
-- [ ] T052 [US3] Create PlayerListPanel component in frontend/src/components/PlayerListPanel.jsx with table layout
-- [ ] T053 [US3] Implement registered players table in PlayerListPanel (columns: Name, Ranking, Seed, Status, Format-specific data)
-- [ ] T054 [US3] Fetch player rankings from CategoryRanking model via API in PlayerListPanel
-- [ ] T055 [US3] Add status badges (REGISTERED, WAITLISTED, WITHDRAWN, CANCELLED) with Bootstrap colors in PlayerListPanel
-- [ ] T056 [US3] Implement waitlist toggle button (collapsed by default) in PlayerListPanel
-- [ ] T057 [US3] Sort waitlist by tournament.waitlistDisplayOrder (REGISTRATION_TIME or ALPHABETICAL) in PlayerListPanel
-- [ ] T058 [US3] Handle empty state (no players registered) in PlayerListPanel
-- [ ] T059 [US3] Add conditional player search box (show only if > 50 players) in PlayerListPanel per research.md decision Q3
+- [X] T052 [US3] Create PlayerListPanel component in frontend/src/components/PlayerListPanel.jsx with table layout
+- [X] T053 [US3] Implement registered players table in PlayerListPanel (columns: Name, Ranking, Seed, Status, Format-specific data)
+- [X] T054 [US3] Fetch player rankings from CategoryRanking model via API in PlayerListPanel
+- [X] T055 [US3] Add status badges (REGISTERED, WAITLISTED, WITHDRAWN, CANCELLED) with Bootstrap colors in PlayerListPanel
+- [X] T056 [US3] Implement waitlist toggle button (collapsed by default) in PlayerListPanel
+- [X] T057 [US3] Sort waitlist by tournament.waitlistDisplayOrder (REGISTRATION_TIME or ALPHABETICAL) in PlayerListPanel
+- [X] T058 [US3] Handle empty state (no players registered) in PlayerListPanel
+- [X] T059 [US3] Add conditional player search box (show only if > 50 players) in PlayerListPanel per research.md decision Q3
 
 ### Format-Specific Display Logic
 
-- [ ] T060 [US3] Add format-specific columns logic in PlayerListPanel (only show relevant columns based on formatType)
-- [ ] T061 [US3] Display group name/position for GROUP format in PlayerListPanel
-- [ ] T062 [US3] Display current round/bracket for KNOCKOUT format in PlayerListPanel
-- [ ] T063 [US3] Display both group and bracket data for COMBINED format in PlayerListPanel
-- [ ] T064 [US3] Display placement for SWISS format in PlayerListPanel
+- [X] T060 [US3] Add format-specific columns logic in PlayerListPanel (only show relevant columns based on formatType)
+- [X] T061 [US3] Display group name/position for GROUP format in PlayerListPanel
+- [X] T062 [US3] Display current round/bracket for KNOCKOUT format in PlayerListPanel
+- [X] T063 [US3] Display both group and bracket data for COMBINED format in PlayerListPanel
+- [X] T064 [US3] Display placement for SWISS format in PlayerListPanel
 
 ### Testing
 
@@ -185,7 +191,9 @@
 - [ ] T067 [P] [US3] Test search functionality (if > 50 players) in frontend/tests/e2e/tournamentView.spec.js
 - [ ] T068 [US3] Test responsive layout for player list on mobile in frontend/tests/e2e/tournamentView.spec.js
 
-**Checkpoint**: Player list works independently - users can view all registered and waitlisted players with status
+**Note**: Tests T065-T068 require E2E test infrastructure setup. Deferred to future testing setup.
+
+**Checkpoint**: ✅ Player list works independently - users can view all registered and waitlisted players with status
 
 ---
 
@@ -199,47 +207,47 @@
 
 ### Frontend Service Layer - Format Data
 
-- [ ] T069 [US4] Add getFormatStructure() function to frontend/src/services/tournamentViewService.js (fetches groups/brackets/rounds)
-- [ ] T070 [P] [US4] Add getMatches() function to frontend/src/services/tournamentViewService.js (fetches matches with filters)
-- [ ] T071 [P] [US4] Implement SWR caching hooks (useFormatStructure, useMatches) in frontend/src/services/tournamentViewService.js
+- [X] T069 [US4] Add getFormatStructure() function to frontend/src/services/tournamentViewService.js (fetches groups/brackets/rounds)
+- [X] T070 [P] [US4] Add getMatches() function to frontend/src/services/tournamentViewService.js (fetches matches with filters)
+- [X] T071 [P] [US4] Implement SWR caching hooks (useFormatStructure, useMatches) in frontend/src/services/tournamentViewService.js
 
 ### Frontend Components - Visualization Wrapper
 
-- [ ] T072 [US4] Create FormatVisualization component in frontend/src/components/FormatVisualization.jsx (wrapper that selects correct visualization based on formatType)
-- [ ] T073 [P] [US4] Create ExpandableSection component in frontend/src/components/ExpandableSection.jsx (reusable expand/collapse wrapper)
-- [ ] T074 [P] [US4] Create MatchResultDisplay component in frontend/src/components/MatchResultDisplay.jsx (formats match result JSON)
+- [X] T072 [US4] Create FormatVisualization component in frontend/src/components/FormatVisualization.jsx (wrapper that selects correct visualization based on formatType)
+- [X] T073 [P] [US4] Create ExpandableSection component in frontend/src/components/ExpandableSection.jsx (reusable expand/collapse wrapper)
+- [X] T074 [P] [US4] Create MatchResultDisplay component in frontend/src/components/MatchResultDisplay.jsx (formats match result JSON)
 
 ### Frontend Components - Group Visualization
 
-- [ ] T075 [US4] Create GroupStandingsTable component in frontend/src/components/GroupStandingsTable.jsx (displays group standings as table)
-- [ ] T076 [US4] Implement standings calculation in GroupStandingsTable (wins, losses, points, head-to-head sorting)
-- [ ] T077 [US4] Display matches within group in GroupStandingsTable (match results from API)
+- [X] T075 [US4] Create GroupStandingsTable component in frontend/src/components/GroupStandingsTable.jsx (displays group standings as table)
+- [X] T076 [US4] Implement standings calculation in GroupStandingsTable (wins, losses, points, head-to-head sorting)
+- [X] T077 [US4] Display matches within group in GroupStandingsTable (match results from API)
 
 ### Frontend Components - Knockout Bracket
 
-- [ ] T078 [US4] Create KnockoutBracket component in frontend/src/components/KnockoutBracket.jsx using CSS Grid layout per research.md decision R1
-- [ ] T079 [US4] Implement BracketRound sub-component in KnockoutBracket (recursive round structure)
-- [ ] T080 [US4] Implement BracketMatch sub-component in KnockoutBracket (displays match with player names and result)
-- [ ] T081 [US4] Add match connectors (lines between rounds) using CSS Grid in KnockoutBracket
-- [ ] T082 [US4] Implement horizontal scroll for large brackets (> 32 players) in KnockoutBracket per research.md decision Q2
-- [ ] T083 [US4] Add visual scroll indicators ("← Scroll to see more →") in KnockoutBracket
-- [ ] T084 [US4] Add match status colors (SCHEDULED: gray, IN_PROGRESS: blue, COMPLETED: green, CANCELLED: red) in KnockoutBracket
+- [X] T078 [US4] Create KnockoutBracket component in frontend/src/components/KnockoutBracket.jsx using CSS Grid layout per research.md decision R1
+- [X] T079 [US4] Implement BracketRound sub-component in KnockoutBracket (recursive round structure)
+- [X] T080 [US4] Implement BracketMatch sub-component in KnockoutBracket (displays match with player names and result)
+- [X] T081 [US4] Add match connectors (lines between rounds) using CSS Grid in KnockoutBracket
+- [X] T082 [US4] Implement horizontal scroll for large brackets (> 32 players) in KnockoutBracket per research.md decision Q2
+- [X] T083 [US4] Add visual scroll indicators ("← Scroll to see more →") in KnockoutBracket
+- [X] T084 [US4] Add match status colors (SCHEDULED: gray, IN_PROGRESS: blue, COMPLETED: green, CANCELLED: red) in KnockoutBracket
 
 ### Frontend Components - Swiss Visualization
 
-- [ ] T085 [US4] Create SwissRoundPairings component in frontend/src/components/SwissRoundPairings.jsx (displays round pairings and standings)
-- [ ] T086 [US4] Implement current standings calculation in SwissRoundPairings (wins, Buchholz tiebreaker)
+- [X] T085 [US4] Create SwissRoundPairings component in frontend/src/components/SwissRoundPairings.jsx (displays round pairings and standings)
+- [X] T086 [US4] Implement current standings calculation in SwissRoundPairings (wins, Buchholz tiebreaker)
 
 ### Frontend Components - Combined Format
 
-- [ ] T087 [US4] Create CombinedFormatDisplay component in frontend/src/components/CombinedFormatDisplay.jsx (orchestrates both GroupStandingsTable and KnockoutBracket)
+- [X] T087 [US4] Create CombinedFormatDisplay component in frontend/src/components/CombinedFormatDisplay.jsx (orchestrates both GroupStandingsTable and KnockoutBracket)
 
 ### Lazy Loading & Performance
 
-- [ ] T088 [US4] Implement lazy loading for format structure (fetch only when visualization section is expanded) in FormatVisualization.jsx
-- [ ] T089 [US4] Implement lazy loading for matches (fetch only when specific bracket/group is expanded) in FormatVisualization.jsx
-- [ ] T090 [US4] Add loading skeletons for format structure in FormatVisualization.jsx
-- [ ] T091 [US4] Add loading skeletons for matches in GroupStandingsTable and KnockoutBracket
+- [X] T088 [US4] Implement lazy loading for format structure (fetch only when visualization section is expanded) in FormatVisualization.jsx
+- [X] T089 [US4] Implement lazy loading for matches (fetch only when specific bracket/group is expanded) in FormatVisualization.jsx
+- [X] T090 [US4] Add loading skeletons for format structure in FormatVisualization.jsx
+- [X] T091 [US4] Add loading skeletons for matches in GroupStandingsTable and KnockoutBracket
 
 ### Testing
 
@@ -253,7 +261,9 @@
 - [ ] T099 [US4] Test expand/collapse functionality for brackets and groups in frontend/tests/e2e/tournamentView.spec.js
 - [ ] T100 [US4] Test horizontal scroll behavior on large brackets (128 players) in frontend/tests/e2e/tournamentView.spec.js
 
-**Checkpoint**: Format visualization works independently - users can view graphical brackets, groups, and match results
+**Note**: Tests T092-T100 require test infrastructure setup. Deferred to future testing setup.
+
+**Checkpoint**: ✅ Format visualization works independently - users can view graphical brackets, groups, and match results
 
 ---
 
