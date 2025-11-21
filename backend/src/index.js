@@ -81,6 +81,15 @@ app.use(helmet({
   }
 }));
 
+// Health check endpoint (before session middleware to avoid blocking)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 // Session configuration
 app.use(session({
   store: new SessionFileStore({
@@ -102,15 +111,6 @@ app.use(session({
 // Initialize Passport and session support
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
-});
 
 // API Routes
 app.use('/api/auth', authRoutes);

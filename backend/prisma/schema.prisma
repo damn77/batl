@@ -1,8 +1,8 @@
 // Prisma schema for BATL user management system
-// Database: SQLite via Prisma ORM
+// Database: PostgreSQL via Prisma ORM
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
