@@ -1,8 +1,19 @@
 import axios from 'axios';
 
+// Determine API base URL
+// - Production: Use VITE_API_URL (e.g., https://batl-backend.onrender.com/api)
+// - Development: Use relative URL for Vite proxy
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // In development, use relative URL so Vite proxy works
+  return '/api';
+};
+
 // Create axios instance with default configuration
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: getBaseURL(),
   withCredentials: true, // Send cookies with requests
   headers: {
     'Content-Type': 'application/json'
