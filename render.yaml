@@ -45,7 +45,6 @@ services:
   - type: web
     name: batl-frontend
     runtime: static
-    region: frankfurt
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
