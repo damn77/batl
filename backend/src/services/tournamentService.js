@@ -809,6 +809,17 @@ export async function updateTournament(id, data) {
     }
   }
 
+  // Get current tournament before update to check for status change
+  const currentTournament = await prisma.tournament.findUnique({
+    where: { id },
+    select: { status: true, categoryId: true },
+    include: {
+      category: {
+        select: { type: true },
+      },
+    },
+  });
+
   // Update allowed fields
   const updateData = {};
   if (data.name !== undefined) updateData.name = data.name;
@@ -817,6 +828,7 @@ export async function updateTournament(id, data) {
   if (data.capacity !== undefined) updateData.capacity = data.capacity === null ? null : parseInt(data.capacity);
   if (data.startDate) updateData.startDate = new Date(data.startDate);
   if (data.endDate) updateData.endDate = new Date(data.endDate);
+  if (data.status !== undefined) updateData.status = data.status;
 
   // Handle location update - create or find location if clubName provided
   if (data.clubName !== undefined) {
@@ -827,7 +839,7 @@ export async function updateTournament(id, data) {
     updateData.locationId = location.id;
   }
 
-  return await prisma.tournament.update({
+  const updatedTournament = await prisma.tournament.update({
     where: { id },
     data: updateData,
     include: {
@@ -872,6 +884,26 @@ export async function updateTournament(id, data) {
       }
     }
   });
+
+  // T056: Tournament close hook - recalculate seeding scores for doubles categories
+  // Check if status changed to COMPLETED and category is DOUBLES
+  const statusChangedToCompleted =
+    currentTournament.status !== 'COMPLETED' &&
+    updatedTournament.status === 'COMPLETED';
+
+  if (statusChangedToCompleted && currentTournament.category.type === 'DOUBLES') {
+    // Recalculate seeding scores for all pairs in this category
+    // This runs asynchronously - we don't wait for it to complete
+    const { recalculateCategorySeedingScores } = await import('./pairService.js');
+    recalculateCategorySeedingScores(currentTournament.categoryId).catch((error) => {
+      console.error(
+        `Failed to recalculate seeding scores for category ${currentTournament.categoryId}:`,
+        error
+      );
+    });
+  }
+
+  return updatedTournament;
 }
 
 /**

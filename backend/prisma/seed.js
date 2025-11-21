@@ -562,6 +562,195 @@ async function main() {
   console.log(`✅ Created rankings for ${Math.min(5, men35Plus.length)} players in Men's 35+`);
 
   // ============================================
+  // 10. DOUBLES PAIRS - Feature 006 (Doubles Pairs)
+  // ============================================
+  console.log('\n👯 Creating doubles pairs...\n');
+
+  const mensDoublesCategory = createdCategories.find(c => c.name === "Men's Doubles Open");
+  const womensDoublesCategory = createdCategories.find(c => c.name === "Women's Doubles Open");
+  const mixedDoublesCategory = createdCategories.find(c => c.name === "Mixed Doubles Open");
+
+  // Create Men's Doubles pairs (using men players with rankings)
+  const menWithRankings = menPlayers.slice(0, 8);
+  const mensPairs = [];
+
+  // Pair 1: Top ranked players (Alex + John)
+  if (menWithRankings.length >= 2) {
+    const pair1 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menWithRankings[0].id,
+        player2Id: menWithRankings[1].id,
+        categoryId: mensDoublesCategory.id,
+        seedingScore: 1900 // 1000 + 900
+      }
+    });
+    mensPairs.push(pair1);
+    console.log(`✅ Men's Pair 1: ${menWithRankings[0].name} & ${menWithRankings[1].name} (Seeding: 1900)`);
+  }
+
+  // Pair 2: Mid ranked players (Mike + David)
+  if (menWithRankings.length >= 4) {
+    const pair2 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menWithRankings[2].id,
+        player2Id: menWithRankings[3].id,
+        categoryId: mensDoublesCategory.id,
+        seedingScore: 1500 // 800 + 700
+      }
+    });
+    mensPairs.push(pair2);
+    console.log(`✅ Men's Pair 2: ${menWithRankings[2].name} & ${menWithRankings[3].name} (Seeding: 1500)`);
+  }
+
+  // Pair 3: Lower ranked players (Robert + James)
+  if (menWithRankings.length >= 6) {
+    const pair3 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menWithRankings[4].id,
+        player2Id: menWithRankings[5].id,
+        categoryId: mensDoublesCategory.id,
+        seedingScore: 1100 // 600 + 500
+      }
+    });
+    mensPairs.push(pair3);
+    console.log(`✅ Men's Pair 3: ${menWithRankings[4].name} & ${menWithRankings[5].name} (Seeding: 1100)`);
+  }
+
+  // Pair 4: Lowest ranked (Thomas + another)
+  if (menWithRankings.length >= 8) {
+    const pair4 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menWithRankings[6].id,
+        player2Id: menWithRankings[7].id,
+        categoryId: mensDoublesCategory.id,
+        seedingScore: 700 // 400 + 300
+      }
+    });
+    mensPairs.push(pair4);
+    console.log(`✅ Men's Pair 4: ${menWithRankings[6].name} & ${menWithRankings[7].name} (Seeding: 700)`);
+  }
+
+  // Create Women's Doubles pairs
+  const womensPairs = [];
+  if (womenPlayers.length >= 4) {
+    const wPair1 = await prisma.doublesPair.create({
+      data: {
+        player1Id: womenPlayers[0].id,
+        player2Id: womenPlayers[1].id,
+        categoryId: womensDoublesCategory.id,
+        seedingScore: 1720 // 900 + 820
+      }
+    });
+    womensPairs.push(wPair1);
+    console.log(`✅ Women's Pair 1: ${womenPlayers[0].name} & ${womenPlayers[1].name} (Seeding: 1720)`);
+
+    const wPair2 = await prisma.doublesPair.create({
+      data: {
+        player1Id: womenPlayers[2].id,
+        player2Id: womenPlayers[3].id,
+        categoryId: womensDoublesCategory.id,
+        seedingScore: 1400 // 740 + 660
+      }
+    });
+    womensPairs.push(wPair2);
+    console.log(`✅ Women's Pair 2: ${womenPlayers[2].name} & ${womenPlayers[3].name} (Seeding: 1400)`);
+  }
+
+  // Create Mixed Doubles pairs
+  const mixedPairs = [];
+  if (menPlayers.length >= 2 && womenPlayers.length >= 2) {
+    const mxPair1 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menPlayers[0].id,
+        player2Id: womenPlayers[0].id,
+        categoryId: mixedDoublesCategory.id,
+        seedingScore: 1900 // 1000 + 900
+      }
+    });
+    mixedPairs.push(mxPair1);
+    console.log(`✅ Mixed Pair 1: ${menPlayers[0].name} & ${womenPlayers[0].name} (Seeding: 1900)`);
+
+    const mxPair2 = await prisma.doublesPair.create({
+      data: {
+        player1Id: menPlayers[1].id,
+        player2Id: womenPlayers[1].id,
+        categoryId: mixedDoublesCategory.id,
+        seedingScore: 1720 // 900 + 820
+      }
+    });
+    mixedPairs.push(mxPair2);
+    console.log(`✅ Mixed Pair 2: ${menPlayers[1].name} & ${womenPlayers[1].name} (Seeding: 1720)`);
+  }
+
+  // ============================================
+  // 11. PAIR REGISTRATIONS - Feature 006
+  // ============================================
+  console.log('\n📝 Creating pair registrations for doubles tournament...\n');
+
+  // Register pairs for Summer Doubles Classic tournament
+  for (let i = 0; i < mensPairs.length; i++) {
+    await prisma.pairRegistration.create({
+      data: {
+        tournamentId: doublesTournament.id,
+        pairId: mensPairs[i].id,
+        status: 'REGISTERED',
+        registrationTimestamp: new Date(now.getTime() - (mensPairs.length - i) * 60 * 60 * 1000)
+      }
+    });
+  }
+  console.log(`✅ Registered ${mensPairs.length} pairs for ${doublesTournament.name}`);
+
+  // ============================================
+  // 12. PAIR RANKINGS - Feature 006
+  // ============================================
+  console.log('\n🏅 Creating pair rankings...\n');
+
+  // Create pair rankings for men's doubles
+  for (let i = 0; i < mensPairs.length; i++) {
+    await prisma.pairRanking.create({
+      data: {
+        pairId: mensPairs[i].id,
+        categoryId: mensDoublesCategory.id,
+        points: 500 - i * 100,
+        wins: 5 - i,
+        losses: i,
+        rank: i + 1
+      }
+    });
+  }
+  console.log(`✅ Created rankings for ${mensPairs.length} men's doubles pairs`);
+
+  // Create pair rankings for women's doubles
+  for (let i = 0; i < womensPairs.length; i++) {
+    await prisma.pairRanking.create({
+      data: {
+        pairId: womensPairs[i].id,
+        categoryId: womensDoublesCategory.id,
+        points: 400 - i * 80,
+        wins: 4 - i,
+        losses: i,
+        rank: i + 1
+      }
+    });
+  }
+  console.log(`✅ Created rankings for ${womensPairs.length} women's doubles pairs`);
+
+  // Create pair rankings for mixed doubles
+  for (let i = 0; i < mixedPairs.length; i++) {
+    await prisma.pairRanking.create({
+      data: {
+        pairId: mixedPairs[i].id,
+        categoryId: mixedDoublesCategory.id,
+        points: 450 - i * 90,
+        wins: 4 - i,
+        losses: i,
+        rank: i + 1
+      }
+    });
+  }
+  console.log(`✅ Created rankings for ${mixedPairs.length} mixed doubles pairs`);
+
+  // ============================================
   // SUMMARY
   // ============================================
   console.log('\n========================================');
@@ -606,11 +795,19 @@ async function main() {
   console.log("   - Women's Open: 6 players ranked");
   console.log("   - Men's 35+: 5 players ranked");
 
+  console.log('\n👯 Doubles Pairs:');
+  console.log(`   - Men's Doubles: ${mensPairs.length} pairs`);
+  console.log(`   - Women's Doubles: ${womensPairs.length} pairs`);
+  console.log(`   - Mixed Doubles: ${mixedPairs.length} pairs`);
+  console.log(`   - Pair registrations: ${mensPairs.length} for Summer Doubles Classic`);
+
   console.log('\n⚠️  IMPORTANT:');
   console.log('   - Change default passwords after first login!');
   console.log('   - Test tournament formats at: /player/tournaments');
   console.log('   - View tournament details at: /tournaments/:id');
   console.log('   - Manage tournaments at: /organizer/tournaments');
+  console.log('   - Test doubles pairs at: /player/pairs');
+  console.log('   - View pair rankings at: /rankings/pairs');
 
   console.log('\n🎉 Ready to test all features!\n');
 }

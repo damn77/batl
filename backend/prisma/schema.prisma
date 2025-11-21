@@ -112,11 +112,11 @@ model User {
   lastLoginAt   DateTime?
 
   // Relationships
-  sessions            Session[]
-  auditLogs           AuditLog[]
-  playerProfile       PlayerProfile?  @relation("UserProfile")
-  createdProfiles     PlayerProfile[] @relation("ProfileCreator")
-  organizer           Organizer?      @relation("UserOrganizer")
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  playerProfile   PlayerProfile?  @relation("UserProfile")
+  createdProfiles PlayerProfile[] @relation("ProfileCreator")
+  organizer       Organizer?      @relation("UserOrganizer")
 
   @@index([role])
   @@index([isActive])
@@ -125,7 +125,7 @@ model User {
 model Session {
   id        String   @id
   userId    String
-  data      String   // JSON serialized
+  data      String // JSON serialized
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -138,15 +138,15 @@ model Session {
 }
 
 model AuditLog {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   userId     String?
   action     String
   entityType String?
   entityId   String?
-  changes    String?   // JSON serialized
+  changes    String? // JSON serialized
   ipAddress  String
   userAgent  String?
-  timestamp  DateTime  @default(now())
+  timestamp  DateTime @default(now())
 
   // Relationships
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -158,18 +158,18 @@ model AuditLog {
 }
 
 model PlayerProfile {
-  id        String    @id @default(uuid())
-  userId    String?   @unique // Nullable - profile can exist without account
+  id        String   @id @default(uuid())
+  userId    String?  @unique // Nullable - profile can exist without account
   name      String
-  email     String?   @unique // Email must be unique if provided (nullable allows multiple null values)
+  email     String?  @unique // Email must be unique if provided (nullable allows multiple null values)
   phone     String?
-  createdBy String    // Organizer who created this profile
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdBy String // Organizer who created this profile
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Category System Fields (T010)
   birthDate DateTime? // Required for age validation
-  gender    Gender?   // Required for gender validation
+  gender    Gender? // Required for gender validation
 
   // Relationships
   user    User? @relation("UserProfile", fields: [userId], references: [id], onDelete: SetNull)
@@ -181,34 +181,42 @@ model PlayerProfile {
   tournamentRegistrations TournamentRegistration[]
 
   // Tournament Rules Relationships (T008-T009)
-  matchesAsPlayer1        Match[]            @relation("MatchPlayer1")
-  matchesAsPlayer2        Match[]            @relation("MatchPlayer2")
-  groupParticipations     GroupParticipant[]
+  matchesAsPlayer1    Match[]            @relation("MatchPlayer1")
+  matchesAsPlayer2    Match[]            @relation("MatchPlayer2")
+  groupParticipations GroupParticipant[]
+
+  // Doubles Pairs Relationships (006-doubles-pairs)
+  doublesPairsAsPlayer1 DoublesPair[] @relation("DoublesPairPlayer1")
+  doublesPairsAsPlayer2 DoublesPair[] @relation("DoublesPairPlayer2")
 
   @@index([userId])
   @@index([createdBy])
   @@index([name])
   @@index([email])
   @@index([birthDate]) // For age-based queries
-  @@index([gender])    // For gender-based queries
+  @@index([gender]) // For gender-based queries
 }
 
 // Category System Models (T011-T014)
 
 model Category {
-  id          String        @id @default(uuid())
-  type        CategoryType  // Singles or Doubles
-  ageGroup    AgeGroup      // Age threshold or ALL_AGES
-  gender      Gender        // Men, Women, or Mixed
-  name        String        // Auto-generated display name
-  description String?       // Optional category description
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id          String       @id @default(uuid())
+  type        CategoryType // Singles or Doubles
+  ageGroup    AgeGroup // Age threshold or ALL_AGES
+  gender      Gender // Men, Women, or Mixed
+  name        String // Auto-generated display name
+  description String? // Optional category description
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // Relationships
   tournaments   Tournament[]
   registrations CategoryRegistration[]
   rankings      CategoryRanking[]
+
+  // Doubles Pairs Relationships (006-doubles-pairs)
+  doublesPairs DoublesPair[]
+  pairRankings PairRanking[]
 
   // Constraints (T015)
   @@unique([type, ageGroup, gender]) // Prevent duplicate categories (FR-005)
@@ -218,27 +226,27 @@ model Category {
 }
 
 model Organizer {
-  id      String  @id @default(uuid())
-  userId  String  @unique
-  name    String
-  email   String
-  phone   String?
+  id     String  @id @default(uuid())
+  userId String  @unique
+  name   String
+  email  String
+  phone  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relationships
-  user                    User         @relation("UserOrganizer", fields: [userId], references: [id], onDelete: Cascade)
-  organizedTournaments    Tournament[] @relation("PrimaryOrganizer")
-  deputyTournaments       Tournament[] @relation("DeputyOrganizer")
+  user                 User         @relation("UserOrganizer", fields: [userId], references: [id], onDelete: Cascade)
+  organizedTournaments Tournament[] @relation("PrimaryOrganizer")
+  deputyTournaments    Tournament[] @relation("DeputyOrganizer")
 
   @@index([userId])
 }
 
 model Location {
-  id        String  @id @default(uuid())
-  clubName  String
-  address   String?
+  id       String  @id @default(uuid())
+  clubName String
+  address  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,58 +259,61 @@ model Location {
 }
 
 model Tournament {
-  id          String           @id @default(uuid())
-  name        String           // Tournament display name
-  categoryId  String           // Required: belongs to one category (FR-006)
-  description String?          // Optional tournament details
+  id          String  @id @default(uuid())
+  name        String // Tournament display name
+  categoryId  String // Required: belongs to one category (FR-006)
+  description String? // Optional tournament details
 
   // Location & Logistics (FR-032 to FR-042)
-  locationId         String?          // Primary location (club/address)
-  backupLocationId   String?          // Backup location for bad weather
-  courts             Int?             // Number of courts available (FR-034)
-  capacity           Int?             // Max registered players (null = unlimited)
-  organizerId        String?          // Primary organizer (FR-037)
-  deputyOrganizerId  String?          // Deputy organizer (FR-038)
-  entryFee           Float?           // Entry fee (null = free)
-  rulesUrl           String?          // Link to tournament rules
-  prizeDescription   String?          // Prize/award details
-  registrationOpenDate  DateTime?     // When registration opens
-  registrationCloseDate DateTime?     // When registration closes
-  minParticipants    Int?             // Minimum required participants
+  locationId            String? // Primary location (club/address)
+  backupLocationId      String? // Backup location for bad weather
+  courts                Int? // Number of courts available (FR-034)
+  capacity              Int? // Max registered players (null = unlimited)
+  organizerId           String? // Primary organizer (FR-037)
+  deputyOrganizerId     String? // Deputy organizer (FR-038)
+  entryFee              Float? // Entry fee (null = free)
+  rulesUrl              String? // Link to tournament rules
+  prizeDescription      String? // Prize/award details
+  registrationOpenDate  DateTime? // When registration opens
+  registrationCloseDate DateTime? // When registration closes
+  minParticipants       Int? // Minimum required participants
 
   // Waitlist Configuration
   waitlistDisplayOrder WaitlistDisplayOrder @default(REGISTRATION_TIME)
 
   // Tournament Rules and Format (T004)
-  formatType           FormatType @default(KNOCKOUT) // Tournament format type
-  formatConfig         String     // JSON: Format-specific configuration
-  defaultScoringRules  String     // JSON: Default match scoring rules
+  formatType          FormatType @default(KNOCKOUT) // Tournament format type
+  formatConfig        String // JSON: Format-specific configuration
+  defaultScoringRules String // JSON: Default match scoring rules
 
   // Scheduling
-  startDate   DateTime
-  endDate     DateTime
+  startDate DateTime
+  endDate   DateTime
 
   // Lifecycle
   status           TournamentStatus @default(SCHEDULED)
-  lastStatusChange DateTime?        // When status last changed
+  lastStatusChange DateTime? // When status last changed
 
   // Audit
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  category                Category                   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  location                Location?                  @relation("PrimaryLocation", fields: [locationId], references: [id], onDelete: SetNull)
-  backupLocation          Location?                  @relation("BackupLocation", fields: [backupLocationId], references: [id], onDelete: SetNull)
-  organizer               Organizer?                 @relation("PrimaryOrganizer", fields: [organizerId], references: [id], onDelete: SetNull)
-  deputyOrganizer         Organizer?                 @relation("DeputyOrganizer", fields: [deputyOrganizerId], references: [id], onDelete: SetNull)
+  category                Category                 @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  location                Location?                @relation("PrimaryLocation", fields: [locationId], references: [id], onDelete: SetNull)
+  backupLocation          Location?                @relation("BackupLocation", fields: [backupLocationId], references: [id], onDelete: SetNull)
+  organizer               Organizer?               @relation("PrimaryOrganizer", fields: [organizerId], references: [id], onDelete: SetNull)
+  deputyOrganizer         Organizer?               @relation("DeputyOrganizer", fields: [deputyOrganizerId], references: [id], onDelete: SetNull)
   tournamentRegistrations TournamentRegistration[]
 
+  // Doubles Pairs Relationships (006-doubles-pairs)
+  pairRegistrations PairRegistration[]
+
   // Tournament Rules Relationships (T004-T009)
-  groups                  Group[]
-  brackets                Bracket[]
-  rounds                  Round[]
-  matches                 Match[]
+  groups   Group[]
+  brackets Bracket[]
+  rounds   Round[]
+  matches  Match[]
 
   // Constraints (T015)
   @@index([categoryId])
@@ -317,13 +328,13 @@ model Tournament {
 
 model CategoryRegistration {
   id              String             @id @default(uuid())
-  playerId        String             // Foreign key to PlayerProfile
-  categoryId      String             // Foreign key to Category
+  playerId        String // Foreign key to PlayerProfile
+  categoryId      String // Foreign key to Category
   status          RegistrationStatus @default(ACTIVE)
   hasParticipated Boolean            @default(false) // True after first completed tournament
   registeredAt    DateTime           @default(now())
-  withdrawnAt     DateTime?          // Timestamp when withdrawn
-  notes           String?            // Optional admin notes
+  withdrawnAt     DateTime? // Timestamp when withdrawn
+  notes           String? // Optional admin notes
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
@@ -341,13 +352,13 @@ model CategoryRegistration {
 
 model CategoryRanking {
   id          String   @id @default(uuid())
-  playerId    String   // Foreign key to PlayerProfile
-  categoryId  String   // Foreign key to Category
-  rank        Int      // Current rank in category (1 = first place)
+  playerId    String // Foreign key to PlayerProfile
+  categoryId  String // Foreign key to Category
+  rank        Int // Current rank in category (1 = first place)
   points      Float    @default(0) // Ranking points
   wins        Int      @default(0) // Total wins in category
   losses      Int      @default(0) // Total losses in category
-  lastUpdated DateTime @updatedAt  // When ranking was last recalculated
+  lastUpdated DateTime @updatedAt // When ranking was last recalculated
   createdAt   DateTime @default(now())
 
   // Relationships
@@ -356,32 +367,32 @@ model CategoryRanking {
 
   // Constraints (T015)
   @@unique([playerId, categoryId]) // One ranking per player per category (FR-013)
-  @@index([categoryId, rank])      // Fast leaderboard queries
+  @@index([categoryId, rank]) // Fast leaderboard queries
   @@index([playerId])
 }
 
 // Tournament Registration Model (003-tournament-registration)
 
 model TournamentRegistration {
-  id                    String                         @id @default(uuid())
-  playerId              String                         // Foreign key to PlayerProfile
-  tournamentId          String                         // Foreign key to Tournament
-  status                TournamentRegistrationStatus   @default(REGISTERED)
+  id           String                       @id @default(uuid())
+  playerId     String // Foreign key to PlayerProfile
+  tournamentId String // Foreign key to Tournament
+  status       TournamentRegistrationStatus @default(REGISTERED)
 
   // Timestamps
-  registrationTimestamp DateTime                       @default(now()) // Used for waitlist ordering
-  withdrawnAt           DateTime?                      // When player withdrew (if WITHDRAWN)
-  cancelledAt           DateTime?                      // When tournament cancelled (if CANCELLED)
+  registrationTimestamp DateTime  @default(now()) // Used for waitlist ordering
+  withdrawnAt           DateTime? // When player withdrew (if WITHDRAWN)
+  cancelledAt           DateTime? // When tournament cancelled (if CANCELLED)
 
   // Waitlist Management
-  promotedBy            String?                        // 'SYSTEM' or userId of organizer who promoted
-  promotedAt            DateTime?                      // When promoted from waitlist
-  demotedBy             String?                        // userId of organizer who demoted
-  demotedAt             DateTime?                      // When demoted to waitlist
+  promotedBy String? // 'SYSTEM' or userId of organizer who promoted
+  promotedAt DateTime? // When promoted from waitlist
+  demotedBy  String? // userId of organizer who demoted
+  demotedAt  DateTime? // When demoted to waitlist
 
   // Audit
-  createdAt             DateTime                       @default(now())
-  updatedAt             DateTime                       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
   player     PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
@@ -399,20 +410,20 @@ model TournamentRegistration {
 // Tournament Rules Models (T005-T009)
 
 model Group {
-  id                    String   @id @default(uuid())
-  tournamentId          String   // Foreign key to Tournament
-  groupNumber           Int      // Group number (1-indexed)
-  groupSize             Int      // Actual size of this group (may be X or X-1)
-  ruleOverrides         String?  // JSON: Group-specific rule overrides
-  advancementCriteria   String?  // JSON: For combined - who advances and to which bracket
+  id                  String  @id @default(uuid())
+  tournamentId        String // Foreign key to Tournament
+  groupNumber         Int // Group number (1-indexed)
+  groupSize           Int // Actual size of this group (may be X or X-1)
+  ruleOverrides       String? // JSON: Group-specific rule overrides
+  advancementCriteria String? // JSON: For combined - who advances and to which bracket
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  tournament            Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  matches               Match[]
-  groupParticipants     GroupParticipant[]
+  tournament        Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  matches           Match[]
+  groupParticipants GroupParticipant[]
 
   // Constraints
   @@unique([tournamentId, groupNumber])
@@ -420,20 +431,20 @@ model Group {
 }
 
 model Bracket {
-  id                    String              @id @default(uuid())
-  tournamentId          String              // Foreign key to Tournament
-  bracketType           BracketType         // MAIN, CONSOLATION, PLACEMENT
-  matchGuarantee        MatchGuaranteeType  // 1_MATCH, 2_MATCH, UNTIL_PLACEMENT
-  ruleOverrides         String?             // JSON: Bracket-specific rule overrides
-  placementRange        String?             // For PLACEMENT brackets: "4-8", "9-16", etc.
+  id             String             @id @default(uuid())
+  tournamentId   String // Foreign key to Tournament
+  bracketType    BracketType // MAIN, CONSOLATION, PLACEMENT
+  matchGuarantee MatchGuaranteeType // 1_MATCH, 2_MATCH, UNTIL_PLACEMENT
+  ruleOverrides  String? // JSON: Bracket-specific rule overrides
+  placementRange String? // For PLACEMENT brackets: "4-8", "9-16", etc.
 
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  rounds                Round[]
-  matches               Match[]
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  rounds     Round[]
+  matches    Match[]
 
   // Constraints
   @@index([tournamentId])
@@ -441,20 +452,20 @@ model Bracket {
 }
 
 model Round {
-  id                    String   @id @default(uuid())
-  tournamentId          String   // Foreign key to Tournament
-  bracketId             String?  // Foreign key to Bracket (nullable for swiss)
-  roundNumber           Int      // Round number (1-indexed)
-  ruleOverrides         String?  // JSON: Round-specific rule overrides
-  earlyTiebreakEnabled  Boolean  @default(false) // For "until placement": early tiebreak
+  id                   String  @id @default(uuid())
+  tournamentId         String // Foreign key to Tournament
+  bracketId            String? // Foreign key to Bracket (nullable for swiss)
+  roundNumber          Int // Round number (1-indexed)
+  ruleOverrides        String? // JSON: Round-specific rule overrides
+  earlyTiebreakEnabled Boolean @default(false) // For "until placement": early tiebreak
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  bracket               Bracket?   @relation(fields: [bracketId], references: [id], onDelete: Cascade)
-  matches               Match[]
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  bracket    Bracket?   @relation(fields: [bracketId], references: [id], onDelete: Cascade)
+  matches    Match[]
 
   // Constraints
   @@unique([tournamentId, bracketId, roundNumber])
@@ -463,30 +474,34 @@ model Round {
 }
 
 model Match {
-  id                    String       @id @default(uuid())
-  tournamentId          String       // Foreign key to Tournament
-  groupId               String?      // Foreign key to Group (for group/combined)
-  bracketId             String?      // Foreign key to Bracket (for knockout/combined)
-  roundId               String?      // Foreign key to Round (for knockout/swiss)
-  matchNumber           Int          // Match number within tournament
-  player1Id             String       // Foreign key to PlayerProfile
-  player2Id             String       // Foreign key to PlayerProfile
-  status                MatchStatus  @default(SCHEDULED)
-  result                String?      // JSON: Match result (scores, winner)
-  ruleOverrides         String?      // JSON: Match-specific rule overrides
-  completedWithRules    String?      // JSON: Immutable snapshot of effective rules when completed
-  completedAt           DateTime?    // Timestamp when match was completed
+  id                 String      @id @default(uuid())
+  tournamentId       String // Foreign key to Tournament
+  groupId            String? // Foreign key to Group (for group/combined)
+  bracketId          String? // Foreign key to Bracket (for knockout/combined)
+  roundId            String? // Foreign key to Round (for knockout/swiss)
+  matchNumber        Int // Match number within tournament
+  player1Id          String // Foreign key to PlayerProfile (for singles, or representative player for doubles)
+  player2Id          String // Foreign key to PlayerProfile (for singles, or representative player for doubles)
+  pair1Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
+  pair2Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
+  status             MatchStatus @default(SCHEDULED)
+  result             String? // JSON: Match result (scores, winner)
+  ruleOverrides      String? // JSON: Match-specific rule overrides
+  completedWithRules String? // JSON: Immutable snapshot of effective rules when completed
+  completedAt        DateTime? // Timestamp when match was completed
 
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  tournament            Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  group                 Group?         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  bracket               Bracket?       @relation(fields: [bracketId], references: [id], onDelete: Cascade)
-  round                 Round?         @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player1               PlayerProfile  @relation("MatchPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
-  player2               PlayerProfile  @relation("MatchPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
+  tournament Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  group      Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  bracket    Bracket?      @relation(fields: [bracketId], references: [id], onDelete: Cascade)
+  round      Round?        @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player1    PlayerProfile @relation("MatchPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
+  player2    PlayerProfile @relation("MatchPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
+  pair1      DoublesPair?  @relation("MatchPair1", fields: [pair1Id], references: [id], onDelete: Restrict) // 006-doubles-pairs
+  pair2      DoublesPair?  @relation("MatchPair2", fields: [pair2Id], references: [id], onDelete: Restrict) // 006-doubles-pairs
 
   // Constraints
   @@index([tournamentId])
@@ -495,24 +510,100 @@ model Match {
   @@index([roundId])
   @@index([player1Id])
   @@index([player2Id])
+  @@index([pair1Id]) // 006-doubles-pairs
+  @@index([pair2Id]) // 006-doubles-pairs
   @@index([status])
 }
 
 model GroupParticipant {
-  id                    String   @id @default(uuid())
-  groupId               String   // Foreign key to Group
-  playerId              String   // Foreign key to PlayerProfile
-  seedPosition          Int?     // Seeding position (placeholder for future)
+  id           String @id @default(uuid())
+  groupId      String // Foreign key to Group
+  playerId     String // Foreign key to PlayerProfile
+  seedPosition Int? // Seeding position (placeholder for future)
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  group                 Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  player                PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  group  Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   // Constraints
   @@unique([groupId, playerId])
   @@index([groupId])
   @@index([playerId])
+}
+
+// Doubles Pair Management Models (006-doubles-pairs)
+
+model DoublesPair {
+  id           String    @id @default(uuid())
+  player1Id    String // Lower player ID (always sorted)
+  player2Id    String // Higher player ID (always sorted)
+  categoryId   String // Foreign key to Category (must be DOUBLES type)
+  seedingScore Float     @default(0) // Combined ranking points for tournament seeding
+  deletedAt    DateTime? // Soft delete timestamp (null = active)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  player1           PlayerProfile      @relation("DoublesPairPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
+  player2           PlayerProfile      @relation("DoublesPairPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
+  category          Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  pairRankings      PairRanking[]
+  pairRegistrations PairRegistration[]
+  matchesAsPair1    Match[]            @relation("MatchPair1")
+  matchesAsPair2    Match[]            @relation("MatchPair2")
+
+  // Constraints
+  @@unique([player1Id, player2Id, categoryId]) // Prevents duplicate pairs in same category
+  @@index([player1Id, deletedAt]) // Fast lookup of pairs containing player1
+  @@index([player2Id, deletedAt]) // Fast lookup of pairs containing player2
+  @@index([categoryId, deletedAt]) // Fast lookup of active pairs in category
+  @@index([categoryId, seedingScore, deletedAt]) // Tournament bracket generation
+}
+
+model PairRanking {
+  id          String   @id @default(uuid())
+  pairId      String // Foreign key to DoublesPair
+  categoryId  String // Foreign key to Category
+  rank        Int // Current rank position (1 = first place)
+  points      Float    @default(0) // Total points earned by this specific pair
+  wins        Int      @default(0) // Total wins by this pair
+  losses      Int      @default(0) // Total losses by this pair
+  lastUpdated DateTime @updatedAt // When ranking was last recalculated
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  pair     DoublesPair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  category Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([pairId, categoryId]) // One ranking per pair per category
+  @@index([categoryId, rank]) // Fast leaderboard queries
+  @@index([pairId])
+}
+
+model PairRegistration {
+  id                    String                       @id @default(uuid())
+  tournamentId          String // Foreign key to Tournament
+  pairId                String // Foreign key to DoublesPair
+  status                TournamentRegistrationStatus @default(REGISTERED)
+  registrationTimestamp DateTime                     @default(now()) // Used for tie-breaking in seeding
+  eligibilityOverride   Boolean                      @default(false) // True if organizer bypassed eligibility
+  overrideReason        String? // Required if eligibilityOverride = true
+  promotedAt            DateTime? // When promoted from waitlist
+  demotedAt             DateTime? // When demoted to waitlist
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+
+  // Relationships
+  tournament Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  pair       DoublesPair @relation(fields: [pairId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([tournamentId, pairId]) // Pair can only register once per tournament
+  @@index([tournamentId, status]) // Fast lookup of registrations by tournament and status
+  @@index([tournamentId, registrationTimestamp]) // Tie-breaking for seeding
+  @@index([pairId, status]) // Fast lookup of pair's active registrations
 }

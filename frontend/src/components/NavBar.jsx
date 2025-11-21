@@ -75,6 +75,16 @@ const NavBar = () => {
                 Rankings
               </span>
             </li>
+            {/* 006-doubles-pairs (T034): Pair rankings link */}
+            <li className="nav-item">
+              <span
+                className="nav-link"
+                onClick={() => navigate('/rankings/pairs')}
+                style={{ cursor: 'pointer' }}
+              >
+                Pair Rankings
+              </span>
+            </li>
 
             {/* Organizer/Admin Links */}
             {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
@@ -128,6 +138,16 @@ const NavBar = () => {
                     style={{ cursor: 'pointer' }}
                   >
                     Categories
+                  </span>
+                </li>
+                {/* 006-doubles-pairs (T034): Pair registration link */}
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/pairs')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Doubles Pairs
                   </span>
                 </li>
               </>

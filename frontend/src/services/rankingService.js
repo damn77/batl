@@ -48,6 +48,28 @@ export const getPlayerAllRankings = async (playerId) => {
   return response.data.data; // { playerId, playerName, rankings: [] }
 };
 
+/**
+ * Get pair rankings for a doubles category
+ * Feature: 006-doubles-pairs - User Story 2 (T047)
+ * @param {string} categoryId - Category UUID (must be DOUBLES type)
+ * @param {Object} options - Optional pagination (page, limit)
+ * @returns {Promise} Pair rankings with metadata
+ */
+export const getPairRankings = async (categoryId, options = {}) => {
+  const params = new URLSearchParams();
+
+  if (options.page) params.append('page', options.page);
+  if (options.limit) params.append('limit', options.limit);
+
+  const query = params.toString();
+  const url = query
+    ? `/v1/rankings/pairs/${categoryId}?${query}`
+    : `/v1/rankings/pairs/${categoryId}`;
+
+  const response = await apiClient.get(url);
+  return response.data.data; // { category, rankings: [], pagination: {} }
+};
+
 // Helper to format win rate as percentage
 export const formatWinRate = (winRate) => {
   return `${(winRate * 100).toFixed(1)}%`;

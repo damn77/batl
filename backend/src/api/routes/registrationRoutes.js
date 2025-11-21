@@ -7,7 +7,10 @@ import {
   getCategoryRegistrations,
   withdrawRegistration,
   reactivateRegistration,
-  bulkRegisterPlayer
+  bulkRegisterPlayer,
+  registerPairForTournament,
+  withdrawPairRegistration,
+  checkPairEligibility
 } from '../registrationController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -99,6 +102,41 @@ router.patch(
   isAuthenticated,
   authorize('reactivate', 'Registration'),
   reactivateRegistration
+);
+
+/**
+ * POST /api/v1/registrations/pair
+ * Register a doubles pair for a tournament
+ * Authorization: ADMIN, ORGANIZER, or PLAYER (must be in pair)
+ * Feature: 006-doubles-pairs (T026)
+ */
+router.post(
+  '/pair',
+  isAuthenticated,
+  registerPairForTournament
+);
+
+/**
+ * POST /api/v1/registrations/pair/check
+ * Check pair eligibility for tournament
+ * Authorization: Not required (public)
+ * Feature: 006-doubles-pairs
+ */
+router.post(
+  '/pair/check',
+  checkPairEligibility
+);
+
+/**
+ * DELETE /api/v1/registrations/pair/:id
+ * Withdraw pair registration
+ * Authorization: ADMIN, ORGANIZER, or PLAYER (must be in pair)
+ * Feature: 006-doubles-pairs (T027)
+ */
+router.delete(
+  '/pair/:id',
+  isAuthenticated,
+  withdrawPairRegistration
 );
 
 export default router;

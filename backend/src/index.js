@@ -13,6 +13,7 @@ import tournamentRoutes from './api/routes/tournamentRoutes.js';
 import registrationRoutes from './api/routes/registrationRoutes.js';
 import rankingRoutes from './api/routes/rankingRoutes.js';
 import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
+import pairRoutes from './api/routes/pairRoutes.js';
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -119,6 +120,7 @@ app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/tournaments', tournamentRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
+app.use('/api/v1/pairs', pairRoutes);
 app.use('/api/tournaments', tournamentRegistrationRoutes);
 // Tournament rules routes with specific base paths
 app.use('/api/v1/tournament-rules', tournamentRulesRouter);

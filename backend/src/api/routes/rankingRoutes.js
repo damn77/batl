@@ -5,6 +5,7 @@ import {
   getPlayerRankingInCategory,
   getPlayerAllRankings
 } from '../rankingController.js';
+import { getPairRankings } from '../pairController.js';
 import { validateQuery, schemas } from '../../middleware/validate.js';
 
 const router = express.Router();
@@ -38,6 +39,17 @@ router.get(
 router.get(
   '/player/:playerId',
   getPlayerAllRankings
+);
+
+/**
+ * GET /api/v1/rankings/pairs/:categoryId
+ * Get pair rankings leaderboard for doubles category
+ * Authorization: PUBLIC - No authentication required
+ * Feature: 006-doubles-pairs - User Story 2 (T045)
+ */
+router.get(
+  '/pairs/:categoryId',
+  getPairRankings
 );
 
 export default router;

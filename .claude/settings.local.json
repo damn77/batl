@@ -12,7 +12,12 @@
       "Bash(else echo \"No checklists directory\")",
       "Bash(if [ -d \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\" ])",
       "Bash(then ls \"D:\\Workspace\\BATL\\specs\\002-category-system\\checklists\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx prisma format:*)",
+      "Bash(\"$USERPROFILE/bin/render.exe\":*)",
+      "Bash(\"$USERPROFILE/bin/render.exe\" config get)",
+      "Bash(\"$USERPROFILE/bin/render.exe\" whoami --output json)",
+      "Bash(\"$USERPROFILE/bin/render.exe\" projects --output json)"
     ],
     "deny": [],
     "ask": []
