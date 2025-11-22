@@ -546,6 +546,16 @@ export async function bulkRegisterPlayer(req, res, next) {
 export async function registerPairForTournament(req, res, next) {
   try {
     const { tournamentId, pairId, eligibilityOverride, overrideReason } = req.body;
+    const demoteRegistrationId = req.body.demoteRegistrationId;
+
+    console.log('[registerPairForTournament] Request received:', {
+      tournamentId,
+      pairId,
+      eligibilityOverride,
+      overrideReason,
+      demoteRegistrationId,
+      hasDemoteId: !!demoteRegistrationId,
+    });
 
     // Validate required fields
     if (!tournamentId || !pairId) {
@@ -563,7 +573,7 @@ export async function registerPairForTournament(req, res, next) {
 
     // Fetch pair first to check authorization
     const { getPairById } = await import('../services/pairService.js');
-    const pair = await getPairById(pairId);
+    const pair = await getPairById(pairId, true);
 
     if (!pair) {
       return res.status(404).json({
@@ -580,12 +590,22 @@ export async function registerPairForTournament(req, res, next) {
       return res.status(authResult.statusCode).json(authResult.error);
     }
 
+    console.log('[registerPairForTournament] Calling registerPair with:', {
+      tournamentId,
+      pairId,
+      demoteRegistrationId,
+    });
+
     // Register pair
     const registration = await pairRegistrationService.registerPair(
       tournamentId,
       pairId,
       req.user,
-      { eligibilityOverride, overrideReason }
+      {
+        eligibilityOverride,
+        overrideReason,
+        demoteRegistrationId
+      }
     );
 
     return res.status(201).json({

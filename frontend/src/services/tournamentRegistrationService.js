@@ -6,12 +6,18 @@ import apiClient from './apiClient';
  */
 
 /**
- * Register current user for a tournament
+ * Register current user (or specific player if organizer) for a tournament
  * @param {string} tournamentId - Tournament UUID
+ * @param {string} [playerId] - Optional Player UUID (ORGANIZER/ADMIN only)
+ * @param {string} [demoteRegistrationId] - Optional Registration ID to demote (ORGANIZER/ADMIN only)
  * @returns {Promise} Registration result with tournament and category info
  */
-export const registerForTournament = async (tournamentId) => {
-  const response = await apiClient.post(`/tournaments/${tournamentId}/register`);
+export const registerForTournament = async (tournamentId, playerId = null, demoteRegistrationId = null) => {
+  const data = {};
+  if (playerId) data.playerId = playerId;
+  if (demoteRegistrationId) data.demoteRegistrationId = demoteRegistrationId;
+
+  const response = await apiClient.post(`/tournaments/${tournamentId}/register`, data);
   return response.data.data;
 };
 

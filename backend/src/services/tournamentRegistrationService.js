@@ -192,7 +192,16 @@ function validateTournamentStatus(tournament) {
  * T012: Register player for tournament with auto-category enrollment
  * Main registration method combining all validations and business logic
  */
-export async function registerPlayer(playerId, tournamentId) {
+export async function registerPlayer(playerId, tournamentId, options = {}) {
+  const { demoteRegistrationId } = options;
+
+  console.log('[registerPlayer] Starting registration', {
+    playerId,
+    tournamentId,
+    demoteRegistrationId,
+    hasDemoteId: !!demoteRegistrationId,
+  });
+
   // Fetch tournament with category details
   const tournament = await prisma.tournament.findUnique({
     where: { id: tournamentId },
@@ -216,16 +225,279 @@ export async function registerPlayer(playerId, tournamentId) {
   // T017: Check for duplicate registration (FR-009)
   const duplicateCheck = await checkDuplicateTournamentRegistration(playerId, tournamentId);
 
-  // If re-registering after withdrawal, delete old record
+  // If re-registering after withdrawal
   if (duplicateCheck.canReregister) {
+    console.log('[registerPlayer] Re-registering withdrawn player', {
+      playerId,
+      previousRegistrationId: duplicateCheck.previous.id,
+    });
+
+    // Check if tournament is full and handle demotion for re-registration
+    if (tournament.capacity) {
+      const registeredCount = await prisma.tournamentRegistration.count({
+        where: {
+          tournamentId,
+          status: 'REGISTERED',
+        },
+      });
+
+      console.log('[registerPlayer] Re-registration capacity check', {
+        registeredCount,
+        capacity: tournament.capacity,
+        isFull: registeredCount >= tournament.capacity,
+      });
+
+      // If full and demotion requested
+      if (registeredCount >= tournament.capacity && demoteRegistrationId) {
+        // Verify the registration to demote
+        const registrationToDemote = await prisma.tournamentRegistration.findUnique({
+          where: { id: demoteRegistrationId },
+          include: {
+            player: { select: { name: true } },
+          },
+        });
+
+        if (!registrationToDemote) {
+          throw createHttpError(404, 'Registration to demote not found', {
+            code: 'REGISTRATION_NOT_FOUND',
+          });
+        }
+
+        if (registrationToDemote.status !== 'REGISTERED') {
+          throw createHttpError(400, `Cannot demote registration with status ${registrationToDemote.status}`, {
+            code: 'INVALID_STATUS',
+          });
+        }
+
+        console.log('[registerPlayer] Re-registration: demoting existing registration', {
+          demoteRegistrationId,
+          demotedPlayer: registrationToDemote.player.name,
+        });
+
+        // Use transaction to atomically demote and re-register
+        const result = await prisma.$transaction(async (tx) => {
+          // 1. Demote the specified registration
+          await tx.tournamentRegistration.update({
+            where: { id: demoteRegistrationId },
+            data: { status: 'WAITLISTED' },
+          });
+
+          // 2. Delete old withdrawn registration
+          await tx.tournamentRegistration.delete({
+            where: { id: duplicateCheck.previous.id },
+          });
+
+          // 3. Create new registration with REGISTERED status
+          const registration = await tx.tournamentRegistration.create({
+            data: {
+              playerId,
+              tournamentId,
+              status: 'REGISTERED',
+              registrationTimestamp: new Date(),
+            },
+            include: {
+              player: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  gender: true,
+                  birthDate: true,
+                },
+              },
+              tournament: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          });
+
+          return registration;
+        });
+
+        // Ensure category registration for REGISTERED players
+        const categoryResult = await ensureCategoryRegistration(
+          playerId,
+          tournament.categoryId,
+          'REGISTERED'
+        );
+
+        console.log('[registerPlayer] Re-registration with demotion completed', {
+          registrationId: result.id,
+          playerId,
+        });
+
+        return {
+          registration: result,
+          categoryRegistration: categoryResult.categoryRegistration
+            ? {
+              ...categoryResult.categoryRegistration,
+              isNew: categoryResult.isNew,
+            }
+            : null,
+          capacityInfo: { status: 'REGISTERED', capacity: tournament.capacity, currentCount: registeredCount },
+          message: 'Successfully registered for tournament',
+        };
+      }
+
+      // If full and no demotion, add to waitlist
+      if (registeredCount >= tournament.capacity) {
+        console.log('[registerPlayer] Re-registration: tournament full, adding to waitlist', {
+          registeredCount,
+          capacity: tournament.capacity,
+        });
+
+        // Delete old withdrawn registration
+        await prisma.tournamentRegistration.delete({
+          where: { id: duplicateCheck.previous.id },
+        });
+
+        // Create new registration with WAITLISTED status
+        const registration = await prisma.tournamentRegistration.create({
+          data: {
+            playerId,
+            tournamentId,
+            status: 'WAITLISTED',
+            registrationTimestamp: new Date(),
+          },
+          include: {
+            player: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                gender: true,
+                birthDate: true,
+              },
+            },
+            tournament: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        });
+
+        return {
+          registration,
+          categoryRegistration: null,
+          capacityInfo: { status: 'WAITLISTED', capacity: tournament.capacity, currentCount: registeredCount },
+          message: 'Added to waitlist - tournament is at capacity',
+        };
+      }
+    }
+
+    // Normal re-registration (not full)
     await prisma.tournamentRegistration.delete({
-      where: { id: duplicateCheck.previous.id }
+      where: { id: duplicateCheck.previous.id },
     });
   }
 
   // T013: Check capacity and determine status (FR-018, FR-031)
   const capacityCheck = await checkCapacity(tournamentId);
-  const registrationStatus = capacityCheck.status;
+  let registrationStatus = capacityCheck.status;
+
+  // If tournament is full, check for demotion
+  if (tournament.capacity && capacityCheck.currentCount >= tournament.capacity) {
+    console.log('[registerPlayer] Tournament is full', {
+      currentCount: capacityCheck.currentCount,
+      capacity: tournament.capacity,
+      demoteRegistrationId,
+    });
+
+    if (demoteRegistrationId) {
+      // Verify the registration to demote
+      const registrationToDemote = await prisma.tournamentRegistration.findUnique({
+        where: { id: demoteRegistrationId },
+        include: {
+          player: { select: { name: true } },
+        },
+      });
+
+      if (!registrationToDemote) {
+        throw createHttpError(404, 'Registration to demote not found', {
+          code: 'REGISTRATION_NOT_FOUND',
+        });
+      }
+
+      if (registrationToDemote.status !== 'REGISTERED') {
+        throw createHttpError(400, `Cannot demote registration with status ${registrationToDemote.status}`, {
+          code: 'INVALID_STATUS',
+        });
+      }
+
+      console.log('[registerPlayer] Demoting existing registration', {
+        demoteRegistrationId,
+        demotedPlayer: registrationToDemote.player.name,
+      });
+
+      // Use transaction to atomically demote and register
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Demote the specified registration
+        await tx.tournamentRegistration.update({
+          where: { id: demoteRegistrationId },
+          data: { status: 'WAITLISTED' },
+        });
+
+        // 2. Create new registration with REGISTERED status
+        const registration = await tx.tournamentRegistration.create({
+          data: {
+            playerId,
+            tournamentId,
+            status: 'REGISTERED',
+            registrationTimestamp: new Date(),
+          },
+          include: {
+            player: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                gender: true,
+                birthDate: true,
+              },
+            },
+            tournament: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        });
+
+        return registration;
+      });
+
+      // Ensure category registration for REGISTERED players
+      const categoryResult = await ensureCategoryRegistration(
+        playerId,
+        tournament.categoryId,
+        'REGISTERED'
+      );
+
+      console.log('[registerPlayer] Registration with demotion completed', {
+        registrationId: result.id,
+        playerId,
+      });
+
+      return {
+        registration: result,
+        categoryRegistration: categoryResult.categoryRegistration
+          ? {
+            ...categoryResult.categoryRegistration,
+            isNew: categoryResult.isNew,
+          }
+          : null,
+        capacityInfo: { status: 'REGISTERED', capacity: tournament.capacity, currentCount: capacityCheck.currentCount },
+        message: 'Successfully registered for tournament',
+      };
+    } else {
+      // No demotion specified, add to waitlist
+      registrationStatus = 'WAITLISTED';
+      console.log('[registerPlayer] No demotion ID, adding to waitlist');
+    }
+  }
 
   // T014: Validate category membership if waitlisted (FR-029, FR-030)
   await validateCategoryMembership(playerId, tournament.categoryId, registrationStatus);
@@ -267,9 +539,9 @@ export async function registerPlayer(playerId, tournamentId) {
     registration,
     categoryRegistration: categoryResult.categoryRegistration
       ? {
-          ...categoryResult.categoryRegistration,
-          isNew: categoryResult.isNew
-        }
+        ...categoryResult.categoryRegistration,
+        isNew: categoryResult.isNew
+      }
       : null,
     capacityInfo: capacityCheck,
     message: registrationStatus === 'WAITLISTED'
@@ -401,13 +673,13 @@ export async function unregisterPlayer(playerId, tournamentId) {
     registration: result.withdrawnRegistration,
     promotedPlayer: result.promotedRegistration
       ? {
-          id: result.promotedRegistration.id,
-          playerId: result.promotedRegistration.playerId,
-          playerName: result.promotedRegistration.player.name,
-          status: result.promotedRegistration.status,
-          promotedAt: result.promotedRegistration.promotedAt,
-          promotedBy: result.promotedRegistration.promotedBy
-        }
+        id: result.promotedRegistration.id,
+        playerId: result.promotedRegistration.playerId,
+        playerName: result.promotedRegistration.player.name,
+        status: result.promotedRegistration.status,
+        promotedAt: result.promotedRegistration.promotedAt,
+        promotedBy: result.promotedRegistration.promotedBy
+      }
       : null,
     categoryCleanup: {
       unregistered: categoryUnregistered,
@@ -514,4 +786,137 @@ export async function getPlayerTournaments(playerId, status = null) {
   });
 
   return registrations;
+}
+
+/**
+ * Withdraw a player from a tournament by registration ID (organizer/admin use)
+ * Same logic as unregisterPlayer but takes registration ID instead of playerId + tournamentId
+ */
+export async function withdrawPlayerByRegistrationId(registrationId) {
+  // Fetch current registration
+  const registration = await prisma.tournamentRegistration.findUnique({
+    where: { id: registrationId },
+    include: {
+      tournament: {
+        include: {
+          category: true
+        }
+      }
+    }
+  });
+
+  if (!registration) {
+    throw createHttpError(404, 'Registration not found', {
+      code: 'REGISTRATION_NOT_FOUND'
+    });
+  }
+
+  // Check if already withdrawn
+  if (registration.status === 'WITHDRAWN' || registration.status === 'CANCELLED') {
+    throw createHttpError(400, 'Registration already withdrawn or cancelled', {
+      code: 'ALREADY_WITHDRAWN',
+      currentStatus: registration.status
+    });
+  }
+
+  const playerId = registration.playerId;
+  const tournamentId = registration.tournamentId;
+  const categoryId = registration.tournament.categoryId;
+  const wasRegistered = registration.status === 'REGISTERED';
+
+  // Use transaction for atomic withdrawal + auto-promotion
+  const result = await prisma.$transaction(async (tx) => {
+    // Update registration to WITHDRAWN
+    const withdrawnRegistration = await tx.tournamentRegistration.update({
+      where: { id: registrationId },
+      data: {
+        status: 'WITHDRAWN',
+        withdrawnAt: new Date()
+      }
+    });
+
+    let promotedRegistration = null;
+
+    // Auto-promote from waitlist if player was REGISTERED (freeing up a spot)
+    if (wasRegistered) {
+      // Find oldest waitlisted player (FIFO by registrationTimestamp)
+      const nextWaitlisted = await tx.tournamentRegistration.findFirst({
+        where: {
+          tournamentId,
+          status: 'WAITLISTED'
+        },
+        orderBy: {
+          registrationTimestamp: 'asc' // Oldest first
+        },
+        include: {
+          player: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      });
+
+      // Promote if found
+      if (nextWaitlisted) {
+        promotedRegistration = await tx.tournamentRegistration.update({
+          where: { id: nextWaitlisted.id },
+          data: {
+            status: 'REGISTERED',
+            promotedBy: 'SYSTEM',
+            promotedAt: new Date()
+          },
+          include: {
+            player: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        });
+      }
+    }
+
+    return {
+      withdrawnRegistration,
+      promotedRegistration
+    };
+  });
+
+  // Smart category cleanup (after transaction)
+  const cleanupResult = await categoryService.shouldUnregisterFromCategory(playerId, categoryId);
+
+  let categoryUnregistered = false;
+  if (cleanupResult.shouldUnregister) {
+    // Delete category registration
+    await prisma.categoryRegistration.delete({
+      where: {
+        playerId_categoryId: {
+          playerId,
+          categoryId
+        }
+      }
+    });
+    categoryUnregistered = true;
+  }
+
+  return {
+    registration: result.withdrawnRegistration,
+    promotedPlayer: result.promotedRegistration ? {
+      playerId: result.promotedRegistration.playerId,
+      playerName: result.promotedRegistration.player.name,
+      playerEmail: result.promotedRegistration.player.email
+    } : null,
+    categoryCleanup: {
+      unregistered: categoryUnregistered,
+      reason: cleanupResult.reason
+    },
+    message: result.promotedRegistration
+      ? `Player unregistered. ${result.promotedRegistration.player.name} has been promoted from the waitlist.`
+      : 'Player unregistered successfully'
+  };
 }

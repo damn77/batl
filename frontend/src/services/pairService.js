@@ -11,13 +11,15 @@ import apiClient from './apiClient';
  * @param {string} player1Id - First player UUID
  * @param {string} player2Id - Second player UUID
  * @param {string} categoryId - Category UUID (must be DOUBLES type)
+ * @param {boolean} allowIneligible - Allow creating ineligible pairs (organizer/admin only)
  * @returns {Promise} Pair object with isNew flag
  */
-export const createOrGetPair = async (player1Id, player2Id, categoryId) => {
+export const createOrGetPair = async (player1Id, player2Id, categoryId, allowIneligible = false) => {
   const response = await apiClient.post('/v1/pairs', {
     player1Id,
     player2Id,
     categoryId,
+    allowIneligible,
   });
   return response.data.data;
 };
@@ -66,19 +68,22 @@ export const listPairs = async (options = {}) => {
  * @param {string} pairId - Pair UUID
  * @param {boolean} eligibilityOverride - Bypass eligibility checks (ORGANIZER/ADMIN only)
  * @param {string} overrideReason - Required if eligibilityOverride is true
+ * @param {string} demoteRegistrationId - Registration ID to demote if tournament is full (ORGANIZER/ADMIN only)
  * @returns {Promise} Registration object
  */
 export const registerPairForTournament = async (
   tournamentId,
   pairId,
   eligibilityOverride = false,
-  overrideReason = null
+  overrideReason = null,
+  demoteRegistrationId = null
 ) => {
   const response = await apiClient.post('/v1/registrations/pair', {
     tournamentId,
     pairId,
     eligibilityOverride,
     overrideReason,
+    demoteRegistrationId,
   });
   return response.data.data;
 };
@@ -124,6 +129,27 @@ export const getPlayerPairs = async (playerId, options = {}) => {
  */
 export const recalculateCategorySeeding = async (categoryId) => {
   const response = await apiClient.post(`/v1/pairs/recalculate-seeding/${categoryId}`);
+  return response.data.data;
+};
+
+/**
+ * T077: Get tournament history for a pair
+ * @param {string} pairId - Pair UUID
+ * @param {Object} options - Pagination options
+ * @param {number} options.page - Page number (default: 1)
+ * @param {number} options.limit - Items per page (default: 20)
+ * @returns {Promise} { pair, stats, history: [], pagination }
+ */
+export const getPairHistory = async (pairId, options = {}) => {
+  const params = new URLSearchParams();
+
+  if (options.page) params.append('page', options.page);
+  if (options.limit) params.append('limit', options.limit);
+
+  const query = params.toString();
+  const url = query ? `/v1/pairs/${pairId}/history?${query}` : `/v1/pairs/${pairId}/history`;
+
+  const response = await apiClient.get(url);
   return response.data.data;
 };
 
