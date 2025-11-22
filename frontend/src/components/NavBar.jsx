@@ -116,6 +116,15 @@ const NavBar = () => {
                     Players
                   </span>
                 </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/pairs')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Doubles Pairs
+                  </span>
+                </li>
               </>
             )}
 

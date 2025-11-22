@@ -87,7 +87,7 @@ const OrganizerPlayersPage = () => {
 
         {/* Search and Filters */}
         <Row className="mb-3">
-          <Col md={6}>
+          <Col md={8}>
             <Form onSubmit={handleSearch}>
               <InputGroup>
                 <Form.Control
@@ -115,20 +115,18 @@ const OrganizerPlayersPage = () => {
             </Form>
           </Col>
           <Col md={4}>
-            <Form.Group>
-              <Form.Label>Account Status</Form.Label>
-              <Form.Select
-                value={accountFilter}
-                onChange={(e) => {
-                  setAccountFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="">All Players</option>
-                <option value="true">With Account</option>
-                <option value="false">Without Account</option>
-              </Form.Select>
-            </Form.Group>
+            <Form.Select
+              value={accountFilter}
+              onChange={(e) => {
+                setAccountFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              aria-label="Filter by account status"
+            >
+              <option value="">All Players</option>
+              <option value="true">With Account</option>
+              <option value="false">Without Account</option>
+            </Form.Select>
           </Col>
         </Row>
 

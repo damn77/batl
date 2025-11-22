@@ -1,7 +1,10 @@
 // T052-T064: Player List Panel Component - Display registered players with status and rankings
 import { useState, useEffect, useMemo } from 'react';
-import { Card, Table, Badge, Button, Form, InputGroup, Collapse, Alert, Spinner } from 'react-bootstrap';
+import { Card, Table, Badge, Button, Form, InputGroup, Collapse, Alert, Spinner, Modal } from 'react-bootstrap';
 import { getTournamentRegistrations, STATUS_LABELS, STATUS_VARIANTS } from '../services/tournamentRegistrationService';
+import { withdrawPairRegistration } from '../services/pairService';
+import apiClient from '../services/apiClient';
+import { useAuth } from '../utils/AuthContext';
 
 /**
  * PlayerListPanel - Displays all registered players with status, rankings, and waitlist support
@@ -10,11 +13,18 @@ import { getTournamentRegistrations, STATUS_LABELS, STATUS_VARIANTS } from '../s
  * @param {Object} tournament - Tournament object with formatType and waitlistDisplayOrder
  */
 const PlayerListPanel = ({ tournament }) => {
+  const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showWaitlist, setShowWaitlist] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [registrationType, setRegistrationType] = useState('SINGLES'); // 'SINGLES' or 'DOUBLES'
+  const [unregisteringId, setUnregisteringId] = useState(null);
+  const [showUnregisterModal, setShowUnregisterModal] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState(null);
+
+  const isOrganizer = user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
 
   useEffect(() => {
     if (tournament?.id) {
@@ -28,10 +38,40 @@ const PlayerListPanel = ({ tournament }) => {
       setError(null);
       const data = await getTournamentRegistrations(tournament.id);
       setRegistrations(data.registrations || []);
+      setRegistrationType(data.type || 'SINGLES');
     } catch (err) {
       setError(err.message || 'Failed to load player list');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUnregisterClick = (registration) => {
+    setSelectedRegistration(registration);
+    setShowUnregisterModal(true);
+  };
+
+  const handleUnregisterConfirm = async () => {
+    if (!selectedRegistration) return;
+
+    try {
+      setUnregisteringId(selectedRegistration.id);
+      setShowUnregisterModal(false);
+
+      if (registrationType === 'DOUBLES') {
+        await withdrawPairRegistration(selectedRegistration.id);
+      } else {
+        // For SINGLES, call the tournament registration withdrawal endpoint
+        await apiClient.delete(`/tournaments/registrations/${selectedRegistration.id}`);
+      }
+
+      // Reload registrations
+      await loadRegistrations();
+    } catch (err) {
+      setError(`Failed to unregister: ${err.message}`);
+    } finally {
+      setUnregisteringId(null);
+      setSelectedRegistration(null);
     }
   };
 
@@ -55,18 +95,27 @@ const PlayerListPanel = ({ tournament }) => {
   const filteredRegisteredPlayers = useMemo(() => {
     if (!searchTerm) return registeredPlayers;
     const term = searchTerm.toLowerCase();
-    return registeredPlayers.filter(r =>
-      r.player?.name?.toLowerCase().includes(term)
-    );
-  }, [registeredPlayers, searchTerm]);
+    return registeredPlayers.filter(r => {
+      if (registrationType === 'DOUBLES') {
+        // Search by either player name in the pair
+        return r.pair?.player1?.name?.toLowerCase().includes(term) ||
+          r.pair?.player2?.name?.toLowerCase().includes(term);
+      }
+      return r.player?.name?.toLowerCase().includes(term);
+    });
+  }, [registeredPlayers, searchTerm, registrationType]);
 
   const filteredWaitlistedPlayers = useMemo(() => {
     if (!searchTerm) return waitlistedPlayers;
     const term = searchTerm.toLowerCase();
-    return waitlistedPlayers.filter(r =>
-      r.player?.name?.toLowerCase().includes(term)
-    );
-  }, [waitlistedPlayers, searchTerm]);
+    return waitlistedPlayers.filter(r => {
+      if (registrationType === 'DOUBLES') {
+        return r.pair?.player1?.name?.toLowerCase().includes(term) ||
+          r.pair?.player2?.name?.toLowerCase().includes(term);
+      }
+      return r.player?.name?.toLowerCase().includes(term);
+    });
+  }, [waitlistedPlayers, searchTerm, registrationType]);
 
   // T060: Determine format-specific columns
   const getFormatSpecificColumns = () => {
@@ -114,29 +163,86 @@ const PlayerListPanel = ({ tournament }) => {
     }
   };
 
-  // Render player row
-  const renderPlayerRow = (registration, index) => (
-    <tr key={registration.id || index}>
-      <td>{index + 1}</td>
-      <td>
-        <strong>{registration.player?.name || 'Unknown'}</strong>
-      </td>
-      <td className="text-center">
-        {registration.player?.ranking || '-'}
-      </td>
-      <td className="text-center">
-        {registration.seedPosition || '-'}
-      </td>
-      {formatSpecificColumns.map(column => (
-        <td key={column} className="text-center">
-          {renderFormatSpecificData(registration, column)}
+  // Render player/pair row
+  const renderPlayerRow = (registration, index) => {
+    const isUnregistering = unregisteringId === registration.id;
+
+    if (registrationType === 'DOUBLES') {
+      // Render pair row
+      return (
+        <tr key={registration.id || index}>
+          <td>{index + 1}</td>
+          <td>
+            <strong>{registration.pair?.player1?.name || 'Unknown'}</strong>
+            <span className="text-muted"> & </span>
+            <strong>{registration.pair?.player2?.name || 'Unknown'}</strong>
+          </td>
+          <td className="text-center">
+            {registration.pair?.seedingScore || '-'}
+          </td>
+          <td className="text-center">
+            {registration.seedPosition || '-'}
+          </td>
+          {formatSpecificColumns.map(column => (
+            <td key={column} className="text-center">
+              {renderFormatSpecificData(registration, column)}
+            </td>
+          ))}
+          <td className="text-center">
+            {renderStatusBadge(registration.status)}
+          </td>
+          {isOrganizer && (
+            <td className="text-center">
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => handleUnregisterClick(registration)}
+                disabled={isUnregistering}
+              >
+                {isUnregistering ? 'Removing...' : 'Unregister'}
+              </Button>
+            </td>
+          )}
+        </tr>
+      );
+    }
+
+    // Render individual player row
+    return (
+      <tr key={registration.id || index}>
+        <td>{index + 1}</td>
+        <td>
+          <strong>{registration.player?.name || 'Unknown'}</strong>
         </td>
-      ))}
-      <td className="text-center">
-        {renderStatusBadge(registration.status)}
-      </td>
-    </tr>
-  );
+        <td className="text-center">
+          {registration.player?.ranking || '-'}
+        </td>
+        <td className="text-center">
+          {registration.seedPosition || '-'}
+        </td>
+        {formatSpecificColumns.map(column => (
+          <td key={column} className="text-center">
+            {renderFormatSpecificData(registration, column)}
+          </td>
+        ))}
+        <td className="text-center">
+          {renderStatusBadge(registration.status)}
+        </td>
+        {isOrganizer && (
+          <td className="text-center">
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={() => handleUnregisterClick(registration)}
+              disabled={isUnregistering}
+            >
+              {isUnregistering ? 'Removing...' : 'Unregister'}
+            </Button>
+          </td>
+        )}
+      </tr>
+    );
+  };
 
   if (loading) {
     return (
@@ -183,7 +289,9 @@ const PlayerListPanel = ({ tournament }) => {
     <Card className="border-0 shadow-sm">
       <Card.Body className="p-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h4 className="mb-0">Registered Players</h4>
+          <h4 className="mb-0">
+            {registrationType === 'DOUBLES' ? 'Registered Pairs' : 'Registered Players'}
+          </h4>
           <Badge bg="primary" className="px-3 py-2">
             {registeredPlayers.length} / {tournament.capacity || '∞'}
           </Badge>
@@ -215,13 +323,14 @@ const PlayerListPanel = ({ tournament }) => {
               <thead className="table-light">
                 <tr>
                   <th style={{ width: '50px' }}>#</th>
-                  <th>Player Name</th>
-                  <th className="text-center">Ranking</th>
+                  <th>{registrationType === 'DOUBLES' ? 'Pair' : 'Player Name'}</th>
+                  <th className="text-center">{registrationType === 'DOUBLES' ? 'Score' : 'Ranking'}</th>
                   <th className="text-center">Seed</th>
                   {formatSpecificColumns.map(column => (
                     <th key={column} className="text-center">{column}</th>
                   ))}
                   <th className="text-center">Status</th>
+                  {isOrganizer && <th className="text-center">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -265,13 +374,14 @@ const PlayerListPanel = ({ tournament }) => {
                       <thead className="table-warning">
                         <tr>
                           <th style={{ width: '50px' }}>#</th>
-                          <th>Player Name</th>
-                          <th className="text-center">Ranking</th>
+                          <th>{registrationType === 'DOUBLES' ? 'Pair' : 'Player Name'}</th>
+                          <th className="text-center">{registrationType === 'DOUBLES' ? 'Score' : 'Ranking'}</th>
                           <th className="text-center">Seed</th>
                           {formatSpecificColumns.map(column => (
                             <th key={column} className="text-center">{column}</th>
                           ))}
                           <th className="text-center">Status</th>
+                          {isOrganizer && <th className="text-center">Actions</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -290,6 +400,36 @@ const PlayerListPanel = ({ tournament }) => {
             </Collapse>
           </>
         )}
+
+        {/* Unregister Confirmation Modal */}
+        <Modal show={showUnregisterModal} onHide={() => setShowUnregisterModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Unregistration</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedRegistration && (
+              <p>
+                Are you sure you want to unregister{' '}
+                {registrationType === 'DOUBLES' ? (
+                  <strong>
+                    {selectedRegistration.pair?.player1?.name} & {selectedRegistration.pair?.player2?.name}
+                  </strong>
+                ) : (
+                  <strong>{selectedRegistration.player?.name}</strong>
+                )}
+                {' '}from this tournament?
+              </p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowUnregisterModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleUnregisterConfirm}>
+              Unregister
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Card.Body>
     </Card>
   );
