@@ -60,6 +60,7 @@ const PairRegistrationPage = () => {
   // T072: Override state (organizer/admin only)
   const [eligibilityOverride, setEligibilityOverride] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
+  const [allowIneligiblePair, setAllowIneligiblePair] = useState(false);
 
   // Loading states
   const [loading, setLoading] = useState(false);
@@ -184,7 +185,7 @@ const PairRegistrationPage = () => {
       setError(null);
       setSuccess(null);
 
-      const pair = await createOrGetPair(player1Id, player2Id, selectedCategoryId);
+      const pair = await createOrGetPair(player1Id, player2Id, selectedCategoryId, allowIneligiblePair);
 
       if (pair.isNew) {
         setCreatedPair(pair);
@@ -268,20 +269,26 @@ const PairRegistrationPage = () => {
       // Reload player pairs to show updated registrations
       await loadPlayerPairs();
     } catch (err) {
-      const errorData = err.response?.data?.error;
-      if (errorData?.violations) {
+      console.error('Registration error:', err);
+
+      // Handle both apiClient custom error object and raw axios error
+      // apiClient interceptor returns { status, code, message, details } directly
+      const errorData = err.response?.data?.error || err;
+      const violations = errorData?.details?.violations || errorData?.violations;
+
+      if (violations) {
         setError(
           <div>
             <strong>Eligibility violations:</strong>
             <ul>
-              {errorData.violations.map((v, idx) => (
+              {violations.map((v, idx) => (
                 <li key={idx}>{v}</li>
               ))}
             </ul>
           </div>
         );
       } else {
-        setError(`Failed to register pair: ${errorData?.message || err.message}`);
+        setError(`Failed to register pair: ${errorData?.message || err.message || 'Unknown error'}`);
       }
     } finally {
       setRegistering(false);
@@ -489,6 +496,22 @@ const PairRegistrationPage = () => {
                         Only DOUBLES type categories are shown
                       </Form.Text>
                     </Form.Group>
+
+                    {/* Allow ineligible pair creation (organizer/admin only) */}
+                    {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
+                      <Form.Group className="mb-3">
+                        <Form.Check
+                          type="checkbox"
+                          id="allowIneligiblePair"
+                          label="Allow creating ineligible pair (Override eligibility requirements)"
+                          checked={allowIneligiblePair}
+                          onChange={(e) => setAllowIneligiblePair(e.target.checked)}
+                        />
+                        <Form.Text className="text-muted">
+                          Check this to create a pair that doesn't meet category eligibility requirements
+                        </Form.Text>
+                      </Form.Group>
+                    )}
 
                     <Button
                       variant="primary"

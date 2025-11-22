@@ -4,6 +4,7 @@
 import { PrismaClient } from '@prisma/client';
 import { sortPlayerIds } from '../utils/pairHelpers.js';
 import { PairErrorCodes, createPairError } from '../utils/pairErrors.js';
+import { pairLogger } from '../utils/logger.js';
 
 const prisma = new PrismaClient();
 
@@ -72,10 +73,14 @@ function validatePlayerEligibility(player, category) {
  * @param {string} player1Id - First player ID
  * @param {string} player2Id - Second player ID
  * @param {string} categoryId - Category ID (must be DOUBLES type)
+ * @param {Object} options - Optional settings
+ * @param {boolean} [options.allowIneligible=false] - Allow creating ineligible pairs (organizer/admin only)
  * @returns {Promise<Object>} Created or existing pair with isNew flag
  * @throws {Error} If validation fails
  */
-export async function createOrGetPair(player1Id, player2Id, categoryId) {
+export async function createOrGetPair(player1Id, player2Id, categoryId, options = {}) {
+  const { allowIneligible = false } = options;
+
   // Sort player IDs to ensure consistent ordering
   let sortedIds;
   try {
@@ -125,21 +130,29 @@ export async function createOrGetPair(player1Id, player2Id, categoryId) {
     );
   }
 
-  // Validate both players meet category eligibility requirements
-  const player1Eligibility = validatePlayerEligibility(player1, category);
-  const player2Eligibility = validatePlayerEligibility(player2, category);
+  // Validate both players meet category eligibility requirements (unless override allowed)
+  if (!allowIneligible) {
+    const player1Eligibility = validatePlayerEligibility(player1, category);
+    const player2Eligibility = validatePlayerEligibility(player2, category);
 
-  const eligibilityViolations = [
-    ...(player1Eligibility.reasons || []),
-    ...(player2Eligibility.reasons || [])
-  ];
+    const eligibilityViolations = [
+      ...(player1Eligibility.reasons || []),
+      ...(player2Eligibility.reasons || [])
+    ];
 
-  if (eligibilityViolations.length > 0) {
-    throw createPairError(
-      PairErrorCodes.INELIGIBLE_PAIR,
-      'One or both players do not meet category eligibility requirements',
-      { violations: eligibilityViolations }
-    );
+    if (eligibilityViolations.length > 0) {
+      throw createPairError(
+        PairErrorCodes.INELIGIBLE_PAIR,
+        'One or both players do not meet category eligibility requirements',
+        { violations: eligibilityViolations }
+      );
+    }
+  } else {
+    pairLogger.info('Creating pair with eligibility override', {
+      player1Id: p1,
+      player2Id: p2,
+      categoryId,
+    });
   }
 
   // Check if pair already exists (including soft-deleted)
@@ -213,6 +226,13 @@ export async function createOrGetPair(player1Id, player2Id, categoryId) {
 
   // If pair exists but is soft-deleted, un-delete it
   if (existingPair && existingPair.deletedAt) {
+    pairLogger.info('Restoring soft-deleted pair', {
+      pairId: existingPair.id,
+      player1Id: p1,
+      player2Id: p2,
+      categoryId,
+    });
+
     const restoredPair = await prisma.doublesPair.update({
       where: { id: existingPair.id },
       data: {
@@ -287,6 +307,13 @@ export async function createOrGetPair(player1Id, player2Id, categoryId) {
     (player1Ranking?.points || 0) + (player2Ranking?.points || 0);
 
   // Create new pair
+  pairLogger.info('Creating new pair', {
+    player1Id: p1,
+    player2Id: p2,
+    categoryId,
+    seedingScore: initialSeedingScore,
+  });
+
   const newPair = await prisma.doublesPair.create({
     data: {
       player1Id: p1,
@@ -547,6 +574,11 @@ export async function checkAndDeleteInactivePair(pairId) {
   }
 
   // No active registrations and no current season participation - soft delete
+  pairLogger.info('Soft-deleting inactive pair', {
+    pairId,
+    reason: 'No active registrations and no current season participation',
+  });
+
   await prisma.doublesPair.update({
     where: { id: pairId },
     data: {
@@ -647,6 +679,11 @@ export async function recalculateCategorySeedingScores(categoryId) {
   });
 
   await Promise.all(updates);
+
+  pairLogger.info('Recalculated seeding scores for category', {
+    categoryId,
+    pairsUpdated: pairs.length,
+  });
 
   return pairs.length;
 }

@@ -23,6 +23,14 @@ router.post('/', isAuthenticated, pairController.createPair);
 router.post('/recalculate-seeding/:categoryId', isAuthenticated, pairController.recalculateCategorySeeding);
 
 /**
+ * GET /api/v1/pairs/:id/history
+ * Get tournament history for a pair
+ * Auth: Not required (public)
+ * Feature: 006-doubles-pairs - Phase 7 (T078)
+ */
+router.get('/:id/history', pairController.getPairHistory);
+
+/**
  * GET /api/v1/pairs/:id
  * Get pair details by ID
  * Auth: Not required (public)
