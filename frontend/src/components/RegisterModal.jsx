@@ -95,13 +95,21 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
         setTimeout(() => {
           // Close modal BEFORE navigation to prevent stale state
           handleClose();
-          login(data.user);
+          login({
+            ...data.user,
+            playerId: data.profile.id
+          });
         }, 2000);
       } else {
         // Close modal BEFORE navigation to prevent stale state
         handleClose();
         // Auto-login after successful registration
-        login(data.user);
+        // Ensure user object has playerId from the created profile
+        const userWithProfile = {
+          ...data.user,
+          playerId: data.profile.id
+        };
+        login(userWithProfile);
       }
     } catch (err) {
       const errorMessage = err.message || err.response?.data?.error?.message || 'Registration failed';
@@ -110,7 +118,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
 
       // Handle email-specific errors
       if (errorDetails?.field === 'email' ||
-          (errorCode === 'CONFLICT' && errorMessage.toLowerCase().includes('email'))) {
+        (errorCode === 'CONFLICT' && errorMessage.toLowerCase().includes('email'))) {
         setValidationErrors({ email: errorMessage });
       } else {
         setError(errorMessage);

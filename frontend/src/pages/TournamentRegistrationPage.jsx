@@ -189,20 +189,25 @@ const TournamentRegistrationPage = () => {
       setSuccess(statusMessage);
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
-      const errorData = err.response?.data?.error;
-      if (errorData?.details?.violations) {
+      console.error('Pair registration error:', err);
+
+      // Handle both apiClient custom error object and raw axios error
+      const errorData = err.response?.data?.error || err;
+      const violations = errorData?.details?.violations || errorData?.violations;
+
+      if (violations) {
         setError(
           <div>
             <strong>Registration failed:</strong>
             <ul className="mb-0 mt-1">
-              {errorData.details.violations.map((v, idx) => (
+              {violations.map((v, idx) => (
                 <li key={idx}>{v}</li>
               ))}
             </ul>
           </div>
         );
       } else {
-        setError(errorData?.message || 'Failed to register pair');
+        setError(errorData?.message || err.message || 'Failed to register pair');
       }
     } finally {
       setPairModalLoading(false);
@@ -259,6 +264,7 @@ const TournamentRegistrationPage = () => {
     if (!selectedTournament) return;
 
     const tournamentId = selectedTournament.id;
+    const tournamentName = selectedTournament.name;
     setLoadingRegistrations({ ...loadingRegistrations, [tournamentId]: true });
     setError(null);
     setSuccess(null);
@@ -267,15 +273,12 @@ const TournamentRegistrationPage = () => {
     try {
       const result = await unregisterFromTournament(tournamentId);
 
-      // Reload registration status to get the current state
-      const updatedReg = await getMyRegistration(tournamentId);
-      setRegistrations({
-        ...registrations,
-        [tournamentId]: updatedReg
-      });
+      // Reload tournaments to get updated registration status
+      // This works for both SINGLES and DOUBLES tournaments
+      await loadTournaments();
 
       // Build success message
-      let message = `Successfully unregistered from ${selectedTournament.name}`;
+      let message = `Successfully unregistered from ${tournamentName}`;
 
       if (result.promotedPlayer) {
         message += `. ${result.promotedPlayer.playerName} has been promoted from the waitlist.`;

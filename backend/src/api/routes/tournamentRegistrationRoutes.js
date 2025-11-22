@@ -6,7 +6,9 @@ import {
   unregisterFromTournament,
   getMyRegistration,
   getTournamentRegistrations,
-  getPlayerTournaments
+  getPlayerTournaments,
+  withdrawTournamentRegistration,
+  updateTournamentRegistration
 } from '../tournamentRegistrationController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -68,6 +70,30 @@ router.get(
   '/players/:playerId/tournaments',
   isAuthenticated,
   getPlayerTournaments
+);
+
+/**
+ * DELETE /api/tournaments/registrations/:registrationId
+ * Withdraw a specific tournament registration (organizer/admin only)
+ * Authorization: ORGANIZER or ADMIN
+ */
+router.delete(
+  '/registrations/:registrationId',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  withdrawTournamentRegistration
+);
+
+/**
+ * PATCH /api/tournaments/registrations/:registrationId
+ * Update a specific tournament registration (organizer/admin only)
+ * Authorization: ORGANIZER or ADMIN
+ */
+router.patch(
+  '/registrations/:registrationId',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  updateTournamentRegistration
 );
 
 export default router;
