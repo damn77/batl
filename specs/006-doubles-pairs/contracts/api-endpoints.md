@@ -56,9 +56,13 @@ Creates a new doubles pair or returns existing pair for the given players and ca
 {
   "player1Id": "uuid",
   "player2Id": "uuid",
-  "categoryId": "uuid"
+  "categoryId": "uuid",
+  "allowIneligible": false
 }
 ```
+
+**Field Descriptions**:
+- `allowIneligible` (optional, default: false): ORGANIZER/ADMIN only. Allows creating pairs that don't meet category eligibility requirements. Requires ORGANIZER or ADMIN role.
 
 **Success Response** (201 Created or 200 OK if existing):
 
@@ -354,14 +358,68 @@ Withdraws a pair from a tournament.
     "id": "uuid",
     "status": "WITHDRAWN",
     "pairDeleted": false,
-    "message": "Pair withdrawn from tournament"
+    "promotedPair": {
+      "id": "uuid",
+      "pairId": "uuid",
+      "player1Name": "Alice Johnson",
+      "player2Name": "Bob Williams",
+      "status": "REGISTERED"
+    },
+    "message": "Pair withdrawn successfully. Alice Johnson & Bob Williams promoted from waitlist."
   }
 }
 ```
 
-**Note**: If pair has no other active registrations and no current season participation, `pairDeleted` will be `true` and the pair will be soft-deleted.
+**Notes**:
+- If pair has no other active registrations and no current season participation, `pairDeleted` will be `true` and the pair will be soft-deleted.
+- If a REGISTERED pair withdraws and there are WAITLISTED pairs, the oldest waitlisted pair is automatically promoted to REGISTERED status.
+- Auto-promotion uses FIFO (First-In, First-Out) based on registration timestamp.
+- Promotion occurs atomically with withdrawal in a database transaction.
 
-### 7. Get Pair Rankings for Category
+### 7. Withdraw Tournament Registration (Organizer)
+
+Allows organizers/admins to withdraw a specific player from a SINGLES tournament by registration ID.
+
+**Endpoint**: `DELETE /tournaments/registrations/:registrationId`
+
+**Authentication**: Required (ORGANIZER, ADMIN)
+
+**Authorization**: ORGANIZER or ADMIN only
+
+**Success Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "registration": {
+      "id": "uuid",
+      "playerId": "uuid",
+      "tournamentId": "uuid",
+      "status": "WITHDRAWN",
+      "withdrawnAt": "2025-11-22T18:15:00Z"
+    },
+    "promotedPlayer": {
+      "playerId": "uuid",
+      "playerName": "Alice Johnson",
+      "playerEmail": "alice@example.com"
+    },
+    "categoryCleanup": {
+      "unregistered": false,
+      "reason": "Player has other active tournaments in category"
+    }
+  },
+  "message": "Player unregistered. Alice Johnson has been promoted from the waitlist."
+}
+```
+
+**Notes**:
+- This endpoint is for organizers to unregister players from SINGLES tournaments
+- For DOUBLES tournaments, use the pair withdrawal endpoint (DELETE /registrations/pair/:id)
+- Includes auto-promotion from waitlist if applicable
+- Includes smart category cleanup (removes category registration if no other tournaments)
+
+### 8. Get Pair Rankings for Category
 
 Retrieves leaderboard of pair rankings in a category.
 
@@ -436,11 +494,16 @@ Manually triggers recalculation of seeding scores for all pairs in a category.
 
 ### 9. Get Pair Tournament History
 
-Retrieves tournament participation history for a pair.
+Retrieves tournament participation history for a pair with stats and pagination.
 
 **Endpoint**: `GET /pairs/:id/history`
 
 **Authentication**: Not required (public)
+
+**Query Parameters**:
+
+- `page` (optional, default: 1): Page number
+- `limit` (optional, default: 20): Items per page
 
 **Success Response** (200 OK):
 
@@ -448,27 +511,52 @@ Retrieves tournament participation history for a pair.
 {
   "success": true,
   "data": {
-    "pairId": "uuid",
-    "player1": { "id": "uuid", "name": "John Doe" },
-    "player2": { "id": "uuid", "name": "Jane Smith" },
-    "tournaments": [
+    "pair": {
+      "id": "uuid",
+      "player1": { "id": "uuid", "name": "John Doe" },
+      "player2": { "id": "uuid", "name": "Jane Smith" },
+      "category": { "id": "uuid", "name": "Men's Doubles Open", "type": "DOUBLES" },
+      "seedingScore": 1800.5
+    },
+    "stats": {
+      "rank": 12,
+      "points": 500,
+      "wins": 5,
+      "losses": 2,
+      "winRate": 71
+    },
+    "history": [
       {
-        "tournamentId": "uuid",
-        "tournamentName": "Spring Doubles Championship",
-        "status": "COMPLETED",
-        "registrationStatus": "REGISTERED",
-        "placement": 1,
-        "pointsEarned": 100,
-        "matchesPlayed": 5,
-        "wins": 5,
-        "losses": 0,
-        "startDate": "2025-03-15",
-        "endDate": "2025-03-17"
+        "registrationId": "uuid",
+        "tournament": {
+          "id": "uuid",
+          "name": "Spring Doubles Championship",
+          "startDate": "2025-03-15T00:00:00Z",
+          "endDate": "2025-03-17T00:00:00Z",
+          "status": "COMPLETED",
+          "clubName": "Main Club",
+          "category": { "id": "uuid", "name": "Men's Doubles Open" }
+        },
+        "registration": {
+          "status": "REGISTERED",
+          "registrationTimestamp": "2025-03-01T10:30:00Z",
+          "seedPosition": 3,
+          "eligibilityOverride": false,
+          "overrideReason": null
+        }
       }
-    ]
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "totalCount": 10,
+      "totalPages": 1
+    }
   }
 }
 ```
+
+**Note**: The `stats` field will be `null` if the pair has no ranking in their category yet.
 
 ## Modified Endpoints
 

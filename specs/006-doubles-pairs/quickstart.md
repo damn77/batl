@@ -341,7 +341,7 @@ curl -X POST http://localhost:3000/api/v1/registrations/pair \
 ## Workflow 5: View Pair Tournament History
 
 ```bash
-curl -X GET "http://localhost:3000/api/v1/pairs/<PAIR_ID>/history" \
+curl -X GET "http://localhost:3000/api/v1/pairs/<PAIR_ID>/history?page=1&limit=10" \
   -H "Cookie: connect.sid=<SESSION_COOKIE>"
 ```
 
@@ -350,40 +350,74 @@ curl -X GET "http://localhost:3000/api/v1/pairs/<PAIR_ID>/history" \
 {
   "success": true,
   "data": {
-    "pairId": "uuid-pair-123",
-    "player1": { "id": "uuid-player-1", "name": "John Doe" },
-    "player2": { "id": "uuid-player-2", "name": "Jane Smith" },
-    "tournaments": [
+    "pair": {
+      "id": "uuid-pair-123",
+      "player1": { "id": "uuid-player-1", "name": "John Doe" },
+      "player2": { "id": "uuid-player-2", "name": "Jane Smith" },
+      "category": { "id": "uuid-category", "name": "Men's Doubles Open", "type": "DOUBLES" },
+      "seedingScore": 1500.0
+    },
+    "stats": {
+      "rank": 5,
+      "points": 1200,
+      "wins": 20,
+      "losses": 5,
+      "winRate": 80
+    },
+    "history": [
       {
-        "tournamentId": "uuid-tournament-1",
-        "tournamentName": "Spring Championship 2025",
-        "status": "COMPLETED",
-        "registrationStatus": "REGISTERED",
-        "placement": 2,
-        "pointsEarned": 400,
-        "matchesPlayed": 5,
-        "wins": 4,
-        "losses": 1,
-        "startDate": "2025-03-15T00:00:00.000Z",
-        "endDate": "2025-03-17T00:00:00.000Z"
+        "registrationId": "uuid-reg-1",
+        "tournament": {
+          "id": "uuid-tournament-1",
+          "name": "Spring Championship 2025",
+          "startDate": "2025-03-15T00:00:00.000Z",
+          "endDate": "2025-03-17T00:00:00.000Z",
+          "status": "COMPLETED",
+          "clubName": "Downtown Club",
+          "category": { "id": "uuid-category", "name": "Men's Doubles Open" }
+        },
+        "registration": {
+          "status": "REGISTERED",
+          "registrationTimestamp": "2025-03-01T10:00:00.000Z",
+          "seedPosition": 3,
+          "eligibilityOverride": false,
+          "overrideReason": null
+        }
       },
       {
-        "tournamentId": "uuid-tournament-2",
-        "tournamentName": "Summer Open 2025",
-        "status": "IN_PROGRESS",
-        "registrationStatus": "REGISTERED",
-        "placement": null,
-        "pointsEarned": 0,
-        "matchesPlayed": 2,
-        "wins": 2,
-        "losses": 0,
-        "startDate": "2025-11-15T00:00:00.000Z",
-        "endDate": "2025-11-20T00:00:00.000Z"
+        "registrationId": "uuid-reg-2",
+        "tournament": {
+          "id": "uuid-tournament-2",
+          "name": "Summer Open 2025",
+          "startDate": "2025-11-15T00:00:00.000Z",
+          "endDate": "2025-11-20T00:00:00.000Z",
+          "status": "IN_PROGRESS",
+          "clubName": "Sports Arena",
+          "category": { "id": "uuid-category", "name": "Men's Doubles Open" }
+        },
+        "registration": {
+          "status": "REGISTERED",
+          "registrationTimestamp": "2025-11-10T14:30:00.000Z",
+          "seedPosition": 2,
+          "eligibilityOverride": false,
+          "overrideReason": null
+        }
       }
-    ]
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "totalCount": 2,
+      "totalPages": 1
+    }
   }
 }
 ```
+
+**Notes**:
+- `stats` contains pair's overall ranking data (null if no ranking exists yet)
+- `history` is sorted by registrationTimestamp (newest first)
+- Supports pagination with `page` and `limit` query parameters
 
 ## Workflow 6: Recalculate Seeding Scores (Admin/Organizer)
 

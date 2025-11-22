@@ -158,3 +158,69 @@ Tournament organizers and admins can register pairs that don't meet standard cat
 - **SC-007**: Tournament pages load and display pair information without performance degradation compared to singles tournaments (within 10% load time)
 - **SC-008**: Historical tournament data remains accessible after pair deletion for record-keeping and statistical purposes
 - **SC-009**: Point attribution is accurate 100% of the time (correct category, correct pair ranking, correct individual player rankings)
+
+## Implementation Notes
+
+### Eligibility Validation Timing
+
+**Decision**: Eligibility validation occurs only at pair creation time, not at tournament registration time.
+
+**Rationale**: Once a pair is created in a category (whether normally or with organizer override), it represents a valid partnership for that category throughout the season. This prevents mid-season invalidation and simplifies the registration flow. Players don't suddenly become ineligible after forming a valid pair.
+
+**Implementation**:
+- Pair creation validates player eligibility against category requirements (age, gender)
+- Tournament registration only validates:
+  - Pair belongs to tournament's category
+  - No partner conflicts (player not registered with different partner)
+  - Tournament capacity and waitlist rules
+- Organizers can bypass eligibility validation at pair creation using `allowIneligible` flag
+
+### Organizer Override Capabilities
+
+**Enhanced Functionality**: Organizers and admins have two levels of override capability:
+
+1. **Pair Creation Override** (`allowIneligible` flag):
+   - Allows creating pairs that don't meet category eligibility requirements
+   - Example: Mixed-gender pair in men's category, underage player in age-restricted category
+   - Checkbox visible only to organizers/admins in pair creation UI
+   - Logged for audit purposes
+
+2. **Tournament Registration Override** (`eligibilityOverride` + `overrideReason`):
+   - Allows registering pairs despite partner conflicts
+   - Requires mandatory reason text for accountability
+   - Marked with "Override" badge in registration lists
+   - Preserved in registration history
+
+### Auto-Promotion on Withdrawal
+
+**Implementation**: Both SINGLES and DOUBLES tournaments support automatic waitlist promotion when a registered player/pair withdraws.
+
+**Behavior**:
+- Uses FIFO (First-In, First-Out) for waitlist promotion
+- Atomic transaction ensures withdrawal and promotion happen together
+- Promotion message included in withdrawal response
+- Works for both player-initiated and organizer-initiated withdrawals
+
+**Endpoints**:
+- SINGLES: `DELETE /api/tournaments/registrations/:registrationId`
+- DOUBLES: `DELETE /api/v1/registrations/pair/:id`
+
+### Organizer Unregistration
+
+**Added Functionality**: Organizers can unregister any player/pair from tournament detail pages.
+
+**Implementation**:
+- "Actions" column with "Unregister" button visible only to organizers/admins
+- Confirmation modal prevents accidental removal
+- Calls appropriate endpoint based on tournament type
+- Triggers auto-promotion if applicable
+- Refreshes player list automatically
+
+**UI Location**: Tournament detail page → Registered Players/Pairs section
+
+### Navigation Enhancements
+
+**Added Links**:
+- "Doubles Pairs" navigation link for organizers/admins
+- Provides access to pair registration page for testing and management
+- Located in main navigation bar alongside other organizer tools

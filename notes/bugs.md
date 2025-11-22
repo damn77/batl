@@ -1,9 +1,5 @@
 ## Bugs ##
-Create tournament modal
-- missing optional address field
-
-Tournaments page /organizer/tournaments
-- I can see newly created tournament in the list but am not able to access it's page to modify it or update player registrations
+- on PROD issue with session tokens
 
 
 ## Missed requirements ##
