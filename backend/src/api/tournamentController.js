@@ -11,10 +11,11 @@ export async function listTournaments(req, res, next) {
     // Get validated query parameters from middleware
     const filters = req.validatedQuery || {};
 
-    // Pass user ID if authenticated (for including registration status)
-    const userId = req.user?.id || null;
+    // Pass player profile ID if authenticated (for including registration status)
+    // Note: playerId is the player profile ID, not the user account ID
+    const playerProfileId = req.user?.playerId || null;
 
-    const result = await tournamentService.listTournaments(filters, userId);
+    const result = await tournamentService.listTournaments(filters, playerProfileId);
 
     return res.status(200).json({
       success: true,

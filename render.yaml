@@ -1,23 +1,31 @@
 # BATL (Bratislavska Tenisova Liga) - Render Blueprint
 # https://render.com/docs/blueprint-spec
 
+databases:
+  - name: batl-db
+    plan: free
+    databaseName: batl
+    user: batl
+
 services:
   # Backend API Service
   - type: web
     name: batl-backend
     runtime: node
-    plan: starter
+    plan: free
     rootDir: backend
-    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    buildCommand: npm install && npx prisma generate && npx prisma db push
     startCommand: npm start
-    healthCheckPath: /api/v1/health
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        value: file:/var/data/batl.db
+        fromDatabase:
+          name: batl-db
+          property: connectionString
       - key: SESSION_SECRET
         generateValue: true
       # Set this to: https://batl-frontend.onrender.com
@@ -36,10 +44,6 @@ services:
         sync: false
       - key: SMTP_PASS
         sync: false
-    disk:
-      name: batl-data
-      mountPath: /var/data
-      sizeGB: 1
 
   # Frontend Static Site
   - type: web

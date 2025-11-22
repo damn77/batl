@@ -11,6 +11,7 @@ Auto-generated from all feature plans. Last updated: 2025-11-02
 - React DatePicker 8.8 (Date Inputs) (002-category-system)
 - **Vitest** (Testing Framework) (003-tournament-registration) - Jest-compatible API, native ES modules support, Vite integration
 - Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10 (004-tournament-rules)
+- Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21 (006-doubles-pairs)
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -50,10 +51,26 @@ When making bugfixes, requirement adjustments, or implementation changes:
 - Constitution-driven development requires spec-code alignment
 - Prevents confusion and reduces debugging time
 
+**Manual Test Case Documentation**
+
+After completing an implementation phase that introduces new UI functionality, generate a test case document:
+
+1. **Location**: `test-cases/` folder
+2. **Filename format**: `[feature-spec]_[phase].md`
+   - Example: `test-cases/006-doubles-pairs_phase-7.md`
+3. **Content**: UI test instructions for manual testing including:
+   - Test scenarios with step-by-step instructions
+   - Expected results for each scenario
+   - Prerequisites (user roles, data setup)
+   - Edge cases and error conditions
+4. **When to generate**: After implementation phase completes, only if there is new user-facing functionality to test
+
+This ensures QA can verify new features work correctly before deployment.
+
 ## Recent Changes
+- 006-doubles-pairs: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21
 - 005-tournament-view: Added SQLite via Prisma ORM (development/production-ready)
 - 004-tournament-rules: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10
-- 003-tournament-registration: Added Vitest testing framework (Jest-compatible API, native ES modules support, Vite integration)
 
 <!-- MANUAL ADDITIONS START -->
 

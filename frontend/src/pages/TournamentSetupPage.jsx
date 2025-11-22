@@ -14,6 +14,7 @@ import {
   STATUS_VARIANTS
 } from '../services/tournamentService';
 import { listCategories } from '../services/categoryService';
+import { recalculateCategorySeeding } from '../services/pairService';
 
 const TournamentSetupPage = () => {
   const navigate = useNavigate();
@@ -46,6 +47,10 @@ const TournamentSetupPage = () => {
   const [isSingleDay, setIsSingleDay] = useState(true);
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // T064: Seeding recalculation state
+  const [recalculatingCategory, setRecalculatingCategory] = useState(null);
+  const [seedingSuccess, setSeedingSuccess] = useState(null);
 
   // Load data
   useEffect(() => {
@@ -205,6 +210,22 @@ const TournamentSetupPage = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // T064: Handle seeding recalculation for DOUBLES categories
+  const handleRecalculateSeeding = async (categoryId, categoryName) => {
+    try {
+      setRecalculatingCategory(categoryId);
+      setSeedingSuccess(null);
+      setError(null);
+
+      const result = await recalculateCategorySeeding(categoryId);
+      setSeedingSuccess(`Seeding recalculated for ${categoryName}: ${result.pairsUpdated} pairs updated`);
+    } catch (err) {
+      setError(`Failed to recalculate seeding: ${err.message}`);
+    } finally {
+      setRecalculatingCategory(null);
+    }
+  };
+
   return (
     <>
       <NavBar />
@@ -222,6 +243,7 @@ const TournamentSetupPage = () => {
         </Row>
 
         {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
+        {seedingSuccess && <Alert variant="success" dismissible onClose={() => setSeedingSuccess(null)}>{seedingSuccess}</Alert>}
 
         {/* Filters */}
         <Card className="mb-3">
@@ -329,9 +351,22 @@ const TournamentSetupPage = () => {
                           variant="outline-secondary"
                           size="sm"
                           onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
+                          className="me-2"
                         >
                           Configure Rules
                         </Button>
+                        {/* T064: Recalculate seeding button for DOUBLES categories */}
+                        {tournament.category?.type === 'DOUBLES' && (
+                          <Button
+                            variant="outline-info"
+                            size="sm"
+                            onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
+                            disabled={recalculatingCategory === tournament.categoryId}
+                            title="Recalculate seeding scores for all pairs in this category"
+                          >
+                            {recalculatingCategory === tournament.categoryId ? 'Recalculating...' : 'Recalc Seeding'}
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}

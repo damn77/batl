@@ -21,6 +21,8 @@ import PlayerRegistrationPage from './pages/PlayerRegistrationPage';
 import CategoryRankingsPage from './pages/CategoryRankingsPage';
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
 import TournamentViewPage from './pages/TournamentViewPage';
+import PairRegistrationPage from './pages/PairRegistrationPage'; // 006-doubles-pairs (T033)
+import PairRankingsPage from './pages/PairRankingsPage'; // 006-doubles-pairs (T051)
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 
@@ -43,6 +45,8 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/rankings" element={<CategoryRankingsPage />} />
+        {/* 006-doubles-pairs (T051): Pair rankings page - public access */}
+        <Route path="/rankings/pairs" element={<PairRankingsPage />} />
         {/* T023: Tournament view page - public access, no authentication required */}
         <Route path="/tournaments/:id" element={<TournamentViewPage />} />
 
@@ -126,6 +130,15 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <PlayerRegistrationPage />
+              </ProtectedRoute>
+            }
+          />
+          {/* 006-doubles-pairs (T033): Pair registration page */}
+          <Route
+            path="/player/pairs"
+            element={
+              <ProtectedRoute>
+                <PairRegistrationPage />
               </ProtectedRoute>
             }
           />

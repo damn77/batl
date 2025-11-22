@@ -13,6 +13,7 @@ import tournamentRoutes from './api/routes/tournamentRoutes.js';
 import registrationRoutes from './api/routes/registrationRoutes.js';
 import rankingRoutes from './api/routes/rankingRoutes.js';
 import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
+import pairRoutes from './api/routes/pairRoutes.js';
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -80,6 +81,15 @@ app.use(helmet({
   }
 }));
 
+// Health check endpoint (before session middleware to avoid blocking)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 // Session configuration
 app.use(session({
   store: new SessionFileStore({
@@ -102,15 +112,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
-});
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -119,6 +120,7 @@ app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/tournaments', tournamentRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
+app.use('/api/v1/pairs', pairRoutes);
 app.use('/api/tournaments', tournamentRegistrationRoutes);
 // Tournament rules routes with specific base paths
 app.use('/api/v1/tournament-rules', tournamentRulesRouter);

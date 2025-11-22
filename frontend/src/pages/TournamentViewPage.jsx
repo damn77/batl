@@ -5,6 +5,7 @@ import NavBar from '../components/NavBar';
 import TournamentHeader from '../components/TournamentHeader';
 import TournamentInfoPanel from '../components/TournamentInfoPanel';
 import PlayerListPanel from '../components/PlayerListPanel';
+import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel';
 import FormatVisualization from '../components/FormatVisualization';
 import { useTournament } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
@@ -86,6 +87,18 @@ const TournamentViewPage = () => {
                 <TournamentInfoPanel tournament={tournament} />
               </Col>
             </Row>
+
+            {/* Organizer Registration Panel */}
+            {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
+              <Row className="mt-4">
+                <Col>
+                  <OrganizerRegistrationPanel
+                    tournament={tournament}
+                    onRegistrationComplete={() => window.location.reload()}
+                  />
+                </Col>
+              </Row>
+            )}
 
             {/* T052: Player List Panel */}
             <Row className="mt-4">

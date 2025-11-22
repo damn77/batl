@@ -1,5 +1,8 @@
 // T062-T067: Registration Controller - HTTP handlers for registration endpoints
 import * as registrationService from '../services/registrationService.js';
+import * as pairRegistrationService from '../services/pairRegistrationService.js';
+import { canRegisterPair } from '../middleware/pairAuth.js';
+import { PairErrorStatusCodes } from '../utils/pairErrors.js';
 
 /**
  * T062: POST /api/v1/registrations - Register player for category
@@ -532,5 +535,155 @@ export async function bulkRegisterPlayer(req, res, next) {
     });
   } catch (err) {
     next(err);
+  }
+}
+
+/**
+ * POST /api/v1/registrations/pair - Register pair for tournament
+ * Authorization: ADMIN, ORGANIZER, or PLAYER (must be in pair)
+ * Feature: 006-doubles-pairs (T025)
+ */
+export async function registerPairForTournament(req, res, next) {
+  try {
+    const { tournamentId, pairId, eligibilityOverride, overrideReason } = req.body;
+    const demoteRegistrationId = req.body.demoteRegistrationId;
+
+    console.log('[registerPairForTournament] Request received:', {
+      tournamentId,
+      pairId,
+      eligibilityOverride,
+      overrideReason,
+      demoteRegistrationId,
+      hasDemoteId: !!demoteRegistrationId,
+    });
+
+    // Validate required fields
+    if (!tournamentId || !pairId) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'tournamentId and pairId are required',
+        },
+      });
+    }
+
+    // Check authorization
+    const userProfileId = req.user?.playerId || null;
+
+    // Fetch pair first to check authorization
+    const { getPairById } = await import('../services/pairService.js');
+    const pair = await getPairById(pairId, true);
+
+    if (!pair) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'PAIR_NOT_FOUND',
+          message: 'Pair not found',
+        },
+      });
+    }
+
+    const authResult = canRegisterPair(req.user, pair, userProfileId);
+    if (!authResult.authorized) {
+      return res.status(authResult.statusCode).json(authResult.error);
+    }
+
+    console.log('[registerPairForTournament] Calling registerPair with:', {
+      tournamentId,
+      pairId,
+      demoteRegistrationId,
+    });
+
+    // Register pair
+    const registration = await pairRegistrationService.registerPair(
+      tournamentId,
+      pairId,
+      req.user,
+      {
+        eligibilityOverride,
+        overrideReason,
+        demoteRegistrationId
+      }
+    );
+
+    return res.status(201).json({
+      success: true,
+      data: registration,
+    });
+  } catch (error) {
+    // Handle pair-specific errors
+    if (error.success === false) {
+      const statusCode = PairErrorStatusCodes[error.error.code] || 500;
+      return res.status(statusCode).json(error);
+    }
+
+    next(error);
+  }
+}
+
+/**
+ * DELETE /api/v1/registrations/pair/:id - Withdraw pair registration
+ * Authorization: ADMIN, ORGANIZER, or PLAYER (must be in pair)
+ * Feature: 006-doubles-pairs (T027)
+ */
+export async function withdrawPairRegistration(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const result = await pairRegistrationService.withdrawPairRegistration(id);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    // Handle pair-specific errors
+    if (error.success === false) {
+      const statusCode = PairErrorStatusCodes[error.error.code] || 500;
+      return res.status(statusCode).json(error);
+    }
+
+    next(error);
+  }
+}
+
+/**
+ * POST /api/v1/registrations/pair/check - Check pair eligibility
+ * Authorization: Not required (public)
+ * Feature: 006-doubles-pairs
+ */
+export async function checkPairEligibility(req, res, next) {
+  try {
+    const { tournamentId, pairId } = req.body;
+
+    if (!tournamentId || !pairId) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_FIELDS',
+          message: 'tournamentId and pairId are required',
+        },
+      });
+    }
+
+    const result = await pairRegistrationService.checkPairEligibility(
+      tournamentId,
+      pairId
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    // Handle pair-specific errors
+    if (error.success === false) {
+      const statusCode = PairErrorStatusCodes[error.error.code] || 500;
+      return res.status(statusCode).json(error);
+    }
+
+    next(error);
   }
 }

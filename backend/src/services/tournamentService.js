@@ -200,6 +200,8 @@ export async function listTournaments(filters = {}, userId = null) {
   let userRegistrationsMap = {};
   if (userId) {
     const tournamentIds = tournaments.map(t => t.id);
+
+    // Fetch individual registrations
     const userRegistrations = await prisma.tournamentRegistration.findMany({
       where: {
         tournamentId: { in: tournamentIds },
@@ -215,23 +217,81 @@ export async function listTournaments(filters = {}, userId = null) {
     // Create map for quick lookup
     userRegistrations.forEach(reg => {
       userRegistrationsMap[reg.tournamentId] = {
+        type: 'SINGLES',
         status: reg.status,
         registeredAt: reg.registrationTimestamp
       };
     });
+
+    // Fetch pair registrations for DOUBLES tournaments
+    const doublesTournamentIds = tournaments
+      .filter(t => t.category?.type === 'DOUBLES')
+      .map(t => t.id);
+
+    if (doublesTournamentIds.length > 0) {
+      const userPairRegistrations = await prisma.pairRegistration.findMany({
+        where: {
+          tournamentId: { in: doublesTournamentIds },
+          pair: {
+            OR: [
+              { player1Id: userId },
+              { player2Id: userId }
+            ]
+          }
+        },
+        select: {
+          tournamentId: true,
+          status: true,
+          registrationTimestamp: true,
+          pairId: true,
+          pair: {
+            select: {
+              player1: { select: { id: true, name: true } },
+              player2: { select: { id: true, name: true } }
+            }
+          }
+        }
+      });
+
+      // Add pair registrations to map (overwrite individual if exists)
+      userPairRegistrations.forEach(reg => {
+        userRegistrationsMap[reg.tournamentId] = {
+          type: 'DOUBLES',
+          status: reg.status,
+          registeredAt: reg.registrationTimestamp,
+          pairId: reg.pairId,
+          pair: reg.pair
+        };
+      });
+    }
   }
 
   // Fetch registration statistics for all tournaments
   const tournamentsWithStats = await Promise.all(
     tournaments.map(async (tournament) => {
-      const [registeredCount, waitlistedCount] = await Promise.all([
-        prisma.tournamentRegistration.count({
-          where: { tournamentId: tournament.id, status: 'REGISTERED' }
-        }),
-        prisma.tournamentRegistration.count({
-          where: { tournamentId: tournament.id, status: 'WAITLISTED' }
-        })
-      ]);
+      let registeredCount, waitlistedCount;
+
+      if (tournament.category?.type === 'DOUBLES') {
+        // Count pair registrations for DOUBLES tournaments
+        [registeredCount, waitlistedCount] = await Promise.all([
+          prisma.pairRegistration.count({
+            where: { tournamentId: tournament.id, status: 'REGISTERED' }
+          }),
+          prisma.pairRegistration.count({
+            where: { tournamentId: tournament.id, status: 'WAITLISTED' }
+          })
+        ]);
+      } else {
+        // Count individual registrations for SINGLES tournaments
+        [registeredCount, waitlistedCount] = await Promise.all([
+          prisma.tournamentRegistration.count({
+            where: { tournamentId: tournament.id, status: 'REGISTERED' }
+          }),
+          prisma.tournamentRegistration.count({
+            where: { tournamentId: tournament.id, status: 'WAITLISTED' }
+          })
+        ]);
+      }
 
       const tournamentData = {
         ...tournament,
@@ -397,14 +457,27 @@ export async function getTournamentWithRelatedData(id) {
   }
 
   // T008: Add computed fields
-  const [registrationCount, waitlistCount] = await Promise.all([
-    prisma.tournamentRegistration.count({
-      where: { tournamentId: id, status: 'REGISTERED' }
-    }),
-    prisma.tournamentRegistration.count({
-      where: { tournamentId: id, status: 'WAITLISTED' }
-    })
-  ]);
+  let registrationCount, waitlistCount;
+
+  if (tournament.category?.type === 'DOUBLES') {
+    [registrationCount, waitlistCount] = await Promise.all([
+      prisma.pairRegistration.count({
+        where: { tournamentId: id, status: 'REGISTERED' }
+      }),
+      prisma.pairRegistration.count({
+        where: { tournamentId: id, status: 'WAITLISTED' }
+      })
+    ]);
+  } else {
+    [registrationCount, waitlistCount] = await Promise.all([
+      prisma.tournamentRegistration.count({
+        where: { tournamentId: id, status: 'REGISTERED' }
+      }),
+      prisma.tournamentRegistration.count({
+        where: { tournamentId: id, status: 'WAITLISTED' }
+      })
+    ]);
+  }
 
   // Calculate rule complexity using the groups, brackets, rounds, and matches data
   const ruleComplexity = ruleComplexityService.calculateComplexity(
@@ -809,6 +882,18 @@ export async function updateTournament(id, data) {
     }
   }
 
+  // Get current tournament before update to check for status change
+  const currentTournament = await prisma.tournament.findUnique({
+    where: { id },
+    select: {
+      status: true,
+      categoryId: true,
+      category: {
+        select: { type: true },
+      },
+    },
+  });
+
   // Update allowed fields
   const updateData = {};
   if (data.name !== undefined) updateData.name = data.name;
@@ -817,6 +902,7 @@ export async function updateTournament(id, data) {
   if (data.capacity !== undefined) updateData.capacity = data.capacity === null ? null : parseInt(data.capacity);
   if (data.startDate) updateData.startDate = new Date(data.startDate);
   if (data.endDate) updateData.endDate = new Date(data.endDate);
+  if (data.status !== undefined) updateData.status = data.status;
 
   // Handle location update - create or find location if clubName provided
   if (data.clubName !== undefined) {
@@ -827,7 +913,7 @@ export async function updateTournament(id, data) {
     updateData.locationId = location.id;
   }
 
-  return await prisma.tournament.update({
+  const updatedTournament = await prisma.tournament.update({
     where: { id },
     data: updateData,
     include: {
@@ -872,7 +958,110 @@ export async function updateTournament(id, data) {
       }
     }
   });
+
+  // T056: Tournament close hook - recalculate seeding scores for doubles categories
+  // Check if status changed to COMPLETED and category is DOUBLES
+  const statusChangedToCompleted =
+    currentTournament.status !== 'COMPLETED' &&
+    updatedTournament.status === 'COMPLETED';
+
+  if (statusChangedToCompleted && currentTournament.category.type === 'DOUBLES') {
+    // Recalculate seeding scores for all pairs in this category
+    // This runs asynchronously - we don't wait for it to complete
+    const { recalculateCategorySeedingScores } = await import('./pairService.js');
+    recalculateCategorySeedingScores(currentTournament.categoryId).catch((error) => {
+      console.error(
+        `Failed to recalculate seeding scores for category ${currentTournament.categoryId}:`,
+        error
+      );
+    });
+  }
+
+  // Handle capacity change - manage waitlist
+  if (updateData.capacity !== undefined && updateData.capacity !== currentTournament.capacity) {
+    await handleCapacityChange(id, updateData.capacity, currentTournament.category.type);
+  }
+
+  return updatedTournament;
 }
+
+/**
+ * Handle capacity changes by updating registration statuses
+ * - If capacity reduced: Move excess registered players to waitlist (newest first)
+ * - If capacity increased: Promote waitlisted players to registered (oldest first)
+ */
+async function handleCapacityChange(tournamentId, newCapacity, categoryType) {
+  const isDoubles = categoryType === 'DOUBLES';
+  const model = isDoubles ? prisma.pairRegistration : prisma.tournamentRegistration;
+
+  // If capacity is null (unlimited), promote all waitlisted
+  if (newCapacity === null) {
+    await model.updateMany({
+      where: {
+        tournamentId,
+        status: 'WAITLISTED'
+      },
+      data: { status: 'REGISTERED' }
+    });
+    return;
+  }
+
+  // Count currently registered
+  const registeredCount = await model.count({
+    where: {
+      tournamentId,
+      status: 'REGISTERED'
+    }
+  });
+
+  if (registeredCount > newCapacity) {
+    // Capacity reduced below current registrations - move excess to waitlist
+    // We need to find the newest registrations to move to waitlist
+    const excessCount = registeredCount - newCapacity;
+
+    const registrationsToDemote = await model.findMany({
+      where: {
+        tournamentId,
+        status: 'REGISTERED'
+      },
+      orderBy: { registrationTimestamp: 'desc' }, // Newest first
+      take: excessCount,
+      select: { id: true }
+    });
+
+    const idsToDemote = registrationsToDemote.map(r => r.id);
+
+    if (idsToDemote.length > 0) {
+      await model.updateMany({
+        where: { id: { in: idsToDemote } },
+        data: { status: 'WAITLISTED' }
+      });
+    }
+  } else if (registeredCount < newCapacity) {
+    // Capacity increased - promote from waitlist
+    const slotsAvailable = newCapacity - registeredCount;
+
+    const registrationsToPromote = await model.findMany({
+      where: {
+        tournamentId,
+        status: 'WAITLISTED'
+      },
+      orderBy: { registrationTimestamp: 'asc' }, // Oldest first (FIFO)
+      take: slotsAvailable,
+      select: { id: true }
+    });
+
+    const idsToPromote = registrationsToPromote.map(r => r.id);
+
+    if (idsToPromote.length > 0) {
+      await model.updateMany({
+        where: { id: { in: idsToPromote } },
+        data: { status: 'REGISTERED' }
+      });
+    }
+  }
+}
+
 
 /**
  * Delete tournament (only if status is SCHEDULED)

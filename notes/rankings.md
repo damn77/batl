@@ -10,6 +10,12 @@
     - this allows for better seeding calculation when player pair changes
 - rules of calculations are defined per ranking
     - e.g. how many best tournament results can count into the yearly ranking
-- ranking templates can be used
-    - 1 predefined template
-    - organizers and admins can create new templates
+    - default value of counted tournaments is 7
+    - seeding score needs to take this limit into account
+
+### Tournament points
+- 
+
+
+### Testing
+- update seed script with test data to allow for demo and testing in UI

@@ -6,7 +6,9 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    birthDate: '',
+    gender: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -69,6 +71,16 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
       errors.name = 'Name must be at least 2 characters';
     }
 
+    // Birth Date validation (optional)
+    // if (!formData.birthDate) {
+    //   errors.birthDate = 'Date of birth is required';
+    // }
+
+    // Gender validation
+    if (!formData.gender) {
+      errors.gender = 'Gender is required';
+    }
+
     // Email validation (optional)
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Invalid email format';
@@ -103,6 +115,8 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
 
       const playerData = {
         name: formData.name.trim(),
+        gender: formData.gender,
+        ...(formData.birthDate && { birthDate: new Date(formData.birthDate).toISOString() }),
         ...(formData.email && { email: formData.email.trim() }),
         ...(formData.phone && { phone: formData.phone.trim() })
       };
@@ -118,7 +132,9 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
       setFormData({
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        birthDate: '',
+        gender: ''
       });
       setValidationErrors({});
       setDuplicates([]);
@@ -166,7 +182,9 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
       setFormData({
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        birthDate: '',
+        gender: ''
       });
       setValidationErrors({});
       setError(null);
@@ -246,6 +264,44 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               </Form.Text>
             )}
           </Form.Group>
+
+          <div className="row">
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Date of Birth</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="birthDate"
+                  value={formData.birthDate}
+                  onChange={handleChange}
+                  isInvalid={!!validationErrors.birthDate}
+                  disabled={loading}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {validationErrors.birthDate}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+            <div className="col-md-6">
+              <Form.Group className="mb-3">
+                <Form.Label>Gender *</Form.Label>
+                <Form.Select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  isInvalid={!!validationErrors.gender}
+                  disabled={loading}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="MEN">Male</option>
+                  <option value="WOMEN">Female</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">
+                  {validationErrors.gender}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+          </div>
 
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>

@@ -1,6 +1,9 @@
 // T018-T031: Tournament Registration Controller
 // HTTP handlers for tournament registration endpoints (003-tournament-registration)
 import * as tournamentRegistrationService from '../services/tournamentRegistrationService.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 /**
  * T018: POST /api/tournaments/:tournamentId/register
@@ -10,9 +13,24 @@ import * as tournamentRegistrationService from '../services/tournamentRegistrati
 export async function registerForTournament(req, res, next) {
   try {
     const { tournamentId } = req.params;
-    const playerId = req.user.playerId;
+    let playerId = req.user.playerId;
 
-    // Ensure user has a player profile
+    // Allow organizers/admins to register other players
+    if ((req.user.role === 'ORGANIZER' || req.user.role === 'ADMIN') && req.body.playerId) {
+      playerId = req.body.playerId;
+    }
+
+    // Extract demoteRegistrationId for organizer-controlled waitlist management
+    const demoteRegistrationId = req.body.demoteRegistrationId;
+
+    console.log('[registerForTournament] Request received:', {
+      tournamentId,
+      playerId,
+      demoteRegistrationId,
+      hasDemoteId: !!demoteRegistrationId,
+    });
+
+    // Ensure user has a player profile (or we have a valid playerId from organizer)
     if (!playerId) {
       return res.status(400).json({
         success: false,
@@ -24,7 +42,11 @@ export async function registerForTournament(req, res, next) {
     }
 
     // Call service to register player
-    const result = await tournamentRegistrationService.registerPlayer(playerId, tournamentId);
+    const result = await tournamentRegistrationService.registerPlayer(
+      playerId,
+      tournamentId,
+      { demoteRegistrationId }
+    );
 
     // Format response based on API contract
     const response = {
@@ -40,13 +62,13 @@ export async function registerForTournament(req, res, next) {
         },
         categoryRegistration: result.categoryRegistration
           ? {
-              id: result.categoryRegistration.id,
-              playerId: result.categoryRegistration.playerId,
-              categoryId: result.categoryRegistration.categoryId,
-              status: result.categoryRegistration.status,
-              hasParticipated: result.categoryRegistration.hasParticipated,
-              isNew: result.categoryRegistration.isNew
-            }
+            id: result.categoryRegistration.id,
+            playerId: result.categoryRegistration.playerId,
+            categoryId: result.categoryRegistration.categoryId,
+            status: result.categoryRegistration.status,
+            hasParticipated: result.categoryRegistration.hasParticipated,
+            isNew: result.categoryRegistration.isNew
+          }
           : null,
         tournament: {
           id: result.registration.tournament.id,
@@ -253,7 +275,78 @@ export async function unregisterFromTournament(req, res, next) {
       });
     }
 
-    // Call service to unregister player
+    // Check if tournament is DOUBLES type
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: { category: true }
+    });
+
+    if (!tournament) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'TOURNAMENT_NOT_FOUND',
+          message: 'Tournament not found'
+        }
+      });
+    }
+
+    // Handle DOUBLES tournament unregistration
+    if (tournament.category?.type === 'DOUBLES') {
+      // Find the pair registration where player is a member
+      const pairRegistration = await prisma.pairRegistration.findFirst({
+        where: {
+          tournamentId,
+          status: { in: ['REGISTERED', 'WAITLISTED'] },
+          pair: {
+            OR: [
+              { player1Id: playerId },
+              { player2Id: playerId }
+            ]
+          }
+        },
+        include: {
+          pair: {
+            include: {
+              player1: { select: { id: true, name: true } },
+              player2: { select: { id: true, name: true } }
+            }
+          }
+        }
+      });
+
+      if (!pairRegistration) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: 'REGISTRATION_NOT_FOUND',
+            message: 'No pair registration found for this tournament'
+          }
+        });
+      }
+
+      // Call service to withdraw pair registration (includes auto-promotion logic)
+      const { withdrawPairRegistration } = await import('../services/pairRegistrationService.js');
+      const result = await withdrawPairRegistration(pairRegistration.id);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          registration: {
+            id: result.id,
+            pairId: result.pairId,
+            tournamentId: result.tournamentId,
+            status: result.status
+          },
+          pair: pairRegistration.pair,
+          promotedPair: result.promotedPair,
+          pairDeleted: result.pairDeleted
+        },
+        message: result.message
+      });
+    }
+
+    // Call service to unregister individual player (SINGLES)
     const result = await tournamentRegistrationService.unregisterPlayer(playerId, tournamentId);
 
     // Format response
@@ -314,6 +407,65 @@ export async function getTournamentRegistrations(req, res, next) {
     const { tournamentId } = req.params;
     const { status } = req.query;
 
+    // Check if tournament is DOUBLES type
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: { category: true }
+    });
+
+    if (!tournament) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'TOURNAMENT_NOT_FOUND',
+          message: 'Tournament not found'
+        }
+      });
+    }
+
+    // For DOUBLES tournaments, return pair registrations
+    if (tournament.category?.type === 'DOUBLES') {
+      const whereClause = { tournamentId };
+      if (status) {
+        whereClause.status = status;
+      }
+
+      const pairRegistrations = await prisma.pairRegistration.findMany({
+        where: whereClause,
+        include: {
+          pair: {
+            include: {
+              player1: { select: { id: true, name: true, email: true } },
+              player2: { select: { id: true, name: true, email: true } }
+            }
+          }
+        },
+        orderBy: { registrationTimestamp: 'asc' }
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          tournamentId,
+          type: 'DOUBLES',
+          registrations: pairRegistrations.map(reg => ({
+            id: reg.id,
+            status: reg.status,
+            registrationTimestamp: reg.registrationTimestamp,
+            seedPosition: reg.seedPosition,
+            pair: {
+              id: reg.pair.id,
+              seedingScore: reg.pair.seedingScore,
+              player1: reg.pair.player1,
+              player2: reg.pair.player2
+            }
+          })),
+          count: pairRegistrations.length
+        }
+      });
+    }
+
+    // For SINGLES tournaments, return individual registrations
     const registrations = await tournamentRegistrationService.getTournamentRegistrations(
       tournamentId,
       status
@@ -323,6 +475,7 @@ export async function getTournamentRegistrations(req, res, next) {
       success: true,
       data: {
         tournamentId,
+        type: 'SINGLES',
         registrations: registrations.map(reg => ({
           id: reg.id,
           status: reg.status,
@@ -387,6 +540,156 @@ export async function getPlayerTournaments(req, res, next) {
         })),
         count: registrations.length
       }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/tournaments/registrations/:registrationId
+ * Withdraw a specific tournament registration (organizer/admin only)
+ * Authorization: ORGANIZER or ADMIN
+ */
+export async function withdrawTournamentRegistration(req, res, next) {
+  try {
+    const { registrationId } = req.params;
+
+    // Get the registration to verify it exists
+    const registration = await prisma.tournamentRegistration.findUnique({
+      where: { id: registrationId }
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_FOUND',
+          message: 'Tournament registration not found'
+        }
+      });
+    }
+
+    // Call service to withdraw
+    const result = await tournamentRegistrationService.withdrawPlayerByRegistrationId(registrationId);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        registration: {
+          id: result.registration.id,
+          playerId: result.registration.playerId,
+          tournamentId: result.registration.tournamentId,
+          status: result.registration.status,
+          withdrawnAt: result.registration.withdrawnAt
+        },
+        promotedPlayer: result.promotedPlayer,
+        categoryCleanup: result.categoryCleanup
+      },
+      message: result.message
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_FOUND',
+          message: err.message
+        }
+      });
+    }
+
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/tournaments/registrations/:registrationId
+ * Update a specific tournament registration (organizer/admin only)
+ * Authorization: ORGANIZER or ADMIN
+ */
+export async function updateTournamentRegistration(req, res, next) {
+  try {
+    const { registrationId } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    const allowedStatuses = ['REGISTERED', 'WAITLISTED', 'WITHDRAWN', 'CANCELLED'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_STATUS',
+          message: `Status must be one of: ${allowedStatuses.join(', ')}`
+        }
+      });
+    }
+
+    // Try to find as Singles Registration first
+    let registration = await prisma.tournamentRegistration.findUnique({
+      where: { id: registrationId },
+      include: {
+        tournament: {
+          include: { category: true }
+        }
+      }
+    });
+
+    let isDoubles = false;
+
+    // If not found, try as Pair Registration (Doubles)
+    if (!registration) {
+      registration = await prisma.pairRegistration.findUnique({
+        where: { id: registrationId },
+        include: {
+          tournament: {
+            include: { category: true }
+          }
+        }
+      });
+      isDoubles = true;
+    }
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_NOT_FOUND',
+          message: 'Registration not found'
+        }
+      });
+    }
+
+    let updatedRegistration;
+
+    if (isDoubles) {
+      updatedRegistration = await prisma.pairRegistration.update({
+        where: { id: registrationId },
+        data: {
+          status: status || registration.status
+        }
+      });
+    } else {
+      updatedRegistration = await prisma.tournamentRegistration.update({
+        where: { id: registrationId },
+        data: {
+          status: status || registration.status
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        registration: {
+          id: updatedRegistration.id,
+          tournamentId: updatedRegistration.tournamentId,
+          status: updatedRegistration.status,
+          updatedAt: updatedRegistration.updatedAt,
+          type: isDoubles ? 'DOUBLES' : 'SINGLES'
+        }
+      },
+      message: 'Registration updated successfully'
     });
   } catch (err) {
     next(err);
