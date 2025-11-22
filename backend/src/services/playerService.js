@@ -50,12 +50,14 @@ export const findPlayerById = async (id, isPublic = false) => {
 };
 
 // Create new player profile
-export const createPlayerProfile = async ({ name, email, phone, createdBy }) => {
+export const createPlayerProfile = async ({ name, email, phone, birthDate, gender, createdBy }) => {
   const profile = await prisma.playerProfile.create({
     data: {
       name: name.trim(),
       email: email ? email.toLowerCase().trim() : null,
       phone: phone || null,
+      birthDate: birthDate ? new Date(birthDate) : null,
+      gender: gender || null,
       createdBy
     },
     include: {
