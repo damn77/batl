@@ -25,6 +25,10 @@ import {
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
+
+// Trust the first proxy (Render load balancer)
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT || 3000;
 
 // Create FileStore constructor
