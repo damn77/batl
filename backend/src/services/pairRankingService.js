@@ -2,6 +2,7 @@
 // Feature: 006-doubles-pairs - User Story 2
 
 import { PrismaClient } from '@prisma/client';
+import * as sharedRankingService from './sharedRankingService.js';
 
 const prisma = new PrismaClient();
 
@@ -249,11 +250,8 @@ export async function getPairRankings(categoryId, options = {}) {
     },
   });
 
-  // Format rankings with computed fields
+  // Format rankings with computed fields using shared service
   const formattedRankings = rankings.map((ranking) => {
-    const totalMatches = ranking.wins + ranking.losses;
-    const winRate = totalMatches > 0 ? ranking.wins / totalMatches : 0;
-
     return {
       rank: ranking.rank,
       pair: {
@@ -265,7 +263,7 @@ export async function getPairRankings(categoryId, options = {}) {
       points: ranking.points,
       wins: ranking.wins,
       losses: ranking.losses,
-      winRate: parseFloat(winRate.toFixed(3)),
+      winRate: sharedRankingService.calculateWinRate(ranking.wins, ranking.losses),
       lastUpdated: ranking.lastUpdated,
     };
   });

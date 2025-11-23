@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import * as categoryService from './categoryService.js';
+import * as sharedRankingService from './sharedRankingService.js';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export async function getCategoryLeaderboard(categoryId, options = {}) {
     })
   ]);
 
-  // Calculate win rate for each ranking
+  // Calculate win rate for each ranking using shared service
   const rankingsWithWinRate = rankings.map(ranking => ({
     rank: ranking.rank,
     playerId: ranking.playerId,
@@ -44,9 +45,7 @@ export async function getCategoryLeaderboard(categoryId, options = {}) {
     points: ranking.points,
     wins: ranking.wins,
     losses: ranking.losses,
-    winRate: ranking.wins + ranking.losses > 0
-      ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-      : 0,
+    winRate: sharedRankingService.calculateWinRate(ranking.wins, ranking.losses),
     lastUpdated: ranking.updatedAt
   }));
 
@@ -99,10 +98,8 @@ export async function getPlayerRankingInCategory(categoryId, playerId) {
     where: { categoryId }
   });
 
-  // Calculate win rate
-  const winRate = ranking.wins + ranking.losses > 0
-    ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-    : 0;
+  // Calculate win rate using shared service
+  const winRate = sharedRankingService.calculateWinRate(ranking.wins, ranking.losses);
 
   return {
     categoryId: category.id,
@@ -156,7 +153,7 @@ export async function getPlayerAllRankings(playerId) {
     }
   });
 
-  // Format rankings with win rates
+  // Format rankings with win rates using shared service
   const formattedRankings = rankings.map(ranking => ({
     categoryId: ranking.categoryId,
     categoryName: ranking.category.name,
@@ -164,17 +161,15 @@ export async function getPlayerAllRankings(playerId) {
     points: ranking.points,
     wins: ranking.wins,
     losses: ranking.losses,
-    winRate: ranking.wins + ranking.losses > 0
-      ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-      : 0
+    winRate: sharedRankingService.calculateWinRate(ranking.wins, ranking.losses)
   }));
 
   // Get the latest update time
   const lastUpdated = rankings.length > 0
     ? rankings.reduce((latest, r) =>
-        r.updatedAt > latest ? r.updatedAt : latest,
-        rankings[0].updatedAt
-      )
+      r.updatedAt > latest ? r.updatedAt : latest,
+      rankings[0].updatedAt
+    )
     : new Date();
 
   return {
