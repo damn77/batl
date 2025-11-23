@@ -57,3 +57,7 @@ services:
       # (Update with your actual backend URL after first deploy)
       - key: VITE_API_URL
         sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
