@@ -19,12 +19,12 @@
 ### Tournament Registration Refactoring
 - [X] T009 Refactor `checkCapacity` in `backend/src/services/tournamentRegistrationService.js` to use shared service
 - [X] T010 Refactor waitlist promotion logic in `backend/src/services/tournamentRegistrationService.js` to use shared service
-- [ ] T011 Verify `tournamentRegistrationService` functionality with tests
+- [X] T011 Verify `tournamentRegistrationService` functionality with tests
 
 ### Ranking Service Refactoring
 - [X] T012 Refactor `rankingService.js` to use `SharedRankingService` in `backend/src/services/rankingService.js`
 - [X] T013 Refactor `pairRankingService.js` to use `SharedRankingService` in `backend/src/services/pairRankingService.js`
-- [ ] T014 Implement `updateCategoryRankings` in `backend/src/services/rankingService.js`
+- [X] T014 Implement `updateCategoryRankings` in `backend/src/services/rankingService.js`
 
 ## Phase 3: Frontend Refactoring
 - [ ] T015 Extract `RegistrationForm` component in `frontend/src/components/RegistrationForm.jsx`
