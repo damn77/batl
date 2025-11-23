@@ -32,6 +32,6 @@
 - [X] T017 Refactor `OrganizerRegistrationPanel` to use new component and hook in `frontend/src/components/OrganizerRegistrationPanel.jsx`
 
 ## Phase 4: Verification & Polish
-- [ ] T018 Run full test suite and verify coverage
-- [ ] T019 Verify CI/CD pipeline execution
-- [ ] T020 Perform manual regression testing of registration flows
+- [X] T018 Run full test suite and verify coverage
+- [X] T019 Verify CI/CD pipeline execution
+- [X] T020 Perform manual regression testing of registration flows
