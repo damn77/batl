@@ -27,9 +27,9 @@
 - [X] T014 Implement `updateCategoryRankings` in `backend/src/services/rankingService.js`
 
 ## Phase 3: Frontend Refactoring
-- [ ] T015 Extract `RegistrationForm` component in `frontend/src/components/RegistrationForm.jsx`
-- [ ] T016 Create `useRegistration` hook in `frontend/src/hooks/useRegistration.js`
-- [ ] T017 Refactor `OrganizerRegistrationPanel` to use new component and hook in `frontend/src/components/OrganizerRegistrationPanel.jsx`
+- [X] T015 Extract `RegistrationForm` component in `frontend/src/components/RegistrationForm.jsx`
+- [X] T016 Create `useRegistration` hook in `frontend/src/hooks/useRegistration.js`
+- [X] T017 Refactor `OrganizerRegistrationPanel` to use new component and hook in `frontend/src/components/OrganizerRegistrationPanel.jsx`
 
 ## Phase 4: Verification & Polish
 - [ ] T018 Run full test suite and verify coverage
