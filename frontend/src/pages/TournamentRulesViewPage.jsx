@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Alert, Spinner, Card } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import TournamentFormatDisplay from '../components/TournamentFormatDisplay';
 import RuleCascadeViewer from '../components/RuleCascadeViewer';
@@ -12,6 +13,7 @@ import { getTournamentFormat, getAllRuleOverrides } from '../services/tournament
  * Accessible to all authenticated users (players, organizers, admins)
  */
 const TournamentRulesViewPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams(); // Tournament ID
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,14 +39,14 @@ const TournamentRulesViewPage = () => {
       if (formatData.success) {
         setTournament(formatData.data);
       } else {
-        throw new Error(formatData.error?.message || 'Failed to load tournament format');
+        throw new Error(formatData.error?.message || t('errors.failedToLoad', { resource: t('common.tournamentFormat') }));
       }
 
       if (overridesData.success) {
         setRuleOverrides(overridesData.data);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load tournament rules');
+      setError(err.message || t('errors.failedToLoad', { resource: t('common.tournamentRules') }));
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ const TournamentRulesViewPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Tournament Rules</h2>
+            <h2>{t('pages.tournamentRules.title')}</h2>
             {tournament && (
               <p className="text-muted">{tournament.name}</p>
             )}
@@ -83,7 +85,7 @@ const TournamentRulesViewPage = () => {
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" />
-            <p className="mt-3 text-muted">Loading tournament rules...</p>
+            <p className="mt-3 text-muted">{t('messages.loadingTournamentRules')}</p>
           </div>
         ) : (
           <Row>
@@ -96,14 +98,13 @@ const TournamentRulesViewPage = () => {
               {/* Display default scoring rules */}
               <Card>
                 <Card.Header>
-                  <h5 className="mb-0">Default Scoring Rules</h5>
+                  <h5 className="mb-0">{t('pages.tournamentRules.defaultScoringRules')}</h5>
                 </Card.Header>
                 <Card.Body>
                   {tournament?.defaultScoringRules ? (
                     <>
                       <p className="text-muted small mb-3">
-                        These are the default scoring rules for all matches in this tournament.
-                        Individual matches, rounds, or groups may have custom overrides.
+                        {t('help.defaultScoringRulesDescription')}
                       </p>
                       {/* T053: Integrate RuleCascadeViewer for tournament defaults */}
                       <RuleCascadeViewer
@@ -116,7 +117,7 @@ const TournamentRulesViewPage = () => {
                     </>
                   ) : (
                     <Alert variant="info" className="mb-0">
-                      No default scoring rules configured
+                      {t('messages.noDefaultScoringRules')}
                     </Alert>
                   )}
                 </Card.Body>
@@ -128,20 +129,20 @@ const TournamentRulesViewPage = () => {
               <Col xs={12} className="mb-4">
                 <Card>
                   <Card.Header>
-                    <h5 className="mb-0">Rule Overrides</h5>
+                    <h5 className="mb-0">{t('pages.tournamentRules.ruleOverrides')}</h5>
                   </Card.Header>
                   <Card.Body>
                     <p className="text-muted small">
-                      The following groups, brackets, rounds, or matches have custom scoring rule overrides:
+                      {t('help.ruleOverridesDescription')}
                     </p>
 
                     {ruleOverrides.groups.length > 0 && (
                       <div className="mb-3">
-                        <h6>Group Overrides</h6>
+                        <h6>{t('pages.tournamentRules.groupOverrides')}</h6>
                         {ruleOverrides.groups.map(group => (
                           <Card key={group.id} bg="light" className="mb-2">
                             <Card.Body className="py-2">
-                              <strong>Group {group.groupNumber}</strong>
+                              <strong>{t('common.group')} {group.groupNumber}</strong>
                               <pre className="small mb-0 mt-1">{JSON.stringify(group.ruleOverrides, null, 2)}</pre>
                             </Card.Body>
                           </Card>
@@ -151,11 +152,11 @@ const TournamentRulesViewPage = () => {
 
                     {ruleOverrides.brackets.length > 0 && (
                       <div className="mb-3">
-                        <h6>Bracket Overrides</h6>
+                        <h6>{t('pages.tournamentRules.bracketOverrides')}</h6>
                         {ruleOverrides.brackets.map(bracket => (
                           <Card key={bracket.id} bg="light" className="mb-2">
                             <Card.Body className="py-2">
-                              <strong>{bracket.bracketType} Bracket</strong>
+                              <strong>{bracket.bracketType} {t('common.bracket')}</strong>
                               <pre className="small mb-0 mt-1">{JSON.stringify(bracket.ruleOverrides, null, 2)}</pre>
                             </Card.Body>
                           </Card>
@@ -165,11 +166,11 @@ const TournamentRulesViewPage = () => {
 
                     {ruleOverrides.rounds.length > 0 && (
                       <div className="mb-3">
-                        <h6>Round Overrides</h6>
+                        <h6>{t('pages.tournamentRules.roundOverrides')}</h6>
                         {ruleOverrides.rounds.map(round => (
                           <Card key={round.id} bg="light" className="mb-2">
                             <Card.Body className="py-2">
-                              <strong>Round {round.roundNumber}</strong>
+                              <strong>{t('common.round')} {round.roundNumber}</strong>
                               <pre className="small mb-0 mt-1">{JSON.stringify(round.ruleOverrides, null, 2)}</pre>
                             </Card.Body>
                           </Card>
@@ -179,11 +180,11 @@ const TournamentRulesViewPage = () => {
 
                     {ruleOverrides.matches.length > 0 && (
                       <div className="mb-3">
-                        <h6>Match Overrides</h6>
+                        <h6>{t('pages.tournamentRules.matchOverrides')}</h6>
                         {ruleOverrides.matches.map(match => (
                           <Card key={match.id} bg="light" className="mb-2">
                             <Card.Body className="py-2">
-                              <strong>Match {match.matchNumber}</strong>
+                              <strong>{t('common.match')} {match.matchNumber}</strong>
                               <pre className="small mb-0 mt-1">{JSON.stringify(match.ruleOverrides, null, 2)}</pre>
                             </Card.Body>
                           </Card>

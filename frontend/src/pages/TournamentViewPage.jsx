@@ -1,6 +1,7 @@
 // T022-T038: Tournament View Page - Comprehensive tournament information display
 import { Container, Row, Col, Alert, Spinner, Breadcrumb } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import TournamentHeader from '../components/TournamentHeader';
 import TournamentInfoPanel from '../components/TournamentInfoPanel';
@@ -18,6 +19,7 @@ import { useAuth } from '../utils/AuthContext';
  * FR-007: Responsive design
  */
 const TournamentViewPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -39,13 +41,13 @@ const TournamentViewPage = () => {
         {/* T032: Breadcrumb navigation */}
         <Breadcrumb className="mb-3">
           <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
-            Home
+            {t('nav.home')}
           </Breadcrumb.Item>
           <Breadcrumb.Item linkAs={Link} linkProps={{ to: getTournamentsLink() }}>
-            Tournaments
+            {t('nav.tournaments')}
           </Breadcrumb.Item>
           <Breadcrumb.Item active>
-            {tournament?.name || 'Tournament Details'}
+            {tournament?.name || t('pages.tournamentView.defaultTitle')}
           </Breadcrumb.Item>
         </Breadcrumb>
 
@@ -53,23 +55,23 @@ const TournamentViewPage = () => {
         {isLoading && (
           <div className="text-center py-5">
             <Spinner animation="border" role="status" variant="primary">
-              <span className="visually-hidden">Loading tournament...</span>
+              <span className="visually-hidden">{t('common.loadingTournament')}</span>
             </Spinner>
-            <p className="mt-3 text-muted">Loading tournament details...</p>
+            <p className="mt-3 text-muted">{t('messages.loadingTournamentDetails')}</p>
           </div>
         )}
 
         {/* Error state */}
         {isError && (
           <Alert variant="danger">
-            <Alert.Heading>Tournament Not Found</Alert.Heading>
+            <Alert.Heading>{t('errors.tournamentNotFound')}</Alert.Heading>
             <p>
-              The tournament you&apos;re looking for could not be found. It may have been deleted or the URL is incorrect.
+              {t('errors.tournamentNotFoundDescription')}
             </p>
             <hr />
             <div className="d-flex justify-content-end">
               <Link to="/tournaments" className="btn btn-outline-danger">
-                Back to Tournaments
+                {t('buttons.backToTournaments')}
               </Link>
             </div>
           </Alert>
