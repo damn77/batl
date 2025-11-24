@@ -1,8 +1,10 @@
 import { useAuth } from '../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -12,7 +14,7 @@ const AdminDashboard = () => {
       <div className="container mt-4">
         <div className="row">
           <div className="col-12">
-            <h1 className="mb-4">Admin Dashboard</h1>
+            <h1 className="mb-4">{t('pages.admin.title')}</h1>
 
             <div className="alert alert-success" role="alert">
               <h4 className="alert-heading">Welcome, {user?.email}!</h4>
@@ -28,13 +30,13 @@ const AdminDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">User Management</h5>
+                    <h5 className="card-title">{t('pages.admin.userManagement')}</h5>
                     <p className="card-text">Manage users, organizers, and players.</p>
                     <button
                       className="btn btn-primary"
                       onClick={() => navigate('/admin/users')}
                     >
-                      Manage Users
+                      {t('pages.admin.userManagement')}
                     </button>
                   </div>
                 </div>
@@ -43,7 +45,7 @@ const AdminDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">Tournament Management</h5>
+                    <h5 className="card-title">{t('pages.admin.tournamentManagement')}</h5>
                     <p className="card-text">Create and manage tennis tournaments.</p>
                     <button className="btn btn-primary" disabled>
                       Coming Soon
@@ -55,7 +57,7 @@ const AdminDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">System Settings</h5>
+                    <h5 className="card-title">{t('pages.admin.systemSettings')}</h5>
                     <p className="card-text">Configure system-wide settings.</p>
                     <button className="btn btn-primary" disabled>
                       Coming Soon
@@ -69,7 +71,7 @@ const AdminDashboard = () => {
               <div className="col-12">
                 <div className="card">
                   <div className="card-header bg-info text-white">
-                    <h5 className="mb-0">MVP Status</h5>
+                    <h5 className="mb-0">{t('pages.admin.mvpStatus')}</h5>
                   </div>
                   <div className="card-body">
                     <ul className="list-group list-group-flush">

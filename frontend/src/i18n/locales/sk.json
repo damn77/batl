@@ -1,0 +1,271 @@
+{
+  "common": {
+    "loading": "Načítava sa...",
+    "error": "Chyba",
+    "save": "Uložiť",
+    "cancel": "Zrušiť",
+    "delete": "Vymazať",
+    "edit": "Upraviť",
+    "create": "Vytvoriť",
+    "back": "Späť",
+    "submit": "Odoslať",
+    "confirm": "Potvrdiť",
+    "search": "Hľadať",
+    "filter": "Filter",
+    "actions": "Akcie",
+    "view": "Zobraziť",
+    "close": "Zavrieť",
+    "yes": "Áno",
+    "no": "Nie",
+    "notProvided": "Nenastavené",
+    "none": "Žiadne",
+    "optional": "Voliteľné",
+    "note": "Poznámka",
+    "advanced": "Pokročilé",
+    "required": "*"
+  },
+  "nav": {
+    "rankings": "Rebríčky",
+    "pairRankings": "Rebríčky párov",
+    "tournaments": "Turnaje",
+    "categories": "Kategórie",
+    "players": "Hráči",
+    "doublesPairs": "Debľové páry",
+    "login": "Prihlásiť",
+    "logout": "Odhlásiť",
+    "register": "Registrovať"
+  },
+  "auth": {
+    "loginTitle": "Prihlásenie",
+    "registerTitle": "Registrácia",
+    "email": "Email",
+    "password": "Heslo",
+    "confirmPassword": "Potvrdiť heslo",
+    "forgotPassword": "Zabudli ste heslo?",
+    "noAccount": "Nemáte účet?",
+    "hasAccount": "Už máte účet?",
+    "loggingIn": "Prihlasovanie...",
+    "newPlayerPrompt": "Nový hráč? Vytvorte si účet",
+    "defaultCredentials": "Predvolené administrátorské prihlasovacie údaje:\nadmin@batl.example.com / ChangeMe123!"
+  },
+  "pages": {
+    "admin": {
+      "title": "Administrátorský panel",
+      "userManagement": "Správa používateľov",
+      "tournamentManagement": "Správa turnajov",
+      "systemSettings": "Systémové nastavenia",
+      "mvpStatus": "MVP stav"
+    },
+    "organizer": {
+      "title": "Panel organizátora",
+      "myTournaments": "Moje turnaje",
+      "playerProfiles": "Profily hráčov",
+      "rankings": "Rebríčky",
+      "features": "Funkcie organizátora"
+    },
+    "categories": {
+      "title": "Správa kategórií",
+      "subtitle": "Vytvorte a spravujte turnajové kategórie"
+    },
+    "rankings": {
+      "title": "Rebríčky kategórií",
+      "subtitle": "Zobraziť rebríčky hráčov v turnajových kategóriách"
+    },
+    "pairRankings": {
+      "title": "Rebríčky párov",
+      "selectCategory": "Vyberte debľovú kategóriu",
+      "noCategoriesAvailable": "Žiadne debľové kategórie nie sú k dispozícii",
+      "aboutTitle": "O rebríčkoch párov"
+    },
+    "pairRegistration": {
+      "title": "Registrácia debľového páru"
+    },
+    "users": {
+      "title": "Správa používateľov"
+    },
+    "players": {
+      "title": "Profily hráčov"
+    },
+    "profile": {
+      "title": "Môj profil"
+    },
+    "publicRankings": {
+      "title": "Rebríčky hráčov",
+      "subtitle": "Zobraziť všetkých registrovaných hráčov",
+      "comingSoon": "Turnajové pavúky a výsledky sa zobrazia tu"
+    }
+  },
+  "form": {
+    "labels": {
+      "type": "Typ",
+      "ageGroup": "Veková skupina",
+      "gender": "Pohlavie",
+      "role": "Rola",
+      "status": "Stav",
+      "email": "Email",
+      "phone": "Telefón",
+      "name": "Meno",
+      "description": "Popis",
+      "dateOfBirth": "Dátum narodenia",
+      "accountEmail": "Email účtu",
+      "venueName": "Názov miesta",
+      "venueAddress": "Adresa miesta",
+      "maxParticipants": "Max. účastníkov",
+      "searchPlayers": "Hľadať hráčov"
+    },
+    "options": {
+      "allTypes": "Všetky typy",
+      "allAgeGroups": "Všetky vekové skupiny",
+      "allGenders": "Všetky pohlavia",
+      "allRoles": "Všetky roly",
+      "anyStatus": "Akýkoľvek stav",
+      "singles": "Dvojhra",
+      "doubles": "Štvorhra",
+      "mixed": "Mix",
+      "male": "Muž",
+      "female": "Žena",
+      "admin": "Administrátor",
+      "organizer": "Organizátor",
+      "player": "Hráč",
+      "active": "Aktívny",
+      "inactive": "Neaktívny",
+      "withAccount": "S účtom",
+      "withoutAccount": "Bez účtu",
+      "allPlayers": "Všetci hráči",
+      "selectGender": "Vyberte pohlavie"
+    }
+  },
+  "table": {
+    "headers": {
+      "name": "Meno",
+      "email": "Email",
+      "phone": "Telefón",
+      "role": "Rola",
+      "status": "Stav",
+      "accountStatus": "Stav účtu",
+      "emailVerified": "Email overený",
+      "created": "Vytvorené",
+      "lastLogin": "Posledné prihlásenie",
+      "actions": "Akcie",
+      "rank": "Poradie",
+      "seeding": "Nasadenie",
+      "points": "Body",
+      "wins": "Výhry",
+      "losses": "Prehry",
+      "winRate": "Úspešnosť",
+      "partner": "Partner",
+      "category": "Kategória",
+      "seedingScore": "Skóre nasadenia",
+      "activeRegistrations": "Aktívne registrácie",
+      "playerName": "Meno hráča"
+    }
+  },
+  "modals": {
+    "createCategory": {
+      "title": "Vytvoriť kategóriu"
+    },
+    "editCategory": {
+      "title": "Upraviť kategóriu"
+    },
+    "confirmDelete": {
+      "title": "Potvrdiť vymazanie"
+    },
+    "createUser": {
+      "title": "Vytvoriť používateľa"
+    },
+    "createPlayer": {
+      "title": "Vytvoriť nový profil hráča",
+      "duplicatesFound": "{count} Potenciálny duplikát{plural} nájdený",
+      "similarProfiles": "Podobný profil hráča{plural} už existuje{verb}:",
+      "duplicateNote": "Tento profil môžete stále vytvoriť, ak ste si istí, že ide o inú osobu. Overte meno a kontaktné informácie, aby ste predišli duplicitným záznamom.",
+      "checkingDuplicates": "Kontrola duplicít...",
+      "emailHint": "Voliteľné. Používa sa na neskoršie prepojenie účtov hráčov.",
+      "phoneHint": "Voliteľné. Medzinárodný formát začínajúci +.",
+      "creating": "Vytváranie...",
+      "submit": "Vytvoriť profil hráča"
+    }
+  },
+  "alerts": {
+    "selectCategory": "Vyberte kategóriu pre zobrazenie rebríčkov",
+    "selectPlayer": "Vyberte hráča pre zobrazenie dostupných kategórií",
+    "noCategoriesFound": "Žiadne kategórie neboli nájdené. Vytvorte svoju prvú kategóriu.",
+    "noTournamentsFound": "Žiadne turnaje neboli nájdené. Vytvorte svoj prvý turnaj.",
+    "noRuleInfo": "Žiadne informácie o pravidlách nie sú k dispozícii",
+    "bracketRulesUpdated": "Pravidlá pavúka boli úspešne aktualizované!",
+    "groupRulesUpdated": "Pravidlá skupiny boli úspešne aktualizované!",
+    "matchRulesUpdated": "Pravidlá zápasu boli úspešne aktualizované!",
+    "roundRulesUpdated": "Pravidlá kola boli úspešne aktualizované!"
+  },
+  "badges": {
+    "hasAccount": "Môže sa prihlásiť",
+    "noAccount": "Pozvaný hráč",
+    "registered": "Registrovaný",
+    "profileOnly": "Bez turnajovej histórie",
+    "match": "Zhoda"
+  },
+  "placeholders": {
+    "tournamentName": "napr. Letný šampionát 2025",
+    "venueName": "napr. Tenisový klub Bratislava",
+    "venueAddress": "napr. Vajnorská 21, 831 04 Bratislava",
+    "maxParticipants": "Nechajte prázdne pre neobmedzený počet",
+    "description": "Voliteľný popis...",
+    "searchByName": "Hľadať podľa mena...",
+    "searchByNameOrEmail": "Hľadať podľa mena alebo emailu...",
+    "email": "hrac@example.com",
+    "phone": "+421901234567",
+    "playerName": "Ján Novák",
+    "password": "Zadajte heslo",
+    "confirmPassword": "Potvrďte heslo",
+    "overrideJustification": "Vysvetlite, prečo by mal byť tento pár povolený napriek porušeniu oprávnenosti..."
+  },
+  "tabs": {
+    "format": "Formát",
+    "scoring": "Bodovanie",
+    "overrides": "Výnimky"
+  },
+  "registration": {
+    "selectEntity": "Vyberte {entityType}",
+    "chooseEntity": "Vyberte {entityType}...",
+    "pairsInCategoryHint": "Zobrazujú sa iba páry v kategórii {categoryName}",
+    "allPlayersHint": "Zobrazujú sa všetci hráči v systéme",
+    "registering": "Registrácia...",
+    "registerEntity": "Registrovať {entityType}",
+    "capacityWarning": "Turnaj je naplnený. Budete požiadaný vybrať, kto bude presunutý do čakacej listiny."
+  },
+  "tournament": {
+    "rules": {
+      "title": "Pravidlá turnaja",
+      "formatTitle": "Konfigurácia formátu turnaja",
+      "formatDescription": "Tento turnaj používa formát {formatType}.",
+      "scoringTitle": "Pravidlá bodovania zápasov",
+      "scoringDescription": "Predvolené pravidlá bodovania aplikované na všetky zápasy, pokiaľ nie sú prepísané.",
+      "standardRules": "Tento turnaj používa štandardné pravidlá.\nNeboli nakonfigurované žiadne výnimky pre skupiny, kolá alebo zápasy.",
+      "customOverrides": "Tento turnaj má vlastné výnimky pravidiel",
+      "modifiedDescription": "Zmeny pravidiel boli nakonfigurované na úrovni skupín alebo kôl. Rôzne časti turnaja môžu používať rôzne pravidlá.",
+      "specificDescription": "Zmeny pravidiel boli nakonfigurované pre konkrétne zápasy. Jednotlivé zápasy môžu používať prispôsobené pravidlá nad rámec štandardnej konfigurácie.",
+      "overrideNote": "Podrobné informácie o výnimkách sú k dispozícii prostredníctvom rozhrania pre správu turnajov. Kontaktujte organizátora turnaja pre konkrétne variácie pravidiel.",
+      "showRawConfig": "Zobraziť surovú konfiguráciu (JSON)",
+      "formatConfig": "Konfigurácia formátu",
+      "scoringRules": "Pravidlá bodovania"
+    }
+  },
+  "errors": {
+    "loginFailed": "Prihlásenie zlyhalo. Overte, či sú váš email a heslo správne.",
+    "nameMinLength": "Meno hráča musí mať aspoň 2 znaky",
+    "genderRequired": "Pohlavie je povinné",
+    "invalidEmail": "Zadajte platnú emailovú adresu (napr. hrac@example.com)",
+    "phoneStartPlus": "Číslo telefónu musí začínať znamienkom + (napr. +421901234567)",
+    "phoneDigits": "Telefón musí mať 7-15 číslic po znamienku +",
+    "phoneFormat": "Telefón musí byť v medzinárodnom formáte: +KódKrajinyČíslo (napr. +421901234567)",
+    "createPlayerFailed": "Vytvorenie profilu hráča zlyhalo",
+    "validationFailed": "Validácia zlyhala: {details}"
+  },
+  "help": {
+    "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
+    "seedingScoreExplanation": "Skóre nasadenia sa vypočíta z individuálnych rebríčkov oboch hráčov a určuje počiatočné umiestnenie páru v turnaji.",
+    "phoneFormat": "Medzinárodný formát zahŕňa kód krajiny (napr. +421 pre Slovensko, +1 pre USA/Kanadu). Príklad: +421901234567",
+    "rawConfigExplanation": "Surová JSON konfigurácia pre pokročilých používateľov a vývojárov. Zobrazuje presné nastavenia turnaja tak, ako sú uložené v databáze.",
+    "whyDuplicatesMatter": "Prečo záleží na duplikátoch?",
+    "duplicateExplanation": "Vytváranie duplicitných profilov môže viesť k nesprávnym výpočtom nasadenia a rebríčkov turnaja. Vytvorte nový profil iba vtedy, ak ste si istí, že ide o inú osobu."
+  }
+}

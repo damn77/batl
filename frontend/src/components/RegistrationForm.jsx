@@ -1,5 +1,6 @@
 // RegistrationForm - Reusable form component for tournament registration
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * RegistrationForm - Unified form component for singles/doubles registration
@@ -35,8 +36,8 @@ const RegistrationForm = ({
     onClearSuccess,
     isFull,
 }) => {
-    const entityType = isDoubles ? 'Pair' : 'Player';
-    const entityTypeLower = entityType.toLowerCase();
+    const { t } = useTranslation();
+    const entityType = isDoubles ? t('form.options.doubles') : t('form.options.player');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -57,25 +58,25 @@ const RegistrationForm = ({
             )}
 
             <Form.Group className="mb-3">
-                <Form.Label>Select {entityType}</Form.Label>
+                <Form.Label>{t('registration.selectEntity', { entityType })}</Form.Label>
                 <Form.Select
                     value={selectedId}
                     onChange={(e) => onSelect(e.target.value)}
                     disabled={loading || disabled}
                 >
-                    <option value="">Choose a {entityTypeLower}...</option>
+                    <option value="">{t('registration.chooseEntity', { entityType })}</option>
                     {entities.map((entity) => (
                         <option key={entity.id} value={entity.id}>
                             {isDoubles
-                                ? `${entity.player1?.name} & ${entity.player2?.name} (Score: ${entity.seedingScore || 0})`
+                                ? `${entity.player1?.name} & ${entity.player2?.name} (${t('table.headers.seedingScore')}: ${entity.seedingScore || 0})`
                                 : entity.name}
                         </option>
                     ))}
                 </Form.Select>
                 <Form.Text className="text-muted">
                     {isDoubles
-                        ? `Only pairs in the ${categoryName} category are shown`
-                        : 'Showing all players in the system'}
+                        ? t('registration.pairsInCategoryHint', { categoryName })
+                        : t('registration.allPlayersHint')}
                 </Form.Text>
             </Form.Group>
 
@@ -87,17 +88,16 @@ const RegistrationForm = ({
                 {loading ? (
                     <>
                         <Spinner animation="border" size="sm" className="me-2" />
-                        Registering...
+                        {t('registration.registering')}
                     </>
                 ) : (
-                    `Register ${entityType}`
+                    t('registration.registerEntity', { entityType })
                 )}
             </Button>
 
             {isFull && (
                 <Form.Text className="d-block mt-2 text-warning">
-                    <strong>Note:</strong> Tournament is at capacity. You&apos;ll be asked to
-                    select who to move to waitlist.
+                    <strong>{t('common.note')}:</strong> {t('registration.capacityWarning')}
                 </Form.Text>
             )}
         </Form>

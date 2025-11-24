@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Spinner, ListGroup } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { createPlayer, checkDuplicates } from '../services/playerService';
 
 const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -68,7 +70,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
 
     // Name validation
     if (!formData.name || formData.name.trim().length < 2) {
-      errors.name = 'Name must be at least 2 characters';
+      errors.name = t('errors.nameMinLength');
     }
 
     // Birth Date validation (optional)
@@ -78,23 +80,23 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
 
     // Gender validation
     if (!formData.gender) {
-      errors.gender = 'Gender is required';
+      errors.gender = t('errors.genderRequired');
     }
 
     // Email validation (optional)
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = t('errors.invalidEmail');
     }
 
     // Phone validation (optional) - more lenient frontend validation
     if (formData.phone) {
       const phoneDigitsOnly = formData.phone.replace(/\D/g, '');
       if (!formData.phone.startsWith('+')) {
-        errors.phone = 'Phone must start with + (e.g., +1234567890)';
+        errors.phone = t('errors.phoneStartPlus');
       } else if (phoneDigitsOnly.length < 7 || phoneDigitsOnly.length > 15) {
-        errors.phone = 'Phone must have 7-15 digits after the + sign';
+        errors.phone = t('errors.phoneDigits');
       } else if (!/^\+[1-9]\d+$/.test(formData.phone)) {
-        errors.phone = 'Phone must be in international format: +CountryCodeNumber (e.g., +12345678901)';
+        errors.phone = t('errors.phoneFormat');
       }
     }
 
@@ -149,14 +151,14 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
       // 2. Raw axios error: { response: { data: { error: {...} } } }
       const errorCode = err.code || err.response?.data?.error?.code;
       const errorDetails = err.details || err.response?.data?.error?.details;
-      let errorMessage = err.message || err.response?.data?.error?.message || 'Failed to create player profile';
+      let errorMessage = err.message || err.response?.data?.error?.message || t('errors.createPlayerFailed');
 
       // Check for validation errors
       if (errorCode === 'VALIDATION_ERROR' && errorDetails) {
         const validationErrors = Array.isArray(errorDetails)
           ? errorDetails.map(d => d.message).join(', ')
           : errorMessage;
-        errorMessage = `Validation failed: ${validationErrors}`;
+        errorMessage = t('errors.validationFailed', { details: validationErrors });
       }
 
       // Check for unique constraint errors (duplicate email)
@@ -167,7 +169,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
 
       // Add helpful hints for common errors
       if (errorMessage.includes('phone')) {
-        errorMessage += ' (Phone must be in international format: +1234567890)';
+        errorMessage += ` (${t('modals.createPlayer.phoneHint')})`;
       }
 
       setError(errorMessage);
@@ -196,7 +198,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
   return (
     <Modal show={show} onHide={handleClose} backdrop={loading ? 'static' : true} size="lg">
       <Modal.Header closeButton={!loading}>
-        <Modal.Title>Create New Player Profile</Modal.Title>
+        <Modal.Title>{t('modals.createPlayer.title')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -206,16 +208,22 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
           <Alert variant="warning" className="border-warning">
             <Alert.Heading>
               <span className="me-2">⚠️</span>
-              {duplicates.length} Potential Duplicate{duplicates.length > 1 ? 's' : ''} Found
+              {t('modals.createPlayer.duplicatesFound', {
+                count: duplicates.length,
+                plural: duplicates.length > 1 ? 's' : ''
+              })}
             </Alert.Heading>
             <p className="mb-2">
-              <strong>Similar player profile{duplicates.length > 1 ? 's' : ''} already exist{duplicates.length === 1 ? 's' : ''}:</strong>
+              <strong>{t('modals.createPlayer.similarProfiles', {
+                plural: duplicates.length > 1 ? 's' : '',
+                verb: duplicates.length === 1 ? 's' : ''
+              })}</strong>
             </p>
             <ListGroup variant="flush" className="mb-2">
               {duplicates.map((dup) => (
                 <ListGroup.Item key={dup.id} className="bg-transparent border-warning">
                   <div className="d-flex align-items-start">
-                    <span className="badge bg-warning text-dark me-2">Match</span>
+                    <span className="badge bg-warning text-dark me-2">{t('badges.match')}</span>
                     <div>
                       <strong>{dup.name}</strong>
                       {dup.email && (
@@ -236,15 +244,14 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               ))}
             </ListGroup>
             <div className="alert alert-light border-warning mb-0">
-              <strong>⚡ Note:</strong> You can still create this profile if you&apos;re sure it&apos;s a different person.
-              Please verify the name and contact information to avoid duplicate entries.
+              <strong>⚡ {t('common.note')}:</strong> {t('modals.createPlayer.duplicateNote')}
             </div>
           </Alert>
         )}
 
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Name *</Form.Label>
+            <Form.Label>{t('form.labels.name')} {t('common.required')}</Form.Label>
             <Form.Control
               type="text"
               name="name"
@@ -252,7 +259,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.name}
               disabled={loading}
-              placeholder="Enter player name"
+              placeholder={t('placeholders.playerName')}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.name}
@@ -260,7 +267,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
             {checkingDuplicates && (
               <Form.Text className="text-muted">
                 <Spinner animation="border" size="sm" className="me-1" />
-                Checking for duplicates...
+                {t('modals.createPlayer.checkingDuplicates')}
               </Form.Text>
             )}
           </Form.Group>
@@ -268,7 +275,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
           <div className="row">
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Date of Birth</Form.Label>
+                <Form.Label>{t('form.labels.dateOfBirth')}</Form.Label>
                 <Form.Control
                   type="date"
                   name="birthDate"
@@ -284,7 +291,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
             </div>
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Gender *</Form.Label>
+                <Form.Label>{t('form.labels.gender')} {t('common.required')}</Form.Label>
                 <Form.Select
                   name="gender"
                   value={formData.gender}
@@ -292,9 +299,9 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
                   isInvalid={!!validationErrors.gender}
                   disabled={loading}
                 >
-                  <option value="">Select Gender</option>
-                  <option value="MEN">Male</option>
-                  <option value="WOMEN">Female</option>
+                  <option value="">{t('form.options.selectGender')}</option>
+                  <option value="MEN">{t('form.options.male')}</option>
+                  <option value="WOMEN">{t('form.options.female')}</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">
                   {validationErrors.gender}
@@ -304,7 +311,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
           </div>
 
           <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>{t('form.labels.email')}</Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -312,18 +319,18 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.email}
               disabled={loading}
-              placeholder="player@example.com (optional)"
+              placeholder={`${t('placeholders.email')} (${t('common.optional').toLowerCase()})`}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.email}
             </Form.Control.Feedback>
             <Form.Text className="text-muted">
-              Optional. Used for linking player accounts later.
+              {t('modals.createPlayer.emailHint')}
             </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Phone</Form.Label>
+            <Form.Label>{t('form.labels.phone')}</Form.Label>
             <Form.Control
               type="tel"
               name="phone"
@@ -331,13 +338,13 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.phone}
               disabled={loading}
-              placeholder="+1234567890 (optional)"
+              placeholder={`${t('placeholders.phone')} (${t('common.optional').toLowerCase()})`}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.phone}
             </Form.Control.Feedback>
             <Form.Text className="text-muted">
-              Optional. International format starting with +.
+              {t('modals.createPlayer.phoneHint')}
             </Form.Text>
           </Form.Group>
         </Form>
@@ -345,7 +352,7 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
 
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose} disabled={loading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={loading || checkingDuplicates}>
           {loading ? (
@@ -358,10 +365,10 @@ const CreatePlayerModal = ({ show, onHide, onPlayerCreated }) => {
                 aria-hidden="true"
                 className="me-2"
               />
-              Creating...
+              {t('modals.createPlayer.creating')}
             </>
           ) : (
-            'Create Player Profile'
+            t('modals.createPlayer.submit')
           )}
         </Button>
       </Modal.Footer>

@@ -1,8 +1,10 @@
 import { useAuth } from '../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 
 const OrganizerDashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -12,7 +14,7 @@ const OrganizerDashboard = () => {
       <div className="container mt-4">
         <div className="row">
           <div className="col-12">
-            <h1 className="mb-4">Organizer Dashboard</h1>
+            <h1 className="mb-4">{t('pages.organizer.title')}</h1>
 
             <div className="alert alert-success" role="alert">
               <h4 className="alert-heading">Welcome, {user?.email}!</h4>
@@ -28,7 +30,7 @@ const OrganizerDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">My Tournaments</h5>
+                    <h5 className="card-title">{t('pages.organizer.myTournaments')}</h5>
                     <p className="card-text">Create and manage your tournaments.</p>
                     <button className="btn btn-primary" disabled>
                       Coming Soon
@@ -40,13 +42,13 @@ const OrganizerDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">Player Profiles</h5>
+                    <h5 className="card-title">{t('pages.organizer.playerProfiles')}</h5>
                     <p className="card-text">Manage player information and profiles.</p>
                     <button
                       className="btn btn-primary"
                       onClick={() => navigate('/organizer/players')}
                     >
-                      Manage Players
+                      {t('nav.players')}
                     </button>
                   </div>
                 </div>
@@ -55,7 +57,7 @@ const OrganizerDashboard = () => {
               <div className="col-md-4 mb-3">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">Rankings</h5>
+                    <h5 className="card-title">{t('pages.organizer.rankings')}</h5>
                     <p className="card-text">View tournament rankings and statistics.</p>
                     <button className="btn btn-primary" disabled>
                       Coming Soon
@@ -69,7 +71,7 @@ const OrganizerDashboard = () => {
               <div className="col-12">
                 <div className="card">
                   <div className="card-header bg-primary text-white">
-                    <h5 className="mb-0">Organizer Features</h5>
+                    <h5 className="mb-0">{t('pages.organizer.features')}</h5>
                   </div>
                   <div className="card-body">
                     <ul className="list-group list-group-flush">

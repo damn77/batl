@@ -1,0 +1,37 @@
+{
+  "lastFullReview": "2025-11-24T15:37:00Z",
+  "files": {
+    "src/components/NavBar.jsx": {
+      "lastReviewed": "2025-11-24T00:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/AdminDashboard.jsx": {
+      "lastReviewed": "2025-11-24T00:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/OrganizerDashboard.jsx": {
+      "lastReviewed": "2025-11-24T00:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/CategoryRankingsPage.jsx": {
+      "lastReviewed": "2025-11-24T00:00:00Z",
+      "status": "complete"
+    },
+    "src/components/RegistrationForm.jsx": {
+      "lastReviewed": "2025-11-24T15:37:00Z",
+      "status": "complete"
+    },
+    "src/components/LoginModal.jsx": {
+      "lastReviewed": "2025-11-24T15:37:00Z",
+      "status": "complete"
+    },
+    "src/components/CreatePlayerModal.jsx": {
+      "lastReviewed": "2025-11-24T15:37:00Z",
+      "status": "complete"
+    },
+    "src/components/TournamentRulesModal.jsx": {
+      "lastReviewed": "2025-11-24T15:37:00Z",
+      "status": "complete"
+    }
+  }
+}

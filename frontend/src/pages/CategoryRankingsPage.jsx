@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Badge, Alert, Spinner, Table } from 'react-bootstrap';
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { listCategories } from '../services/categoryService';
 import { getCategoryLeaderboard, formatWinRate, formatRank, getRankBadgeVariant } from '../services/rankingService';
 
 const CategoryRankingsPage = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [rankings, setRankings] = useState([]);
@@ -71,7 +73,7 @@ const CategoryRankingsPage = () => {
     () => [
       {
         accessorKey: 'rank',
-        header: 'Rank',
+        header: t('table.headers.rank'),
         size: 80,
         cell: ({ getValue }) => (
           <Badge bg={getRankBadgeVariant(getValue())} className="fs-6">
@@ -81,33 +83,33 @@ const CategoryRankingsPage = () => {
       },
       {
         accessorKey: 'playerName',
-        header: 'Player',
+        header: t('table.headers.playerName'),
         cell: ({ getValue }) => <strong>{getValue()}</strong>
       },
       {
         accessorKey: 'points',
-        header: 'Points',
+        header: t('table.headers.points'),
         size: 100,
         cell: ({ getValue }) => <strong>{getValue()}</strong>
       },
       {
         accessorKey: 'wins',
-        header: 'Wins',
+        header: t('table.headers.wins'),
         size: 80
       },
       {
         accessorKey: 'losses',
-        header: 'Losses',
+        header: t('table.headers.losses'),
         size: 80
       },
       {
         accessorKey: 'winRate',
-        header: 'Win Rate',
+        header: t('table.headers.winRate'),
         size: 100,
         cell: ({ getValue }) => formatWinRate(getValue())
       }
     ],
-    []
+    [t]
   );
 
   const table = useReactTable({
@@ -136,8 +138,8 @@ const CategoryRankingsPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Category Rankings</h2>
-            <p className="text-muted">View player rankings across tournament categories</p>
+            <h2>{t('pages.rankings.title')}</h2>
+            <p className="text-muted">{t('pages.rankings.subtitle')}</p>
           </Col>
         </Row>
 
@@ -147,7 +149,7 @@ const CategoryRankingsPage = () => {
           <Col md={3}>
             <Card>
               <Card.Header>
-                <strong>Categories</strong>
+                <strong>{t('nav.categories')}</strong>
               </Card.Header>
               <Card.Body className="p-0">
                 <div className="list-group list-group-flush">
@@ -175,7 +177,7 @@ const CategoryRankingsPage = () => {
 
           <Col md={9}>
             {!selectedCategory ? (
-              <Alert variant="info">Select a category to view rankings</Alert>
+              <Alert variant="info">{t('alerts.selectCategory')}</Alert>
             ) : loading ? (
               <div className="text-center py-5">
                 <Spinner animation="border" />

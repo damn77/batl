@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
 import { useModal } from '../utils/ModalContext';
 import { logout as logoutAPI } from '../services/authService';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const NavBar = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { openLoginModal, openRegisterModal } = useModal();
   const navigate = useNavigate();
@@ -72,7 +75,7 @@ const NavBar = () => {
                 onClick={() => navigate('/rankings')}
                 style={{ cursor: 'pointer' }}
               >
-                Rankings
+                {t('nav.rankings')}
               </span>
             </li>
             {/* 006-doubles-pairs (T034): Pair rankings link */}
@@ -82,7 +85,7 @@ const NavBar = () => {
                 onClick={() => navigate('/rankings/pairs')}
                 style={{ cursor: 'pointer' }}
               >
-                Pair Rankings
+                {t('nav.pairRankings')}
               </span>
             </li>
 
@@ -95,7 +98,7 @@ const NavBar = () => {
                     onClick={() => navigate('/organizer/categories')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Categories
+                    {t('nav.categories')}
                   </span>
                 </li>
                 <li className="nav-item">
@@ -104,7 +107,7 @@ const NavBar = () => {
                     onClick={() => navigate('/organizer/tournaments')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Tournaments
+                    {t('nav.tournaments')}
                   </span>
                 </li>
                 <li className="nav-item">
@@ -113,7 +116,7 @@ const NavBar = () => {
                     onClick={() => navigate('/organizer/players')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Players
+                    {t('nav.players')}
                   </span>
                 </li>
                 <li className="nav-item">
@@ -122,7 +125,7 @@ const NavBar = () => {
                     onClick={() => navigate('/player/pairs')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Doubles Pairs
+                    {t('nav.doublesPairs')}
                   </span>
                 </li>
               </>
@@ -137,7 +140,7 @@ const NavBar = () => {
                     onClick={() => navigate('/player/tournaments')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Tournaments
+                    {t('nav.tournaments')}
                   </span>
                 </li>
                 <li className="nav-item">
@@ -146,7 +149,7 @@ const NavBar = () => {
                     onClick={() => navigate('/player/register')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Categories
+                    {t('nav.categories')}
                   </span>
                 </li>
                 {/* 006-doubles-pairs (T034): Pair registration link */}
@@ -156,13 +159,16 @@ const NavBar = () => {
                     onClick={() => navigate('/player/pairs')}
                     style={{ cursor: 'pointer' }}
                   >
-                    Doubles Pairs
+                    {t('nav.doublesPairs')}
                   </span>
                 </li>
               </>
             )}
           </ul>
           <ul className="navbar-nav ms-auto">
+            <li className="nav-item me-2">
+              <LanguageSwitcher />
+            </li>
             {user ? (
               <>
                 <li className="navbar-text text-white me-3">
@@ -174,7 +180,7 @@ const NavBar = () => {
                     className="btn btn-outline-light btn-sm"
                     onClick={handleLogout}
                   >
-                    Logout
+                    {t('nav.logout')}
                   </button>
                 </li>
               </>
@@ -185,7 +191,7 @@ const NavBar = () => {
                     className="btn btn-outline-light btn-sm me-2"
                     onClick={openLoginModal}
                   >
-                    Login
+                    {t('nav.login')}
                   </button>
                 </li>
                 <li className="nav-item">
@@ -193,7 +199,7 @@ const NavBar = () => {
                     className="btn btn-light btn-sm"
                     onClick={openRegisterModal}
                   >
-                    Register
+                    {t('nav.register')}
                   </button>
                 </li>
               </>

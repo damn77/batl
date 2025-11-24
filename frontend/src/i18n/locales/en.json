@@ -1,0 +1,271 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "view": "View",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "notProvided": "Not set",
+    "none": "None",
+    "optional": "Optional",
+    "note": "Note",
+    "advanced": "Advanced",
+    "required": "*"
+  },
+  "nav": {
+    "rankings": "Rankings",
+    "pairRankings": "Pair Rankings",
+    "tournaments": "Tournaments",
+    "categories": "Categories",
+    "players": "Players",
+    "doublesPairs": "Doubles Pairs",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loggingIn": "Logging in...",
+    "newPlayerPrompt": "New player? Create an account",
+    "defaultCredentials": "Default admin credentials:\nadmin@batl.example.com / ChangeMe123!"
+  },
+  "pages": {
+    "admin": {
+      "title": "Admin Dashboard",
+      "userManagement": "User Management",
+      "tournamentManagement": "Tournament Management",
+      "systemSettings": "System Settings",
+      "mvpStatus": "MVP Status"
+    },
+    "organizer": {
+      "title": "Organizer Dashboard",
+      "myTournaments": "My Tournaments",
+      "playerProfiles": "Player Profiles",
+      "rankings": "Rankings",
+      "features": "Organizer Features"
+    },
+    "categories": {
+      "title": "Category Management",
+      "subtitle": "Create and manage tournament categories"
+    },
+    "rankings": {
+      "title": "Category Rankings",
+      "subtitle": "View player rankings across tournament categories"
+    },
+    "pairRankings": {
+      "title": "Pair Rankings",
+      "selectCategory": "Select Doubles Category",
+      "noCategoriesAvailable": "No doubles categories available",
+      "aboutTitle": "About Pair Rankings"
+    },
+    "pairRegistration": {
+      "title": "Register Doubles Pair"
+    },
+    "users": {
+      "title": "User Management"
+    },
+    "players": {
+      "title": "Player Profiles"
+    },
+    "profile": {
+      "title": "My Profile"
+    },
+    "publicRankings": {
+      "title": "Player Rankings",
+      "subtitle": "View all registered players",
+      "comingSoon": "Tournament brackets and results will appear here"
+    }
+  },
+  "form": {
+    "labels": {
+      "type": "Type",
+      "ageGroup": "Age Group",
+      "gender": "Gender",
+      "role": "Role",
+      "status": "Status",
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name",
+      "description": "Description",
+      "dateOfBirth": "Date of Birth",
+      "accountEmail": "Account Email",
+      "venueName": "Venue Name",
+      "venueAddress": "Venue Address",
+      "maxParticipants": "Max Participants",
+      "searchPlayers": "Search Players"
+    },
+    "options": {
+      "allTypes": "All Types",
+      "allAgeGroups": "All Age Groups",
+      "allGenders": "All Genders",
+      "allRoles": "All Roles",
+      "anyStatus": "Any Status",
+      "singles": "Singles",
+      "doubles": "Doubles",
+      "mixed": "Mixed",
+      "male": "Male",
+      "female": "Female",
+      "admin": "Admin",
+      "organizer": "Organizer",
+      "player": "Player",
+      "active": "Active",
+      "inactive": "Inactive",
+      "withAccount": "With Account",
+      "withoutAccount": "Without Account",
+      "allPlayers": "All Players",
+      "selectGender": "Select Gender"
+    }
+  },
+  "table": {
+    "headers": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "status": "Status",
+      "accountStatus": "Account Status",
+      "emailVerified": "Email Verified",
+      "created": "Created",
+      "lastLogin": "Last Login",
+      "actions": "Actions",
+      "rank": "Rank",
+      "seeding": "Seeding",
+      "points": "Points",
+      "wins": "Wins",
+      "losses": "Losses",
+      "winRate": "Win Rate",
+      "partner": "Partner",
+      "category": "Category",
+      "seedingScore": "Seeding Score",
+      "activeRegistrations": "Active Registrations",
+      "playerName": "Player Name"
+    }
+  },
+  "modals": {
+    "createCategory": {
+      "title": "Create Category"
+    },
+    "editCategory": {
+      "title": "Edit Category"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete"
+    },
+    "createUser": {
+      "title": "Create User"
+    },
+    "createPlayer": {
+      "title": "Create New Player Profile",
+      "duplicatesFound": "{count} Potential Duplicate{plural} Found",
+      "similarProfiles": "Similar player profile{plural} already exist{verb}:",
+      "duplicateNote": "You can still create this profile if you're sure it's a different person. Please verify the name and contact information to avoid duplicate entries.",
+      "checkingDuplicates": "Checking for duplicates...",
+      "emailHint": "Optional. Used for linking player accounts later.",
+      "phoneHint": "Optional. International format starting with +.",
+      "creating": "Creating...",
+      "submit": "Create Player Profile"
+    }
+  },
+  "alerts": {
+    "selectCategory": "Select a category to view rankings",
+    "selectPlayer": "Please select a player to view available categories",
+    "noCategoriesFound": "No categories found. Create your first category to get started.",
+    "noTournamentsFound": "No tournaments found. Create your first tournament to get started.",
+    "noRuleInfo": "No rule information available",
+    "bracketRulesUpdated": "Bracket rules updated successfully!",
+    "groupRulesUpdated": "Group rules updated successfully!",
+    "matchRulesUpdated": "Match rules updated successfully!",
+    "roundRulesUpdated": "Round rules updated successfully!"
+  },
+  "badges": {
+    "hasAccount": "Can Login",
+    "noAccount": "Invited Player",
+    "registered": "Registered",
+    "profileOnly": "No Tournament History",
+    "match": "Match"
+  },
+  "placeholders": {
+    "tournamentName": "e.g. Summer Championship 2025",
+    "venueName": "e.g. Tennis Club Bratislava",
+    "venueAddress": "e.g. Vajnorska 21, 831 04 Bratislava",
+    "maxParticipants": "Leave empty for unlimited",
+    "description": "Optional description...",
+    "searchByName": "Search by name...",
+    "searchByNameOrEmail": "Search by name or email...",
+    "email": "player@example.com",
+    "phone": "+421901234567",
+    "playerName": "John Smith",
+    "password": "Enter password",
+    "confirmPassword": "Confirm password",
+    "overrideJustification": "Explain why this pair should be allowed despite eligibility violations..."
+  },
+  "tabs": {
+    "format": "Format",
+    "scoring": "Scoring",
+    "overrides": "Overrides"
+  },
+  "registration": {
+    "selectEntity": "Select {entityType}",
+    "chooseEntity": "Choose a {entityType}...",
+    "pairsInCategoryHint": "Only pairs in the {categoryName} category are shown",
+    "allPlayersHint": "Showing all players in the system",
+    "registering": "Registering...",
+    "registerEntity": "Register {entityType}",
+    "capacityWarning": "Tournament is at capacity. You'll be asked to select who to move to waitlist."
+  },
+  "tournament": {
+    "rules": {
+      "title": "Tournament Rules",
+      "formatTitle": "Tournament Format Configuration",
+      "formatDescription": "This tournament uses a {formatType} format.",
+      "scoringTitle": "Match Scoring Rules",
+      "scoringDescription": "Default scoring rules applied to all matches unless overridden.",
+      "standardRules": "This tournament uses standard rules throughout.\nNo group, round, or match-specific overrides have been configured.",
+      "customOverrides": "This tournament has custom rule overrides",
+      "modifiedDescription": "Rule changes have been configured at the group or round level. Different parts of the tournament may use different rules.",
+      "specificDescription": "Rule changes have been configured for specific matches. Individual matches may use customized rules beyond the standard configuration.",
+      "overrideNote": "Detailed override information is available through the tournament management interface. Contact the tournament organizer for specific rule variations.",
+      "showRawConfig": "Show Raw Configuration (JSON)",
+      "formatConfig": "Format Configuration",
+      "scoringRules": "Scoring Rules"
+    }
+  },
+  "errors": {
+    "loginFailed": "Login failed. Please verify your email and password are correct.",
+    "nameMinLength": "Player name must be at least 2 characters long",
+    "genderRequired": "Gender is required",
+    "invalidEmail": "Please enter a valid email address (e.g., player@example.com)",
+    "phoneStartPlus": "Phone number must start with + (e.g., +1234567890)",
+    "phoneDigits": "Phone must have 7-15 digits after the + sign",
+    "phoneFormat": "Phone must be in international format: +CountryCodeNumber (e.g., +12345678901)",
+    "createPlayerFailed": "Failed to create player profile",
+    "validationFailed": "Validation failed: {details}"
+  },
+  "help": {
+    "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
+    "seedingScoreExplanation": "Seeding score is calculated from both players' individual rankings and determines the pair's initial tournament placement.",
+    "phoneFormat": "International format includes country code (e.g., +421 for Slovakia, +1 for USA/Canada). Example: +421901234567",
+    "rawConfigExplanation": "Raw JSON configuration for advanced users and developers. This shows the exact tournament settings as stored in the database.",
+    "whyDuplicatesMatter": "Why do duplicates matter?",
+    "duplicateExplanation": "Creating duplicate profiles can lead to incorrect tournament seeding and ranking calculations. Only create a new profile if you're certain this is a different person."
+  }
+}

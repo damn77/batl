@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
 import { login as loginAPI } from '../services/authService';
 
 const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
       // Then trigger login and navigation
       login(data.user);
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setError(err.message || t('errors.loginFailed'));
       setLoading(false);
     }
   };
@@ -44,7 +46,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>BATL Login</Modal.Title>
+        <Modal.Title>{t('auth.loginTitle')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -56,7 +58,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
 
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="loginEmail">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>{t('auth.email')}</Form.Label>
             <Form.Control
               type="email"
               value={email}
@@ -64,12 +66,12 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
               required
               disabled={loading}
               autoComplete="email"
-              placeholder="Enter your email"
+              placeholder={t('placeholders.email')}
             />
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="loginPassword">
-            <Form.Label>Password</Form.Label>
+            <Form.Label>{t('auth.password')}</Form.Label>
             <Form.Control
               type="password"
               value={password}
@@ -77,7 +79,7 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
               required
               disabled={loading}
               autoComplete="current-password"
-              placeholder="Enter your password"
+              placeholder={t('placeholders.password')}
             />
           </Form.Group>
 
@@ -97,10 +99,10 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
                   aria-hidden="true"
                   className="me-2"
                 />
-                Logging in...
+                {t('auth.loggingIn')}
               </>
             ) : (
-              'Login'
+              t('nav.login')
             )}
           </Button>
         </Form>
@@ -112,16 +114,17 @@ const LoginModal = ({ show, onHide, onSwitchToRegister }) => {
             onClick={handleSwitchToRegister}
             disabled={loading}
           >
-            New player? Create an account
+            {t('auth.newPlayerPrompt')}
           </button>
         </div>
 
-        <div className="mt-3 text-center">
-          <small className="text-muted">
-            Default admin credentials:<br />
-            admin@batl.example.com / ChangeMe123!
-          </small>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="mt-3 text-center">
+            <small className="text-muted">
+              {t('auth.defaultCredentials')}
+            </small>
+          </div>
+        )}
       </Modal.Body>
     </Modal>
   );
