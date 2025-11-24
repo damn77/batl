@@ -1,4 +1,5 @@
 {
+  "enabledMcpjsonServers": ["playwright", "chrome-devtools"],
   "permissions": {
     "allow": [
       "Bash(if [ -d specs ])",
