@@ -124,6 +124,9 @@
     },
     "tournamentRulesSetup": {
       "title": "Nastavenie pravidiel turnaja"
+    },
+    "categoryRankings": {
+      "leaderboard": "{{category}} - Rebríček"
     }
   },
   "form": {
@@ -625,7 +628,9 @@
     "failedToUnregister": "Odregistrácia z {resource} zlyhala",
     "failedToLoadTournamentRules": "Načítanie pravidiel turnaja zlyhalo",
     "failedToSaveTournamentFormat": "Uloženie formátu turnaja zlyhalo",
-    "failedToSaveScoringRules": "Uloženie pravidiel skórovania zlyhalo"
+    "failedToSaveScoringRules": "Uloženie pravidiel skórovania zlyhalo",
+    "categoryNotFound": "Kategória nebola nájdená",
+    "failedToLoadRankings": "Načítanie rebríčkov zlyhalo"
   },
   "help": {
     "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
@@ -652,7 +657,10 @@
     "removedFromCategory": "Boli ste odstránený z kategórie (žiadna história účasti).",
     "loadingTournamentRules": "Načítavajú sa pravidlá turnaja...",
     "formatSavedSuccess": "Formát turnaja bol úspešne uložený!",
-    "scoringRulesSavedSuccess": "Pravidlá skórovania boli úspešne uložené!"
+    "scoringRulesSavedSuccess": "Pravidlá skórovania boli úspešne uložené!",
+    "noRankingsYet": "Pre túto kategóriu zatiaľ nie sú k dispozícii žiadne rebríčky. Rebríčky sa aktualizujú po dokončení turnaja.",
+    "lastUpdated": "Naposledy aktualizované: {{date}}",
+    "showingRankedPlayers": "Zobrazuje sa {{count}} hodnotených hráčov"
   },
   "validation": {
     "selectPlayer2": "Vyberte hráča 2 pre nový pár",

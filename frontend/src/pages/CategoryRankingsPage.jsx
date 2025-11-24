@@ -41,7 +41,7 @@ const CategoryRankingsPage = () => {
         setSelectedCategory(data.categories[0].id);
       }
     } catch (err) {
-      setError('Failed to load categories');
+      setError(t('errors.failedToLoad', { resource: t('nav.categories').toLowerCase() }));
     } finally {
       setLoadingCategories(false);
     }
@@ -58,9 +58,9 @@ const CategoryRankingsPage = () => {
       setLastUpdated(data.lastUpdated);
     } catch (err) {
       if (err.code === 'CATEGORY_NOT_FOUND') {
-        setError('Category not found');
+        setError(t('errors.categoryNotFound'));
       } else {
-        setError(err.message || 'Failed to load rankings');
+        setError(err.message || t('errors.failedToLoadRankings'));
       }
       setRankings([]);
     } finally {
@@ -184,15 +184,15 @@ const CategoryRankingsPage = () => {
               </div>
             ) : rankings.length === 0 ? (
               <Alert variant="info">
-                No rankings available for this category yet. Rankings are updated after tournament completion.
+                {t('messages.noRankingsYet')}
               </Alert>
             ) : (
               <Card>
                 <Card.Header className="d-flex justify-content-between align-items-center">
-                  <strong>{categoryName} - Leaderboard</strong>
+                  <strong>{t('pages.categoryRankings.leaderboard', { category: categoryName })}</strong>
                   {lastUpdated && (
                     <small className="text-muted">
-                      Last updated: {new Date(lastUpdated).toLocaleDateString()}
+                      {t('messages.lastUpdated', { date: new Date(lastUpdated).toLocaleDateString() })}
                     </small>
                   )}
                 </Card.Header>
@@ -226,7 +226,7 @@ const CategoryRankingsPage = () => {
                   </Table>
                 </Card.Body>
                 <Card.Footer className="text-muted small">
-                  Showing {rankings.length} ranked players
+                  {t('messages.showingRankedPlayers', { count: rankings.length })}
                 </Card.Footer>
               </Card>
             )}

@@ -124,6 +124,9 @@
     },
     "tournamentRulesSetup": {
       "title": "Tournament Rules Setup"
+    },
+    "categoryRankings": {
+      "leaderboard": "{{category}} - Leaderboard"
     }
   },
   "form": {
@@ -625,7 +628,9 @@
     "failedToUnregister": "Failed to unregister from {resource}",
     "failedToLoadTournamentRules": "Failed to load tournament rules",
     "failedToSaveTournamentFormat": "Failed to save tournament format",
-    "failedToSaveScoringRules": "Failed to save scoring rules"
+    "failedToSaveScoringRules": "Failed to save scoring rules",
+    "categoryNotFound": "Category not found",
+    "failedToLoadRankings": "Failed to load rankings"
   },
   "help": {
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
@@ -652,7 +657,10 @@
     "removedFromCategory": "You have been removed from the category (no participation history).",
     "loadingTournamentRules": "Loading tournament rules...",
     "formatSavedSuccess": "Tournament format saved successfully!",
-    "scoringRulesSavedSuccess": "Scoring rules saved successfully!"
+    "scoringRulesSavedSuccess": "Scoring rules saved successfully!",
+    "noRankingsYet": "No rankings available for this category yet. Rankings are updated after tournament completion.",
+    "lastUpdated": "Last updated: {{date}}",
+    "showingRankedPlayers": "Showing {{count}} ranked players"
   },
   "validation": {
     "selectPlayer2": "Please select Player 2 for the new pair",
