@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Spinner, Modal, Badge } from 'react-bootstrap';
 import { useAuth } from '../utils/AuthContext';
-import { useRegistration } from '../hooks/useRegistration';
+import { useRegistration } from '../hooks/useRegistration.jsx';
 import RegistrationForm from './RegistrationForm';
 import apiClient from '../services/apiClient';
 

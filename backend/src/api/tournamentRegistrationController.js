@@ -407,6 +407,9 @@ export async function getTournamentRegistrations(req, res, next) {
     const { tournamentId } = req.params;
     const { status } = req.query;
 
+    // Check if user is privileged (Organizer or Admin)
+    const isPrivileged = req.user && (req.user.role === 'ADMIN' || req.user.role === 'ORGANIZER');
+
     // Check if tournament is DOUBLES type
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
@@ -456,8 +459,14 @@ export async function getTournamentRegistrations(req, res, next) {
             pair: {
               id: reg.pair.id,
               seedingScore: reg.pair.seedingScore,
-              player1: reg.pair.player1,
-              player2: reg.pair.player2
+              player1: {
+                ...reg.pair.player1,
+                email: isPrivileged ? reg.pair.player1.email : undefined
+              },
+              player2: {
+                ...reg.pair.player2,
+                email: isPrivileged ? reg.pair.player2.email : undefined
+              }
             }
           })),
           count: pairRegistrations.length
@@ -483,7 +492,7 @@ export async function getTournamentRegistrations(req, res, next) {
           player: {
             id: reg.player.id,
             name: reg.player.name,
-            email: reg.player.email
+            email: isPrivileged ? reg.player.email : undefined
           }
         })),
         count: registrations.length

@@ -893,40 +893,4 @@ export async function withdrawPlayerByRegistrationId(registrationId) {
       : 'Player unregistered successfully'
   };
 }
-promotedRegistration
-    };
-  });
 
-// Smart category cleanup (after transaction)
-const cleanupResult = await categoryService.shouldUnregisterFromCategory(playerId, categoryId);
-
-let categoryUnregistered = false;
-if (cleanupResult.shouldUnregister) {
-  // Delete category registration
-  await prisma.categoryRegistration.delete({
-    where: {
-      playerId_categoryId: {
-        playerId,
-        categoryId
-      }
-    }
-  });
-  categoryUnregistered = true;
-}
-
-return {
-  registration: result.withdrawnRegistration,
-  promotedPlayer: result.promotedRegistration ? {
-    playerId: result.promotedRegistration.playerId,
-    playerName: result.promotedRegistration.player.name,
-    playerEmail: result.promotedRegistration.player.email
-  } : null,
-  categoryCleanup: {
-    unregistered: categoryUnregistered,
-    reason: cleanupResult.reason
-  },
-  message: result.promotedRegistration
-    ? `Player unregistered. ${result.promotedRegistration.player.name} has been promoted from the waitlist.`
-    : 'Player unregistered successfully'
-};
-}
