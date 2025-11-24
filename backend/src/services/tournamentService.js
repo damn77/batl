@@ -600,7 +600,7 @@ export async function getFormatStructure(id) {
       }));
       break;
 
-    case 'SWISS':
+    case 'SWISS': {
       // Fetch rounds and all registered players for standings
       result.rounds = await prisma.round.findMany({
         where: { tournamentId: id },
@@ -643,6 +643,7 @@ export async function getFormatStructure(id) {
 
       result.players = registrations.map(reg => reg.player);
       break;
+    }
 
     case 'COMBINED':
       // Fetch groups, brackets, and rounds
