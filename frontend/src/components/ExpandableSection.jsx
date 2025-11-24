@@ -1,6 +1,7 @@
 // T073: Expandable Section Component - Reusable expand/collapse wrapper
 import { useState } from 'react';
 import { Card, Button, Collapse } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ExpandableSection - Reusable component for expand/collapse functionality
@@ -21,6 +22,7 @@ const ExpandableSection = ({
   loading = false,
   badge
 }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const handleToggle = () => {
@@ -46,9 +48,9 @@ const ExpandableSection = ({
             size="sm"
             onClick={handleToggle}
             aria-expanded={isExpanded}
-            aria-label={isExpanded ? `Collapse ${title}` : `Expand ${title}`}
+            aria-label={isExpanded ? t('common.collapseSection', { section: title }) : t('common.expandSection', { section: title })}
           >
-            {isExpanded ? '▼ Collapse' : '▶ Expand'}
+            {isExpanded ? `▼ ${t('common.collapse')}` : `▶ ${t('common.expand')}`}
           </Button>
         </div>
       </Card.Header>
@@ -58,9 +60,9 @@ const ExpandableSection = ({
             {loading ? (
               <div className="text-center py-4">
                 <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
+                  <span className="visually-hidden">{t('common.loading')}</span>
                 </div>
-                <p className="mt-2 text-muted">Loading data...</p>
+                <p className="mt-2 text-muted">{t('common.loadingData')}</p>
               </div>
             ) : (
               children

@@ -1,5 +1,5 @@
 {
-  "lastFullReview": "2025-11-24T16:11:00Z",
+  "lastFullReview": "2025-11-24T16:16:00Z",
   "files": {
     "src/components/NavBar.jsx": {
       "lastReviewed": "2025-11-24T00:00:00Z",
@@ -47,6 +47,10 @@
     },
     "src/components/ErrorBoundary.jsx": {
       "lastReviewed": "2025-11-24T16:11:00Z",
+      "status": "complete"
+    },
+    "src/components/ExpandableSection.jsx": {
+      "lastReviewed": "2025-11-24T16:16:00Z",
       "status": "complete"
     },
     "src/services/tournamentRegistrationService.js": {
