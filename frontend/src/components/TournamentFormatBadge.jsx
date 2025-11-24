@@ -1,5 +1,6 @@
 // T025: Tournament Format Badge Component - Displays format type with icon
 import { Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { getFormatTypeInfo } from '../services/tournamentViewService';
 
 /**
@@ -7,6 +8,8 @@ import { getFormatTypeInfo } from '../services/tournamentViewService';
  * FR-002: Display tournament format type and configuration
  */
 const TournamentFormatBadge = ({ formatType, formatConfig }) => {
+  const { t } = useTranslation(); // Hook triggers re-render on language change
+
   if (!formatType) return null;
 
   // Parse formatConfig if it's a JSON string

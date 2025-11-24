@@ -1,5 +1,6 @@
 // T074: Match Result Display Component - Formats match result JSON
 import { Badge } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * MatchResultDisplay - Displays match result in user-friendly format
@@ -9,6 +10,8 @@ import { Badge } from 'react-bootstrap';
  * @param {boolean} compact - Whether to show compact view (default: false)
  */
 const MatchResultDisplay = ({ match, compact = false }) => {
+  const { t, i18n } = useTranslation();
+
   if (!match) return null;
 
   // Get match status
@@ -16,10 +19,10 @@ const MatchResultDisplay = ({ match, compact = false }) => {
 
   // Status badge configuration
   const statusConfig = {
-    SCHEDULED: { variant: 'secondary', label: 'Scheduled' },
-    IN_PROGRESS: { variant: 'primary', label: 'In Progress' },
-    COMPLETED: { variant: 'success', label: 'Completed' },
-    CANCELLED: { variant: 'danger', label: 'Cancelled' }
+    SCHEDULED: { variant: 'secondary', label: t('matchStatus.scheduled') },
+    IN_PROGRESS: { variant: 'primary', label: t('matchStatus.inProgress') },
+    COMPLETED: { variant: 'success', label: t('matchStatus.completed') },
+    CANCELLED: { variant: 'danger', label: t('matchStatus.cancelled') }
   };
 
   const statusInfo = statusConfig[status] || statusConfig.SCHEDULED;
@@ -47,7 +50,7 @@ const MatchResultDisplay = ({ match, compact = false }) => {
       <div className="d-flex gap-2 align-items-center">
         {sets.map((set, index) => (
           <div key={index} className="d-flex flex-column align-items-center">
-            <small className="text-muted">Set {index + 1}</small>
+            <small className="text-muted">{t('match.set')} {index + 1}</small>
             <strong>
               {set.player1Score}
               {set.tiebreak && <sup className="text-muted">{set.tiebreak.player1Points}</sup>}
@@ -90,7 +93,7 @@ const MatchResultDisplay = ({ match, compact = false }) => {
         </Badge>
         {match.scheduledTime && (
           <small className="text-muted">
-            {new Date(match.scheduledTime).toLocaleString('en-US', {
+            {new Date(match.scheduledTime).toLocaleString(i18n.language, {
               month: 'short',
               day: 'numeric',
               hour: '2-digit',
@@ -119,7 +122,7 @@ const MatchResultDisplay = ({ match, compact = false }) => {
 
       {match.court && (
         <div className="mt-2 text-muted small">
-          Court: {match.court}
+          {t('match.court')}: {match.court}
         </div>
       )}
     </div>

@@ -60,6 +60,34 @@
     "src/services/tournamentViewService.js": {
       "lastReviewed": "2025-11-24T16:00:00Z",
       "status": "complete"
+    },
+    "src/components/RegistrationStatusBadge.jsx": {
+      "lastReviewed": "2025-11-24T17:38:00Z",
+      "status": "complete"
+    },
+    "src/components/TournamentFormatBadge.jsx": {
+      "lastReviewed": "2025-11-24T17:38:00Z",
+      "status": "complete"
+    },
+    "src/components/RuleComplexityIndicator.jsx": {
+      "lastReviewed": "2025-11-24T17:38:00Z",
+      "status": "complete"
+    },
+    "src/components/MatchScoringRulesForm.jsx": {
+      "lastReviewed": "2025-11-24T17:45:00Z",
+      "status": "complete"
+    },
+    "src/components/MatchRulesPanel.jsx": {
+      "lastReviewed": "2025-11-24T17:55:00Z",
+      "status": "complete"
+    },
+    "src/components/MatchResultDisplay.jsx": {
+      "lastReviewed": "2025-11-24T18:05:00Z",
+      "status": "complete"
+    },
+    "src/components/MatchHistoricalRulesDisplay.jsx": {
+      "lastReviewed": "2025-11-24T18:10:00Z",
+      "status": "complete"
     }
   }
 }

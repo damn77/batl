@@ -1,3 +1,34 @@
+{
+  "common": {
+    "loading": "Načítava sa...",
+    "error": "Chyba",
+    "save": "Uložiť",
+    "cancel": "Zrušiť",
+    "delete": "Vymazať",
+    "edit": "Upraviť",
+    "create": "Vytvoriť",
+    "back": "Späť",
+    "submit": "Odoslať",
+    "confirm": "Potvrdiť",
+    "search": "Hľadať",
+    "filter": "Filter",
+    "actions": "Akcie",
+    "view": "Zobraziť",
+    "close": "Zavrieť",
+    "yes": "Áno",
+    "no": "Nie",
+    "notProvided": "Nenastavené",
+    "none": "Žiadne",
+    "optional": "Voliteľné",
+    "note": "Poznámka",
+    "advanced": "Pokročilé",
+    "required": "*"
+  },
+  "nav": {
+    "rankings": "Rebríčky",
+    "pairRankings": "Rebríčky párov",
+    "tournaments": "Turnaje",
+    "categories": "Kategórie",
     "players": "Hráči",
     "doublesPairs": "Debľové páry",
     "login": "Prihlásiť",
@@ -286,6 +317,97 @@
       "showRawConfig": "Zobraziť surovú konfiguráciu (JSON)",
       "formatConfig": "Konfigurácia formátu",
       "scoringRules": "Pravidlá bodovania"
+    }
+  },
+  "scoring": {
+    "title": "Pravidlá bodovania zápasu",
+    "format": "Formát bodovania",
+    "formats": {
+      "sets": "Tradičné sety",
+      "setsDesc": "Štandardné tenisové bodovanie so setmi",
+      "standardTiebreak": "Štandardný tajbrejk",
+      "standardTiebreakDesc": "Tajbrejk do 7 bodov",
+      "bigTiebreak": "Veľký tajbrejk",
+      "bigTiebreakDesc": "Tajbrejk do 10 bodov",
+      "mixed": "Zmiešaný formát",
+      "mixedDesc": "Sety s tajbrejkom v rozhodujúcom sete"
+    },
+    "winningSets": "Víťazné sety",
+    "winningSetsOptions": {
+      "1": "1 set",
+      "2": "2 sety (na 2 víťazné)"
+    },
+    "advantageRule": "Pravidlo výhody",
+    "advantageOptions": {
+      "advantage": "Výhoda (40-40, Zhoda)",
+      "noAdvantage": "Bez výhody (Rozhodujúca loptička)"
+    },
+    "tiebreakTrigger": "Spustenie tajbrejku",
+    "tiebreakTriggerOptions": {
+      "6-6": "6-6 (Štandard)",
+      "5-5": "5-5 (Skorý tajbrejk)",
+      "4-4": "4-4 (Veľmi skorý tajbrejk)",
+      "3-3": "3-3 (Krátke sety)"
+    },
+    "tiebreakTriggerHelp": "Kedy hrať tajbrejk v každom sete",
+    "winningTiebreaks": "Víťazné tajbrejky",
+    "winningTiebreaksOptions": {
+      "1": "1 tajbrejk",
+      "2": "2 tajbrejky (na 2 víťazné)",
+      "3": "3 tajbrejky (na 3 víťazné)"
+    },
+    "bigTiebreakHelp": "Veľký tajbrejk do 10 bodov (o 2)",
+    "standardTiebreakHelp": "Štandardný tajbrejk do 7 bodov (o 2)",
+    "finalSetTiebreak": "Tajbrejk v rozhodujúcom sete",
+    "finalSetTiebreakOptions": {
+      "standard": "Štandardný tajbrejk (do 7)",
+      "big": "Veľký tajbrejk (do 10)"
+    },
+    "finalSetTiebreakHelp": "Typ tajbrejku len pre rozhodujúci set"
+  },
+  "matchRules": {
+    "title": "Pravidlá zápasu: {{matchName}}",
+    "removeOverrides": "Odstrániť prepísania",
+    "confirmRemove": "Odstrániť všetky prepísania pravidiel pre tento zápas? Zdedí pravidlá od rodiča.",
+    "updateSuccess": "Pravidlá zápasu boli úspešne aktualizované!",
+    "completedTitle": "Zápas ukončený:",
+    "completedMessage": "Tento zápas bol ukončený a jeho pravidlá nie je možné zmeniť. Zápas sa hral podľa pravidiel platných v čase ukončenia.",
+    "save": "Uložiť pravidlá zápasu",
+    "saving": "Ukladám...",
+    "errors": {
+      "alreadyCompleted": "Nie je možné upraviť pravidlá pre ukončený zápas. Výsledok zápasu je konečný.",
+      "updateFailed": "Nepodarilo sa aktualizovať pravidlá zápasu",
+      "removeFailed": "Nepodarilo sa odstrániť prepísania pravidiel zápasu"
+    }
+  },
+  "matchStatus": {
+    "scheduled": "Naplánovaný",
+    "inProgress": "Prebieha",
+    "completed": "Ukončený",
+    "cancelled": "Zrušený"
+  },
+  "match": {
+    "set": "Set",
+    "court": "Kurt"
+  },
+  "historicalRules": {
+    "title": "Použité pravidlá zápasu",
+    "snapshot": "Historický záznam",
+    "description": "Toto sú presné pravidlá, ktoré platili v čase, keď sa tento zápas hral. Aj keď sa pravidlá turnaja neskôr zmenili, oficiálny záznam tohto zápasu používa tieto pravidlá.",
+    "labels": {
+      "formatType": "Formát skórovania",
+      "winningSets": "Víťazné sety",
+      "winningGames": "Víťazné hry",
+      "advantageRule": "Výhoda",
+      "tiebreakTrigger": "Spúšťač tajbrejku",
+      "matchTiebreakPoints": "Body zápasového tajbrejku",
+      "bigTiebreakWinBy": "Veľký tajbrejk vyhrať o"
+    },
+    "values": {
+      "yes": "Áno",
+      "no": "Nie",
+      "advantage": "Výhoda",
+      "noAdvantage": "Žiadna výhoda"
     }
   },
   "errors": {

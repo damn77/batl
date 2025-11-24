@@ -1,6 +1,7 @@
 // T089: Panel for setting match-level rule overrides
 import { useState } from 'react';
 import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import RuleOverrideForm from './RuleOverrideForm';
 import { setMatchRuleOverrides, removeRuleOverrides } from '../services/tournamentRulesService';
 
@@ -14,6 +15,7 @@ import { setMatchRuleOverrides, removeRuleOverrides } from '../services/tourname
  * @param {Function} onUpdate - Callback when rules are updated
  */
 function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentOverrides = {}, onUpdate }) {
+  const { t } = useTranslation();
   const [ruleOverrides, setRuleOverrides] = useState(currentOverrides);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,9 +39,9 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
       }
     } catch (err) {
       if (err.response?.data?.error?.code === 'MATCH_ALREADY_COMPLETED') {
-        setError('Cannot modify rules for a completed match. The match result is final.');
+        setError(t('matchRules.errors.alreadyCompleted'));
       } else {
-        setError(err.response?.data?.error?.message || 'Failed to update match rules');
+        setError(err.response?.data?.error?.message || t('matchRules.errors.updateFailed'));
       }
     } finally {
       setLoading(false);
@@ -47,7 +49,7 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
   };
 
   const handleRemove = async () => {
-    if (!window.confirm('Remove all rule overrides for this match? It will inherit parent rules.')) {
+    if (!window.confirm(t('matchRules.confirmRemove'))) {
       return;
     }
 
@@ -65,7 +67,7 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
         onUpdate(response.data);
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to remove match rule overrides');
+      setError(err.response?.data?.error?.message || t('matchRules.errors.removeFailed'));
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
     <Card className="mb-3">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <div>
-          <h5 className="mb-0">Match Rules: {matchName}</h5>
+          <h5 className="mb-0">{t('matchRules.title', { matchName })}</h5>
           <Badge bg={isCompleted ? 'secondary' : 'info'} className="mt-1">
             {matchStatus}
           </Badge>
@@ -89,18 +91,17 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
             onClick={handleRemove}
             disabled={loading}
           >
-            Remove Overrides
+            {t('matchRules.removeOverrides')}
           </Button>
         )}
       </Card.Header>
       <Card.Body>
         {error && <Alert variant="danger">{error}</Alert>}
-        {success && <Alert variant="success">Match rules updated successfully!</Alert>}
+        {success && <Alert variant="success">{t('matchRules.updateSuccess')}</Alert>}
 
         {isCompleted ? (
           <Alert variant="warning">
-            <strong>Match Completed:</strong> This match has been completed and its rules cannot be changed.
-            The match was played with the rules that were in effect at the time of completion.
+            <strong>{t('matchRules.completedTitle')}</strong> {t('matchRules.completedMessage')}
           </Alert>
         ) : (
           <>
@@ -119,10 +120,10 @@ function MatchRulesPanel({ matchId, matchName, matchStatus = 'PENDING', currentO
                 {loading ? (
                   <>
                     <Spinner as="span" animation="border" size="sm" className="me-2" />
-                    Saving...
+                    {t('matchRules.saving')}
                   </>
                 ) : (
-                  'Save Match Rules'
+                  t('matchRules.save')
                 )}
               </Button>
             </div>

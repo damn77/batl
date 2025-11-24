@@ -1,5 +1,6 @@
 // T039: Rule Complexity Indicator Component - Displays 🟢🟡🔴 icons with tooltips
 import { Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { getRuleComplexityInfo } from '../services/tournamentViewService';
 
 /**
@@ -11,6 +12,8 @@ import { getRuleComplexityInfo } from '../services/tournamentViewService';
  * @param {string} size - sm, md, or lg (default: md)
  */
 const RuleComplexityIndicator = ({ complexity, showLabel = true, size = 'md' }) => {
+  const { t } = useTranslation(); // Hook triggers re-render on language change
+
   if (!complexity) return null;
 
   const complexityInfo = getRuleComplexityInfo(complexity);

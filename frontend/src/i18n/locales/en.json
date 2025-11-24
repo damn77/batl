@@ -1,3 +1,34 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "view": "View",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "notProvided": "Not set",
+    "none": "None",
+    "optional": "Optional",
+    "note": "Note",
+    "advanced": "Advanced",
+    "required": "*"
+  },
+  "nav": {
+    "rankings": "Rankings",
+    "pairRankings": "Pair Rankings",
+    "tournaments": "Tournaments",
+    "categories": "Categories",
     "players": "Players",
     "doublesPairs": "Doubles Pairs",
     "login": "Login",
@@ -286,6 +317,97 @@
       "showRawConfig": "Show Raw Configuration (JSON)",
       "formatConfig": "Format Configuration",
       "scoringRules": "Scoring Rules"
+    }
+  },
+  "scoring": {
+    "title": "Match Scoring Rules",
+    "format": "Scoring Format",
+    "formats": {
+      "sets": "Traditional Sets",
+      "setsDesc": "Standard tennis scoring with sets",
+      "standardTiebreak": "Standard Tiebreak",
+      "standardTiebreakDesc": "Tiebreak to 7 points",
+      "bigTiebreak": "Big Tiebreak",
+      "bigTiebreakDesc": "Tiebreak to 10 points",
+      "mixed": "Mixed Format",
+      "mixedDesc": "Sets with final set tiebreak"
+    },
+    "winningSets": "Winning Sets",
+    "winningSetsOptions": {
+      "1": "1 Set",
+      "2": "2 Sets (Best of 3)"
+    },
+    "advantageRule": "Advantage Rule",
+    "advantageOptions": {
+      "advantage": "Advantage (40-40, Deuce)",
+      "noAdvantage": "No Advantage (Deciding Point)"
+    },
+    "tiebreakTrigger": "Tiebreak Trigger",
+    "tiebreakTriggerOptions": {
+      "6-6": "6-6 (Standard)",
+      "5-5": "5-5 (Early Tiebreak)",
+      "4-4": "4-4 (Very Early Tiebreak)",
+      "3-3": "3-3 (Short Sets)"
+    },
+    "tiebreakTriggerHelp": "When to play a tiebreak in each set",
+    "winningTiebreaks": "Winning Tiebreaks",
+    "winningTiebreaksOptions": {
+      "1": "1 Tiebreak",
+      "2": "2 Tiebreaks (Best of 3)",
+      "3": "3 Tiebreaks (Best of 5)"
+    },
+    "bigTiebreakHelp": "Big tiebreak to 10 points (win by 2)",
+    "standardTiebreakHelp": "Standard tiebreak to 7 points (win by 2)",
+    "finalSetTiebreak": "Final Set Tiebreak",
+    "finalSetTiebreakOptions": {
+      "standard": "Standard Tiebreak (to 7)",
+      "big": "Big Tiebreak (to 10)"
+    },
+    "finalSetTiebreakHelp": "Type of tiebreak for the final set only"
+  },
+  "matchRules": {
+    "title": "Match Rules: {{matchName}}",
+    "removeOverrides": "Remove Overrides",
+    "confirmRemove": "Remove all rule overrides for this match? It will inherit parent rules.",
+    "updateSuccess": "Match rules updated successfully!",
+    "completedTitle": "Match Completed:",
+    "completedMessage": "This match has been completed and its rules cannot be changed. The match was played with the rules that were in effect at the time of completion.",
+    "save": "Save Match Rules",
+    "saving": "Saving...",
+    "errors": {
+      "alreadyCompleted": "Cannot modify rules for a completed match. The match result is final.",
+      "updateFailed": "Failed to update match rules",
+      "removeFailed": "Failed to remove match rule overrides"
+    }
+  },
+  "matchStatus": {
+    "scheduled": "Scheduled",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "match": {
+    "set": "Set",
+    "court": "Court"
+  },
+  "historicalRules": {
+    "title": "Match Rules Used",
+    "snapshot": "Historical Snapshot",
+    "description": "These are the exact rules that were in effect when this match was played. Even if tournament rules were changed later, this match's official record uses these rules.",
+    "labels": {
+      "formatType": "Scoring Format",
+      "winningSets": "Winning Sets",
+      "winningGames": "Winning Games",
+      "advantageRule": "Advantage",
+      "tiebreakTrigger": "Tiebreak Trigger",
+      "matchTiebreakPoints": "Match Tiebreak Points",
+      "bigTiebreakWinBy": "Big Tiebreak Win By"
+    },
+    "values": {
+      "yes": "Yes",
+      "no": "No",
+      "advantage": "Advantage",
+      "noAdvantage": "No Advantage"
     }
   },
   "errors": {

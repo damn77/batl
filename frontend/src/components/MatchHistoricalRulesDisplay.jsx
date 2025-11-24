@@ -1,6 +1,7 @@
 // T105: Display historical rules for completed matches
 import { Alert, Badge } from 'react-bootstrap';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * T105: Component to display the rules that were in effect when a match was completed
@@ -10,6 +11,8 @@ import PropTypes from 'prop-types';
  * @param {string} matchStatus - Current status of the match
  */
 function MatchHistoricalRulesDisplay({ completedWithRules, matchStatus }) {
+  const { t } = useTranslation();
+
   // Only show for completed matches with rule snapshot
   if (matchStatus !== 'COMPLETED' || !completedWithRules) {
     return null;
@@ -17,41 +20,31 @@ function MatchHistoricalRulesDisplay({ completedWithRules, matchStatus }) {
 
   const formatRuleValue = (key, value) => {
     if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
+      return value ? t('historicalRules.values.yes') : t('historicalRules.values.no');
     }
     if (key === 'formatType') {
       return value.replace(/_/g, ' ');
     }
     if (key === 'advantageRule') {
-      return value === 'ADVANTAGE' ? 'Advantage' : value === 'NO_ADVANTAGE' ? 'No Advantage' : value;
+      return value === 'ADVANTAGE' ? t('historicalRules.values.advantage') :
+        value === 'NO_ADVANTAGE' ? t('historicalRules.values.noAdvantage') : value;
     }
     return value;
   };
 
   const getRuleLabel = (key) => {
-    const labels = {
-      formatType: 'Scoring Format',
-      winningSets: 'Winning Sets',
-      winningGames: 'Winning Games',
-      advantageRule: 'Advantage',
-      tiebreakTrigger: 'Tiebreak Trigger',
-      matchTiebreakPoints: 'Match Tiebreak Points',
-      bigTiebreakWinBy: 'Big Tiebreak Win By'
-    };
-    return labels[key] || key;
+    return t(`historicalRules.labels.${key}`, { defaultValue: key });
   };
 
   return (
     <div className="mt-3">
       <div className="d-flex align-items-center mb-2">
-        <h6 className="mb-0 me-2">Match Rules Used</h6>
-        <Badge bg="secondary">Historical Snapshot</Badge>
+        <h6 className="mb-0 me-2">{t('historicalRules.title')}</h6>
+        <Badge bg="secondary">{t('historicalRules.snapshot')}</Badge>
       </div>
       <Alert variant="info" className="mb-0">
         <small className="text-muted d-block mb-2">
-          These are the exact rules that were in effect when this match was played.
-          Even if tournament rules were changed later, this match&apos;s official record
-          uses these rules.
+          {t('historicalRules.description')}
         </small>
         <div className="row">
           {Object.entries(completedWithRules)

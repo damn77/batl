@@ -1,21 +1,23 @@
 // T034: Match Scoring Rules Form Component
 import { useState } from 'react';
 import { Form, Card, Row, Col } from 'react-bootstrap';
-
-const ScoringFormatOptions = {
-  SETS: { label: 'Traditional Sets', description: 'Standard tennis scoring with sets' },
-  STANDARD_TIEBREAK: { label: 'Standard Tiebreak', description: 'Tiebreak to 7 points' },
-  BIG_TIEBREAK: { label: 'Big Tiebreak', description: 'Tiebreak to 10 points' },
-  MIXED: { label: 'Mixed Format', description: 'Sets with final set tiebreak' }
-};
+import { useTranslation } from 'react-i18next';
 
 const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
+  const { t } = useTranslation();
   const [scoringRules, setScoringRules] = useState(value || {
     formatType: 'SETS',
     winningSets: 2,
     advantageRule: 'ADVANTAGE',
     tiebreakTrigger: '6-6'
   });
+
+  const ScoringFormatOptions = {
+    SETS: { label: t('scoring.formats.sets'), description: t('scoring.formats.setsDesc') },
+    STANDARD_TIEBREAK: { label: t('scoring.formats.standardTiebreak'), description: t('scoring.formats.standardTiebreakDesc') },
+    BIG_TIEBREAK: { label: t('scoring.formats.bigTiebreak'), description: t('scoring.formats.bigTiebreakDesc') },
+    MIXED: { label: t('scoring.formats.mixed'), description: t('scoring.formats.mixedDesc') }
+  };
 
   const handleFormatTypeChange = (newType) => {
     let defaultRules = { formatType: newType };
@@ -65,11 +67,11 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
   return (
     <Card>
       <Card.Header>
-        <h5 className="mb-0">Match Scoring Rules</h5>
+        <h5 className="mb-0">{t('scoring.title')}</h5>
       </Card.Header>
       <Card.Body>
         <Form.Group className="mb-3">
-          <Form.Label>Scoring Format</Form.Label>
+          <Form.Label>{t('scoring.format')}</Form.Label>
           <Form.Select
             value={scoringRules.formatType}
             onChange={(e) => handleFormatTypeChange(e.target.value)}
@@ -92,46 +94,46 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Winning Sets</Form.Label>
+                  <Form.Label>{t('scoring.winningSets')}</Form.Label>
                   <Form.Select
                     value={scoringRules.winningSets}
                     onChange={(e) => handleFieldChange('winningSets', parseInt(e.target.value))}
                     disabled={disabled}
                   >
-                    <option value={1}>1 Set</option>
-                    <option value={2}>2 Sets (Best of 3)</option>
+                    <option value={1}>{t('scoring.winningSetsOptions.1')}</option>
+                    <option value={2}>{t('scoring.winningSetsOptions.2')}</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Advantage Rule</Form.Label>
+                  <Form.Label>{t('scoring.advantageRule')}</Form.Label>
                   <Form.Select
                     value={scoringRules.advantageRule}
                     onChange={(e) => handleFieldChange('advantageRule', e.target.value)}
                     disabled={disabled}
                   >
-                    <option value="ADVANTAGE">Advantage (40-40, Deuce)</option>
-                    <option value="NO_ADVANTAGE">No Advantage (Deciding Point)</option>
+                    <option value="ADVANTAGE">{t('scoring.advantageOptions.advantage')}</option>
+                    <option value="NO_ADVANTAGE">{t('scoring.advantageOptions.noAdvantage')}</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Tiebreak Trigger</Form.Label>
+              <Form.Label>{t('scoring.tiebreakTrigger')}</Form.Label>
               <Form.Select
                 value={scoringRules.tiebreakTrigger}
                 onChange={(e) => handleFieldChange('tiebreakTrigger', e.target.value)}
                 disabled={disabled}
               >
-                <option value="6-6">6-6 (Standard)</option>
-                <option value="5-5">5-5 (Early Tiebreak)</option>
-                <option value="4-4">4-4 (Very Early Tiebreak)</option>
-                <option value="3-3">3-3 (Short Sets)</option>
+                <option value="6-6">{t('scoring.tiebreakTriggerOptions.6-6')}</option>
+                <option value="5-5">{t('scoring.tiebreakTriggerOptions.5-5')}</option>
+                <option value="4-4">{t('scoring.tiebreakTriggerOptions.4-4')}</option>
+                <option value="3-3">{t('scoring.tiebreakTriggerOptions.3-3')}</option>
               </Form.Select>
               <Form.Text className="text-muted">
-                When to play a tiebreak in each set
+                {t('scoring.tiebreakTriggerHelp')}
               </Form.Text>
             </Form.Group>
           </>
@@ -140,22 +142,22 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
         {/* Tiebreak formats */}
         {(scoringRules.formatType === 'STANDARD_TIEBREAK' || scoringRules.formatType === 'BIG_TIEBREAK') && (
           <Form.Group className="mb-3">
-            <Form.Label>Winning Tiebreaks</Form.Label>
+            <Form.Label>{t('scoring.winningTiebreaks')}</Form.Label>
             <Form.Select
               value={scoringRules.winningTiebreaks}
               onChange={(e) => handleFieldChange('winningTiebreaks', parseInt(e.target.value))}
               disabled={disabled}
             >
-              <option value={1}>1 Tiebreak</option>
-              <option value={2}>2 Tiebreaks (Best of 3)</option>
+              <option value={1}>{t('scoring.winningTiebreaksOptions.1')}</option>
+              <option value={2}>{t('scoring.winningTiebreaksOptions.2')}</option>
               {scoringRules.formatType === 'STANDARD_TIEBREAK' && (
-                <option value={3}>3 Tiebreaks (Best of 5)</option>
+                <option value={3}>{t('scoring.winningTiebreaksOptions.3')}</option>
               )}
             </Form.Select>
             <Form.Text className="text-muted">
               {scoringRules.formatType === 'BIG_TIEBREAK'
-                ? 'Big tiebreak to 10 points (win by 2)'
-                : 'Standard tiebreak to 7 points (win by 2)'}
+                ? t('scoring.bigTiebreakHelp')
+                : t('scoring.standardTiebreakHelp')}
             </Form.Text>
           </Form.Group>
         )}
@@ -163,17 +165,17 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
         {/* Mixed format - final set tiebreak */}
         {scoringRules.formatType === 'MIXED' && (
           <Form.Group className="mb-3">
-            <Form.Label>Final Set Tiebreak</Form.Label>
+            <Form.Label>{t('scoring.finalSetTiebreak')}</Form.Label>
             <Form.Select
               value={scoringRules.finalSetTiebreak}
               onChange={(e) => handleFieldChange('finalSetTiebreak', e.target.value)}
               disabled={disabled}
             >
-              <option value="STANDARD">Standard Tiebreak (to 7)</option>
-              <option value="BIG">Big Tiebreak (to 10)</option>
+              <option value="STANDARD">{t('scoring.finalSetTiebreakOptions.standard')}</option>
+              <option value="BIG">{t('scoring.finalSetTiebreakOptions.big')}</option>
             </Form.Select>
             <Form.Text className="text-muted">
-              Type of tiebreak for the final set only
+              {t('scoring.finalSetTiebreakHelp')}
             </Form.Text>
           </Form.Group>
         )}

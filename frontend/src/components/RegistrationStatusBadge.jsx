@@ -1,8 +1,9 @@
 import { Badge } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import {
-  STATUS_LABELS,
-  STATUS_VARIANTS,
-  STATUS_DESCRIPTIONS
+  getStatusLabel,
+  getStatusDescription,
+  STATUS_VARIANTS
 } from '../services/tournamentRegistrationService';
 
 /**
@@ -13,11 +14,13 @@ import {
  * @param {boolean} showDescription - Whether to show status description tooltip (default: false)
  */
 const RegistrationStatusBadge = ({ status, showDescription = false }) => {
+  const { t } = useTranslation(); // Hook triggers re-render on language change
+
   if (!status) return null;
 
   const variant = STATUS_VARIANTS[status] || 'secondary';
-  const label = STATUS_LABELS[status] || status;
-  const description = STATUS_DESCRIPTIONS[status];
+  const label = getStatusLabel(status);
+  const description = getStatusDescription(status);
 
   return (
     <Badge
