@@ -37,16 +37,24 @@
   },
   "auth": {
     "loginTitle": "Prihlásenie",
-    "registerTitle": "Registrácia",
+    "registerTitle": "Registrácia hráča",
     "email": "Email",
     "password": "Heslo",
     "confirmPassword": "Potvrdiť heslo",
     "forgotPassword": "Zabudli ste heslo?",
     "noAccount": "Nemáte účet?",
     "hasAccount": "Už máte účet?",
+    "hasAccountLogin": "Už máte účet? Prihlásiť sa",
     "loggingIn": "Prihlasovanie...",
+    "creatingAccount": "Vytváranie účtu...",
+    "createAccount": "Vytvoriť účet",
+    "fullName": "Celé meno",
+    "phoneOptional": "Telefón (voliteľné)",
     "newPlayerPrompt": "Nový hráč? Vytvorte si účet",
-    "defaultCredentials": "Predvolené administrátorské prihlasovacie údaje:\nadmin@batl.example.com / ChangeMe123!"
+    "defaultCredentials": "Predvolené administrátorské prihlasovacie údaje:\nadmin@batl.example.com / ChangeMe123!",
+    "profileLinkedSuccess": "Váš účet bol prepojený s existujúcim profilom hráča a turnajovou históriou!",
+    "passwordRequirements": "Musí mať aspoň 8 znakov s veľkým písmenom, malým písmenom a číslom",
+    "phoneFormat": "Formát: +421901234567"
   },
   "pages": {
     "admin": {
@@ -171,7 +179,37 @@
       "title": "Potvrdiť vymazanie"
     },
     "createUser": {
-      "title": "Vytvoriť používateľa"
+      "title": "Vytvoriť nového používateľa",
+      "creating": "Vytváranie...",
+      "submit": "Vytvoriť používateľa",
+      "roleHelp": "Administrátori môžu spravovať používateľov a systémové nastavenia. Organizátori môžu vytvoriť turnaje."
+    },
+    "ruleChangeWarning": {
+      "title": "Potvrdiť zmenu pravidiel",
+      "formatNotAllowed": "Zmena formátu nie je povolená",
+      "formatNotAllowedMsg": "Formát turnaja nemôže byť zmenený po začatí alebo ukončení zápasov. Tento turnaj má {completed} ukončený(ch) zápas(ov) a {inProgress} prebiehajúci(ch) zápas(ov).",
+      "ruleChange": "Zmena pravidiel",
+      "ruleChangeMsg": "Chystáte sa zmeniť {changeType} pre tento turnaj. Pretože ešte neboli odohrané žiadne zápasy, táto zmena ovplyvní všetky zápasy.",
+      "activeTournamentChange": "Zmena pravidiel aktívneho turnaja",
+      "activeTournamentMsg": "Tento turnaj už začal. Zmena {changeType}:",
+      "notAffectCompleted": "NEOVPLYVNÍ ukončené zápasy ({count} zápas{plural}) - zachovajú si pôvodné pravidlá",
+      "notAffectInProgress": "NEOVPLYVNÍ prebiehajúce zápasy ({count} zápas{plural}) - zachovajú si aktuálne pravidlá",
+      "applyToFuture": "APLIKOVÁ SA na budúce zápasy ({count} zápas{plural}) - použijú nové pravidlá",
+      "matchStatusSummary": "Prehľad stavu zápasov:",
+      "statusCompleted": "Ukončené",
+      "statusInProgress": "Prebiehajúce",
+      "statusScheduled": "Náplánované",
+      "impactPreserved": "Pravidlá zachované",
+      "impactNoChange": "Žiadna zmena",
+      "impactNewRules": "Použijú sa nové pravidlá",
+      "matchesAffected": "{count} zápas{plural} ovplyvnený(ch)",
+      "cannotProceed": "Nemôžete pokračovať: Zmeny formátu nie sú povolené po začatí zápasov.",
+      "confirmChange": "Potvrdiť zmenu",
+      "changeNotAllowed": "Zmena nie je povolená",
+      "formatType": "formát turnaja",
+      "defaultRules": "predvolené pravidlá bodovania",
+      "override": "prepísanie pravidiel",
+      "rules": "pravidlá"
     },
     "createPlayer": {
       "title": "Vytvoriť nový profil hráča",
@@ -203,6 +241,16 @@
     "profileOnly": "Bez turnajovej histórie",
     "match": "Zhoda"
   },
+  "status": {
+    "registered": "Registrovaný",
+    "waitlisted": "Na čakacej listine",
+    "withdrawn": "Odhlásený",
+    "cancelled": "Zrušený",
+    "registeredDesc": "Máte potvrdené miesto v tomto turnaji",
+    "waitlistedDesc": "Turnaj je naplnený. Budete upozornený, ak sa uvoľní miesto.",
+    "withdrawnDesc": "Odhlásili ste sa z tohto turnaja",
+    "cancelledDesc": "Tento turnaj bol zrušený"
+  },
   "placeholders": {
     "tournamentName": "napr. Letný šampionát 2025",
     "venueName": "napr. Tenisový klub Bratislava",
@@ -233,6 +281,28 @@
     "capacityWarning": "Turnaj je naplnený. Budete požiadaný vybrať, kto bude presunutý do čakacej listiny."
   },
   "tournament": {
+    "formats": {
+      "knockout": "Vyraďovací",
+      "group": "Skupinová fáza",
+      "swiss": "Švajčiarsky systém",
+      "combined": "Kombinovaný",
+      "singleElimination": "Jednoduchá eliminácia",
+      "doubleElimination": "Dvojitá eliminácia",
+      "playUntilPlacement": "Hrať do umiestnenia",
+      "groupsOf": "Skupiny po {size}",
+      "rounds": "{count} kolá",
+      "topAdvance": "Skupiny po {size}, top {advance} postupujú",
+      "matchGuarantee1": "Jednoduchá eliminácia (1 zápas zaručený)",
+      "matchGuarantee2": "Dvojitá eliminácia (2 zápasy zaručené)"
+    },
+    "complexity": {
+      "standard": "Štandardné",
+      "modified": "Upravené",
+      "complex": "Komplexné",
+      "standardDesc": "Pravidlá definované len na úrovni turnaja",
+      "modifiedDesc": "Zmeny pravidiel definované na úrovni skupiny alebo kola",
+      "complexDesc": "Zmeny pravidiel konfigurované pre konkrétne zápasy"
+    },
     "rules": {
       "title": "Pravidlá turnaja",
       "formatTitle": "Konfigurácia formátu turnaja",
@@ -251,7 +321,18 @@
   },
   "errors": {
     "loginFailed": "Prihlásenie zlyhalo. Overte, či sú váš email a heslo správne.",
+    "registerFailed": "Registrácia zlyhala",
+    "createUserFailed": "Vytvorenie používateľa zlyhalo",
+    "emailRequired": "Email je povinný",
+    "nameRequired": "Meno je povinné",
     "nameMinLength": "Meno hráča musí mať aspoň 2 znaky",
+    "passwordRequired": "Heslo je povinné",
+    "passwordMinLength": "Heslo musí mať aspoň 8 znakov",
+    "passwordLowercase": "Heslo musí obsahovať malé písmeno",
+    "passwordUppercase": "Heslo musí obsahovať veľké písmeno",
+    "passwordNumber": "Heslo musí obsahovať číslo",
+    "confirmPasswordRequired": "Potvrďte heslo",
+    "passwordsNoMatch": "Heslá sa nezhodujú",
     "genderRequired": "Pohlavie je povinné",
     "invalidEmail": "Zadajte platnú emailovú adresu (napr. hrac@example.com)",
     "phoneStartPlus": "Číslo telefónu musí začínať znamienkom + (napr. +421901234567)",

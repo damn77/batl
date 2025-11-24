@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { createUser } from '../services/userService';
 
 const CreateUserModal = ({ show, onHide, onUserCreated }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -33,29 +35,29 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
 
     // Email validation
     if (!formData.email) {
-      errors.email = 'Email is required';
+      errors.email = t('errors.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = t('errors.invalidEmail');
     }
 
     // Password validation
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = t('errors.passwordRequired');
     } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
+      errors.password = t('errors.passwordMinLength');
     } else if (!/(?=.*[a-z])/.test(formData.password)) {
-      errors.password = 'Password must contain a lowercase letter';
+      errors.password = t('errors.passwordLowercase');
     } else if (!/(?=.*[A-Z])/.test(formData.password)) {
-      errors.password = 'Password must contain an uppercase letter';
+      errors.password = t('errors.passwordUppercase');
     } else if (!/(?=.*\d)/.test(formData.password)) {
-      errors.password = 'Password must contain a number';
+      errors.password = t('errors.passwordNumber');
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm password';
+      errors.confirmPassword = t('errors.confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = t('errors.passwordsNoMatch');
     }
 
     setValidationErrors(errors);
@@ -91,13 +93,13 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
       // Error can come in two structures:
       // 1. Direct from apiClient interceptor: { status, code, message, details }
       // 2. Raw axios error: { response: { data: { error: {...} } } }
-      const errorMessage = err.message || err.response?.data?.error?.message || 'Failed to create user';
+      const errorMessage = err.message || err.response?.data?.error?.message || t('errors.createUserFailed');
       const errorCode = err.code || err.response?.data?.error?.code;
       const errorDetails = err.details || err.response?.data?.error?.details;
 
       // Handle email-specific errors
       if (errorDetails?.field === 'email' ||
-          (errorCode === 'CONFLICT' && errorMessage.toLowerCase().includes('email'))) {
+        (errorCode === 'CONFLICT' && errorMessage.toLowerCase().includes('email'))) {
         setValidationErrors({ email: errorMessage });
       } else {
         setError(errorMessage);
@@ -125,7 +127,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
   return (
     <Modal show={show} onHide={handleClose} backdrop={loading ? 'static' : true}>
       <Modal.Header closeButton={!loading}>
-        <Modal.Title>Create New User</Modal.Title>
+        <Modal.Title>{t('modals.createUser.title')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -133,7 +135,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
 
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Email *</Form.Label>
+            <Form.Label>{t('auth.email')} {t('common.required')}</Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -141,7 +143,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.email}
               disabled={loading}
-              placeholder="user@example.com"
+              placeholder={t('placeholders.email')}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.email}
@@ -149,23 +151,23 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Role *</Form.Label>
+            <Form.Label>{t('form.labels.role')} {t('common.required')}</Form.Label>
             <Form.Select
               name="role"
               value={formData.role}
               onChange={handleChange}
               disabled={loading}
             >
-              <option value="ORGANIZER">Organizer</option>
-              <option value="ADMIN">Admin</option>
+              <option value="ORGANIZER">{t('form.options.organizer')}</option>
+              <option value="ADMIN">{t('form.options.admin')}</option>
             </Form.Select>
             <Form.Text className="text-muted">
-              Admins can manage users and system settings. Organizers can create tournaments.
+              {t('modals.createUser.roleHelp')}
             </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Password *</Form.Label>
+            <Form.Label>{t('auth.password')} {t('common.required')}</Form.Label>
             <Form.Control
               type="password"
               name="password"
@@ -173,18 +175,18 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.password}
               disabled={loading}
-              placeholder="Enter password"
+              placeholder={t('placeholders.password')}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.password}
             </Form.Control.Feedback>
             <Form.Text className="text-muted">
-              Must be at least 8 characters with uppercase, lowercase, and number.
+              {t('auth.passwordRequirements')}
             </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Confirm Password *</Form.Label>
+            <Form.Label>{t('auth.confirmPassword')} {t('common.required')}</Form.Label>
             <Form.Control
               type="password"
               name="confirmPassword"
@@ -192,7 +194,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
               onChange={handleChange}
               isInvalid={!!validationErrors.confirmPassword}
               disabled={loading}
-              placeholder="Confirm password"
+              placeholder={t('placeholders.confirmPassword')}
             />
             <Form.Control.Feedback type="invalid">
               {validationErrors.confirmPassword}
@@ -203,7 +205,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
 
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose} disabled={loading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={loading}>
           {loading ? (
@@ -216,10 +218,10 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
                 aria-hidden="true"
                 className="me-2"
               />
-              Creating...
+              {t('modals.createUser.creating')}
             </>
           ) : (
-            'Create User'
+            t('modals.createUser.submit')
           )}
         </Button>
       </Modal.Footer>

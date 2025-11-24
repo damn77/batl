@@ -1,5 +1,6 @@
 // T101: Rule Change Warning Modal - Warns organizers about rule changes during active tournaments
 import { Modal, Button, Alert, Table } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,6 +13,8 @@ import PropTypes from 'prop-types';
  * @param {string} changeType - Type of change: 'format', 'default-rules', 'override'
  */
 function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, changeType }) {
+  const { t } = useTranslation();
+
   if (!changeImpact) {
     return null;
   }
@@ -29,13 +32,13 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
   const getChangeTypeLabel = () => {
     switch (changeType) {
       case 'format':
-        return 'tournament format';
+        return t('modals.ruleChangeWarning.formatType');
       case 'default-rules':
-        return 'default scoring rules';
+        return t('modals.ruleChangeWarning.defaultRules');
       case 'override':
-        return 'rule overrides';
+        return t('modals.ruleChangeWarning.override');
       default:
-        return 'rules';
+        return t('modals.ruleChangeWarning.rules');
     }
   };
 
@@ -43,10 +46,12 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
     if (changeType === 'format') {
       return (
         <Alert variant="danger">
-          <Alert.Heading>Format Change Not Allowed</Alert.Heading>
+          <Alert.Heading>{t('modals.ruleChangeWarning.formatNotAllowed')}</Alert.Heading>
           <p>
-            Tournament format cannot be changed after matches have started or been completed.
-            This tournament has {completedMatches} completed match(es) and {inProgressMatches} in-progress match(es).
+            {t('modals.ruleChangeWarning.formatNotAllowedMsg', {
+              completed: completedMatches,
+              inProgress: inProgressMatches
+            })}
           </p>
         </Alert>
       );
@@ -55,10 +60,9 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
     if (!hasActiveMatches) {
       return (
         <Alert variant="info">
-          <Alert.Heading>Rule Change</Alert.Heading>
+          <Alert.Heading>{t('modals.ruleChangeWarning.ruleChange')}</Alert.Heading>
           <p>
-            You are about to change the {getChangeTypeLabel()} for this tournament.
-            Since no matches have been played yet, this change will affect all matches.
+            {t('modals.ruleChangeWarning.ruleChangeMsg', { changeType: getChangeTypeLabel() })}
           </p>
         </Alert>
       );
@@ -66,22 +70,28 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
 
     return (
       <Alert variant="warning">
-        <Alert.Heading>Active Tournament Rule Change</Alert.Heading>
+        <Alert.Heading>{t('modals.ruleChangeWarning.activeTournamentChange')}</Alert.Heading>
         <p>
-          This tournament has already started. Changing {getChangeTypeLabel()} will:
+          {t('modals.ruleChangeWarning.activeTournamentMsg', { changeType: getChangeTypeLabel() })}
         </p>
         <ul>
           <li>
-            <strong>NOT affect</strong> completed matches ({completedMatches} match{completedMatches !== 1 ? 'es' : ''})
-            - they retain their original rules
+            <strong>NOT affect</strong> {t('modals.ruleChangeWarning.notAffectCompleted', {
+              count: completedMatches,
+              plural: completedMatches !== 1 ? 'es' : ''
+            })}
           </li>
           <li>
-            <strong>NOT affect</strong> in-progress matches ({inProgressMatches} match{inProgressMatches !== 1 ? 'es' : ''})
-            - they keep their current rules
+            <strong>NOT affect</strong> {t('modals.ruleChangeWarning.notAffectInProgress', {
+              count: inProgressMatches,
+              plural: inProgressMatches !== 1 ? 'es' : ''
+            })}
           </li>
           <li>
-            <strong>Apply to</strong> future matches ({affectedMatches || scheduledMatches} match{(affectedMatches || scheduledMatches) !== 1 ? 'es' : ''})
-            - they will use the new rules
+            <strong>Apply to</strong> {t('modals.ruleChangeWarning.applyToFuture', {
+              count: affectedMatches || scheduledMatches,
+              plural: (affectedMatches || scheduledMatches) !== 1 ? 'es' : ''
+            })}
           </li>
         </ul>
       </Alert>
@@ -91,45 +101,44 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
   return (
     <Modal show={show} onHide={onCancel} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Confirm Rule Change</Modal.Title>
+        <Modal.Title>{t('modals.ruleChangeWarning.title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {getWarningMessage()}
 
-        <h6 className="mt-3 mb-2">Match Status Summary:</h6>
+        <h6 className="mt-3 mb-2">{t('modals.ruleChangeWarning.matchStatusSummary')}</h6>
         <Table size="sm" bordered>
           <thead>
             <tr>
-              <th>Status</th>
-              <th className="text-end">Count</th>
-              <th>Impact</th>
+              <th>{t('table.headers.status')}</th>
+              <th className="text-end">{t('table.headers.count')}</th>
+              <th>{t('table.headers.impact')}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Completed</td>
+              <td>{t('modals.ruleChangeWarning.statusCompleted')}</td>
               <td className="text-end">{completedMatches}</td>
-              <td><span className="text-muted">Rules preserved</span></td>
+              <td><span className="text-muted">{t('modals.ruleChangeWarning.impactPreserved')}</span></td>
             </tr>
             <tr>
-              <td>In Progress</td>
+              <td>{t('modals.ruleChangeWarning.statusInProgress')}</td>
               <td className="text-end">{inProgressMatches}</td>
-              <td><span className="text-muted">No change</span></td>
+              <td><span className="text-muted">{t('modals.ruleChangeWarning.impactNoChange')}</span></td>
             </tr>
             <tr>
-              <td>Scheduled</td>
+              <td>{t('modals.ruleChangeWarning.statusScheduled')}</td>
               <td className="text-end">{scheduledMatches}</td>
-              <td><strong className="text-primary">Will use new rules</strong></td>
+              <td><strong className="text-primary">{t('modals.ruleChangeWarning.impactNewRules')}</strong></td>
             </tr>
             <tr className="table-secondary">
-              <td><strong>Total</strong></td>
+              <td><strong>{t('common.total')}</strong></td>
               <td className="text-end"><strong>{totalMatches}</strong></td>
               <td>
-                {affectedMatches !== undefined ? (
-                  <strong>{affectedMatches} match{affectedMatches !== 1 ? 'es' : ''} affected</strong>
-                ) : (
-                  <strong>{scheduledMatches} match{scheduledMatches !== 1 ? 'es' : ''} affected</strong>
-                )}
+                <strong>{t('modals.ruleChangeWarning.matchesAffected', {
+                  count: affectedMatches !== undefined ? affectedMatches : scheduledMatches,
+                  plural: (affectedMatches !== undefined ? affectedMatches : scheduledMatches) !== 1 ? 'es' : ''
+                })}</strong>
               </td>
             </tr>
           </tbody>
@@ -137,21 +146,21 @@ function RuleChangeWarningModal({ show, onConfirm, onCancel, changeImpact, chang
 
         {changeType === 'format' && hasActiveMatches && (
           <Alert variant="danger" className="mt-3">
-            <strong>Cannot proceed:</strong> Format changes are not allowed after matches have started.
+            <strong>{t('modals.ruleChangeWarning.cannotProceed')}</strong>
           </Alert>
         )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         {changeType !== 'format' || !hasActiveMatches ? (
           <Button variant="warning" onClick={onConfirm}>
-            Confirm Change
+            {t('modals.ruleChangeWarning.confirmChange')}
           </Button>
         ) : (
           <Button variant="danger" disabled>
-            Change Not Allowed
+            {t('modals.ruleChangeWarning.changeNotAllowed')}
           </Button>
         )}
       </Modal.Footer>

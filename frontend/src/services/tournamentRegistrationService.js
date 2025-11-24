@@ -1,4 +1,5 @@
 import apiClient from './apiClient';
+import i18n from '../i18n/i18n';
 
 /**
  * Tournament Registration Service - API calls for tournament registrations
@@ -94,12 +95,18 @@ export const TOURNAMENT_REGISTRATION_STATUS = {
   CANCELLED: 'CANCELLED'
 };
 
-// Status labels for display
+// Status labels for display (using i18n)
+export const getStatusLabel = (status) => {
+  const key = status.toLowerCase();
+  return i18n.t(`status.${key}`);
+};
+
+// Legacy export for backwards compatibility
 export const STATUS_LABELS = {
-  REGISTERED: 'Registered',
-  WAITLISTED: 'Waitlisted',
-  WITHDRAWN: 'Withdrawn',
-  CANCELLED: 'Cancelled'
+  get REGISTERED() { return i18n.t('status.registered'); },
+  get WAITLISTED() { return i18n.t('status.waitlisted'); },
+  get WITHDRAWN() { return i18n.t('status.withdrawn'); },
+  get CANCELLED() { return i18n.t('status.cancelled'); }
 };
 
 // Status badge variants for React Bootstrap
@@ -110,10 +117,16 @@ export const STATUS_VARIANTS = {
   CANCELLED: 'danger'
 };
 
-// Status descriptions
+// Status descriptions (using i18n)
+export const getStatusDescription = (status) => {
+  const key = status.toLowerCase();
+  return i18n.t(`status.${key}Desc`);
+};
+
+// Legacy export for backwards compatibility
 export const STATUS_DESCRIPTIONS = {
-  REGISTERED: 'You have a confirmed spot in this tournament',
-  WAITLISTED: 'Tournament is at capacity. You will be notified if a spot opens up.',
-  WITHDRAWN: 'You have withdrawn from this tournament',
-  CANCELLED: 'This tournament has been cancelled'
+  get REGISTERED() { return i18n.t('status.registeredDesc'); },
+  get WAITLISTED() { return i18n.t('status.waitlistedDesc'); },
+  get WITHDRAWN() { return i18n.t('status.withdrawnDesc'); },
+  get CANCELLED() { return i18n.t('status.cancelledDesc'); }
 };

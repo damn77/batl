@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
 import { register as registerAPI } from '../services/authService';
 
 const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -37,36 +39,36 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
 
     // Email validation
     if (!formData.email) {
-      errors.email = 'Email is required';
+      errors.email = t('errors.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = t('errors.invalidEmail');
     }
 
     // Name validation
     if (!formData.name) {
-      errors.name = 'Name is required';
+      errors.name = t('errors.nameRequired');
     } else if (formData.name.length < 2) {
-      errors.name = 'Name must be at least 2 characters';
+      errors.name = t('errors.nameMinLength');
     }
 
     // Password validation
     if (!formData.password) {
-      errors.password = 'Password is required';
+      errors.password = t('errors.passwordRequired');
     } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
+      errors.password = t('errors.passwordMinLength');
     } else if (!/(?=.*[a-z])/.test(formData.password)) {
-      errors.password = 'Password must contain a lowercase letter';
+      errors.password = t('errors.passwordLowercase');
     } else if (!/(?=.*[A-Z])/.test(formData.password)) {
-      errors.password = 'Password must contain an uppercase letter';
+      errors.password = t('errors.passwordUppercase');
     } else if (!/(?=.*\d)/.test(formData.password)) {
-      errors.password = 'Password must contain a number';
+      errors.password = t('errors.passwordNumber');
     }
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm password';
+      errors.confirmPassword = t('errors.confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = t('errors.passwordsNoMatch');
     }
 
     setValidationErrors(errors);
@@ -112,7 +114,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
         login(userWithProfile);
       }
     } catch (err) {
-      const errorMessage = err.message || err.response?.data?.error?.message || 'Registration failed';
+      const errorMessage = err.message || err.response?.data?.error?.message || t('errors.registerFailed');
       const errorCode = err.code || err.response?.data?.error?.code;
       const errorDetails = err.details || err.response?.data?.error?.details;
 
@@ -151,7 +153,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Player Registration</Modal.Title>
+        <Modal.Title>{t('auth.registerTitle')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -163,20 +165,20 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
 
         {profileLinked && (
           <Alert variant="success">
-            Your account has been linked to your existing player profile and tournament history!
+            {t('auth.profileLinkedSuccess')}
           </Alert>
         )}
 
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="registerName">
-            <Form.Label>Full Name *</Form.Label>
+            <Form.Label>{t('auth.fullName')} {t('common.required')}</Form.Label>
             <Form.Control
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               disabled={loading}
-              placeholder="John Smith"
+              placeholder={t('placeholders.playerName')}
               isInvalid={!!validationErrors.name}
             />
             <Form.Control.Feedback type="invalid">
@@ -185,7 +187,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="registerEmail">
-            <Form.Label>Email *</Form.Label>
+            <Form.Label>{t('auth.email')} {t('common.required')}</Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -193,7 +195,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
               onChange={handleChange}
               disabled={loading}
               autoComplete="email"
-              placeholder="player@example.com"
+              placeholder={t('placeholders.email')}
               isInvalid={!!validationErrors.email}
             />
             <Form.Control.Feedback type="invalid">
@@ -202,22 +204,22 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="registerPhone">
-            <Form.Label>Phone (optional)</Form.Label>
+            <Form.Label>{t('auth.phoneOptional')}</Form.Label>
             <Form.Control
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               disabled={loading}
-              placeholder="+421901234567"
+              placeholder={t('placeholders.phone')}
             />
             <Form.Text className="text-muted">
-              Format: +421901234567
+              {t('auth.phoneFormat')}
             </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="registerPassword">
-            <Form.Label>Password *</Form.Label>
+            <Form.Label>{t('auth.password')} {t('common.required')}</Form.Label>
             <Form.Control
               type="password"
               name="password"
@@ -231,12 +233,12 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
               {validationErrors.password}
             </Form.Control.Feedback>
             <Form.Text className="text-muted">
-              Must be at least 8 characters with uppercase, lowercase, and number
+              {t('auth.passwordRequirements')}
             </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="registerConfirmPassword">
-            <Form.Label>Confirm Password *</Form.Label>
+            <Form.Label>{t('auth.confirmPassword')} {t('common.required')}</Form.Label>
             <Form.Control
               type="password"
               name="confirmPassword"
@@ -267,10 +269,10 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
                   aria-hidden="true"
                   className="me-2"
                 />
-                Creating account...
+                {t('auth.creatingAccount')}
               </>
             ) : (
-              'Create Account'
+              t('auth.createAccount')
             )}
           </Button>
         </Form>
@@ -282,7 +284,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
             onClick={handleSwitchToLogin}
             disabled={loading}
           >
-            Already have an account? Login
+            {t('auth.hasAccountLogin')}
           </button>
         </div>
       </Modal.Body>

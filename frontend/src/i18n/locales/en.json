@@ -37,16 +37,24 @@
   },
   "auth": {
     "loginTitle": "Login",
-    "registerTitle": "Register",
+    "registerTitle": "Player Registration",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
+    "hasAccountLogin": "Already have an account? Login",
     "loggingIn": "Logging in...",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create Account",
+    "fullName": "Full Name",
+    "phoneOptional": "Phone (optional)",
     "newPlayerPrompt": "New player? Create an account",
-    "defaultCredentials": "Default admin credentials:\nadmin@batl.example.com / ChangeMe123!"
+    "defaultCredentials": "Default admin credentials:\nadmin@batl.example.com / ChangeMe123!",
+    "profileLinkedSuccess": "Your account has been linked to your existing player profile and tournament history!",
+    "passwordRequirements": "Must be at least 8 characters with uppercase, lowercase, and number",
+    "phoneFormat": "Format: +421901234567"
   },
   "pages": {
     "admin": {
@@ -171,7 +179,37 @@
       "title": "Confirm Delete"
     },
     "createUser": {
-      "title": "Create User"
+      "title": "Create New User",
+      "creating": "Creating...",
+      "submit": "Create User",
+      "roleHelp": "Admins can manage users and system settings. Organizers can create tournaments."
+    },
+    "ruleChangeWarning": {
+      "title": "Confirm Rule Change",
+      "formatNotAllowed": "Format Change Not Allowed",
+      "formatNotAllowedMsg": "Tournament format cannot be changed after matches have started or been completed. This tournament has {completed} completed match(es) and {inProgress} in-progress match(es).",
+      "ruleChange": "Rule Change",
+      "ruleChangeMsg": "You are about to change the {changeType} for this tournament. Since no matches have been played yet, this change will affect all matches.",
+      "activeTournamentChange": "Active Tournament Rule Change",
+      "activeTournamentMsg": "This tournament has already started. Changing {changeType} will:",
+      "notAffectCompleted": "NOT affect completed matches ({count} match{plural}) - they retain their original rules",
+      "notAffectInProgress": "NOT affect in-progress matches ({count} match{plural}) - they keep their current rules",
+      "applyToFuture": "Apply to future matches ({count} match{plural}) - they will use the new rules",
+      "matchStatusSummary": "Match Status Summary:",
+      "statusCompleted": "Completed",
+      "statusInProgress": "In Progress",
+      "statusScheduled": "Scheduled",
+      "impactPreserved": "Rules preserved",
+      "impactNoChange": "No change",
+      "impactNewRules": "Will use new rules",
+      "matchesAffected": "{count} match{plural} affected",
+      "cannotProceed": "Cannot proceed: Format changes are not allowed after matches have started.",
+      "confirmChange": "Confirm Change",
+      "changeNotAllowed": "Change Not Allowed",
+      "formatType": "tournament format",
+      "defaultRules": "default scoring rules",
+      "override": "rule overrides",
+      "rules": "rules"
     },
     "createPlayer": {
       "title": "Create New Player Profile",
@@ -203,6 +241,16 @@
     "profileOnly": "No Tournament History",
     "match": "Match"
   },
+  "status": {
+    "registered": "Registered",
+    "waitlisted": "Waitlisted",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled",
+    "registeredDesc": "You have a confirmed spot in this tournament",
+    "waitlistedDesc": "Tournament is at capacity. You will be notified if a spot opens up.",
+    "withdrawnDesc": "You have withdrawn from this tournament",
+    "cancelledDesc": "This tournament has been cancelled"
+  },
   "placeholders": {
     "tournamentName": "e.g. Summer Championship 2025",
     "venueName": "e.g. Tennis Club Bratislava",
@@ -233,6 +281,28 @@
     "capacityWarning": "Tournament is at capacity. You'll be asked to select who to move to waitlist."
   },
   "tournament": {
+    "formats": {
+      "knockout": "Knockout",
+      "group": "Group Stage",
+      "swiss": "Swiss System",
+      "combined": "Combined",
+      "singleElimination": "Single Elimination",
+      "doubleElimination": "Double Elimination",
+      "playUntilPlacement": "Play until placement",
+      "groupsOf": "Groups of {size}",
+      "rounds": "{count} rounds",
+      "topAdvance": "Groups of {size}, top {advance} advance",
+      "matchGuarantee1": "Single Elimination (1 match guarantee)",
+      "matchGuarantee2": "Double Elimination (2 match guarantee)"
+    },
+    "complexity": {
+      "standard": "Standard",
+      "modified": "Modified",
+      "complex": "Complex",
+      "standardDesc": "Rules defined only at tournament level",
+      "modifiedDesc": "Rule changes defined at group or round level",
+      "complexDesc": "Rule changes configured for specific matches"
+    },
     "rules": {
       "title": "Tournament Rules",
       "formatTitle": "Tournament Format Configuration",
@@ -251,7 +321,18 @@
   },
   "errors": {
     "loginFailed": "Login failed. Please verify your email and password are correct.",
+    "registerFailed": "Registration failed",
+    "createUserFailed": "Failed to create user",
+    "emailRequired": "Email is required",
+    "nameRequired": "Name is required",
     "nameMinLength": "Player name must be at least 2 characters long",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordLowercase": "Password must contain a lowercase letter",
+    "passwordUppercase": "Password must contain an uppercase letter",
+    "passwordNumber": "Password must contain a number",
+    "confirmPasswordRequired": "Please confirm password",
+    "passwordsNoMatch": "Passwords do not match",
     "genderRequired": "Gender is required",
     "invalidEmail": "Please enter a valid email address (e.g., player@example.com)",
     "phoneStartPlus": "Phone number must start with + (e.g., +1234567890)",

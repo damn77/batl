@@ -1,5 +1,5 @@
 {
-  "lastFullReview": "2025-11-24T15:37:00Z",
+  "lastFullReview": "2025-11-24T16:00:00Z",
   "files": {
     "src/components/NavBar.jsx": {
       "lastReviewed": "2025-11-24T00:00:00Z",
@@ -31,6 +31,26 @@
     },
     "src/components/TournamentRulesModal.jsx": {
       "lastReviewed": "2025-11-24T15:37:00Z",
+      "status": "complete"
+    },
+    "src/components/RegisterModal.jsx": {
+      "lastReviewed": "2025-11-24T15:45:00Z",
+      "status": "complete"
+    },
+    "src/components/CreateUserModal.jsx": {
+      "lastReviewed": "2025-11-24T15:49:00Z",
+      "status": "complete"
+    },
+    "src/components/RuleChangeWarningModal.jsx": {
+      "lastReviewed": "2025-11-24T15:54:00Z",
+      "status": "complete"
+    },
+    "src/services/tournamentRegistrationService.js": {
+      "lastReviewed": "2025-11-24T15:54:00Z",
+      "status": "complete"
+    },
+    "src/services/tournamentViewService.js": {
+      "lastReviewed": "2025-11-24T16:00:00Z",
       "status": "complete"
     }
   }

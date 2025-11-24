@@ -1,6 +1,7 @@
 // T019-T021: Tournament View Service - API calls and SWR hooks for tournament view page
 import useSWR from 'swr';
 import apiClient from './apiClient';
+import i18n from '../i18n/i18n';
 
 /**
  * T019: Get tournament by ID with full details (enhanced endpoint)
@@ -54,40 +55,45 @@ export const getMatches = async (id, filters = {}) => {
 export const getFormatTypeInfo = (formatType, formatConfig = {}) => {
   const formatInfo = {
     KNOCKOUT: {
-      label: 'Knockout',
+      label: i18n.t('tournament.formats.knockout'),
       icon: '🏆',
       getDescription: (config) => {
-        if (!config?.matchGuarantee) return 'Single Elimination';
+        if (!config?.matchGuarantee) return i18n.t('tournament.formats.singleElimination');
         const guarantees = {
-          MATCH_1: 'Single Elimination (1 match guarantee)',
-          MATCH_2: 'Double Elimination (2 match guarantee)',
-          UNTIL_PLACEMENT: 'Play until placement'
+          MATCH_1: i18n.t('tournament.formats.matchGuarantee1'),
+          MATCH_2: i18n.t('tournament.formats.matchGuarantee2'),
+          UNTIL_PLACEMENT: i18n.t('tournament.formats.playUntilPlacement')
         };
-        return guarantees[config.matchGuarantee] || 'Knockout Tournament';
+        return guarantees[config.matchGuarantee] || i18n.t('tournament.formats.knockout');
       }
     },
     GROUP: {
-      label: 'Group Stage',
+      label: i18n.t('tournament.formats.group'),
       icon: '👥',
       getDescription: (config) => {
-        if (!config?.groupSize) return 'Group Stage';
-        return `Groups of ${config.groupSize}`;
+        if (!config?.groupSize) return i18n.t('tournament.formats.group');
+        return i18n.t('tournament.formats.groupsOf', { size: config.groupSize });
       }
     },
     SWISS: {
-      label: 'Swiss System',
+      label: i18n.t('tournament.formats.swiss'),
       icon: '♟️',
       getDescription: (config) => {
-        if (!config?.rounds) return 'Swiss System';
-        return `${config.rounds} rounds`;
+        if (!config?.rounds) return i18n.t('tournament.formats.swiss');
+        return i18n.t('tournament.formats.rounds', { count: config.rounds });
       }
     },
     COMBINED: {
-      label: 'Combined',
+      label: i18n.t('tournament.formats.combined'),
       icon: '🎯',
       getDescription: (config) => {
-        if (!config?.groupSize || !config?.advancePerGroup) return 'Group Stage + Knockout';
-        return `Groups of ${config.groupSize}, top ${config.advancePerGroup} advance`;
+        if (!config?.groupSize || !config?.advancePerGroup) {
+          return `${i18n.t('tournament.formats.group')} + ${i18n.t('tournament.formats.knockout')}`;
+        }
+        return i18n.t('tournament.formats.topAdvance', {
+          size: config.groupSize,
+          advance: config.advancePerGroup
+        });
       }
     }
   };
@@ -129,21 +135,21 @@ export const getRuleComplexityInfo = (complexity) => {
   const complexityInfo = {
     DEFAULT: {
       variant: 'success',
-      label: 'Standard',
+      label: i18n.t('tournament.complexity.standard'),
       icon: '🟢',
-      description: 'Rules defined only at tournament level'
+      description: i18n.t('tournament.complexity.standardDesc')
     },
     MODIFIED: {
       variant: 'warning',
-      label: 'Modified',
+      label: i18n.t('tournament.complexity.modified'),
       icon: '🟡',
-      description: 'Rule changes defined at group or round level'
+      description: i18n.t('tournament.complexity.modifiedDesc')
     },
     SPECIFIC: {
       variant: 'danger',
-      label: 'Complex',
+      label: i18n.t('tournament.complexity.complex'),
       icon: '🔴',
-      description: 'Rule changes configured for specific matches'
+      description: i18n.t('tournament.complexity.complexDesc')
     }
   };
 

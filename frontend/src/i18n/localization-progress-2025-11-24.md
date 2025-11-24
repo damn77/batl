@@ -132,7 +132,7 @@ All validation errors now use translation keys:
 
 ### Language Support
 - ✅ **English (en)**: 100% complete
-- ✅ **Slovak (sk)**: 100% complete (professional translations)
+- ✅ **Slovak (sk)**: 100% complete (AI translations)
 
 ---
 
