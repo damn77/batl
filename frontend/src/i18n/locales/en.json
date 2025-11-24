@@ -27,7 +27,8 @@
     "tournament": "tournament",
     "tournaments": "tournaments",
     "unknownCategory": "Unknown Category",
-    "playersCount": "{{count}} players"
+    "playersCount": "{{count}} players",
+    "saving": "Saving..."
   },
   "nav": {
     "rankings": "Rankings",
@@ -46,7 +47,9 @@
     "unregister": "Unregister",
     "viewRules": "View Rules",
     "registerPair": "Register Pair",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "saveFormatConfig": "Save Format & Configuration",
+    "saveScoringRules": "Save Scoring Rules"
   },
   "auth": {
     "loginTitle": "Login",
@@ -118,6 +121,9 @@
     "tournamentRegistration": {
       "title": "Tournament Registration",
       "description": "Browse and register for upcoming tournaments"
+    },
+    "tournamentRulesSetup": {
+      "title": "Tournament Rules Setup"
     }
   },
   "form": {
@@ -195,7 +201,8 @@
       "capacity": "Capacity",
       "dates": "Dates",
       "format": "Format",
-      "location": "Location"
+      "location": "Location",
+      "players": "Players"
     }
   },
   "modals": {
@@ -615,7 +622,10 @@
     "registrationFailed": "Registration failed",
     "failedToLoad": "Failed to load {resource}",
     "failedToRegister": "Failed to register {resource}",
-    "failedToUnregister": "Failed to unregister from {resource}"
+    "failedToUnregister": "Failed to unregister from {resource}",
+    "failedToLoadTournamentRules": "Failed to load tournament rules",
+    "failedToSaveTournamentFormat": "Failed to save tournament format",
+    "failedToSaveScoringRules": "Failed to save scoring rules"
   },
   "help": {
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
@@ -639,7 +649,10 @@
     "registeredForTournament": "Successfully registered for {tournament}!",
     "unregisteredFromTournament": "Successfully unregistered from {tournament}",
     "playerPromotedFromWaitlist": "{player} has been promoted from the waitlist.",
-    "removedFromCategory": "You have been removed from the category (no participation history)."
+    "removedFromCategory": "You have been removed from the category (no participation history).",
+    "loadingTournamentRules": "Loading tournament rules...",
+    "formatSavedSuccess": "Tournament format saved successfully!",
+    "scoringRulesSavedSuccess": "Scoring rules saved successfully!"
   },
   "validation": {
     "selectPlayer2": "Please select Player 2 for the new pair",

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Alert, Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import TournamentFormatSelector from '../components/TournamentFormatSelector';
 import MatchScoringRulesForm from '../components/MatchScoringRulesForm';
 import FormatConfigPanel from '../components/FormatConfigPanel';
@@ -10,6 +11,7 @@ import { setTournamentFormat, setDefaultScoringRules, getTournamentFormat } from
 import apiClient from '../services/apiClient';
 
 const TournamentRulesSetupPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -76,7 +78,7 @@ const TournamentRulesSetupPage = () => {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to load tournament rules');
+      setError(err.response?.data?.error?.message || t('errors.failedToLoadTournamentRules'));
     } finally {
       setLoading(false);
     }
@@ -124,11 +126,11 @@ const TournamentRulesSetupPage = () => {
       const response = await setTournamentFormat(id, formatType, formatConfig);
 
       if (response.success) {
-        setSuccess('Tournament format saved successfully!');
+        setSuccess(t('messages.formatSavedSuccess'));
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || 'Failed to save tournament format';
+      const errorMsg = err.response?.data?.error?.message || t('errors.failedToSaveTournamentFormat');
       setError(errorMsg);
 
       // If format change not allowed, mark as having matches
@@ -160,11 +162,11 @@ const TournamentRulesSetupPage = () => {
       const response = await setDefaultScoringRules(id, scoringRules);
 
       if (response.success) {
-        setSuccess('Scoring rules saved successfully!');
+        setSuccess(t('messages.scoringRulesSavedSuccess'));
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to save scoring rules');
+      setError(err.response?.data?.error?.message || t('errors.failedToSaveScoringRules'));
     } finally {
       setSaving(false);
     }
@@ -197,9 +199,9 @@ const TournamentRulesSetupPage = () => {
     return (
       <Container className="mt-4 text-center">
         <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </Spinner>
-        <p className="mt-2">Loading tournament rules...</p>
+        <p className="mt-2">{t('messages.loadingTournamentRules')}</p>
       </Container>
     );
   }
@@ -208,15 +210,15 @@ const TournamentRulesSetupPage = () => {
     <Container className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2>Tournament Rules Setup</h2>
+          <h2>{t('pages.tournamentRulesSetup.title')}</h2>
           <p className="text-muted mb-1">{tournamentName}</p>
           <p className="text-muted mb-0">
-            <strong>Players:</strong> {registrationStats.registered} / {registrationStats.capacity || '∞'}
-            {registrationStats.waitlisted > 0 && ` (${registrationStats.waitlisted} waitlisted)`}
+            <strong>{t('table.headers.players')}:</strong> {registrationStats.registered} / {registrationStats.capacity || '∞'}
+            {registrationStats.waitlisted > 0 && ` (${registrationStats.waitlisted} ${t('status.waitlisted').toLowerCase()})`}
           </p>
         </div>
         <Button variant="secondary" onClick={() => navigate(-1)}>
-          Back
+          {t('common.back')}
         </Button>
       </div>
 
@@ -271,7 +273,7 @@ const TournamentRulesSetupPage = () => {
               onClick={handleSaveFormat}
               disabled={saving || hasMatches}
             >
-              {saving ? 'Saving...' : 'Save Format & Configuration'}
+              {saving ? t('common.saving') : t('buttons.saveFormatConfig')}
             </Button>
           </div>
         </Col>
@@ -282,7 +284,7 @@ const TournamentRulesSetupPage = () => {
               onClick={handleSaveScoringRules}
               disabled={saving}
             >
-              {saving ? 'Saving...' : 'Save Scoring Rules'}
+              {saving ? t('common.saving') : t('buttons.saveScoringRules')}
             </Button>
           </div>
         </Col>

@@ -27,7 +27,8 @@
     "tournament": "turnaj",
     "tournaments": "turnaje",
     "unknownCategory": "Neznáma kategória",
-    "playersCount": "{{count}} hráčov"
+    "playersCount": "{{count}} hráčov",
+    "saving": "Ukladanie..."
   },
   "nav": {
     "rankings": "Rebríčky",
@@ -46,7 +47,9 @@
     "unregister": "Odregistrovať",
     "viewRules": "Zobraziť pravidlá",
     "registerPair": "Registrovať pár",
-    "cancel": "Zrušiť"
+    "cancel": "Zrušiť",
+    "saveFormatConfig": "Uložiť formát a konfiguráciu",
+    "saveScoringRules": "Uložiť pravidlá skórovania"
   },
   "auth": {
     "loginTitle": "Prihlásenie",
@@ -118,6 +121,9 @@
     "tournamentRegistration": {
       "title": "Registrácia na turnaj",
       "description": "Prehľadávať a registrovať sa na nadchádzajúce turnaje"
+    },
+    "tournamentRulesSetup": {
+      "title": "Nastavenie pravidiel turnaja"
     }
   },
   "form": {
@@ -195,7 +201,8 @@
       "capacity": "Kapacita",
       "dates": "Dátumy",
       "format": "Formát",
-      "location": "Miesto"
+      "location": "Miesto",
+      "players": "Hráči"
     }
   },
   "modals": {
@@ -615,7 +622,10 @@
     "registrationFailed": "Registrácia zlyhala",
     "failedToLoad": "Načítanie {resource} zlyhalo",
     "failedToRegister": "Registrácia {resource} zlyhala",
-    "failedToUnregister": "Odregistrácia z {resource} zlyhala"
+    "failedToUnregister": "Odregistrácia z {resource} zlyhala",
+    "failedToLoadTournamentRules": "Načítanie pravidiel turnaja zlyhalo",
+    "failedToSaveTournamentFormat": "Uloženie formátu turnaja zlyhalo",
+    "failedToSaveScoringRules": "Uloženie pravidiel skórovania zlyhalo"
   },
   "help": {
     "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
@@ -639,7 +649,10 @@
     "registeredForTournament": "Úspešne registrovaný na {tournament}!",
     "unregisteredFromTournament": "Úspešne odregistrovaný z {tournament}",
     "playerPromotedFromWaitlist": "{player} bol povýšený z čakacej listiny.",
-    "removedFromCategory": "Boli ste odstránený z kategórie (žiadna história účasti)."
+    "removedFromCategory": "Boli ste odstránený z kategórie (žiadna história účasti).",
+    "loadingTournamentRules": "Načítavajú sa pravidlá turnaja...",
+    "formatSavedSuccess": "Formát turnaja bol úspešne uložený!",
+    "scoringRulesSavedSuccess": "Pravidlá skórovania boli úspešne uložené!"
   },
   "validation": {
     "selectPlayer2": "Vyberte hráča 2 pre nový pár",
