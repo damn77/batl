@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
       const data = await checkSessionAPI();
       setUser(data.user);
       setIsAuthenticated(true);
-    } catch (error) {
+    } catch {
       // Session not valid or expired
       setUser(null);
       setIsAuthenticated(false);

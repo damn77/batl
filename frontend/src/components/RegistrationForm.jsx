@@ -1,5 +1,4 @@
 // RegistrationForm - Reusable form component for tournament registration
-import { useState } from 'react';
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
 
 /**
@@ -97,7 +96,7 @@ const RegistrationForm = ({
 
             {isFull && (
                 <Form.Text className="d-block mt-2 text-warning">
-                    <strong>Note:</strong> Tournament is at capacity. You'll be asked to
+                    <strong>Note:</strong> Tournament is at capacity. You&apos;ll be asked to
                     select who to move to waitlist.
                 </Form.Text>
             )}

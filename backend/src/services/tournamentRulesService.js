@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import { validateFormatConfig } from '../validation/formatConfigSchemas.js';
 import { validateScoringRules } from '../validation/scoringRulesSchemas.js';
-import { FormatType } from '../types/formatTypes.js';
 
 const prisma = new PrismaClient();
 

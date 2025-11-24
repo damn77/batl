@@ -50,7 +50,7 @@ function MatchHistoricalRulesDisplay({ completedWithRules, matchStatus }) {
       <Alert variant="info" className="mb-0">
         <small className="text-muted d-block mb-2">
           These are the exact rules that were in effect when this match was played.
-          Even if tournament rules were changed later, this match's official record
+          Even if tournament rules were changed later, this match&apos;s official record
           uses these rules.
         </small>
         <div className="row">

@@ -179,7 +179,7 @@ const SwissRoundPairings = ({ tournamentId, rounds, players }) => {
           <small className="text-muted">
             P = Played, W = Wins, D = Draws, L = Losses, Pts = Points (1 for win, 0.5 for draw)
             <br />
-            Buchholz = Sum of opponents' points (tiebreaker)
+            Buchholz = Sum of opponents&apos; points (tiebreaker)
           </small>
         </div>
       </div>

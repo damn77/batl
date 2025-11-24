@@ -25,10 +25,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  getCategoryStats,
-  CATEGORY_TYPES,
   AGE_GROUPS,
-  GENDERS,
   formatCategoryName
 } from '../services/categoryService';
 

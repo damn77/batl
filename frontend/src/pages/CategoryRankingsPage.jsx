@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Container, Row, Col, Card, Badge, Alert, Spinner, Form, Table } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Alert, Spinner, Table } from 'react-bootstrap';
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
 import NavBar from '../components/NavBar';
 import { listCategories } from '../services/categoryService';

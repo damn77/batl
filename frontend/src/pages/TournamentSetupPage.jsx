@@ -8,7 +8,6 @@ import {
   listTournaments,
   createTournament,
   updateTournament,
-  deleteTournament,
   TOURNAMENT_STATUS,
   STATUS_LABELS,
   STATUS_VARIANTS

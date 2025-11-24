@@ -1,5 +1,5 @@
 // T075-T077: Group Standings Table Component - Displays group standings and matches
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Table, Alert, Spinner } from 'react-bootstrap';
 import { useMatches } from '../services/tournamentViewService';
 import MatchResultDisplay from './MatchResultDisplay';

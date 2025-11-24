@@ -6,6 +6,30 @@ import { getRuleComplexityInfo } from '../services/tournamentViewService';
 import RuleComplexityIndicator from './RuleComplexityIndicator';
 import TournamentRulesModal from './TournamentRulesModal';
 
+// Info row component for consistent formatting - defined outside to prevent recreation on each render
+const InfoRow = ({ label, value, link }) => {
+  if (value === null || value === undefined || value === 'Not specified') {
+    return null; // T031: Hide null/optional fields
+  }
+
+  return (
+    <Row className="mb-3">
+      <Col xs={5} className="text-muted">
+        <small>{label}:</small>
+      </Col>
+      <Col xs={7}>
+        {link ? (
+          <Link to={link} className="text-decoration-none">
+            {value}
+          </Link>
+        ) : (
+          <strong>{value}</strong>
+        )}
+      </Col>
+    </Row>
+  );
+};
+
 /**
  * TournamentInfoPanel - Displays all tournament information in organized sections
  * FR-001: Display all general tournament information
@@ -70,30 +94,6 @@ const TournamentInfoPanel = ({ tournament }) => {
 
   const registrationStatus = getRegistrationStatus();
   const ruleComplexityInfo = getRuleComplexityInfo(tournament.ruleComplexity);
-
-  // Info row component for consistent formatting
-  const InfoRow = ({ label, value, link }) => {
-    if (value === null || value === undefined || value === 'Not specified') {
-      return null; // T031: Hide null/optional fields
-    }
-
-    return (
-      <Row className="mb-3">
-        <Col xs={5} className="text-muted">
-          <small>{label}:</small>
-        </Col>
-        <Col xs={7}>
-          {link ? (
-            <Link to={link} className="text-decoration-none">
-              {value}
-            </Link>
-          ) : (
-            <strong>{value}</strong>
-          )}
-        </Col>
-      </Row>
-    );
-  };
 
   return (
     <Card className="border-0 shadow-sm">

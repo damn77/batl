@@ -1,5 +1,4 @@
 {
-  "enabledMcpjsonServers": ["playwright", "chrome-devtools"],
   "permissions": {
     "allow": [
       "Bash(if [ -d specs ])",
@@ -18,11 +17,16 @@
       "Bash(\"$USERPROFILE/bin/render.exe\":*)",
       "Bash(\"$USERPROFILE/bin/render.exe\" config get)",
       "Bash(\"$USERPROFILE/bin/render.exe\" whoami --output json)",
-      "Bash(\"$USERPROFILE/bin/render.exe\" projects --output json)"
+      "Bash(\"$USERPROFILE/bin/render.exe\" projects --output json)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
   },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "chrome-devtools"
+  ],
   "hooks": {
     "PostToolUse": [
       {

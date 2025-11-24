@@ -73,7 +73,7 @@ const CreateUserModal = ({ show, onHide, onUserCreated }) => {
     try {
       setLoading(true);
 
-      const { confirmPassword, ...userData } = formData;
+      const { confirmPassword: _confirmPassword, ...userData } = formData;
       await createUser(userData);
 
       // Reset form

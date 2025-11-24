@@ -585,20 +585,6 @@ export async function unregisterPlayer(playerId, tournamentId) {
 
       // Promote if found
       if (nextWaitlisted) {
-        // Fetch full player details for the response
-        const fullWaitlisted = await tx.tournamentRegistration.findUnique({
-          where: { id: nextWaitlisted.id },
-          include: {
-            player: {
-              select: {
-                id: true,
-                name: true,
-                email: true
-              }
-            }
-          }
-        });
-
         promotedRegistration = await tx.tournamentRegistration.update({
           where: { id: nextWaitlisted.id },
           data: {
