@@ -1,46 +1,22 @@
 // Tests for Tournament Registration Service
 // Feature: 003-tournament-registration
 
-import { jest } from '@jest/globals';
-import * as tournamentRegistrationService from '../src/services/tournamentRegistrationService.js';
 import * as sharedTournamentService from '../src/services/sharedTournamentService.js';
-
-// Mock the shared service
-jest.mock('../src/services/sharedTournamentService.js');
 
 describe('Tournament Registration Service', () => {
     describe('checkCapacity', () => {
-        it('should delegate to sharedTournamentService.checkCapacity', async () => {
-            const mockResult = {
-                status: 'REGISTERED',
-                capacity: 10,
-                currentCount: 5,
-                isFull: false
-            };
-
-            sharedTournamentService.checkCapacity.mockResolvedValue(mockResult);
-
-            // Note: checkCapacity is not exported, so we test it indirectly through registerPlayer
-            // This test verifies the integration with sharedTournamentService
+        it('should have checkCapacity function available from sharedTournamentService', () => {
+            // Verify the shared service function is available
             expect(sharedTournamentService.checkCapacity).toBeDefined();
+            expect(typeof sharedTournamentService.checkCapacity).toBe('function');
         });
     });
 
     describe('getNextWaitlistCandidate', () => {
-        it('should delegate to sharedTournamentService.getNextWaitlistCandidate', async () => {
-            const mockCandidate = {
-                id: 'reg-123',
-                playerId: 'player-1',
-                tournamentId: 'tournament-1',
-                status: 'WAITLISTED',
-                registrationTimestamp: new Date()
-            };
-
-            sharedTournamentService.getNextWaitlistCandidate.mockResolvedValue(mockCandidate);
-
-            // Note: This is tested indirectly through unregisterPlayer
-            // This test verifies the integration with sharedTournamentService
+        it('should have getNextWaitlistCandidate function available from sharedTournamentService', () => {
+            // Verify the shared service function is available
             expect(sharedTournamentService.getNextWaitlistCandidate).toBeDefined();
+            expect(typeof sharedTournamentService.getNextWaitlistCandidate).toBe('function');
         });
     });
 });
