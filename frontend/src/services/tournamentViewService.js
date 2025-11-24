@@ -1,7 +1,7 @@
 // T019-T021: Tournament View Service - API calls and SWR hooks for tournament view page
 import useSWR from 'swr';
 import apiClient from './apiClient';
-import i18n from '../i18n/i18n';
+import i18n from '../i18n';
 
 /**
  * T019: Get tournament by ID with full details (enhanced endpoint)

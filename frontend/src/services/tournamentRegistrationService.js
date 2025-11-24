@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import i18n from '../i18n/i18n';
+import i18n from '../i18n';
 
 /**
  * Tournament Registration Service - API calls for tournament registrations
