@@ -22,7 +22,12 @@
     "optional": "Voliteľné",
     "note": "Poznámka",
     "advanced": "Pokročilé",
-    "required": "*"
+    "required": "*",
+    "pair": "pár",
+    "tournament": "turnaj",
+    "tournaments": "turnaje",
+    "unknownCategory": "Neznáma kategória",
+    "playersCount": "{{count}} hráčov"
   },
   "nav": {
     "rankings": "Rebríčky",
@@ -34,6 +39,14 @@
     "login": "Prihlásiť",
     "logout": "Odhlásiť",
     "register": "Registrovať"
+  },
+  "buttons": {
+    "register": "Registrovať",
+    "reRegister": "Znovu registrovať",
+    "unregister": "Odregistrovať",
+    "viewRules": "Zobraziť pravidlá",
+    "registerPair": "Registrovať pár",
+    "cancel": "Zrušiť"
   },
   "auth": {
     "loginTitle": "Prihlásenie",
@@ -101,6 +114,10 @@
       "title": "Rebríčky hráčov",
       "subtitle": "Zobraziť všetkých registrovaných hráčov",
       "comingSoon": "Turnajové pavúky a výsledky sa zobrazia tu"
+    },
+    "tournamentRegistration": {
+      "title": "Registrácia na turnaj",
+      "description": "Prehľadávať a registrovať sa na nadchádzajúce turnaje"
     }
   },
   "form": {
@@ -119,7 +136,12 @@
       "venueName": "Názov miesta",
       "venueAddress": "Adresa miesta",
       "maxParticipants": "Max. účastníkov",
-      "searchPlayers": "Hľadať hráčov"
+      "searchPlayers": "Hľadať hráčov",
+      "registrationOption": "Možnosť registrácie",
+      "selectExistingPair": "Vybrať existujúci pár",
+      "createNewPair": "Vytvoriť nový pár",
+      "selectPair": "Vybrať pár",
+      "selectPlayer2": "Vybrať hráča 2"
     },
     "options": {
       "allTypes": "Všetky typy",
@@ -141,6 +163,10 @@
       "withoutAccount": "Bez účtu",
       "allPlayers": "Všetci hráči",
       "selectGender": "Vyberte pohlavie"
+    },
+    "placeholders": {
+      "selectPair": "-- Vyberte pár --",
+      "selectPartner": "-- Vyberte partnera --"
     }
   },
   "table": {
@@ -165,7 +191,11 @@
       "category": "Kategória",
       "seedingScore": "Skóre nasadenia",
       "activeRegistrations": "Aktívne registrácie",
-      "playerName": "Meno hráča"
+      "playerName": "Meno hráča",
+      "capacity": "Kapacita",
+      "dates": "Dátumy",
+      "format": "Formát",
+      "location": "Miesto"
     }
   },
   "modals": {
@@ -221,6 +251,13 @@
       "phoneHint": "Voliteľné. Medzinárodný formát začínajúci +.",
       "creating": "Vytváranie...",
       "submit": "Vytvoriť profil hráča"
+    },
+    "confirmUnregistration": {
+      "title": "Potvrdiť odregistráciu",
+      "message": "Naozaj sa chcete odregistrovať z {tournament}?"
+    },
+    "registerPair": {
+      "title": "Registrovať pár na {tournament}"
     }
   },
   "alerts": {
@@ -574,7 +611,11 @@
     "boundaryNetwork": "Problémami so sieťovým pripojením",
     "tryAgain": "Skúsiť znova",
     "goHome": "Prejsť na hlavnú stránku",
-    "errorDetails": "Detaily chyby (Vývojársky režim)"
+    "errorDetails": "Detaily chyby (Vývojársky režim)",
+    "registrationFailed": "Registrácia zlyhala",
+    "failedToLoad": "Načítanie {resource} zlyhalo",
+    "failedToRegister": "Registrácia {resource} zlyhala",
+    "failedToUnregister": "Odregistrácia z {resource} zlyhala"
   },
   "help": {
     "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
@@ -582,6 +623,26 @@
     "phoneFormat": "Medzinárodný formát zahŕňa kód krajiny (napr. +421 pre Slovensko, +1 pre USA/Kanadu). Príklad: +421901234567",
     "rawConfigExplanation": "Surová JSON konfigurácia pre pokročilých používateľov a vývojárov. Zobrazuje presné nastavenia turnaja tak, ako sú uložené v databáze.",
     "whyDuplicatesMatter": "Prečo záleží na duplikátoch?",
-    "duplicateExplanation": "Vytváranie duplicitných profilov môže viesť k nesprávnym výpočtom nasadenia a rebríčkov turnaja. Vytvorte nový profil iba vtedy, ak ste si istí, že ide o inú osobu."
+    "duplicateExplanation": "Vytváranie duplicitných profilov môže viesť k nesprávnym výpočtom nasadenia a rebríčkov turnaja. Vytvorte nový profil iba vtedy, ak ste si istí, že ide o inú osobu.",
+    "youWillBePlayer1": "Budete hráč 1. Vyberte svojho partnera nižšie.",
+    "partnerMustMeetRequirements": "Partner musí spĺňať požiadavky kategórie (vek, pohlavie)",
+    "unregistrationNote": "Ak ste aktuálne registrovaný (nie na čakacej listine), vaše miesto bude dané ďalšiemu hráčovi na čakacej listine."
+  },
+  "messages": {
+    "loadingTournaments": "Načítavajú sa turnaje...",
+    "loadingPairs": "Načítavajú sa páry...",
+    "noUpcomingTournaments": "Žiadne nadchádzajúce turnaje nie sú k dispozícii. Skúste to neskôr!",
+    "noExistingPairs": "Pre túto kategóriu neboli nájdené žiadne existujúce páry. Vytvorte nový pár.",
+    "pairAddedToWaitlist": "Pár bol pridaný na čakaciu listinu pre {tournament}. {description}",
+    "pairRegisteredForTournament": "Pár bol úspešne registrovaný na {tournament}!",
+    "addedToWaitlist": "Pridaný na čakaciu listinu pre {tournament}. {description}",
+    "registeredForTournament": "Úspešne registrovaný na {tournament}!",
+    "unregisteredFromTournament": "Úspešne odregistrovaný z {tournament}",
+    "playerPromotedFromWaitlist": "{player} bol povýšený z čakacej listiny.",
+    "removedFromCategory": "Boli ste odstránený z kategórie (žiadna história účasti)."
+  },
+  "validation": {
+    "selectPlayer2": "Vyberte hráča 2 pre nový pár",
+    "selectOrCreatePair": "Vyberte pár alebo vytvorte nový"
   }
 }

@@ -22,7 +22,12 @@
     "optional": "Optional",
     "note": "Note",
     "advanced": "Advanced",
-    "required": "*"
+    "required": "*",
+    "pair": "pair",
+    "tournament": "tournament",
+    "tournaments": "tournaments",
+    "unknownCategory": "Unknown Category",
+    "playersCount": "{{count}} players"
   },
   "nav": {
     "rankings": "Rankings",
@@ -34,6 +39,14 @@
     "login": "Login",
     "logout": "Logout",
     "register": "Register"
+  },
+  "buttons": {
+    "register": "Register",
+    "reRegister": "Re-register",
+    "unregister": "Unregister",
+    "viewRules": "View Rules",
+    "registerPair": "Register Pair",
+    "cancel": "Cancel"
   },
   "auth": {
     "loginTitle": "Login",
@@ -101,6 +114,10 @@
       "title": "Player Rankings",
       "subtitle": "View all registered players",
       "comingSoon": "Tournament brackets and results will appear here"
+    },
+    "tournamentRegistration": {
+      "title": "Tournament Registration",
+      "description": "Browse and register for upcoming tournaments"
     }
   },
   "form": {
@@ -119,7 +136,12 @@
       "venueName": "Venue Name",
       "venueAddress": "Venue Address",
       "maxParticipants": "Max Participants",
-      "searchPlayers": "Search Players"
+      "searchPlayers": "Search Players",
+      "registrationOption": "Registration Option",
+      "selectExistingPair": "Select existing pair",
+      "createNewPair": "Create new pair",
+      "selectPair": "Select Pair",
+      "selectPlayer2": "Select Player 2"
     },
     "options": {
       "allTypes": "All Types",
@@ -141,6 +163,10 @@
       "withoutAccount": "Without Account",
       "allPlayers": "All Players",
       "selectGender": "Select Gender"
+    },
+    "placeholders": {
+      "selectPair": "-- Select a pair --",
+      "selectPartner": "-- Select partner --"
     }
   },
   "table": {
@@ -165,7 +191,11 @@
       "category": "Category",
       "seedingScore": "Seeding Score",
       "activeRegistrations": "Active Registrations",
-      "playerName": "Player Name"
+      "playerName": "Player Name",
+      "capacity": "Capacity",
+      "dates": "Dates",
+      "format": "Format",
+      "location": "Location"
     }
   },
   "modals": {
@@ -221,6 +251,13 @@
       "phoneHint": "Optional. International format starting with +.",
       "creating": "Creating...",
       "submit": "Create Player Profile"
+    },
+    "confirmUnregistration": {
+      "title": "Confirm Unregistration",
+      "message": "Are you sure you want to unregister from {tournament}?"
+    },
+    "registerPair": {
+      "title": "Register Pair for {tournament}"
     }
   },
   "alerts": {
@@ -574,7 +611,11 @@
     "boundaryNetwork": "Network connectivity problems",
     "tryAgain": "Try Again",
     "goHome": "Go to Homepage",
-    "errorDetails": "Error Details (Development Mode)"
+    "errorDetails": "Error Details (Development Mode)",
+    "registrationFailed": "Registration failed",
+    "failedToLoad": "Failed to load {resource}",
+    "failedToRegister": "Failed to register {resource}",
+    "failedToUnregister": "Failed to unregister from {resource}"
   },
   "help": {
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
@@ -582,6 +623,26 @@
     "phoneFormat": "International format includes country code (e.g., +421 for Slovakia, +1 for USA/Canada). Example: +421901234567",
     "rawConfigExplanation": "Raw JSON configuration for advanced users and developers. This shows the exact tournament settings as stored in the database.",
     "whyDuplicatesMatter": "Why do duplicates matter?",
-    "duplicateExplanation": "Creating duplicate profiles can lead to incorrect tournament seeding and ranking calculations. Only create a new profile if you're certain this is a different person."
+    "duplicateExplanation": "Creating duplicate profiles can lead to incorrect tournament seeding and ranking calculations. Only create a new profile if you're certain this is a different person.",
+    "youWillBePlayer1": "You will be Player 1. Select your partner below.",
+    "partnerMustMeetRequirements": "Partner must meet category requirements (age, gender)",
+    "unregistrationNote": "If you are currently registered (not waitlisted), your spot will be given to the next player on the waitlist."
+  },
+  "messages": {
+    "loadingTournaments": "Loading tournaments...",
+    "loadingPairs": "Loading pairs...",
+    "noUpcomingTournaments": "No upcoming tournaments available. Check back later!",
+    "noExistingPairs": "No existing pairs found for this category. Please create a new pair.",
+    "pairAddedToWaitlist": "Pair added to waitlist for {tournament}. {description}",
+    "pairRegisteredForTournament": "Pair successfully registered for {tournament}!",
+    "addedToWaitlist": "Added to waitlist for {tournament}. {description}",
+    "registeredForTournament": "Successfully registered for {tournament}!",
+    "unregisteredFromTournament": "Successfully unregistered from {tournament}",
+    "playerPromotedFromWaitlist": "{player} has been promoted from the waitlist.",
+    "removedFromCategory": "You have been removed from the category (no participation history)."
+  },
+  "validation": {
+    "selectPlayer2": "Please select Player 2 for the new pair",
+    "selectOrCreatePair": "Please select a pair or create a new one"
   }
 }

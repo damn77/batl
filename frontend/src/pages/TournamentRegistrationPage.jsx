@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, ListGroup, Modal, Form } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import RegistrationStatusBadge from '../components/RegistrationStatusBadge';
 import TournamentFormatBadge from '../components/TournamentFormatBadge';
@@ -24,6 +25,7 @@ import { useAuth } from '../utils/AuthContext';
  * Player page for browsing and registering for tournaments
  */
 const TournamentRegistrationPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tournaments, setTournaments] = useState([]);
@@ -81,7 +83,7 @@ const TournamentRegistrationPage = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to load tournaments');
+      setError(err.response?.data?.error?.message || t('errors.failedToLoad', { resource: t('common.tournaments') }));
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,7 @@ const TournamentRegistrationPage = () => {
       // If creating a new pair
       if (pairModalMode === 'create') {
         if (!newPairPlayer2Id) {
-          setError('Please select Player 2 for the new pair');
+          setError(t('validation.selectPlayer2'));
           setPairModalLoading(false);
           return;
         }
@@ -165,7 +167,7 @@ const TournamentRegistrationPage = () => {
       }
 
       if (!pairId) {
-        setError('Please select a pair or create a new one');
+        setError(t('validation.selectOrCreatePair'));
         setPairModalLoading(false);
         return;
       }
@@ -182,8 +184,8 @@ const TournamentRegistrationPage = () => {
 
       // Show success message
       const statusMessage = result.status === 'WAITLISTED'
-        ? `Pair added to waitlist for ${pairModalTournament.name}. ${STATUS_DESCRIPTIONS.WAITLISTED}`
-        : `Pair successfully registered for ${pairModalTournament.name}!`;
+        ? t('messages.pairAddedToWaitlist', { tournament: pairModalTournament.name, description: STATUS_DESCRIPTIONS.WAITLISTED })
+        : t('messages.pairRegisteredForTournament', { tournament: pairModalTournament.name });
 
       setSuccess(statusMessage);
       setTimeout(() => setSuccess(null), 5000);
@@ -197,7 +199,7 @@ const TournamentRegistrationPage = () => {
       if (violations) {
         setError(
           <div>
-            <strong>Registration failed:</strong>
+            <strong>{t('errors.registrationFailed')}:</strong>
             <ul className="mb-0 mt-1">
               {violations.map((v, idx) => (
                 <li key={idx}>{v}</li>
@@ -206,7 +208,7 @@ const TournamentRegistrationPage = () => {
           </div>
         );
       } else {
-        setError(errorData?.message || err.message || 'Failed to register pair');
+        setError(errorData?.message || err.message || t('errors.failedToRegister', { resource: t('common.pair') }));
       }
     } finally {
       setPairModalLoading(false);
@@ -239,8 +241,8 @@ const TournamentRegistrationPage = () => {
 
       // Show success message
       const statusMessage = result.registration.status === 'WAITLISTED'
-        ? `Added to waitlist for ${result.tournament.name}. ${STATUS_DESCRIPTIONS.WAITLISTED}`
-        : `Successfully registered for ${result.tournament.name}!`;
+        ? t('messages.addedToWaitlist', { tournament: result.tournament.name, description: STATUS_DESCRIPTIONS.WAITLISTED })
+        : t('messages.registeredForTournament', { tournament: result.tournament.name });
 
       setSuccess(statusMessage);
 
@@ -248,7 +250,7 @@ const TournamentRegistrationPage = () => {
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       const errorData = err.response?.data?.error;
-      setError(errorData?.message || 'Failed to register for tournament');
+      setError(errorData?.message || t('errors.failedToRegister', { resource: t('common.tournament') }));
     } finally {
       setLoadingRegistrations({ ...loadingRegistrations, [tournamentId]: false });
     }
@@ -277,14 +279,14 @@ const TournamentRegistrationPage = () => {
       await loadTournaments();
 
       // Build success message
-      let message = `Successfully unregistered from ${tournamentName}`;
+      let message = t('messages.unregisteredFromTournament', { tournament: tournamentName });
 
       if (result.promotedPlayer) {
-        message += `. ${result.promotedPlayer.playerName} has been promoted from the waitlist.`;
+        message += `. ${t('messages.playerPromotedFromWaitlist', { player: result.promotedPlayer.playerName })}`;
       }
 
       if (result.categoryCleanup?.unregistered) {
-        message += ` You have been removed from the category (no participation history).`;
+        message += ` ${t('messages.removedFromCategory')}`;
       }
 
       setSuccess(message);
@@ -293,7 +295,7 @@ const TournamentRegistrationPage = () => {
       setTimeout(() => setSuccess(null), 7000);
     } catch (err) {
       const errorData = err.response?.data?.error;
-      setError(errorData?.message || 'Failed to unregister from tournament');
+      setError(errorData?.message || t('errors.failedToUnregister', { resource: t('common.tournament') }));
     } finally {
       setLoadingRegistrations({ ...loadingRegistrations, [tournamentId]: false });
       setSelectedTournament(null);
@@ -321,7 +323,7 @@ const TournamentRegistrationPage = () => {
           onClick={() => handleRegister(tournament.id)}
           disabled={isLoading}
         >
-          {isLoading ? <Spinner animation="border" size="sm" /> : 'Register'}
+          {isLoading ? <Spinner animation="border" size="sm" /> : t('buttons.register')}
         </Button>
       );
     }
@@ -340,7 +342,7 @@ const TournamentRegistrationPage = () => {
             onClick={() => handleRegister(tournament.id)}
             disabled={isLoading}
           >
-            {isLoading ? <Spinner animation="border" size="sm" /> : 'Re-register'}
+            {isLoading ? <Spinner animation="border" size="sm" /> : t('buttons.reRegister')}
           </Button>
         </>
       );
@@ -356,7 +358,7 @@ const TournamentRegistrationPage = () => {
           onClick={() => handleUnregisterClick(tournament)}
           disabled={isLoading}
         >
-          {isLoading ? <Spinner animation="border" size="sm" /> : 'Unregister'}
+          {isLoading ? <Spinner animation="border" size="sm" /> : t('buttons.unregister')}
         </Button>
       </>
     );
@@ -368,9 +370,9 @@ const TournamentRegistrationPage = () => {
         <NavBar />
         <Container className="mt-4 text-center">
           <Spinner animation="border" role="status">
-            <span className="visually-hidden">Loading...</span>
+            <span className="visually-hidden">{t('common.loading')}</span>
           </Spinner>
-          <p className="mt-2">Loading tournaments...</p>
+          <p className="mt-2">{t('messages.loadingTournaments')}</p>
         </Container>
       </>
     );
@@ -382,9 +384,9 @@ const TournamentRegistrationPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Tournament Registration</h2>
+            <h2>{t('pages.tournamentRegistration.title')}</h2>
             <p className="text-muted">
-              Browse and register for upcoming tournaments
+              {t('pages.tournamentRegistration.description')}
             </p>
           </Col>
         </Row>
@@ -403,7 +405,7 @@ const TournamentRegistrationPage = () => {
 
         {tournaments.length === 0 ? (
           <Alert variant="info">
-            No upcoming tournaments available. Check back later!
+            {t('messages.noUpcomingTournaments')}
           </Alert>
         ) : (
           <Row>
@@ -420,49 +422,49 @@ const TournamentRegistrationPage = () => {
                       </Link>
                     </Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
-                      {tournament.category?.name || 'Unknown Category'}
+                      {tournament.category?.name || t('common.unknownCategory')}
                     </Card.Subtitle>
 
                     <ListGroup variant="flush" className="mb-3">
                       <ListGroup.Item>
-                        <strong>Dates:</strong>{' '}
+                        <strong>{t('table.headers.dates')}:</strong>{' '}
                         {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
                       </ListGroup.Item>
 
                       {tournament.clubName && (
                         <ListGroup.Item>
-                          <strong>Location:</strong> {tournament.clubName}
+                          <strong>{t('table.headers.location')}:</strong> {tournament.clubName}
                           {tournament.address && <><br /><small className="text-muted">{tournament.address}</small></>}
                         </ListGroup.Item>
                       )}
 
                       {tournament.capacity && (
                         <ListGroup.Item>
-                          <strong>Capacity:</strong> {tournament.capacity} players
+                          <strong>{t('table.headers.capacity')}:</strong> {t('common.playersCount', { count: tournament.capacity })}
                         </ListGroup.Item>
                       )}
 
                       {tournament.entryFee && (
                         <ListGroup.Item>
-                          <strong>Entry Fee:</strong> ${tournament.entryFee}
+                          <strong>{t('tournament.entryFee')}:</strong> ${tournament.entryFee}
                         </ListGroup.Item>
                       )}
 
                       {tournament.prizeDescription && (
                         <ListGroup.Item>
-                          <strong>Prizes:</strong> {tournament.prizeDescription}
+                          <strong>{t('tournament.prizes')}:</strong> {tournament.prizeDescription}
                         </ListGroup.Item>
                       )}
 
                       <ListGroup.Item>
-                        <strong>Status:</strong>{' '}
+                        <strong>{t('table.headers.status')}:</strong>{' '}
                         <Badge bg="info">{TOURNAMENT_STATUS_LABELS[tournament.status]}</Badge>
                       </ListGroup.Item>
 
                       {/* Display tournament format with icon and tooltip */}
                       {tournament.formatType && (
                         <ListGroup.Item>
-                          <strong>Format:</strong>{' '}
+                          <strong>{t('table.headers.format')}:</strong>{' '}
                           <TournamentFormatBadge
                             formatType={tournament.formatType}
                             formatConfig={tournament.formatConfig}
@@ -478,7 +480,7 @@ const TournamentRegistrationPage = () => {
                         size="sm"
                         onClick={() => navigate(`/tournament/${tournament.id}/rules`)}
                       >
-                        View Rules
+                        {t('buttons.viewRules')}
                       </Button>
                     </div>
 
@@ -497,27 +499,26 @@ const TournamentRegistrationPage = () => {
         {/* Unregister Confirmation Modal */}
         <Modal show={showUnregisterModal} onHide={() => setShowUnregisterModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Confirm Unregistration</Modal.Title>
+            <Modal.Title>{t('modals.confirmUnregistration.title')}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {selectedTournament && (
               <>
                 <p>
-                  Are you sure you want to unregister from <strong>{selectedTournament.name}</strong>?
+                  {t('modals.confirmUnregistration.message', { tournament: selectedTournament.name })}
                 </p>
                 <Alert variant="warning" className="small">
-                  <strong>Note:</strong> If you are currently registered (not waitlisted),
-                  your spot will be given to the next player on the waitlist.
+                  <strong>{t('common.note')}:</strong> {t('help.unregistrationNote')}
                 </Alert>
               </>
             )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowUnregisterModal(false)}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button variant="danger" onClick={handleUnregisterConfirm}>
-              Unregister
+              {t('buttons.unregister')}
             </Button>
           </Modal.Footer>
         </Modal>
@@ -525,25 +526,25 @@ const TournamentRegistrationPage = () => {
         {/* Pair Registration Modal for DOUBLES tournaments */}
         <Modal show={showPairModal} onHide={() => setShowPairModal(false)} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Register Pair for {pairModalTournament?.name}</Modal.Title>
+            <Modal.Title>{t('modals.registerPair.title', { tournament: pairModalTournament?.name })}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {pairModalLoading ? (
               <div className="text-center py-4">
                 <Spinner animation="border" />
-                <p className="mt-2">Loading pairs...</p>
+                <p className="mt-2">{t('messages.loadingPairs')}</p>
               </div>
             ) : (
               <>
                 {/* Mode Selection */}
                 <Form.Group className="mb-3">
-                  <Form.Label>Registration Option</Form.Label>
+                  <Form.Label>{t('form.labels.registrationOption')}</Form.Label>
                   <div>
                     <Form.Check
                       type="radio"
                       id="mode-select"
                       name="pairMode"
-                      label="Select existing pair"
+                      label={t('form.labels.selectExistingPair')}
                       checked={pairModalMode === 'select'}
                       onChange={() => setPairModalMode('select')}
                       disabled={availablePairs.length === 0}
@@ -552,7 +553,7 @@ const TournamentRegistrationPage = () => {
                       type="radio"
                       id="mode-create"
                       name="pairMode"
-                      label="Create new pair"
+                      label={t('form.labels.createNewPair')}
                       checked={pairModalMode === 'create'}
                       onChange={() => setPairModalMode('create')}
                     />
@@ -562,17 +563,17 @@ const TournamentRegistrationPage = () => {
                 {pairModalMode === 'select' ? (
                   /* Select Existing Pair */
                   <Form.Group className="mb-3">
-                    <Form.Label>Select Pair</Form.Label>
+                    <Form.Label>{t('form.labels.selectPair')}</Form.Label>
                     {availablePairs.length === 0 ? (
                       <Alert variant="info">
-                        No existing pairs found for this category. Please create a new pair.
+                        {t('messages.noExistingPairs')}
                       </Alert>
                     ) : (
                       <Form.Select
                         value={selectedPairId}
                         onChange={(e) => setSelectedPairId(e.target.value)}
                       >
-                        <option value="">-- Select a pair --</option>
+                        <option value="">{t('form.placeholders.selectPair')}</option>
                         {availablePairs.map((pair) => (
                           <option key={pair.id} value={pair.id}>
                             {pair.player1?.name} & {pair.player2?.name}
@@ -585,15 +586,15 @@ const TournamentRegistrationPage = () => {
                 ) : (
                   /* Create New Pair */
                   <Form.Group className="mb-3">
-                    <Form.Label>Select Player 2</Form.Label>
+                    <Form.Label>{t('form.labels.selectPlayer2')}</Form.Label>
                     <Form.Text className="d-block mb-2 text-muted">
-                      You will be Player 1. Select your partner below.
+                      {t('help.youWillBePlayer1')}
                     </Form.Text>
                     <Form.Select
                       value={newPairPlayer2Id}
                       onChange={(e) => setNewPairPlayer2Id(e.target.value)}
                     >
-                      <option value="">-- Select partner --</option>
+                      <option value="">{t('form.placeholders.selectPartner')}</option>
                       {availablePlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name}
@@ -602,7 +603,7 @@ const TournamentRegistrationPage = () => {
                       ))}
                     </Form.Select>
                     <Form.Text className="text-muted">
-                      Partner must meet category requirements (age, gender)
+                      {t('help.partnerMustMeetRequirements')}
                     </Form.Text>
                   </Form.Group>
                 )}
@@ -611,14 +612,14 @@ const TournamentRegistrationPage = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowPairModal(false)}>
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button
               variant="primary"
               onClick={handlePairRegister}
               disabled={pairModalLoading || (pairModalMode === 'select' && !selectedPairId) || (pairModalMode === 'create' && !newPairPlayer2Id)}
             >
-              {pairModalLoading ? <Spinner animation="border" size="sm" /> : 'Register Pair'}
+              {pairModalLoading ? <Spinner animation="border" size="sm" /> : t('buttons.registerPair')}
             </Button>
           </Modal.Footer>
         </Modal>
