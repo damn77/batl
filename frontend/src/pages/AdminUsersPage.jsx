@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Container, Table, Button, Badge, Pagination, Spinner, Alert, Form, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import CreateUserModal from '../components/CreateUserModal';
 import { listUsers, deleteUser } from '../services/userService';
 
 const AdminUsersPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,9 +96,9 @@ const AdminUsersPage = () => {
       <NavBar />
       <Container className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>User Management</h2>
+          <h2>{t('pages.users.title')}</h2>
           <Button variant="primary" onClick={handleCreateUser}>
-            Create New User
+            {t('modals.createUser.title')}
           </Button>
         </div>
 
@@ -104,7 +106,7 @@ const AdminUsersPage = () => {
         <Row className="mb-3">
           <Col md={4}>
             <Form.Group>
-              <Form.Label>Role</Form.Label>
+              <Form.Label>{t('form.labels.role')}</Form.Label>
               <Form.Select
                 value={roleFilter}
                 onChange={(e) => {
@@ -112,16 +114,16 @@ const AdminUsersPage = () => {
                   setCurrentPage(1);
                 }}
               >
-                <option value="">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="ORGANIZER">Organizer</option>
-                <option value="PLAYER">Player</option>
+                <option value="">{t('form.options.allRoles')}</option>
+                <option value="ADMIN">{t('form.options.admin')}</option>
+                <option value="ORGANIZER">{t('form.options.organizer')}</option>
+                <option value="PLAYER">{t('form.options.player')}</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={4}>
             <Form.Group>
-              <Form.Label>Status</Form.Label>
+              <Form.Label>{t('form.labels.status')}</Form.Label>
               <Form.Select
                 value={statusFilter}
                 onChange={(e) => {
@@ -129,9 +131,9 @@ const AdminUsersPage = () => {
                   setCurrentPage(1);
                 }}
               >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
+                <option value="">{t('form.options.anyStatus')}</option>
+                <option value="true">{t('form.options.active')}</option>
+                <option value="false">{t('form.options.inactive')}</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -142,7 +144,7 @@ const AdminUsersPage = () => {
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </Spinner>
           </div>
         ) : (
@@ -154,13 +156,13 @@ const AdminUsersPage = () => {
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Email Verified</th>
-                  <th>Created</th>
-                  <th>Last Login</th>
-                  <th>Actions</th>
+                  <th>{t('table.headers.email')}</th>
+                  <th>{t('table.headers.role')}</th>
+                  <th>{t('table.headers.status')}</th>
+                  <th>{t('table.headers.emailVerified')}</th>
+                  <th>{t('table.headers.created')}</th>
+                  <th>{t('table.headers.lastLogin')}</th>
+                  <th>{t('table.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,12 +183,12 @@ const AdminUsersPage = () => {
                       </td>
                       <td>
                         <Badge bg={user.isActive ? 'success' : 'secondary'}>
-                          {user.isActive ? 'Active' : 'Inactive'}
+                          {user.isActive ? t('form.options.active') : t('form.options.inactive')}
                         </Badge>
                       </td>
                       <td>
                         <Badge bg={user.emailVerified ? 'success' : 'warning'}>
-                          {user.emailVerified ? 'Yes' : 'No'}
+                          {user.emailVerified ? t('common.yes') : t('common.no')}
                         </Badge>
                       </td>
                       <td>{formatDate(user.createdAt)}</td>
@@ -198,7 +200,7 @@ const AdminUsersPage = () => {
                           className="me-2"
                           onClick={() => handleViewUser(user.id)}
                         >
-                          View
+                          {t('common.view')}
                         </Button>
                         {user.isActive && (
                           <Button

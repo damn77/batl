@@ -11,6 +11,7 @@ import {
   Form,
   Pagination,
 } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { listCategories } from '../services/categoryService';
 import { getPairRankings, formatWinRate, getRankBadgeVariant } from '../services/rankingService';
@@ -26,6 +27,7 @@ import { getPairRankings, formatWinRate, getRankBadgeVariant } from '../services
  * - Public access (no authentication required)
  */
 const PairRankingsPage = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [rankingsData, setRankingsData] = useState(null);
@@ -63,7 +65,7 @@ const PairRankingsPage = () => {
         setSelectedCategoryId(doublesCategories[0].id);
       }
     } catch (err) {
-      setError(`Failed to load categories: ${err.message}`);
+      setError(t('errors.failedToLoad', { resource: t('nav.categories') }) + `: ${err.message}`);
     } finally {
       setLoadingCategories(false);
     }
@@ -82,7 +84,7 @@ const PairRankingsPage = () => {
     } catch (err) {
       const errorData = err.response?.data?.error;
       setError(
-        errorData?.message || `Failed to load pair rankings: ${err.message}`
+        errorData?.message || t('errors.failedToLoad', { resource: t('pages.pairRankings.title') }) + `: ${err.message}`
       );
       setRankingsData(null);
     } finally {
@@ -157,10 +159,9 @@ const PairRankingsPage = () => {
       <Container className="mt-4">
         <Row>
           <Col>
-            <h1>Pair Rankings</h1>
+            <h1>{t('pages.pairRankings.title')}</h1>
             <p className="text-muted">
-              View doubles pair rankings for each category. Rankings are updated
-              automatically after tournaments complete.
+              {t('pages.pairRankings.subtitle')}
             </p>
           </Col>
         </Row>
@@ -171,17 +172,17 @@ const PairRankingsPage = () => {
             <Card>
               <Card.Body>
                 <Form.Group>
-                  <Form.Label>Select Doubles Category</Form.Label>
+                  <Form.Label>{t('form.labels.selectDoublesCategory')}</Form.Label>
                   <Form.Select
                     value={selectedCategoryId}
                     onChange={(e) => handleCategoryChange(e.target.value)}
                     disabled={loadingCategories || categories.length === 0}
                   >
                     {categories.length === 0 ? (
-                      <option value="">No doubles categories available</option>
+                      <option value="">{t('messages.noDoublesCategoriesAvailable')}</option>
                     ) : (
                       <>
-                        <option value="">Select a category...</option>
+                        <option value="">{t('form.options.selectCategory')}</option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>
                             {cat.name} ({cat.gender}, {cat.ageGroup})
@@ -191,7 +192,7 @@ const PairRankingsPage = () => {
                     )}
                   </Form.Select>
                   <Form.Text className="text-muted">
-                    Only DOUBLES type categories are shown
+                    {t('help.onlyDoublesShown')}
                   </Form.Text>
                 </Form.Group>
               </Card.Body>
@@ -213,7 +214,7 @@ const PairRankingsPage = () => {
           <Row className="mt-3">
             <Col className="text-center">
               <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading rankings...</span>
+                <span className="visually-hidden">{t('common.loadingResource', { resource: t('common.rankings') })}</span>
               </Spinner>
             </Col>
           </Row>
@@ -228,10 +229,10 @@ const PairRankingsPage = () => {
                   <Card.Header>
                     <div className="d-flex justify-content-between align-items-center">
                       <h5 className="mb-0">
-                        {rankingsData.category.name} - Pair Rankings
+                        {rankingsData.category.name} - {t('pages.pairRankings.title')}
                       </h5>
                       <small className="text-muted">
-                        {rankingsData.pagination.total} pairs
+                        {rankingsData.pagination.total} {t('tournament.pairs')}
                       </small>
                     </div>
                   </Card.Header>
@@ -239,21 +240,21 @@ const PairRankingsPage = () => {
                     {rankingsData.rankings.length === 0 ? (
                       <div className="text-center p-4">
                         <p className="text-muted mb-0">
-                          No pair rankings available for this category yet.
+                          {t('messages.noPairRankingsYet')}
                         </p>
                       </div>
                     ) : (
                       <Table striped bordered hover responsive className="mb-0">
                         <thead>
                           <tr>
-                            <th style={{ width: '80px' }}>Rank</th>
-                            <th>Player 1</th>
-                            <th>Player 2</th>
-                            <th style={{ width: '100px' }}>Seeding</th>
-                            <th style={{ width: '100px' }}>Points</th>
-                            <th style={{ width: '80px' }}>Wins</th>
-                            <th style={{ width: '80px' }}>Losses</th>
-                            <th style={{ width: '100px' }}>Win Rate</th>
+                            <th style={{ width: '80px' }}>{t('table.headers.rank')}</th>
+                            <th>{t('table.headers.player1')}</th>
+                            <th>{t('table.headers.player2')}</th>
+                            <th style={{ width: '100px' }}>{t('table.headers.seeding')}</th>
+                            <th style={{ width: '100px' }}>{t('table.headers.points')}</th>
+                            <th style={{ width: '80px' }}>{t('table.headers.wins')}</th>
+                            <th style={{ width: '80px' }}>{t('table.headers.losses')}</th>
+                            <th style={{ width: '100px' }}>{t('table.headers.winRate')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -305,12 +306,12 @@ const PairRankingsPage = () => {
               <Row className="mt-2">
                 <Col className="text-center">
                   <small className="text-muted">
-                    Showing {(currentPage - 1) * limit + 1} to{' '}
-                    {Math.min(
-                      currentPage * limit,
-                      rankingsData.pagination.total
-                    )}{' '}
-                    of {rankingsData.pagination.total} pairs
+                    {t('pagination.showingRange', {
+                      from: (currentPage - 1) * limit + 1,
+                      to: Math.min(currentPage * limit, rankingsData.pagination.total),
+                      total: rankingsData.pagination.total,
+                      resource: t('tournament.pairs')
+                    })}
                   </small>
                 </Col>
               </Row>
@@ -323,23 +324,19 @@ const PairRankingsPage = () => {
           <Col>
             <Card bg="light">
               <Card.Body>
-                <h6>About Pair Rankings</h6>
+                <h6>{t('help.aboutPairRankings')}</h6>
                 <ul className="mb-0 small">
                   <li>
-                    <strong>Points:</strong> Total points earned by this specific
-                    pair in tournaments
+                    <strong>{t('table.headers.points')}:</strong> {t('help.pairPointsDescription')}
                   </li>
                   <li>
-                    <strong>Seeding Score:</strong> Combined individual ranking
-                    points of both players (used for tournament seeding)
+                    <strong>{t('table.headers.seeding')}:</strong> {t('help.seedingScoreDescription')}
                   </li>
                   <li>
-                    <strong>Win Rate:</strong> Percentage of matches won by this
-                    pair
+                    <strong>{t('table.headers.winRate')}:</strong> {t('help.winRateDescription')}
                   </li>
                   <li>
-                    Rankings are updated automatically after each tournament
-                    completes
+                    {t('help.rankingsAutoUpdate')}
                   </li>
                 </ul>
               </Card.Body>

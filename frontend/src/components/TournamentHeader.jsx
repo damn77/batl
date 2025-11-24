@@ -1,5 +1,6 @@
 // T024: Tournament Header Component - Displays name, status badge, category badge, format badge
 import { Card, Badge, Row, Col } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import TournamentFormatBadge from './TournamentFormatBadge';
 import { getStatusBadgeVariant } from '../services/tournamentViewService';
 
@@ -9,6 +10,8 @@ import { getStatusBadgeVariant } from '../services/tournamentViewService';
  * FR-002: Display format type badge
  */
 const TournamentHeader = ({ tournament }) => {
+  const { t } = useTranslation();
+
   if (!tournament) return null;
 
   // Format status for display
@@ -18,40 +21,11 @@ const TournamentHeader = ({ tournament }) => {
 
   // Get category label
   const getCategoryLabel = (category) => {
-    if (!category) return 'No Category';
+    if (!category) return t('tournament.noCategory');
 
-    const typeLabels = {
-      SINGLES: 'Singles',
-      DOUBLES: 'Doubles',
-      MIXED_DOUBLES: 'Mixed Doubles'
-    };
-
-    const genderLabels = {
-      MEN: 'Men',
-      WOMEN: 'Women',
-      MIXED: 'Mixed',
-      OPEN: 'Open'
-    };
-
-    const ageLabels = {
-      OPEN: 'Open',
-      AGE_35: '35+',
-      AGE_40: '40+',
-      AGE_45: '45+',
-      AGE_50: '50+',
-      AGE_55: '55+',
-      AGE_60: '60+',
-      AGE_65: '65+',
-      AGE_70: '70+',
-      U12: 'U12',
-      U14: 'U14',
-      U16: 'U16',
-      U18: 'U18'
-    };
-
-    const type = typeLabels[category.type] || category.type;
-    const gender = genderLabels[category.gender] || category.gender;
-    const age = ageLabels[category.ageGroup] || category.ageGroup;
+    const type = t(`tournament.categories.${category.type}`, { defaultValue: category.type });
+    const gender = t(`tournament.genders.${category.gender}`, { defaultValue: category.gender });
+    const age = t(`tournament.ageGroups.${category.ageGroup}`, { defaultValue: category.ageGroup });
 
     return `${type} | ${gender} ${age}`;
   };
@@ -72,7 +46,7 @@ const TournamentHeader = ({ tournament }) => {
           <Col xs="auto">
             {/* Status Badge */}
             <div className="d-flex align-items-center gap-2">
-              <small className="text-muted">Status:</small>
+              <small className="text-muted">{t('tournament.status')}:</small>
               <Badge
                 bg={getStatusBadgeVariant(tournament.status)}
                 className="px-3 py-2"
@@ -85,7 +59,7 @@ const TournamentHeader = ({ tournament }) => {
           <Col xs="auto">
             {/* Category Badge */}
             <div className="d-flex align-items-center gap-2">
-              <small className="text-muted">Category:</small>
+              <small className="text-muted">{t('tournament.category')}:</small>
               <Badge bg="info" className="px-3 py-2">
                 {getCategoryLabel(tournament.category)}
               </Badge>
@@ -95,7 +69,7 @@ const TournamentHeader = ({ tournament }) => {
           <Col xs="auto">
             {/* T025: Format Badge */}
             <div className="d-flex align-items-center gap-2">
-              <small className="text-muted">Format:</small>
+              <small className="text-muted">{t('tournament.format')}:</small>
               <TournamentFormatBadge
                 formatType={tournament.formatType}
                 formatConfig={tournament.formatConfig}

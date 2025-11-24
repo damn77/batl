@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Badge, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { getPlayer, updatePlayer } from '../services/playerService';
 
 const PlayerDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -136,7 +138,7 @@ const PlayerDetailPage = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return t('common.never');
     return new Date(dateString).toLocaleString();
   };
 
@@ -174,9 +176,9 @@ const PlayerDetailPage = () => {
       <NavBar />
       <Container className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Player Profile</h2>
+          <h2>{t('pages.playerProfile.title')}</h2>
           <Button variant="secondary" onClick={handleBack}>
-            Back to Players
+            {t('common.backToPlayers')}
           </Button>
         </div>
 

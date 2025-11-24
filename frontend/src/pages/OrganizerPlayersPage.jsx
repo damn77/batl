@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Container, Table, Button, Badge, Pagination, Spinner, Alert, Form, Row, Col, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import CreatePlayerModal from '../components/CreatePlayerModal';
 import { listPlayers } from '../services/playerService';
 
 const OrganizerPlayersPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const OrganizerPlayersPage = () => {
       setTotalPages(data.pagination.totalPages);
       setTotalPlayers(data.pagination.total);
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to load players');
+      setError(err.response?.data?.error?.message || t('errors.failedToLoad', { resource: t('common.players') }));
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ const OrganizerPlayersPage = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return t('common.never');
     return new Date(dateString).toLocaleString();
   };
 
@@ -79,9 +81,9 @@ const OrganizerPlayersPage = () => {
       <NavBar />
       <Container className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Player Profiles</h2>
+          <h2>{t('pages.organizerPlayers.title')}</h2>
           <Button variant="primary" onClick={handleCreatePlayer}>
-            Create New Player
+            {t('modals.createPlayer.title')}
           </Button>
         </div>
 
@@ -92,12 +94,12 @@ const OrganizerPlayersPage = () => {
               <InputGroup>
                 <Form.Control
                   type="text"
-                  placeholder="Search by name or email..."
+                  placeholder={t('placeholders.searchByNameOrEmail')}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
                 <Button variant="outline-secondary" type="submit">
-                  Search
+                  {t('common.search')}
                 </Button>
                 {searchQuery && (
                   <Button
@@ -108,7 +110,7 @@ const OrganizerPlayersPage = () => {
                       setCurrentPage(1);
                     }}
                   >
-                    Clear
+                    {t('common.clear')}
                   </Button>
                 )}
               </InputGroup>
@@ -121,11 +123,11 @@ const OrganizerPlayersPage = () => {
                 setAccountFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              aria-label="Filter by account status"
+              aria-label={t('form.labels.filterByAccountStatus')}
             >
-              <option value="">All Players</option>
-              <option value="true">With Account</option>
-              <option value="false">Without Account</option>
+              <option value="">{t('form.options.allPlayers')}</option>
+              <option value="true">{t('form.options.withAccount')}</option>
+              <option value="false">{t('form.options.withoutAccount')}</option>
             </Form.Select>
           </Col>
         </Row>
@@ -135,32 +137,32 @@ const OrganizerPlayersPage = () => {
         {loading ? (
           <div className="text-center my-5">
             <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </Spinner>
           </div>
         ) : (
           <>
             <p className="text-muted">
-              Showing {players.length} of {totalPlayers} player profiles
-              {searchQuery && ` (filtered by "${searchQuery}")`}
+              {t('pagination.showingOf', { showing: players.length, total: totalPlayers, resource: t('pages.organizerPlayers.playerProfiles') })}
+              {searchQuery && ` (${t('pagination.filteredBy')} "${searchQuery}")`}
             </p>
 
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Account Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t('table.headers.name')}</th>
+                  <th>{t('table.headers.email')}</th>
+                  <th>{t('table.headers.phone')}</th>
+                  <th>{t('table.headers.accountStatus')}</th>
+                  <th>{t('table.headers.created')}</th>
+                  <th>{t('table.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {players.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center text-muted">
-                      {searchQuery ? 'No players found matching your search' : 'No player profiles yet'}
+                      {searchQuery ? t('messages.noResultsFound') : t('messages.noPlayerProfilesYet')}
                     </td>
                   </tr>
                 ) : (
@@ -171,9 +173,9 @@ const OrganizerPlayersPage = () => {
                       <td>{player.phone || <span className="text-muted">—</span>}</td>
                       <td>
                         {player.userId ? (
-                          <Badge bg="success">Has Account</Badge>
+                          <Badge bg="success">{t('status.hasAccount')}</Badge>
                         ) : (
-                          <Badge bg="secondary">No Account</Badge>
+                          <Badge bg="secondary">{t('status.noAccount')}</Badge>
                         )}
                       </td>
                       <td>{formatDate(player.createdAt)}</td>
@@ -183,7 +185,7 @@ const OrganizerPlayersPage = () => {
                           size="sm"
                           onClick={() => handleViewPlayer(player.id)}
                         >
-                          View
+                          {t('common.view')}
                         </Button>
                       </td>
                     </tr>

@@ -19,6 +19,7 @@ import {
   getFilteredRowModel,
   flexRender
 } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import {
   listCategories,
@@ -30,6 +31,7 @@ import {
 } from '../services/categoryService';
 
 const CategoryManagementPage = () => {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,7 +71,7 @@ const CategoryManagementPage = () => {
       const data = await listCategories(filters);
       setCategories(data.categories || []);
     } catch (err) {
-      setError(err.message || 'Failed to load categories');
+      setError(err.message || t('errors.failedToLoad', { resource: t('nav.categories') }));
     } finally {
       setLoading(false);
     }
@@ -84,14 +86,14 @@ const CategoryManagementPage = () => {
     () => [
       {
         accessorKey: 'name',
-        header: 'Category',
+        header: t('table.headers.category'),
         cell: ({ row }) => (
           <strong>{row.original.name}</strong>
         )
       },
       {
         accessorKey: 'type',
-        header: 'Type',
+        header: t('table.headers.type'),
         cell: ({ getValue }) => (
           <Badge bg={getValue() === 'SINGLES' ? 'primary' : 'info'}>
             {getValue()}
@@ -100,7 +102,7 @@ const CategoryManagementPage = () => {
       },
       {
         accessorKey: 'ageGroup',
-        header: 'Age Group',
+        header: t('form.labels.ageGroup'),
         cell: ({ getValue }) => {
           const value = getValue();
           return value === 'ALL_AGES' ? 'All Ages' : `${value.replace('AGE_', '')}+`;
@@ -108,7 +110,7 @@ const CategoryManagementPage = () => {
       },
       {
         accessorKey: 'gender',
-        header: 'Gender',
+        header: t('form.labels.gender'),
         cell: ({ getValue }) => {
           const genderMap = { MEN: "Men's", WOMEN: "Women's", MIXED: 'Mixed' };
           return genderMap[getValue()] || getValue();
@@ -116,7 +118,7 @@ const CategoryManagementPage = () => {
       },
       {
         id: 'stats',
-        header: 'Stats',
+        header: t('common.stats'),
         cell: ({ row }) => {
           const counts = row.original._counts || {};
           return (
@@ -129,7 +131,7 @@ const CategoryManagementPage = () => {
       },
       {
         id: 'actions',
-        header: 'Actions',
+        header: t('table.headers.actions'),
         cell: ({ row }) => (
           <div className="d-flex gap-2">
             <Button
@@ -137,7 +139,7 @@ const CategoryManagementPage = () => {
               variant="outline-primary"
               onClick={() => handleEditCategory(row.original)}
             >
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               size="sm"
@@ -145,13 +147,13 @@ const CategoryManagementPage = () => {
               onClick={() => handleDeleteClick(row.original)}
               disabled={(row.original._counts?.tournaments || 0) > 0}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </div>
         )
       }
     ],
-    []
+    [t]
   );
 
   const table = useReactTable({
@@ -190,7 +192,7 @@ const CategoryManagementPage = () => {
     e.preventDefault();
 
     if (!formData.type || !formData.ageGroup || !formData.gender) {
-      setFormError('Please fill in all required fields');
+      setFormError(t('validation.requiredFields'));
       return;
     }
 
@@ -202,7 +204,7 @@ const CategoryManagementPage = () => {
       setShowCreateModal(false);
       loadCategories();
     } catch (err) {
-      setFormError(err.message || 'Failed to create category');
+      setFormError(err.message || t('errors.failedToCreate', { resource: t('common.category') }));
     } finally {
       setSubmitting(false);
     }
@@ -219,7 +221,7 @@ const CategoryManagementPage = () => {
       setShowEditModal(false);
       loadCategories();
     } catch (err) {
-      setFormError(err.message || 'Failed to update category');
+      setFormError(err.message || t('errors.failedToUpdate', { resource: t('common.category') }));
     } finally {
       setSubmitting(false);
     }
@@ -245,12 +247,12 @@ const CategoryManagementPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Category Management</h2>
-            <p className="text-muted">Create and manage tournament categories</p>
+            <h2>{t('pages.categories.title')}</h2>
+            <p className="text-muted">{t('pages.categories.subtitle')}</p>
           </Col>
           <Col xs="auto">
             <Button variant="primary" onClick={handleCreateClick}>
-              Create Category
+              {t('modals.createCategory.title')}
             </Button>
           </Col>
         </Row>
@@ -305,7 +307,7 @@ const CategoryManagementPage = () => {
             <Spinner animation="border" />
           </div>
         ) : categories.length === 0 ? (
-          <Alert variant="info">No categories found. Create your first category to get started.</Alert>
+          <Alert variant="info">{t('messages.noCategoriesYet')}</Alert>
         ) : (
           <Card>
             <Card.Body>
@@ -334,7 +336,7 @@ const CategoryManagementPage = () => {
                 </tbody>
               </Table>
               <div className="text-muted small">
-                Total: {categories.length} categories
+                {t('pagination.total')}: {categories.length} {t('nav.categories')}
               </div>
             </Card.Body>
           </Card>
@@ -343,7 +345,7 @@ const CategoryManagementPage = () => {
         {/* Create Modal */}
         <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Create Category</Modal.Title>
+            <Modal.Title>{t('modals.createCategory.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitCreate}>
             <Modal.Body>
@@ -411,10 +413,10 @@ const CategoryManagementPage = () => {
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowCreateModal(false)} disabled={submitting}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="primary" type="submit" disabled={submitting}>
-                {submitting ? 'Creating...' : 'Create Category'}
+                {submitting ? t('common.creating') : t('modals.createCategory.title')}
               </Button>
             </Modal.Footer>
           </Form>
@@ -423,7 +425,7 @@ const CategoryManagementPage = () => {
         {/* Edit Modal */}
         <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Edit Category</Modal.Title>
+            <Modal.Title>{t('modals.editCategory.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitEdit}>
             <Modal.Body>
@@ -446,10 +448,10 @@ const CategoryManagementPage = () => {
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={submitting}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="primary" type="submit" disabled={submitting}>
-                {submitting ? 'Saving...' : 'Save Changes'}
+                {submitting ? t('common.saving') : t('common.saveChanges')}
               </Button>
             </Modal.Footer>
           </Form>
@@ -458,20 +460,20 @@ const CategoryManagementPage = () => {
         {/* Delete Confirmation */}
         <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Confirm Delete</Modal.Title>
+            <Modal.Title>{t('modals.confirmDelete.title')}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            Are you sure you want to delete <strong>{selectedCategory?.name}</strong>?
+            {t('modals.confirmDelete.message', { item: selectedCategory?.name })}
             <Alert variant="warning" className="mt-3 mb-0">
-              This action cannot be undone.
+              {t('warnings.cannotUndo')}
             </Alert>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)} disabled={submitting}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="danger" onClick={handleConfirmDelete} disabled={submitting}>
-              {submitting ? 'Deleting...' : 'Delete Category'}
+              {submitting ? t('common.deleting') : t('common.deleteItem', { item: t('common.category') })}
             </Button>
           </Modal.Footer>
         </Modal>

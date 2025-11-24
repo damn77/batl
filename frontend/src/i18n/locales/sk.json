@@ -281,6 +281,90 @@
     "capacityWarning": "Turnaj je naplnený. Budete požiadaný vybrať, kto bude presunutý do čakacej listiny."
   },
   "tournament": {
+    "title": "Informácie o turnaji",
+    "status": "Stav",
+    "category": "Kategória",
+    "format": "Formát",
+    "noCategory": "Žiadna kategória",
+    "categories": {
+      "SINGLES": "Dvojhra",
+      "DOUBLES": "Štvorhra",
+      "MIXED_DOUBLES": "Zmiešaná štvorhra"
+    },
+    "genders": {
+      "MEN": "Muži",
+      "WOMEN": "Ženy",
+      "MIXED": "Mix",
+      "OPEN": "Open"
+    },
+    "ageGroups": {
+      "OPEN": "Open",
+      "AGE_35": "35+",
+      "AGE_40": "40+",
+      "AGE_45": "45+",
+      "AGE_50": "50+",
+      "AGE_55": "55+",
+      "AGE_60": "60+",
+      "AGE_65": "65+",
+      "AGE_70": "70+",
+      "U12": "U12",
+      "U14": "U14",
+      "U16": "U16",
+      "U18": "U18"
+    },
+    "sections": {
+      "locationSchedule": "Miesto a harmonogram",
+      "organizerRegistration": "Organizátor a registrácia",
+      "primaryLocation": "Hlavné miesto",
+      "backupLocation": "Náhradné miesto",
+      "weatherContingency": "V prípade zlého počasia",
+      "dates": "Dátumy turnaja",
+      "registrationWindow": "Registračné okno",
+      "history": "História turnaja",
+      "primaryOrganizer": "Hlavný organizátor",
+      "deputyOrganizer": "Zástupca organizátora",
+      "feesPrizes": "Poplatky a ceny",
+      "rules": "Pravidlá turnaja"
+    },
+    "labels": {
+      "club": "Klub",
+      "address": "Adresa",
+      "courtsAvailable": "Dostupné kurty",
+      "startDate": "Dátum začiatku",
+      "endDate": "Dátum konca",
+      "opens": "Otvára sa",
+      "closes": "Zatvára sa",
+      "created": "Vytvorené",
+      "lastStatusChange": "Posledná zmena stavu",
+      "name": "Meno",
+      "email": "Email",
+      "phone": "Telefón",
+      "entryFee": "Štartovné",
+      "prizes": "Ceny",
+      "rules": "Pravidlá",
+      "registered": "Registrovaní",
+      "waitlist": "Čakacia listina",
+      "minParticipants": "Min. účastníkov",
+      "complexity": "Komplexnosť"
+    },
+    "values": {
+      "notSpecified": "Nešpecifikované",
+      "free": "Zdarma",
+      "unlimitedCapacity": "Neobmedzená kapacita",
+      "courtsCount": "{{count}} kurtov",
+      "firstCome": "Kto prv príde",
+      "alphabetical": "Abecedne"
+    },
+    "actions": {
+      "viewExternalRules": "Zobraziť externé pravidlá",
+      "viewTournamentRules": "Zobraziť pravidlá turnaja"
+    },
+    "registrationStatus": {
+      "notConfigured": "Nenakonfigurované",
+      "notYetOpen": "Ešte neotvorené",
+      "closed": "Registrácia uzavretá",
+      "open": "Registrácia otvorená"
+    },
     "formats": {
       "knockout": "Vyraďovací",
       "group": "Skupinová fáza",

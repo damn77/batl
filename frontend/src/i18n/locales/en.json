@@ -281,6 +281,90 @@
     "capacityWarning": "Tournament is at capacity. You'll be asked to select who to move to waitlist."
   },
   "tournament": {
+    "title": "Tournament Information",
+    "status": "Status",
+    "category": "Category",
+    "format": "Format",
+    "noCategory": "No Category",
+    "categories": {
+      "SINGLES": "Singles",
+      "DOUBLES": "Doubles",
+      "MIXED_DOUBLES": "Mixed Doubles"
+    },
+    "genders": {
+      "MEN": "Men",
+      "WOMEN": "Women",
+      "MIXED": "Mixed",
+      "OPEN": "Open"
+    },
+    "ageGroups": {
+      "OPEN": "Open",
+      "AGE_35": "35+",
+      "AGE_40": "40+",
+      "AGE_45": "45+",
+      "AGE_50": "50+",
+      "AGE_55": "55+",
+      "AGE_60": "60+",
+      "AGE_65": "65+",
+      "AGE_70": "70+",
+      "U12": "U12",
+      "U14": "U14",
+      "U16": "U16",
+      "U18": "U18"
+    },
+    "sections": {
+      "locationSchedule": "Location & Schedule",
+      "organizerRegistration": "Organizer & Registration",
+      "primaryLocation": "Primary Location",
+      "backupLocation": "Backup Location",
+      "weatherContingency": "Weather Contingency",
+      "dates": "Tournament Dates",
+      "registrationWindow": "Registration Window",
+      "history": "Tournament History",
+      "primaryOrganizer": "Primary Organizer",
+      "deputyOrganizer": "Deputy Organizer",
+      "feesPrizes": "Fees & Prizes",
+      "rules": "Tournament Rules"
+    },
+    "labels": {
+      "club": "Club",
+      "address": "Address",
+      "courtsAvailable": "Courts Available",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "opens": "Opens",
+      "closes": "Closes",
+      "created": "Created",
+      "lastStatusChange": "Last Status Change",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "entryFee": "Entry Fee",
+      "prizes": "Prizes",
+      "rules": "Rules",
+      "registered": "Registered",
+      "waitlist": "Waitlist",
+      "minParticipants": "Min. Participants",
+      "complexity": "Complexity"
+    },
+    "values": {
+      "notSpecified": "Not specified",
+      "free": "Free",
+      "unlimitedCapacity": "Unlimited Capacity",
+      "courtsCount": "{{count}} courts",
+      "firstCome": "First-come",
+      "alphabetical": "Alphabetical"
+    },
+    "actions": {
+      "viewExternalRules": "View External Rules",
+      "viewTournamentRules": "View Tournament Rules"
+    },
+    "registrationStatus": {
+      "notConfigured": "Not configured",
+      "notYetOpen": "Not Yet Open",
+      "closed": "Registration Closed",
+      "open": "Registration Open"
+    },
     "formats": {
       "knockout": "Knockout",
       "group": "Group Stage",

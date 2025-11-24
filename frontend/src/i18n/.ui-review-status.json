@@ -1,100 +1,140 @@
 {
-  "lastFullReview": "2025-11-24T16:16:00Z",
+  "lastFullReview": "2025-11-24T19:00:00Z",
   "files": {
     "src/components/NavBar.jsx": {
-      "lastReviewed": "2025-11-24T00:00:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/pages/AdminDashboard.jsx": {
-      "lastReviewed": "2025-11-24T00:00:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/pages/OrganizerDashboard.jsx": {
-      "lastReviewed": "2025-11-24T00:00:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/pages/CategoryRankingsPage.jsx": {
-      "lastReviewed": "2025-11-24T00:00:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/RegistrationForm.jsx": {
-      "lastReviewed": "2025-11-24T15:37:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/LoginModal.jsx": {
-      "lastReviewed": "2025-11-24T15:37:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/CreatePlayerModal.jsx": {
-      "lastReviewed": "2025-11-24T15:37:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/TournamentRulesModal.jsx": {
-      "lastReviewed": "2025-11-24T15:37:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/RegisterModal.jsx": {
-      "lastReviewed": "2025-11-24T15:45:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/CreateUserModal.jsx": {
-      "lastReviewed": "2025-11-24T15:49:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/RuleChangeWarningModal.jsx": {
-      "lastReviewed": "2025-11-24T15:54:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/ErrorBoundary.jsx": {
-      "lastReviewed": "2025-11-24T16:11:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/ExpandableSection.jsx": {
-      "lastReviewed": "2025-11-24T16:16:00Z",
-      "status": "complete"
-    },
-    "src/services/tournamentRegistrationService.js": {
-      "lastReviewed": "2025-11-24T15:54:00Z",
-      "status": "complete"
-    },
-    "src/services/tournamentViewService.js": {
-      "lastReviewed": "2025-11-24T16:00:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/RegistrationStatusBadge.jsx": {
-      "lastReviewed": "2025-11-24T17:38:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/TournamentFormatBadge.jsx": {
-      "lastReviewed": "2025-11-24T17:38:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/RuleComplexityIndicator.jsx": {
-      "lastReviewed": "2025-11-24T17:38:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/MatchScoringRulesForm.jsx": {
-      "lastReviewed": "2025-11-24T17:45:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/MatchRulesPanel.jsx": {
-      "lastReviewed": "2025-11-24T17:55:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/MatchResultDisplay.jsx": {
-      "lastReviewed": "2025-11-24T18:05:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/MatchHistoricalRulesDisplay.jsx": {
-      "lastReviewed": "2025-11-24T18:10:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/TournamentFormatDisplay.jsx": {
-      "lastReviewed": "2025-11-24T18:20:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
       "status": "complete"
     },
     "src/components/TournamentFormatSelector.jsx": {
-      "lastReviewed": "2025-11-24T18:30:00Z",
+      "lastReviewed": "2025-11-24T19:00:00Z",
+      "status": "complete"
+    },
+    "src/components/TournamentHeader.jsx": {
+      "lastReviewed": "2025-11-24T19:00:00Z",
+      "status": "complete"
+    },
+    "src/components/TournamentInfoPanel.jsx": {
+      "lastReviewed": "2025-11-24T19:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/AdminUsersPage.jsx": {
+      "lastReviewed": "2025-11-24T19:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PublicRankingsPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/OrganizerPlayersPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PairRankingsPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/CategoryManagementPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PlayerProfilePage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PlayerDetailPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/LoginPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/RegisterPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/UserDetailPage.jsx": {
+      "lastReviewed": "2025-11-24T20:00:00Z",
       "status": "complete"
     }
   }

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Badge, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { getUser, updateUser } from '../services/userService';
 
 const UserDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -39,7 +41,7 @@ const UserDetailPage = () => {
         emailVerified: data.user.emailVerified
       });
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to load user');
+      setError(err.response?.data?.error?.message || t('errors.failedToLoad', { resource: t('common.user') }));
     } finally {
       setLoading(false);
     }
@@ -98,17 +100,17 @@ const UserDetailPage = () => {
       if (formData.emailVerified !== user.emailVerified) updates.emailVerified = formData.emailVerified;
 
       if (Object.keys(updates).length === 0) {
-        setError('No changes to save');
+        setError(t('validation.noChanges'));
         return;
       }
 
       await updateUser(id, updates);
-      setSuccessMessage('User updated successfully');
+      setSuccessMessage(t('messages.userUpdatedSuccessfully'));
 
       // Reload user data
       await loadUser();
     } catch (err) {
-      const errorMessage = err.response?.data?.error?.message || 'Failed to update user';
+      const errorMessage = err.response?.data?.error?.message || t('errors.failedToUpdate', { resource: t('common.user') });
       const errorDetails = err.response?.data?.error?.details;
 
       if (errorDetails?.field === 'email') {
@@ -135,7 +137,7 @@ const UserDetailPage = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return t('common.never');
     return new Date(dateString).toLocaleString();
   };
 
@@ -146,7 +148,7 @@ const UserDetailPage = () => {
         <Container className="mt-4">
           <div className="text-center my-5">
             <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </Spinner>
           </div>
         </Container>
@@ -161,7 +163,7 @@ const UserDetailPage = () => {
         <Container className="mt-4">
           <Alert variant="danger">{error}</Alert>
           <Button variant="secondary" onClick={handleBack}>
-            Back to Users
+            {t('common.backToUsers')}
           </Button>
         </Container>
       </>
@@ -173,9 +175,9 @@ const UserDetailPage = () => {
       <NavBar />
       <Container className="mt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>User Details</h2>
+          <h2>{t('pages.userDetails.title')}</h2>
           <Button variant="secondary" onClick={handleBack}>
-            Back to Users
+            {t('common.backToUsers')}
           </Button>
         </div>
 
@@ -186,7 +188,7 @@ const UserDetailPage = () => {
           <Col md={8}>
             <Card className="mb-4">
               <Card.Header>
-                <h5 className="mb-0">Edit User</h5>
+                <h5 className="mb-0">{t('pages.userDetails.editUser')}</h5>
               </Card.Header>
               <Card.Body>
                 <Form onSubmit={handleSubmit}>
@@ -266,7 +268,7 @@ const UserDetailPage = () => {
                           Saving...
                         </>
                       ) : (
-                        'Save Changes'
+                        t('common.saveChanges')
                       )}
                     </Button>
                     <Button
@@ -275,7 +277,7 @@ const UserDetailPage = () => {
                       onClick={loadUser}
                       disabled={saving}
                     >
-                      Reset
+                      {t('common.reset')}
                     </Button>
                   </div>
                 </Form>
