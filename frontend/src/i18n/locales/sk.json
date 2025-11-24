@@ -410,6 +410,58 @@
       "noAdvantage": "Žiadna výhoda"
     }
   },
+  "tournamentFormat": {
+    "title": "Formát turnaja",
+    "configuration": "Konfigurácia",
+    "types": {
+      "knockout": "Pavúk",
+      "group": "Skupinová fáza",
+      "swiss": "Švajčiarsky systém",
+      "combined": "Kombinovaný (Skupiny + Pavúk)"
+    },
+    "descriptions": {
+      "knockout": "Jednoduchá alebo dvojitá eliminácia",
+      "group": "Skupiny každý s každým",
+      "swiss": "Švajčiarsky systém s párovaním podľa výkonu",
+      "combined": "Skupinová fáza nasledovaná vyraďovacou časťou"
+    },
+    "labels": {
+      "matchGuarantee": "Garancia zápasov",
+      "groupSize": "Veľkosť skupiny",
+      "format": "Formát",
+      "numberOfRounds": "Počet kôl",
+      "advancementRules": "Pravidlá postupu",
+      "place": "Miesto {{position}}"
+    },
+    "values": {
+      "singleElimination": "Jednoduchá eliminácia (1 zápas)",
+      "doubleElimination": "Dvojitá eliminácia (garancia 2 zápasov)",
+      "untilPlacement": "Do umiestnenia (plný pavúk)",
+      "playersPerGroup": "{{count}} hráčov v skupine",
+      "singleGroup": "Jedna skupina",
+      "roundsCount": "{{count}} kôl"
+    },
+    "selector": {
+      "formatType": "Typ formátu",
+      "groupsSizeHelp": "Skupiny môžu mať veľkosť {{size}} alebo {{sizeMinusOne}}",
+      "minRoundsHelp": "Vyžadujú sa minimálne 3 kolá",
+      "disabledWarning": "Formát nie je možné zmeniť po začatí zápasov"
+    },
+    "matchGuarantees": {
+      "MATCH_1": {
+        "label": "Garancia 1 zápasu",
+        "description": "Jednoduchá eliminácia"
+      },
+      "MATCH_2": {
+        "label": "Garancia 2 zápasov",
+        "description": "Dvojitá eliminácia"
+      },
+      "UNTIL_PLACEMENT": {
+        "label": "Do umiestnenia",
+        "description": "Pokračovať až do konečného umiestnenia"
+      }
+    }
+  },
   "errors": {
     "loginFailed": "Prihlásenie zlyhalo. Overte, či sú váš email a heslo správne.",
     "registerFailed": "Registrácia zlyhala",

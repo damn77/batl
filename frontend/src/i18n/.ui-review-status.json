@@ -88,6 +88,14 @@
     "src/components/MatchHistoricalRulesDisplay.jsx": {
       "lastReviewed": "2025-11-24T18:10:00Z",
       "status": "complete"
+    },
+    "src/components/TournamentFormatDisplay.jsx": {
+      "lastReviewed": "2025-11-24T18:20:00Z",
+      "status": "complete"
+    },
+    "src/components/TournamentFormatSelector.jsx": {
+      "lastReviewed": "2025-11-24T18:30:00Z",
+      "status": "complete"
     }
   }
 }

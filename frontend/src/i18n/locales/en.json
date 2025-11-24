@@ -410,6 +410,58 @@
       "noAdvantage": "No Advantage"
     }
   },
+  "tournamentFormat": {
+    "title": "Tournament Format",
+    "configuration": "Configuration",
+    "types": {
+      "knockout": "Knockout",
+      "group": "Group Stage",
+      "swiss": "Swiss System",
+      "combined": "Combined (Group + Knockout)"
+    },
+    "descriptions": {
+      "knockout": "Single or double elimination bracket format",
+      "group": "Round-robin groups with all players facing each other",
+      "swiss": "Swiss system with players matched by performance",
+      "combined": "Group stage followed by knockout brackets"
+    },
+    "labels": {
+      "matchGuarantee": "Match Guarantee",
+      "groupSize": "Group Size",
+      "format": "Format",
+      "numberOfRounds": "Number of Rounds",
+      "advancementRules": "Advancement Rules",
+      "place": "Place {{position}}"
+    },
+    "values": {
+      "singleElimination": "Single Elimination (1 match)",
+      "doubleElimination": "Double Elimination (2 match guarantee)",
+      "untilPlacement": "Until Placement (full bracket)",
+      "playersPerGroup": "{{count}} players per group",
+      "singleGroup": "Single Group",
+      "roundsCount": "{{count}} rounds"
+    },
+    "selector": {
+      "formatType": "Format Type",
+      "groupsSizeHelp": "Groups may be size {{size}} or {{sizeMinusOne}}",
+      "minRoundsHelp": "Minimum 3 rounds required",
+      "disabledWarning": "Format cannot be changed after matches have started"
+    },
+    "matchGuarantees": {
+      "MATCH_1": {
+        "label": "1 Match Guarantee",
+        "description": "Single elimination"
+      },
+      "MATCH_2": {
+        "label": "2 Match Guarantee",
+        "description": "Double elimination"
+      },
+      "UNTIL_PLACEMENT": {
+        "label": "Until Placement",
+        "description": "Continue until final placement"
+      }
+    }
+  },
   "errors": {
     "loginFailed": "Login failed. Please verify your email and password are correct.",
     "registerFailed": "Registration failed",

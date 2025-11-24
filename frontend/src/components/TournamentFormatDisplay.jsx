@@ -1,5 +1,6 @@
 // T051: TournamentFormatDisplay - Display tournament format and configuration
 import { Card, Badge, Table } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Displays tournament format type and format-specific configuration
@@ -10,6 +11,8 @@ import { Card, Badge, Table } from 'react-bootstrap';
  * @param {Object} props.tournament.formatConfig - Format-specific configuration
  */
 const TournamentFormatDisplay = ({ tournament }) => {
+  const { t } = useTranslation();
+
   if (!tournament) {
     return null;
   }
@@ -29,24 +32,12 @@ const TournamentFormatDisplay = ({ tournament }) => {
 
   // Helper to get format type display name
   const getFormatDisplayName = (type) => {
-    const names = {
-      KNOCKOUT: 'Knockout',
-      GROUP: 'Group Stage',
-      SWISS: 'Swiss System',
-      COMBINED: 'Combined (Group + Knockout)'
-    };
-    return names[type] || type;
+    return t(`tournamentFormat.types.${type.toLowerCase()}`, { defaultValue: type });
   };
 
   // Helper to get format type description
   const getFormatDescription = (type) => {
-    const descriptions = {
-      KNOCKOUT: 'Single or double elimination bracket format',
-      GROUP: 'Round-robin groups with all players facing each other',
-      SWISS: 'Swiss system with players matched by performance',
-      COMBINED: 'Group stage followed by knockout brackets'
-    };
-    return descriptions[type] || '';
+    return t(`tournamentFormat.descriptions.${type.toLowerCase()}`, { defaultValue: '' });
   };
 
   // Render format-specific configuration
@@ -59,11 +50,11 @@ const TournamentFormatDisplay = ({ tournament }) => {
           <Table size="sm" className="mb-0">
             <tbody>
               <tr>
-                <td><strong>Match Guarantee</strong></td>
+                <td><strong>{t('tournamentFormat.labels.matchGuarantee')}</strong></td>
                 <td>
-                  {formatConfig.matchGuarantee === 'MATCH_1' && 'Single Elimination (1 match)'}
-                  {formatConfig.matchGuarantee === 'MATCH_2' && 'Double Elimination (2 match guarantee)'}
-                  {formatConfig.matchGuarantee === 'UNTIL_PLACEMENT' && 'Until Placement (full bracket)'}
+                  {formatConfig.matchGuarantee === 'MATCH_1' && t('tournamentFormat.values.singleElimination')}
+                  {formatConfig.matchGuarantee === 'MATCH_2' && t('tournamentFormat.values.doubleElimination')}
+                  {formatConfig.matchGuarantee === 'UNTIL_PLACEMENT' && t('tournamentFormat.values.untilPlacement')}
                 </td>
               </tr>
             </tbody>
@@ -75,13 +66,13 @@ const TournamentFormatDisplay = ({ tournament }) => {
           <Table size="sm" className="mb-0">
             <tbody>
               <tr>
-                <td><strong>Group Size</strong></td>
-                <td>{formatConfig.groupSize} players per group</td>
+                <td><strong>{t('tournamentFormat.labels.groupSize')}</strong></td>
+                <td>{t('tournamentFormat.values.playersPerGroup', { count: formatConfig.groupSize })}</td>
               </tr>
               {formatConfig.singleGroup && (
                 <tr>
-                  <td><strong>Format</strong></td>
-                  <td><Badge bg="info">Single Group</Badge></td>
+                  <td><strong>{t('tournamentFormat.labels.format')}</strong></td>
+                  <td><Badge bg="info">{t('tournamentFormat.values.singleGroup')}</Badge></td>
                 </tr>
               )}
             </tbody>
@@ -93,8 +84,8 @@ const TournamentFormatDisplay = ({ tournament }) => {
           <Table size="sm" className="mb-0">
             <tbody>
               <tr>
-                <td><strong>Number of Rounds</strong></td>
-                <td>{formatConfig.rounds} rounds</td>
+                <td><strong>{t('tournamentFormat.labels.numberOfRounds')}</strong></td>
+                <td>{t('tournamentFormat.values.roundsCount', { count: formatConfig.rounds })}</td>
               </tr>
             </tbody>
           </Table>
@@ -105,11 +96,11 @@ const TournamentFormatDisplay = ({ tournament }) => {
           <Table size="sm" className="mb-0">
             <tbody>
               <tr>
-                <td><strong>Group Size</strong></td>
-                <td>{formatConfig.groupSize} players per group</td>
+                <td><strong>{t('tournamentFormat.labels.groupSize')}</strong></td>
+                <td>{t('tournamentFormat.values.playersPerGroup', { count: formatConfig.groupSize })}</td>
               </tr>
               <tr>
-                <td><strong>Advancement Rules</strong></td>
+                <td><strong>{t('tournamentFormat.labels.advancementRules')}</strong></td>
                 <td>
                   <div className="d-flex flex-column gap-1">
                     {formatConfig.advancementRules && formatConfig.advancementRules.map((rule, index) => (
@@ -117,7 +108,7 @@ const TournamentFormatDisplay = ({ tournament }) => {
                         <Badge bg={rule.bracket === 'MAIN' ? 'success' : rule.bracket === 'CONSOLATION' ? 'warning' : 'info'} className="me-1">
                           {rule.bracket}
                         </Badge>
-                        <span className="small">Place {rule.position}</span>
+                        <span className="small">{t('tournamentFormat.labels.place', { position: rule.position })}</span>
                       </div>
                     ))}
                   </div>
@@ -139,7 +130,7 @@ const TournamentFormatDisplay = ({ tournament }) => {
   return (
     <Card>
       <Card.Header>
-        <h5 className="mb-0">Tournament Format</h5>
+        <h5 className="mb-0">{t('tournamentFormat.title')}</h5>
       </Card.Header>
       <Card.Body>
         <div className="mb-3">
@@ -149,7 +140,7 @@ const TournamentFormatDisplay = ({ tournament }) => {
         </div>
         <p className="text-muted mb-3">{getFormatDescription(formatType)}</p>
 
-        <h6 className="mb-2">Configuration</h6>
+        <h6 className="mb-2">{t('tournamentFormat.configuration')}</h6>
         {renderFormatConfig()}
       </Card.Body>
     </Card>
