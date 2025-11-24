@@ -1,6 +1,7 @@
 // T113: Error Boundary for tournament rules pages
 import React from 'react';
 import { Alert, Button, Container } from 'react-bootstrap';
+import { withTranslation } from 'react-i18next';
 
 /**
  * Error Boundary component to catch and display React errors gracefully
@@ -48,27 +49,29 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    const { t } = this.props;
+
     if (this.state.hasError) {
       // Render custom fallback UI
       return (
         <Container className="mt-5">
           <Alert variant="danger">
-            <Alert.Heading>Oops! Something went wrong</Alert.Heading>
+            <Alert.Heading>{t('errors.boundaryTitle')}</Alert.Heading>
             <p>
-              An unexpected error occurred while loading this page. This might be due to:
+              {t('errors.boundaryMessage')}
             </p>
             <ul>
-              <li>A temporary technical issue</li>
-              <li>Invalid data in the system</li>
-              <li>Network connectivity problems</li>
+              <li>{t('errors.boundaryTechnical')}</li>
+              <li>{t('errors.boundaryInvalidData')}</li>
+              <li>{t('errors.boundaryNetwork')}</li>
             </ul>
             <hr />
             <div className="d-flex gap-2">
               <Button onClick={this.handleReset} variant="primary">
-                Try Again
+                {t('errors.tryAgain')}
               </Button>
               <Button onClick={() => window.location.href = '/'} variant="secondary">
-                Go to Homepage
+                {t('errors.goHome')}
               </Button>
             </div>
 
@@ -76,7 +79,7 @@ class ErrorBoundary extends React.Component {
             {import.meta.env.DEV && this.state.error && (
               <details className="mt-3">
                 <summary style={{ cursor: 'pointer', userSelect: 'none' }}>
-                  <strong>Error Details (Development Mode)</strong>
+                  <strong>{t('errors.errorDetails')}</strong>
                 </summary>
                 <pre className="mt-2 p-3 bg-light border rounded" style={{ fontSize: '0.85rem', overflow: 'auto' }}>
                   {this.state.error.toString()}
@@ -99,4 +102,4 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-export default ErrorBoundary;
+export default withTranslation()(ErrorBoundary);

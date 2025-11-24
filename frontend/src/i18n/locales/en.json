@@ -339,7 +339,15 @@
     "phoneDigits": "Phone must have 7-15 digits after the + sign",
     "phoneFormat": "Phone must be in international format: +CountryCodeNumber (e.g., +12345678901)",
     "createPlayerFailed": "Failed to create player profile",
-    "validationFailed": "Validation failed: {details}"
+    "validationFailed": "Validation failed: {details}",
+    "boundaryTitle": "Oops! Something went wrong",
+    "boundaryMessage": "An unexpected error occurred while loading this page. This might be due to:",
+    "boundaryTechnical": "A temporary technical issue",
+    "boundaryInvalidData": "Invalid data in the system",
+    "boundaryNetwork": "Network connectivity problems",
+    "tryAgain": "Try Again",
+    "goHome": "Go to Homepage",
+    "errorDetails": "Error Details (Development Mode)"
   },
   "help": {
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",

@@ -339,7 +339,15 @@
     "phoneDigits": "Telefón musí mať 7-15 číslic po znamienku +",
     "phoneFormat": "Telefón musí byť v medzinárodnom formáte: +KódKrajinyČíslo (napr. +421901234567)",
     "createPlayerFailed": "Vytvorenie profilu hráča zlyhalo",
-    "validationFailed": "Validácia zlyhala: {details}"
+    "validationFailed": "Validácia zlyhala: {details}",
+    "boundaryTitle": "Ups! Niečo sa pokazilo",
+    "boundaryMessage": "Vyskytla sa neočakávaná chyba pri načítaní tejto stránky. Môže to byť spôsobené:",
+    "boundaryTechnical": "Dočasným technickým problémom",
+    "boundaryInvalidData": "Neplatnými údajmi v systéme",
+    "boundaryNetwork": "Problémami so sieťovým pripojením",
+    "tryAgain": "Skúsiť znova",
+    "goHome": "Prejsť na hlavnú stránku",
+    "errorDetails": "Detaily chyby (Vývojársky režim)"
   },
   "help": {
     "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
