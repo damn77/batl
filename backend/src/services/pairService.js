@@ -85,7 +85,7 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
   let sortedIds;
   try {
     sortedIds = sortPlayerIds(player1Id, player2Id);
-  } catch (error) {
+  } catch {
     throw createPairError(PairErrorCodes.SAME_PLAYER);
   }
 

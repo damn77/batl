@@ -9,7 +9,6 @@ import {
   registerForTournament,
   unregisterFromTournament,
   getMyRegistration,
-  TOURNAMENT_REGISTRATION_STATUS,
   STATUS_DESCRIPTIONS
 } from '../services/tournamentRegistrationService';
 import {

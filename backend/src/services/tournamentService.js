@@ -197,7 +197,7 @@ export async function listTournaments(filters = {}, userId = null) {
   ]);
 
   // Fetch user's registrations if userId provided (optimization to avoid N+1 queries)
-  let userRegistrationsMap = {};
+  const userRegistrationsMap = {};
   if (userId) {
     const tournamentIds = tournaments.map(t => t.id);
 
@@ -488,6 +488,7 @@ export async function getTournamentWithRelatedData(id) {
   );
 
   // Remove the rule-related arrays from the response (only used for complexity calculation)
+  // eslint-disable-next-line no-unused-vars
   const { groups, brackets, rounds, matches, ...tournamentData } = tournament;
 
   return {
@@ -600,7 +601,7 @@ export async function getFormatStructure(id) {
       }));
       break;
 
-    case 'SWISS':
+    case 'SWISS': {
       // Fetch rounds and all registered players for standings
       result.rounds = await prisma.round.findMany({
         where: { tournamentId: id },
@@ -643,6 +644,7 @@ export async function getFormatStructure(id) {
 
       result.players = registrations.map(reg => reg.player);
       break;
+    }
 
     case 'COMBINED':
       // Fetch groups, brackets, and rounds

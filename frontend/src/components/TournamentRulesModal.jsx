@@ -3,6 +3,99 @@ import { Modal, Tab, Tabs, Row, Col, Accordion, Badge } from 'react-bootstrap';
 import RuleComplexityIndicator from './RuleComplexityIndicator';
 import { parseFormatConfig, parseScoringRules } from '../services/tournamentViewService';
 
+// T041: Format Tab Content - defined outside to prevent recreation on each render
+const FormatTab = ({ formatType, formatFields }) => (
+  <div className="p-3">
+    <h5 className="mb-3">Tournament Format Configuration</h5>
+    <p className="text-muted">
+      This tournament uses a <strong>{formatType}</strong> format.
+    </p>
+
+    {formatFields.map((field, index) => (
+      <Row key={index} className="mb-2">
+        <Col xs={5} className="text-muted">
+          {field.label}:
+        </Col>
+        <Col xs={7}>
+          <strong>{field.value}</strong>
+        </Col>
+      </Row>
+    ))}
+  </div>
+);
+
+// T042: Scoring Tab Content - defined outside to prevent recreation on each render
+const ScoringTab = ({ scoringFields }) => (
+  <div className="p-3">
+    <h5 className="mb-3">Match Scoring Rules</h5>
+    <p className="text-muted">
+      Default scoring rules applied to all matches unless overridden.
+    </p>
+
+    {scoringFields.map((field, index) => (
+      <Row key={index} className="mb-2">
+        <Col xs={5} className="text-muted">
+          {field.label}:
+        </Col>
+        <Col xs={7}>
+          <strong>{field.value}</strong>
+        </Col>
+      </Row>
+    ))}
+  </div>
+);
+
+// T043: Overrides Tab Content - defined outside to prevent recreation on each render
+const OverridesTab = ({ ruleComplexity }) => {
+  const hasOverrides = ruleComplexity !== 'DEFAULT';
+
+  if (!hasOverrides) {
+    return (
+      <div className="p-3 text-center">
+        <div className="py-5">
+          <RuleComplexityIndicator complexity="DEFAULT" size="lg" />
+          <p className="mt-3 text-muted">
+            This tournament uses standard rules throughout.
+            <br />
+            No group, round, or match-specific overrides have been configured.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-3">
+      <h5 className="mb-3">Rule Overrides</h5>
+      <div className="alert alert-info">
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <RuleComplexityIndicator complexity={ruleComplexity} />
+          <strong>This tournament has custom rule overrides</strong>
+        </div>
+        {ruleComplexity === 'MODIFIED' && (
+          <p className="mb-0">
+            Rule changes have been configured at the group or round level.
+            Different parts of the tournament may use different rules.
+          </p>
+        )}
+        {ruleComplexity === 'SPECIFIC' && (
+          <p className="mb-0">
+            Rule changes have been configured for specific matches.
+            Individual matches may use customized rules beyond the standard configuration.
+          </p>
+        )}
+      </div>
+
+      <p className="text-muted mt-3">
+        <small>
+          <strong>Note:</strong> Detailed override information is available through the tournament
+          management interface. Contact the tournament organizer for specific rule variations.
+        </small>
+      </p>
+    </div>
+  );
+};
+
 /**
  * TournamentRulesModal - Modal popup displaying tournament rules
  * FR-003: Display tournament rules with complexity indicator
@@ -20,99 +113,6 @@ const TournamentRulesModal = ({ show, onHide, tournament }) => {
   // T047: Parse scoring rules
   const scoringFields = parseScoringRules(tournament.defaultScoringRules);
 
-  // T041: Format Tab Content
-  const FormatTab = () => (
-    <div className="p-3">
-      <h5 className="mb-3">Tournament Format Configuration</h5>
-      <p className="text-muted">
-        This tournament uses a <strong>{tournament.formatType}</strong> format.
-      </p>
-
-      {formatFields.map((field, index) => (
-        <Row key={index} className="mb-2">
-          <Col xs={5} className="text-muted">
-            {field.label}:
-          </Col>
-          <Col xs={7}>
-            <strong>{field.value}</strong>
-          </Col>
-        </Row>
-      ))}
-    </div>
-  );
-
-  // T042: Scoring Tab Content
-  const ScoringTab = () => (
-    <div className="p-3">
-      <h5 className="mb-3">Match Scoring Rules</h5>
-      <p className="text-muted">
-        Default scoring rules applied to all matches unless overridden.
-      </p>
-
-      {scoringFields.map((field, index) => (
-        <Row key={index} className="mb-2">
-          <Col xs={5} className="text-muted">
-            {field.label}:
-          </Col>
-          <Col xs={7}>
-            <strong>{field.value}</strong>
-          </Col>
-        </Row>
-      ))}
-    </div>
-  );
-
-  // T043: Overrides Tab Content
-  const OverridesTab = () => {
-    const hasOverrides = tournament.ruleComplexity !== 'DEFAULT';
-
-    if (!hasOverrides) {
-      return (
-        <div className="p-3 text-center">
-          <div className="py-5">
-            <RuleComplexityIndicator complexity="DEFAULT" size="lg" />
-            <p className="mt-3 text-muted">
-              This tournament uses standard rules throughout.
-              <br />
-              No group, round, or match-specific overrides have been configured.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-3">
-        <h5 className="mb-3">Rule Overrides</h5>
-        <div className="alert alert-info">
-          <div className="d-flex align-items-center gap-2 mb-2">
-            <RuleComplexityIndicator complexity={tournament.ruleComplexity} />
-            <strong>This tournament has custom rule overrides</strong>
-          </div>
-          {tournament.ruleComplexity === 'MODIFIED' && (
-            <p className="mb-0">
-              Rule changes have been configured at the group or round level.
-              Different parts of the tournament may use different rules.
-            </p>
-          )}
-          {tournament.ruleComplexity === 'SPECIFIC' && (
-            <p className="mb-0">
-              Rule changes have been configured for specific matches.
-              Individual matches may use customized rules beyond the standard configuration.
-            </p>
-          )}
-        </div>
-
-        <p className="text-muted mt-3">
-          <small>
-            <strong>Note:</strong> Detailed override information is available through the tournament
-            management interface. Contact the tournament organizer for specific rule variations.
-          </small>
-        </p>
-      </div>
-    );
-  };
-
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
@@ -125,13 +125,13 @@ const TournamentRulesModal = ({ show, onHide, tournament }) => {
         {/* T040: Tabbed Interface */}
         <Tabs defaultActiveKey="format" className="mb-3">
           <Tab eventKey="format" title="Format">
-            <FormatTab />
+            <FormatTab formatType={tournament.formatType} formatFields={formatFields} />
           </Tab>
           <Tab eventKey="scoring" title="Scoring">
-            <ScoringTab />
+            <ScoringTab scoringFields={scoringFields} />
           </Tab>
           <Tab eventKey="overrides" title="Overrides">
-            <OverridesTab />
+            <OverridesTab ruleComplexity={tournament.ruleComplexity} />
           </Tab>
         </Tabs>
 

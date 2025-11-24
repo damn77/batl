@@ -371,7 +371,7 @@ export async function registerPair(tournamentId, pairId, user, options = {}) {
 
   // Determine registration status based on tournament capacity
   let status = 'REGISTERED';
-  let promotedAt = null;
+  const promotedAt = null;
 
   pairRegistrationLogger.info('Starting registration process', {
     tournamentId,

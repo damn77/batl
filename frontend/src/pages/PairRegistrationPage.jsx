@@ -508,7 +508,7 @@ const PairRegistrationPage = () => {
                           onChange={(e) => setAllowIneligiblePair(e.target.checked)}
                         />
                         <Form.Text className="text-muted">
-                          Check this to create a pair that doesn't meet category eligibility requirements
+                          Check this to create a pair that doesn&apos;t meet category eligibility requirements
                         </Form.Text>
                       </Form.Group>
                     )}
@@ -691,7 +691,7 @@ const PairRegistrationPage = () => {
                               disabled={registering}
                             />
                             <Form.Text className="text-muted">
-                              Use this to register pairs that don't meet normal eligibility
+                              Use this to register pairs that don&apos;t meet normal eligibility
                               requirements
                             </Form.Text>
                           </Form.Group>

@@ -64,7 +64,7 @@ const TournamentViewPage = () => {
           <Alert variant="danger">
             <Alert.Heading>Tournament Not Found</Alert.Heading>
             <p>
-              The tournament you're looking for could not be found. It may have been deleted or the URL is incorrect.
+              The tournament you&apos;re looking for could not be found. It may have been deleted or the URL is incorrect.
             </p>
             <hr />
             <div className="d-flex justify-content-end">

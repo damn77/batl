@@ -56,7 +56,7 @@ router.get(
  */
 router.get(
   '/:tournamentId/registrations',
-  isAuthenticated,
+  // isAuthenticated, // Allow public access (filtered in controller)
   authorize('read', 'Tournament'),
   getTournamentRegistrations
 );

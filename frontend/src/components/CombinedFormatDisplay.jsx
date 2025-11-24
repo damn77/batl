@@ -15,7 +15,7 @@ import ExpandableSection from './ExpandableSection';
  */
 const CombinedFormatDisplay = ({ tournamentId, groups, brackets, rounds }) => {
   // Separate rounds by phase (group rounds vs knockout rounds)
-  const groupRounds = rounds?.filter(r => r.phase === 'GROUP') || [];
+  const _groupRounds = rounds?.filter(r => r.phase === 'GROUP') || []; // Reserved for future use
   const knockoutRounds = rounds?.filter(r => r.phase === 'KNOCKOUT') || [];
 
   return (

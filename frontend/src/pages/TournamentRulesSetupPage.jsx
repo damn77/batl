@@ -326,8 +326,8 @@ const TournamentRulesSetupPage = () => {
               </div>
             </div>
             <p className="mb-0">
-              <strong>Example:</strong> You can set tournament defaults to "Best of 1 set", but override
-              the Finals round to use "Best of 3 sets". Individual matches can have their own specific rules
+              <strong>Example:</strong> You can set tournament defaults to &quot;Best of 1 set&quot;, but override
+              the Finals round to use &quot;Best of 3 sets&quot;. Individual matches can have their own specific rules
               if needed.
             </p>
           </Alert>

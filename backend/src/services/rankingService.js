@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import * as categoryService from './categoryService.js';
+import * as sharedRankingService from './sharedRankingService.js';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export async function getCategoryLeaderboard(categoryId, options = {}) {
     })
   ]);
 
-  // Calculate win rate for each ranking
+  // Calculate win rate for each ranking using shared service
   const rankingsWithWinRate = rankings.map(ranking => ({
     rank: ranking.rank,
     playerId: ranking.playerId,
@@ -44,9 +45,7 @@ export async function getCategoryLeaderboard(categoryId, options = {}) {
     points: ranking.points,
     wins: ranking.wins,
     losses: ranking.losses,
-    winRate: ranking.wins + ranking.losses > 0
-      ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-      : 0,
+    winRate: sharedRankingService.calculateWinRate(ranking.wins, ranking.losses),
     lastUpdated: ranking.updatedAt
   }));
 
@@ -99,10 +98,8 @@ export async function getPlayerRankingInCategory(categoryId, playerId) {
     where: { categoryId }
   });
 
-  // Calculate win rate
-  const winRate = ranking.wins + ranking.losses > 0
-    ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-    : 0;
+  // Calculate win rate using shared service
+  const winRate = sharedRankingService.calculateWinRate(ranking.wins, ranking.losses);
 
   return {
     categoryId: category.id,
@@ -156,7 +153,7 @@ export async function getPlayerAllRankings(playerId) {
     }
   });
 
-  // Format rankings with win rates
+  // Format rankings with win rates using shared service
   const formattedRankings = rankings.map(ranking => ({
     categoryId: ranking.categoryId,
     categoryName: ranking.category.name,
@@ -164,17 +161,15 @@ export async function getPlayerAllRankings(playerId) {
     points: ranking.points,
     wins: ranking.wins,
     losses: ranking.losses,
-    winRate: ranking.wins + ranking.losses > 0
-      ? Number((ranking.wins / (ranking.wins + ranking.losses)).toFixed(3))
-      : 0
+    winRate: sharedRankingService.calculateWinRate(ranking.wins, ranking.losses)
   }));
 
   // Get the latest update time
   const lastUpdated = rankings.length > 0
     ? rankings.reduce((latest, r) =>
-        r.updatedAt > latest ? r.updatedAt : latest,
-        rankings[0].updatedAt
-      )
+      r.updatedAt > latest ? r.updatedAt : latest,
+      rankings[0].updatedAt
+    )
     : new Date();
 
   return {
@@ -188,18 +183,89 @@ export async function getPlayerAllRankings(playerId) {
 /**
  * T086-T088: Update category rankings (called after tournament completion)
  * This function will be triggered by tournament result entry
- *
- * Note: This is a placeholder for future implementation.
- * Actual ranking calculation will depend on the tournament scoring system.
+ * 
+ * @param {string} categoryId - Category ID
+ * @param {Array} tournamentResults - Array of {playerId, points, won, lost}
+ * @returns {Promise<Object>} Updated rankings summary
  */
-export async function updateCategoryRankings(_categoryId, _tournamentResults) {
-  // T086: Calculate points from tournament results
-  // T087: Upsert rankings (update existing, create new)
-  // T088: Assign ranks based on points (descending order)
+export async function updateCategoryRankings(categoryId, tournamentResults) {
+  if (!tournamentResults || tournamentResults.length === 0) {
+    throw createHttpError(400, 'Tournament results are required', {
+      code: 'INVALID_INPUT'
+    });
+  }
 
-  // Placeholder implementation
-  throw createHttpError(501, 'Ranking updates are not yet implemented', {
-    code: 'NOT_IMPLEMENTED',
-    message: 'This feature will be implemented when tournament result entry is added'
+  // Verify category exists
+  await categoryService.getCategoryById(categoryId);
+
+  // T086: Calculate points from tournament results and update rankings
+  const updates = [];
+
+  for (const result of tournamentResults) {
+    const { playerId, points, wins = 0, losses = 0 } = result;
+
+    // Get or create ranking
+    let ranking = await prisma.categoryRanking.findUnique({
+      where: {
+        playerId_categoryId: {
+          playerId,
+          categoryId
+        }
+      }
+    });
+
+    if (ranking) {
+      // T087: Update existing ranking
+      ranking = await prisma.categoryRanking.update({
+        where: { id: ranking.id },
+        data: {
+          points: { increment: points },
+          wins: { increment: wins },
+          losses: { increment: losses }
+        }
+      });
+    } else {
+      // T087: Create new ranking
+      ranking = await prisma.categoryRanking.create({
+        data: {
+          playerId,
+          categoryId,
+          rank: 0, // Will be recalculated
+          points,
+          wins,
+          losses
+        }
+      });
+    }
+
+    updates.push(ranking);
+  }
+
+  // T088: Recalculate ranks based on points (descending order)
+  const allRankings = await prisma.categoryRanking.findMany({
+    where: { categoryId },
+    orderBy: [
+      { points: 'desc' },
+      { wins: 'desc' },
+      { losses: 'asc' }
+    ]
   });
+
+  // Update ranks in a transaction
+  const rankUpdates = allRankings.map((ranking, index) => {
+    const rank = index + 1; // 1-indexed
+    return prisma.categoryRanking.update({
+      where: { id: ranking.id },
+      data: { rank }
+    });
+  });
+
+  await prisma.$transaction(rankUpdates);
+
+  return {
+    categoryId,
+    updatedCount: updates.length,
+    totalRankings: allRankings.length,
+    message: 'Rankings updated successfully'
+  };
 }

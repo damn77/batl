@@ -1,5 +1,4 @@
 // T057-T060: Format validation service for tournament format configurations
-import createHttpError from 'http-errors';
 
 /**
  * T058: Validate if a given number of players can be evenly divided into groups
@@ -143,9 +142,6 @@ export function validateMatchGuarantee(matchGuarantee, playerCount) {
       totalRounds: 0
     };
   }
-
-  // Extract guarantee number
-  const guaranteeNum = parseInt(matchGuarantee.split('_')[1]);
 
   // Calculate rounds needed for single elimination
   const singleElimRounds = Math.ceil(Math.log2(playerCount));

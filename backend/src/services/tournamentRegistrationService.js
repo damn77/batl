@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import * as registrationService from './registrationService.js';
 import * as categoryService from './categoryService.js';
+import * as sharedTournamentService from './sharedTournamentService.js';
 
 const prisma = new PrismaClient();
 
@@ -12,32 +13,7 @@ const prisma = new PrismaClient();
  * FR-018, FR-031: Returns REGISTERED or WAITLISTED based on capacity
  */
 async function checkCapacity(tournamentId) {
-  const tournament = await prisma.tournament.findUnique({
-    where: { id: tournamentId },
-    select: { capacity: true }
-  });
-
-  // null capacity = unlimited (always REGISTERED)
-  if (tournament.capacity === null) {
-    return { status: 'REGISTERED', capacity: null, currentCount: null };
-  }
-
-  // Count current REGISTERED players (not WAITLISTED, WITHDRAWN, or CANCELLED)
-  const currentCount = await prisma.tournamentRegistration.count({
-    where: {
-      tournamentId,
-      status: 'REGISTERED'
-    }
-  });
-
-  // Determine status based on capacity
-  const status = currentCount >= tournament.capacity ? 'WAITLISTED' : 'REGISTERED';
-
-  return {
-    status,
-    capacity: tournament.capacity,
-    currentCount
-  };
+  return await sharedTournamentService.checkCapacity(tournamentId, 'tournamentRegistration');
 }
 
 /**
@@ -604,25 +580,8 @@ export async function unregisterPlayer(playerId, tournamentId) {
 
     // T027: Auto-promote from waitlist if player was REGISTERED (freeing up a spot)
     if (wasRegistered) {
-      // Find oldest waitlisted player (FIFO by registrationTimestamp)
-      const nextWaitlisted = await tx.tournamentRegistration.findFirst({
-        where: {
-          tournamentId,
-          status: 'WAITLISTED'
-        },
-        orderBy: {
-          registrationTimestamp: 'asc' // Oldest first
-        },
-        include: {
-          player: {
-            select: {
-              id: true,
-              name: true,
-              email: true
-            }
-          }
-        }
-      });
+      // Find oldest waitlisted player (FIFO by registrationTimestamp) using shared service
+      const nextWaitlisted = await sharedTournamentService.getNextWaitlistCandidate(tournamentId, 'tournamentRegistration');
 
       // Promote if found
       if (nextWaitlisted) {
@@ -920,3 +879,4 @@ export async function withdrawPlayerByRegistrationId(registrationId) {
       : 'Player unregistered successfully'
   };
 }
+

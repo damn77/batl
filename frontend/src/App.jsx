@@ -5,7 +5,6 @@ import { ModalProvider, useModal } from './utils/ModalContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import PublicRankingsPage from './pages/PublicRankingsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsersPage from './pages/AdminUsersPage';
 import UserDetailPage from './pages/UserDetailPage';

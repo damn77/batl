@@ -1,7 +1,7 @@
 // T033: Tournament Format Selector Component
 // T110: Use format metadata from API instead of hardcoded values
 import { useState, useEffect } from 'react';
-import { Form, Card, Row, Col, Alert } from 'react-bootstrap';
+import { Form, Card, Alert } from 'react-bootstrap';
 import { getFormatTypes } from '../services/tournamentRulesService';
 
 // Static match guarantee options (not provided by API)
