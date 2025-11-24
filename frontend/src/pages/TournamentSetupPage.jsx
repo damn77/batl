@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import {
   listTournaments,
@@ -16,6 +17,7 @@ import { listCategories } from '../services/categoryService';
 import { recalculateCategorySeeding } from '../services/pairService';
 
 const TournamentSetupPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -79,7 +81,7 @@ const TournamentSetupPage = () => {
       const data = await listTournaments(filters);
       setTournaments(data.tournaments || []);
     } catch (err) {
-      setError(err.message || 'Failed to load tournaments');
+      setError(err.message || t('errors.failedToLoad', { resource: t('common.tournaments') }));
     } finally {
       setLoading(false);
     }
@@ -108,12 +110,12 @@ const TournamentSetupPage = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.categoryId || !formData.clubName) {
-      setFormError('Please fill in all required fields (Name, Category, Club Name)');
+      setFormError(t('validation.requiredFields', { fields: t('validation.nameAndCategoryAndClub') }));
       return;
     }
 
     if (formData.endDate < formData.startDate) {
-      setFormError('End date must be after start date');
+      setFormError(t('validation.endDateAfterStartDate'));
       return;
     }
 
@@ -134,7 +136,7 @@ const TournamentSetupPage = () => {
       setShowCreateModal(false);
       loadTournaments();
     } catch (err) {
-      setFormError(err.message || 'Failed to create tournament');
+      setFormError(err.message || t('errors.failedToCreate', { resource: t('common.tournament') }));
     } finally {
       setSubmitting(false);
     }
@@ -173,12 +175,12 @@ const TournamentSetupPage = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.categoryId || !formData.clubName) {
-      setFormError('Please fill in all required fields (Name, Category, Club Name)');
+      setFormError(t('validation.requiredFields', { fields: t('validation.nameAndCategoryAndClub') }));
       return;
     }
 
     if (formData.endDate < formData.startDate) {
-      setFormError('End date must be after start date');
+      setFormError(t('validation.endDateAfterStartDate'));
       return;
     }
 
@@ -199,7 +201,7 @@ const TournamentSetupPage = () => {
       setSelectedTournament(null);
       loadTournaments();
     } catch (err) {
-      setFormError(err.message || 'Failed to update tournament');
+      setFormError(err.message || t('errors.failedToUpdate', { resource: t('common.tournament') }));
     } finally {
       setSubmitting(false);
     }
@@ -231,12 +233,12 @@ const TournamentSetupPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Tournament Setup</h2>
-            <p className="text-muted">Create and manage tournaments</p>
+            <h2>{t('pages.tournamentSetup.title')}</h2>
+            <p className="text-muted">{t('pages.tournamentSetup.description')}</p>
           </Col>
           <Col xs="auto">
             <Button variant="primary" onClick={handleCreateClick}>
-              Create Tournament
+              {t('buttons.createTournament')}
             </Button>
           </Col>
         </Row>
@@ -250,9 +252,9 @@ const TournamentSetupPage = () => {
             <Row>
               <Col md={4}>
                 <Form.Group>
-                  <Form.Label>Category</Form.Label>
+                  <Form.Label>{t('form.labels.category')}</Form.Label>
                   <Form.Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-                    <option value="">All Categories</option>
+                    <option value="">{t('filters.allCategories')}</option>
                     {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
@@ -261,9 +263,9 @@ const TournamentSetupPage = () => {
               </Col>
               <Col md={4}>
                 <Form.Group>
-                  <Form.Label>Status</Form.Label>
+                  <Form.Label>{t('form.labels.status')}</Form.Label>
                   <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">All Statuses</option>
+                    <option value="">{t('filters.allStatuses')}</option>
                     {Object.keys(TOURNAMENT_STATUS).map(status => (
                       <option key={status} value={status}>{STATUS_LABELS[status]}</option>
                     ))}
@@ -273,13 +275,13 @@ const TournamentSetupPage = () => {
               <Col md={4}>
                 {/* T121: Format filter */}
                 <Form.Group>
-                  <Form.Label>Format</Form.Label>
+                  <Form.Label>{t('form.labels.format')}</Form.Label>
                   <Form.Select value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)}>
-                    <option value="">All Formats</option>
-                    <option value="KNOCKOUT">Knockout</option>
-                    <option value="GROUP">Group Stage</option>
-                    <option value="SWISS">Swiss</option>
-                    <option value="COMBINED">Combined</option>
+                    <option value="">{t('filters.allFormats')}</option>
+                    <option value="KNOCKOUT">{t('tournament.formats.knockout')}</option>
+                    <option value="GROUP">{t('tournament.formats.groupStage')}</option>
+                    <option value="SWISS">{t('tournament.formats.swiss')}</option>
+                    <option value="COMBINED">{t('tournament.formats.combined')}</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -293,20 +295,20 @@ const TournamentSetupPage = () => {
             <Spinner animation="border" />
           </div>
         ) : tournaments.length === 0 ? (
-          <Alert variant="info">No tournaments found. Create your first tournament to get started.</Alert>
+          <Alert variant="info">{t('messages.noTournamentsFound')}</Alert>
         ) : (
           <Card>
             <Card.Body>
               <Table responsive hover>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Location</th>
-                    <th>Dates</th>
-                    <th>Players</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>{t('table.headers.name')}</th>
+                    <th>{t('table.headers.category')}</th>
+                    <th>{t('table.headers.location')}</th>
+                    <th>{t('table.headers.dates')}</th>
+                    <th>{t('table.headers.players')}</th>
+                    <th>{t('table.headers.status')}</th>
+                    <th>{t('table.headers.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -344,7 +346,7 @@ const TournamentSetupPage = () => {
                           onClick={() => handleEditClick(tournament)}
                           className="me-2"
                         >
-                          Edit
+                          {t('buttons.edit')}
                         </Button>
                         <Button
                           variant="outline-secondary"
@@ -352,7 +354,7 @@ const TournamentSetupPage = () => {
                           onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
                           className="me-2"
                         >
-                          Configure Rules
+                          {t('buttons.configureRules')}
                         </Button>
                         {/* T064: Recalculate seeding button for DOUBLES categories */}
                         {tournament.category?.type === 'DOUBLES' && (
@@ -361,9 +363,9 @@ const TournamentSetupPage = () => {
                             size="sm"
                             onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
                             disabled={recalculatingCategory === tournament.categoryId}
-                            title="Recalculate seeding scores for all pairs in this category"
+                            title={t('help.recalculateSeeding')}
                           >
-                            {recalculatingCategory === tournament.categoryId ? 'Recalculating...' : 'Recalc Seeding'}
+                            {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
                           </Button>
                         )}
                       </td>
@@ -378,31 +380,31 @@ const TournamentSetupPage = () => {
         {/* Create Modal */}
         <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Create Tournament</Modal.Title>
+            <Modal.Title>{t('modals.createTournament.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitCreate}>
             <Modal.Body>
               {formError && <Alert variant="danger">{formError}</Alert>}
 
               <Form.Group className="mb-3">
-                <Form.Label>Tournament Name *</Form.Label>
+                <Form.Label>{t('form.labels.tournamentName')} *</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Summer Championship 2025"
+                  placeholder={t('form.placeholders.tournamentName')}
                   required
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Category *</Form.Label>
+                <Form.Label>{t('form.labels.category')} *</Form.Label>
                 <Form.Select
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                   required
                 >
-                  <option value="">Select category...</option>
+                  <option value="">{t('form.placeholders.selectCategory')}</option>
                   {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
@@ -412,7 +414,7 @@ const TournamentSetupPage = () => {
               <Form.Group className="mb-3">
                 <Form.Check
                   type="checkbox"
-                  label="Single day tournament"
+                  label={t('form.labels.singleDayTournament')}
                   checked={isSingleDay}
                   onChange={(e) => handleSingleDayToggle(e.target.checked)}
                 />
@@ -421,7 +423,7 @@ const TournamentSetupPage = () => {
               <Row>
                 <Col md={isSingleDay ? 12 : 6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Start Date *</Form.Label>
+                    <Form.Label>{t('form.labels.startDate')} *</Form.Label>
                     <DatePicker
                       selected={formData.startDate}
                       onChange={(date) => {
@@ -441,7 +443,7 @@ const TournamentSetupPage = () => {
                 {!isSingleDay && (
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>End Date *</Form.Label>
+                      <Form.Label>{t('form.labels.endDate')} *</Form.Label>
                       <DatePicker
                         selected={formData.endDate}
                         onChange={(date) => setFormData({ ...formData, endDate: date })}
@@ -456,57 +458,57 @@ const TournamentSetupPage = () => {
               </Row>
 
               <Form.Group className="mb-3">
-                <Form.Label>Club Name *</Form.Label>
+                <Form.Label>{t('form.labels.clubName')} *</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.clubName}
                   onChange={(e) => setFormData({ ...formData, clubName: e.target.value })}
-                  placeholder="e.g. Tennis Club Bratislava"
+                  placeholder={t('form.placeholders.clubName')}
                   required
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Address (Optional)</Form.Label>
+                <Form.Label>{t('form.labels.addressOptional')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
+                  placeholder={t('form.placeholders.address')}
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Maximum Players (Optional)</Form.Label>
+                <Form.Label>{t('form.labels.maximumPlayers')}</Form.Label>
                 <Form.Control
                   type="number"
                   min="2"
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                  placeholder="Leave empty for unlimited"
+                  placeholder={t('form.placeholders.leaveEmptyForUnlimited')}
                 />
                 <Form.Text className="text-muted">
-                  Maximum number of registered players. Leave empty for no limit.
+                  {t('help.maximumPlayersHint')}
                 </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('form.labels.description')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Optional tournament description..."
+                  placeholder={t('form.placeholders.tournamentDescription')}
                 />
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowCreateModal(false)} disabled={submitting}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button variant="primary" type="submit" disabled={submitting}>
-                {submitting ? 'Creating...' : 'Create Tournament'}
+                {submitting ? t('common.creating') : t('buttons.createTournament')}
               </Button>
             </Modal.Footer>
           </Form>
@@ -515,31 +517,31 @@ const TournamentSetupPage = () => {
         {/* Edit Modal */}
         <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Edit Tournament</Modal.Title>
+            <Modal.Title>{t('modals.editTournament.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitEdit}>
             <Modal.Body>
               {formError && <Alert variant="danger">{formError}</Alert>}
 
               <Form.Group className="mb-3">
-                <Form.Label>Tournament Name *</Form.Label>
+                <Form.Label>{t('form.labels.tournamentName')} *</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Summer Championship 2025"
+                  placeholder={t('form.placeholders.tournamentName')}
                   required
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Category *</Form.Label>
+                <Form.Label>{t('form.labels.category')} *</Form.Label>
                 <Form.Select
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                   required
                 >
-                  <option value="">Select category...</option>
+                  <option value="">{t('form.placeholders.selectCategory')}</option>
                   {[...categories].sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
@@ -549,7 +551,7 @@ const TournamentSetupPage = () => {
               <Form.Group className="mb-3">
                 <Form.Check
                   type="checkbox"
-                  label="Single day tournament"
+                  label={t('form.labels.singleDayTournament')}
                   checked={isSingleDay}
                   onChange={(e) => handleSingleDayToggle(e.target.checked)}
                 />
@@ -558,7 +560,7 @@ const TournamentSetupPage = () => {
               <Row>
                 <Col md={isSingleDay ? 12 : 6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Start Date *</Form.Label>
+                    <Form.Label>{t('form.labels.startDate')} *</Form.Label>
                     <DatePicker
                       selected={formData.startDate}
                       onChange={(date) => {
@@ -578,7 +580,7 @@ const TournamentSetupPage = () => {
                 {!isSingleDay && (
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>End Date *</Form.Label>
+                      <Form.Label>{t('form.labels.endDate')} *</Form.Label>
                       <DatePicker
                         selected={formData.endDate}
                         onChange={(date) => setFormData({ ...formData, endDate: date })}
@@ -593,57 +595,57 @@ const TournamentSetupPage = () => {
               </Row>
 
               <Form.Group className="mb-3">
-                <Form.Label>Club Name *</Form.Label>
+                <Form.Label>{t('form.labels.clubName')} *</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.clubName}
                   onChange={(e) => setFormData({ ...formData, clubName: e.target.value })}
-                  placeholder="e.g. Tennis Club Bratislava"
+                  placeholder={t('form.placeholders.clubName')}
                   required
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Address (Optional)</Form.Label>
+                <Form.Label>{t('form.labels.addressOptional')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="e.g. Vajnorská 21, 831 04 Bratislava"
+                  placeholder={t('form.placeholders.address')}
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Maximum Players (Optional)</Form.Label>
+                <Form.Label>{t('form.labels.maximumPlayers')}</Form.Label>
                 <Form.Control
                   type="number"
                   min="2"
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                  placeholder="Leave empty for unlimited"
+                  placeholder={t('form.placeholders.leaveEmptyForUnlimited')}
                 />
                 <Form.Text className="text-muted">
-                  Maximum number of registered players. Leave empty for no limit.
+                  {t('help.maximumPlayersHint')}
                 </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('form.labels.description')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Optional tournament description..."
+                  placeholder={t('form.placeholders.tournamentDescription')}
                 />
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={submitting}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button variant="primary" type="submit" disabled={submitting}>
-                {submitting ? 'Saving...' : 'Save Changes'}
+                {submitting ? t('common.saving') : t('buttons.saveChanges')}
               </Button>
             </Modal.Footer>
           </Form>

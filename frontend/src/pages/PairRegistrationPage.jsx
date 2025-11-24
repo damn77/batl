@@ -39,6 +39,7 @@ import {
  * - View existing pair registrations
  */
 const PairRegistrationPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   // Data lists
@@ -133,7 +134,7 @@ const PairRegistrationPage = () => {
         }
       }
     } catch (err) {
-      setError(`Failed to load data: ${err.message}`);
+      setError(t('errors.failedToLoad', { resource: t('common.data') }) + `: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -171,12 +172,12 @@ const PairRegistrationPage = () => {
 
   const handleCreateOrGetPair = async () => {
     if (!player1Id || !player2Id || !selectedCategoryId) {
-      setError('Please select both players and a category');
+      setError(t('validation.selectPlayersAndCategory'));
       return;
     }
 
     if (player1Id === player2Id) {
-      setError('Both players cannot be the same person');
+      setError(t('validation.playersCannotBeSame'));
       return;
     }
 
@@ -189,20 +190,23 @@ const PairRegistrationPage = () => {
 
       if (pair.isNew) {
         setCreatedPair(pair);
-        setSuccess('New doubles pair created successfully!');
+        setSuccess(t('messages.pairCreatedSuccess'));
         // Reload player pairs
         await loadPlayerPairs();
       } else {
         // Duplicate pair - show error instead of loading it
         setError(
-          `A pair with ${pair.player1.name} & ${pair.player2.name} already exists in ${pair.category.name}. ` +
-          `You can select it from "Existing Pairs" or the pair picker in Step 3.`
+          t('errors.pairAlreadyExists', {
+            player1: pair.player1.name,
+            player2: pair.player2.name,
+            category: pair.category.name
+          })
         );
         // Reload player pairs to show the existing pair
         await loadPlayerPairs();
       }
     } catch (err) {
-      setError(`Failed to create pair: ${err.response?.data?.error?.message || err.message}`);
+      setError(t('errors.failedToCreate', { resource: t('common.pair') }) + `: ${err.response?.data?.error?.message || err.message}`);
     } finally {
       setLoading(false);
     }
@@ -211,7 +215,7 @@ const PairRegistrationPage = () => {
   const handleCheckEligibility = async () => {
     const pairToCheck = getSelectedPair();
     if (!pairToCheck || !selectedTournamentId) {
-      setError('Please select a pair and tournament first');
+      setError(t('validation.selectPairAndTournament'));
       return;
     }
 
@@ -224,7 +228,7 @@ const PairRegistrationPage = () => {
       setEligibilityResult(result);
     } catch (err) {
       setError(
-        `Failed to check eligibility: ${err.response?.data?.error?.message || err.message}`
+        t('errors.failedToCheck', { resource: t('common.eligibility') }) + `: ${err.response?.data?.error?.message || err.message}`
       );
     } finally {
       setCheckingEligibility(false);
@@ -234,13 +238,13 @@ const PairRegistrationPage = () => {
   const handleRegisterPair = async () => {
     const pairToRegister = getSelectedPair();
     if (!pairToRegister || !selectedTournamentId) {
-      setError('Please select a pair and tournament first');
+      setError(t('validation.selectPairAndTournament'));
       return;
     }
 
     // T073: Validate override reason if override is enabled
     if (eligibilityOverride && !overrideReason.trim()) {
-      setError('Override reason is required when eligibility override is enabled');
+      setError(t('validation.overrideReasonRequired'));
       return;
     }
 
@@ -258,7 +262,7 @@ const PairRegistrationPage = () => {
       );
 
       setSuccess(
-        `Pair successfully registered for tournament! Status: ${PAIR_STATUS_LABELS[registration.status]}`
+        t('messages.pairRegisteredSuccess', { status: PAIR_STATUS_LABELS[registration.status] })
       );
 
       // Reset eligibility result and override fields
@@ -279,7 +283,7 @@ const PairRegistrationPage = () => {
       if (violations) {
         setError(
           <div>
-            <strong>Eligibility violations:</strong>
+            <strong>{t('errors.eligibilityViolations')}:</strong>
             <ul>
               {violations.map((v, idx) => (
                 <li key={idx}>{v}</li>
@@ -288,7 +292,7 @@ const PairRegistrationPage = () => {
           </div>
         );
       } else {
-        setError(`Failed to register pair: ${errorData?.message || err.message || 'Unknown error'}`);
+        setError(t('errors.failedToRegister', { resource: t('common.pair') }) + `: ${errorData?.message || err.message || t('errors.unknown')}`);
       }
     } finally {
       setRegistering(false);
@@ -324,9 +328,9 @@ const PairRegistrationPage = () => {
       <Container className="mt-4">
         <Row>
           <Col>
-            <h1>Register Doubles Pair</h1>
+            <h1>{t('pages.pairRegistration.title')}</h1>
             <p className="text-muted">
-              Create or select a doubles pair and register for a tournament in a doubles category.
+              {t('pages.pairRegistration.description')}
             </p>
           </Col>
         </Row>
@@ -335,7 +339,7 @@ const PairRegistrationPage = () => {
           <Row className="mt-3">
             <Col className="text-center">
               <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </Spinner>
             </Col>
           </Row>
@@ -374,7 +378,7 @@ const PairRegistrationPage = () => {
                       className="d-flex justify-content-between align-items-center"
                     >
                       <h5 className="mb-0">
-                        Existing Pairs ({playerPairs.length})
+                        {t('pages.pairRegistration.existingPairs', { count: playerPairs.length })}
                       </h5>
                       <Button
                         variant="link"
@@ -383,7 +387,7 @@ const PairRegistrationPage = () => {
                         aria-controls="existing-pairs-collapse"
                         aria-expanded={showExistingPairs}
                       >
-                        {showExistingPairs ? '▲ Hide' : '▼ Show'}
+                        {showExistingPairs ? t('buttons.hide') : t('buttons.show')}
                       </Button>
                     </Card.Header>
                     <Collapse in={showExistingPairs}>
@@ -392,10 +396,10 @@ const PairRegistrationPage = () => {
                           <Table striped bordered hover responsive size="sm">
                             <thead>
                               <tr>
-                                <th>Partner</th>
-                                <th>Category</th>
-                                <th>Seeding Score</th>
-                                <th>Active Registrations</th>
+                                <th>{t('table.headers.partner')}</th>
+                                <th>{t('table.headers.category')}</th>
+                                <th>{t('table.headers.seedingScore')}</th>
+                                <th>{t('table.headers.activeRegistrations')}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -421,15 +425,15 @@ const PairRegistrationPage = () => {
                                                 {PAIR_STATUS_LABELS[reg.status]}
                                               </Badge>
                                               {reg.eligibilityOverride && (
-                                                <Badge bg="warning" text="dark" title={reg.overrideReason || 'Eligibility override'}>
-                                                  Override
+                                                <Badge bg="warning" text="dark" title={reg.overrideReason || t('help.eligibilityOverride')}>
+                                                  {t('status.override')}
                                                 </Badge>
                                               )}
                                             </li>
                                           ))}
                                         </ul>
                                       ) : (
-                                        <span className="text-muted">None</span>
+                                        <span className="text-muted">{t('common.none')}</span>
                                       )}
                                     </td>
                                   </tr>
@@ -450,7 +454,7 @@ const PairRegistrationPage = () => {
               <Col>
                 <Card>
                   <Card.Header>
-                    <h5>Step 1: Select Players</h5>
+                    <h5>{t('pages.pairRegistration.step1')}</h5>
                   </Card.Header>
                   <Card.Body>
                     <PairSelector
@@ -472,11 +476,11 @@ const PairRegistrationPage = () => {
               <Col>
                 <Card>
                   <Card.Header>
-                    <h5>Step 2: Select Category and Create Pair</h5>
+                    <h5>{t('pages.pairRegistration.step2')}</h5>
                   </Card.Header>
                   <Card.Body>
                     <Form.Group className="mb-3">
-                      <Form.Label>Doubles Category *</Form.Label>
+                      <Form.Label>{t('form.labels.doublesCategory')} *</Form.Label>
                       <Form.Select
                         value={selectedCategoryId}
                         onChange={(e) => {
@@ -485,7 +489,7 @@ const PairRegistrationPage = () => {
                         }}
                         disabled={!player1Id || !player2Id || loading}
                       >
-                        <option value="">Select a doubles category...</option>
+                        <option value="">{t('form.placeholders.selectDoublesCategory')}</option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>
                             {cat.name} ({cat.gender}, {cat.ageGroup})
@@ -493,7 +497,7 @@ const PairRegistrationPage = () => {
                         ))}
                       </Form.Select>
                       <Form.Text className="text-muted">
-                        Only DOUBLES type categories are shown
+                        {t('help.onlyDoublesCategories')}
                       </Form.Text>
                     </Form.Group>
 
@@ -503,12 +507,12 @@ const PairRegistrationPage = () => {
                         <Form.Check
                           type="checkbox"
                           id="allowIneligiblePair"
-                          label="Allow creating ineligible pair (Override eligibility requirements)"
+                          label={t('form.labels.allowIneligiblePair')}
                           checked={allowIneligiblePair}
                           onChange={(e) => setAllowIneligiblePair(e.target.checked)}
                         />
                         <Form.Text className="text-muted">
-                          Check this to create a pair that doesn&apos;t meet category eligibility requirements
+                          {t('help.allowIneligiblePairHint')}
                         </Form.Text>
                       </Form.Group>
                     )}
@@ -524,7 +528,7 @@ const PairRegistrationPage = () => {
                         loading
                       }
                     >
-                      Create Pair
+                      {t('buttons.createPair')}
                     </Button>
                   </Card.Body>
                 </Card>
@@ -537,22 +541,22 @@ const PairRegistrationPage = () => {
                 <Col>
                   <Card>
                     <Card.Header>
-                      <h5>Step 3: Select Tournament and Register</h5>
+                      <h5>{t('pages.pairRegistration.step3')}</h5>
                     </Card.Header>
                     <Card.Body>
                       {createdPair && (
                         <Alert variant="success" className="mb-3">
-                          <strong>New Pair Created:</strong> {createdPair.player1.name} &amp;{' '}
+                          <strong>{t('messages.newPairCreated')}:</strong> {createdPair.player1.name} &amp;{' '}
                           {createdPair.player2.name}
                           <br />
-                          <strong>Category:</strong> {createdPair.category.name}
+                          <strong>{t('form.labels.category')}:</strong> {createdPair.category.name}
                           <br />
-                          <strong>Seeding Score:</strong> {createdPair.seedingScore.toFixed(0)}
+                          <strong>{t('table.headers.seedingScore')}:</strong> {createdPair.seedingScore.toFixed(0)}
                         </Alert>
                       )}
 
                       <Form.Group className="mb-3">
-                        <Form.Label>Tournament *</Form.Label>
+                        <Form.Label>{t('form.labels.tournament')} *</Form.Label>
                         <Form.Select
                           value={selectedTournamentId}
                           onChange={(e) => {
@@ -562,7 +566,7 @@ const PairRegistrationPage = () => {
                           }}
                           disabled={loading || tournaments.length === 0}
                         >
-                          <option value="">Select a tournament...</option>
+                          <option value="">{t('form.placeholders.selectTournament')}</option>
                           {tournaments.map((t) => (
                             <option key={t.id} value={t.id}>
                               {t.name} - {t.status}
@@ -572,14 +576,14 @@ const PairRegistrationPage = () => {
                         </Form.Select>
                         <Form.Text className="text-muted">
                           {tournaments.length === 0
-                            ? 'No tournaments available for this category'
-                            : 'Select the tournament to register for'}
+                            ? t('messages.noTournamentsAvailable')
+                            : t('help.selectTournamentToRegister')}
                         </Form.Text>
                       </Form.Group>
 
                       {/* Pair picker - enabled after tournament selection */}
                       <Form.Group className="mb-3">
-                        <Form.Label>Select Pair to Register *</Form.Label>
+                        <Form.Label>{t('form.labels.selectPairToRegister')} *</Form.Label>
                         <Form.Select
                           value={selectedExistingPairId || (createdPair?.id || '')}
                           onChange={(e) => {
@@ -590,26 +594,26 @@ const PairRegistrationPage = () => {
                         >
                           <option value="">
                             {!selectedTournamentId
-                              ? 'Select tournament first...'
+                              ? t('messages.selectTournamentFirst')
                               : categoryPairs.length === 0
-                                ? 'No pairs available in this category'
-                                : 'Select a pair...'}
+                                ? t('messages.noPairsAvailable')
+                                : t('form.placeholders.selectPair')}
                           </option>
                           {createdPair && !categoryPairs.find(p => p.id === createdPair.id) && (
                             <option key={createdPair.id} value={createdPair.id}>
-                              {createdPair.player1.name} & {createdPair.player2.name} (Seeding: {createdPair.seedingScore.toFixed(0)}) - NEW
+                              {createdPair.player1.name} & {createdPair.player2.name} ({t('table.headers.seeding')}: {createdPair.seedingScore.toFixed(0)}) - {t('status.new')}
                             </option>
                           )}
                           {categoryPairs.map((pair) => (
                             <option key={pair.id} value={pair.id}>
-                              {pair.player1.name} & {pair.player2.name} (Seeding: {pair.seedingScore?.toFixed(0) || 0})
+                              {pair.player1.name} & {pair.player2.name} ({t('table.headers.seeding')}: {pair.seedingScore?.toFixed(0) || 0})
                             </option>
                           ))}
                         </Form.Select>
                         <Form.Text className="text-muted">
                           {!selectedTournamentId
-                            ? 'Tournament must be selected before choosing a pair'
-                            : 'Select an existing pair from this category or create a new one in Step 2'}
+                            ? t('help.selectTournamentBeforePair')
+                            : t('help.selectExistingOrCreatePair')}
                         </Form.Text>
                       </Form.Group>
 
@@ -629,7 +633,7 @@ const PairRegistrationPage = () => {
                               className="me-2"
                             />
                           )}
-                          Check Eligibility
+                          {t('buttons.checkEligibility')}
                         </Button>
 
                         <Button
@@ -647,11 +651,11 @@ const PairRegistrationPage = () => {
                               className="me-2"
                             />
                           )}
-                          Register Pair
+                          {t('buttons.registerPair')}
                         </Button>
 
                         <Button variant="secondary" onClick={resetForm}>
-                          Reset Form
+                          {t('buttons.resetForm')}
                         </Button>
                       </div>
 
@@ -660,12 +664,12 @@ const PairRegistrationPage = () => {
                           variant={eligibilityResult.eligible ? 'success' : 'danger'}
                           className="mt-3"
                         >
-                          <strong>Eligibility Check:</strong>{' '}
+                          <strong>{t('pages.pairRegistration.eligibilityCheck')}:</strong>{' '}
                           {eligibilityResult.eligible ? (
-                            <span className="text-success">✓ Pair is eligible</span>
+                            <span className="text-success">✓ {t('status.pairEligible')}</span>
                           ) : (
                             <>
-                              <span className="text-danger">✗ Pair is not eligible</span>
+                              <span className="text-danger">✗ {t('status.pairNotEligible')}</span>
                               {eligibilityResult.violations && (
                                 <ul className="mt-2 mb-0">
                                   {eligibilityResult.violations.map((v, idx) => (
@@ -685,14 +689,13 @@ const PairRegistrationPage = () => {
                             <Form.Check
                               type="checkbox"
                               id="eligibilityOverride"
-                              label="Override eligibility requirements (Admin/Organizer)"
+                              label={t('form.labels.overrideEligibility')}
                               checked={eligibilityOverride}
                               onChange={(e) => setEligibilityOverride(e.target.checked)}
                               disabled={registering}
                             />
                             <Form.Text className="text-muted">
-                              Use this to register pairs that don&apos;t meet normal eligibility
-                              requirements
+                              {t('help.overrideEligibilityHint')}
                             </Form.Text>
                           </Form.Group>
 
@@ -701,27 +704,26 @@ const PairRegistrationPage = () => {
                             <>
                               <Form.Group>
                                 <Form.Label>
-                                  Override Reason <span className="text-danger">*</span>
+                                  {t('form.labels.overrideReason')} <span className="text-danger">*</span>
                                 </Form.Label>
                                 <Form.Control
                                   as="textarea"
                                   rows={3}
                                   value={overrideReason}
                                   onChange={(e) => setOverrideReason(e.target.value)}
-                                  placeholder="Explain why this pair should be allowed despite eligibility violations..."
+                                  placeholder={t('form.placeholders.overrideReason')}
                                   disabled={registering}
                                   isInvalid={eligibilityOverride && !overrideReason.trim()}
                                 />
                                 <Form.Control.Feedback type="invalid">
-                                  Override reason is required when eligibility override is enabled
+                                  {t('validation.overrideReasonRequired')}
                                 </Form.Control.Feedback>
                               </Form.Group>
 
                               {/* T076: Warning dialog showing violations */}
                               {eligibilityResult && !eligibilityResult.eligible && (
                                 <Alert variant="warning" className="mt-2 mb-0">
-                                  <strong>⚠ Warning:</strong> You are about to register a pair
-                                  with the following violations:
+                                  <strong>⚠ {t('common.warning')}:</strong> {t('messages.aboutToRegisterViolatingPair')}
                                   <ul className="mt-2 mb-0 small">
                                     {eligibilityResult.violations.map((v, idx) => (
                                       <li key={idx}>{v}</li>

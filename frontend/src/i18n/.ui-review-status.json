@@ -136,6 +136,30 @@
     "src/pages/UserDetailPage.jsx": {
       "lastReviewed": "2025-11-24T20:00:00Z",
       "status": "complete"
+    },
+    "src/components/ProtectedRoute.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
+    },
+    "src/utils/ToastContext.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
+    },
+    "src/utils/AuthContext.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PlayerRegistrationPage.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/TournamentSetupPage.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
+    },
+    "src/pages/PairRegistrationPage.jsx": {
+      "lastReviewed": "2025-11-24T21:00:00Z",
+      "status": "complete"
     }
   }
 }

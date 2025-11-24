@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, ListGroup } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { useAuth } from '../utils/AuthContext';
 import { listPlayers } from '../services/playerService';
@@ -13,6 +14,7 @@ import {
 } from '../services/registrationService';
 
 const PlayerRegistrationPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -80,7 +82,7 @@ const PlayerRegistrationPage = () => {
         setEligibilityResults(results);
       }
     } catch (err) {
-      setError('Failed to load data');
+      setError(t('errors.failedToLoad', { resource: t('common.data') }));
     } finally {
       setLoading(false);
     }
@@ -124,7 +126,7 @@ const PlayerRegistrationPage = () => {
 
   const handleBulkRegister = async () => {
     if (!selectedPlayer || selectedCategories.length === 0) {
-      setError('Please select at least one category');
+      setError(t('validation.selectAtLeastOneCategory'));
       return;
     }
 
@@ -135,20 +137,21 @@ const PlayerRegistrationPage = () => {
       const result = await bulkRegisterPlayer(selectedPlayer, selectedCategories);
 
       if (result.successful.length > 0) {
-        setSuccess(`Successfully registered for ${result.successful.length} category(ies)`);
+        setSuccess(t('messages.registrationSuccess', { count: result.successful.length }));
         setSelectedCategories([]);
         loadPlayerRegistrations();
       }
 
       if (result.failed.length > 0) {
         setError(
-          `Failed to register for ${result.failed.length} category(ies): ${
-            result.failed.map(f => f.categoryName).join(', ')
-          }`
+          t('errors.registrationFailed', {
+            count: result.failed.length,
+            categories: result.failed.map(f => f.categoryName).join(', ')
+          })
         );
       }
     } catch (err) {
-      setError(err.message || 'Failed to register player');
+      setError(err.message || t('errors.failedToRegisterPlayer'));
     } finally {
       setRegistering(false);
     }
@@ -184,8 +187,8 @@ const PlayerRegistrationPage = () => {
       <Container className="mt-4">
         <Row className="mb-4">
           <Col>
-            <h2>Category Registration</h2>
-            <p className="text-muted">Register players for tournament categories based on age and skill level</p>
+            <h2>{t('pages.registration.title')}</h2>
+            <p className="text-muted">{t('pages.registration.description')}</p>
           </Col>
         </Row>
 
@@ -199,13 +202,13 @@ const PlayerRegistrationPage = () => {
               <Card className="mb-3">
                 <Card.Body>
                   <Form.Group>
-                    <Form.Label>Select Player *</Form.Label>
+                    <Form.Label>{t('form.labels.selectPlayer')} *</Form.Label>
                     <Form.Select
                       value={selectedPlayer}
                       onChange={(e) => setSelectedPlayer(e.target.value)}
                       size="lg"
                     >
-                      <option value="">Choose a player...</option>
+                      <option value="">{t('form.placeholders.choosePlayer')}</option>
                       {players.map(player => (
                         <option key={player.id} value={player.id}>
                           {player.name} {player.birthDate && player.gender ? '✓' : '⚠️'}
@@ -213,7 +216,7 @@ const PlayerRegistrationPage = () => {
                       ))}
                     </Form.Select>
                     <Form.Text className="text-muted">
-                      ✓ = Complete profile | ⚠️ = Missing birthDate/gender
+                      {t('help.profileCompleteness')}
                     </Form.Text>
                   </Form.Group>
                 </Card.Body>
@@ -223,7 +226,7 @@ const PlayerRegistrationPage = () => {
             {selectedPlayer && currentRegistrations.length > 0 && (
               <Card>
                 <Card.Header>
-                  <strong>Current Registrations</strong>
+                  <strong>{t('pages.registration.currentRegistrations')}</strong>
                 </Card.Header>
                 <ListGroup variant="flush">
                   {currentRegistrations.map(reg => (
@@ -241,17 +244,17 @@ const PlayerRegistrationPage = () => {
 
           <Col md={8}>
             {!selectedPlayer ? (
-              <Alert variant="info">Please select a player to view available categories</Alert>
+              <Alert variant="info">{t('messages.selectPlayerFirst')}</Alert>
             ) : checkingEligibility ? (
               <div className="text-center py-5">
                 <Spinner animation="border" />
-                <p className="mt-2">Checking eligibility...</p>
+                <p className="mt-2">{t('messages.checkingEligibility')}</p>
               </div>
             ) : (
               <>
                 <Card className="mb-3">
                   <Card.Header className="d-flex justify-content-between align-items-center">
-                    <strong>Available Categories</strong>
+                    <strong>{t('pages.registration.availableCategories')}</strong>
                     {selectedCategories.length > 0 && (
                       <Button
                         variant="primary"
@@ -259,7 +262,7 @@ const PlayerRegistrationPage = () => {
                         onClick={handleBulkRegister}
                         disabled={registering}
                       >
-                        {registering ? 'Registering...' : `Register for ${selectedCategories.length} categories`}
+                        {registering ? t('common.registering') : t('buttons.registerForCategories', { count: selectedCategories.length })}
                       </Button>
                     )}
                   </Card.Header>
@@ -285,7 +288,7 @@ const PlayerRegistrationPage = () => {
                             />
 
                             {alreadyRegistered && (
-                              <Badge bg="success" className="ms-4">Already Registered</Badge>
+                              <Badge bg="success" className="ms-4">{t('status.alreadyRegistered')}</Badge>
                             )}
 
                             {!isEligible && !alreadyRegistered && eligibility && (
@@ -300,11 +303,11 @@ const PlayerRegistrationPage = () => {
                           </div>
 
                           {alreadyRegistered ? (
-                            <Badge bg="info">Registered</Badge>
+                            <Badge bg="info">{t('status.registered')}</Badge>
                           ) : isEligible ? (
-                            <Badge bg="success">Eligible</Badge>
+                            <Badge bg="success">{t('status.eligible')}</Badge>
                           ) : (
-                            <Badge bg="danger">Ineligible</Badge>
+                            <Badge bg="danger">{t('status.ineligible')}</Badge>
                           )}
                         </ListGroup.Item>
                       );
@@ -314,7 +317,7 @@ const PlayerRegistrationPage = () => {
 
                 {selectedCategories.length === 0 && (
                   <Alert variant="info">
-                    Select categories to register for. Only eligible categories can be selected.
+                    {t('messages.selectCategoriesToRegister')}
                   </Alert>
                 )}
               </>

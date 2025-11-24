@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkSession as checkSessionAPI } from '../services/authService';
 
 // Create Auth Context
@@ -7,6 +8,7 @@ const AuthContext = createContext(null);
 
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -26,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       navigate('/rankings', {
-        state: { message: 'Your session has expired. Please log in again.' }
+        state: { message: t('auth.sessionExpired') }
       });
     };
 

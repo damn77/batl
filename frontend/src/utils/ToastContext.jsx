@@ -1,6 +1,7 @@
 // T114: Toast notification system for successful rule updates
 import { createContext, useContext, useState, useCallback } from 'react';
 import { Toast, ToastContainer } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
 const ToastContext = createContext();
@@ -22,6 +23,7 @@ export const useToast = () => {
  * Wrap your app or specific pages with this to enable toast notifications
  */
 export const ToastProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState([]);
 
   const showToast = useCallback((message, variant = 'success', duration = 3000) => {
@@ -89,10 +91,10 @@ export const ToastProvider = ({ children }) => {
           >
             <Toast.Header>
               <strong className="me-auto">
-                {toast.variant === 'success' && 'Success'}
-                {toast.variant === 'danger' && 'Error'}
-                {toast.variant === 'info' && 'Info'}
-                {toast.variant === 'warning' && 'Warning'}
+                {toast.variant === 'success' && t('common.success')}
+                {toast.variant === 'danger' && t('common.error')}
+                {toast.variant === 'info' && t('common.info')}
+                {toast.variant === 'warning' && t('common.warning')}
               </strong>
             </Toast.Header>
             <Toast.Body className={toast.variant === 'danger' || toast.variant === 'dark' ? 'text-white' : ''}>

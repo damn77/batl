@@ -1,9 +1,11 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole = null, requiredRoles = [] }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
 
@@ -12,7 +14,7 @@ const ProtectedRoute = ({ children, requiredRole = null, requiredRoles = [] }) =
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
