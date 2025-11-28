@@ -12,6 +12,7 @@ import {
   Table,
   Collapse,
 } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import PairSelector from '../components/PairSelector';
 import { useAuth } from '../utils/AuthContext';
@@ -206,7 +207,7 @@ const PairRegistrationPage = () => {
         await loadPlayerPairs();
       }
     } catch (err) {
-      setError(t('errors.failedToCreate', { resource: t('common.pair') }) + `: ${err.response?.data?.error?.message || err.message}`);
+      setError(t('errors.failedToCreate', { resource: t('common.pair') }) + `: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -228,7 +229,7 @@ const PairRegistrationPage = () => {
       setEligibilityResult(result);
     } catch (err) {
       setError(
-        t('errors.failedToCheck', { resource: t('common.eligibility') }) + `: ${err.response?.data?.error?.message || err.message}`
+        t('errors.failedToCheck', { resource: t('common.eligibility') }) + `: ${err.message}`
       );
     } finally {
       setCheckingEligibility(false);
@@ -275,10 +276,8 @@ const PairRegistrationPage = () => {
     } catch (err) {
       console.error('Registration error:', err);
 
-      // Handle both apiClient custom error object and raw axios error
       // apiClient interceptor returns { status, code, message, details } directly
-      const errorData = err.response?.data?.error || err;
-      const violations = errorData?.details?.violations || errorData?.violations;
+      const violations = err.details?.violations;
 
       if (violations) {
         setError(
@@ -292,7 +291,7 @@ const PairRegistrationPage = () => {
           </div>
         );
       } else {
-        setError(t('errors.failedToRegister', { resource: t('common.pair') }) + `: ${errorData?.message || err.message || t('errors.unknown')}`);
+        setError(t('errors.failedToRegister', { resource: t('common.pair') }) + `: ${err.message || t('errors.unknown')}`);
       }
     } finally {
       setRegistering(false);
