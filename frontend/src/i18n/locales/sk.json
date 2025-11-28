@@ -24,13 +24,33 @@
     "advanced": "Pokročilé",
     "required": "*",
     "pair": "pár",
+    "pairs": "páry",
+    "player": "hráč",
+    "players": "hráči",
     "tournament": "turnaj",
     "tournaments": "turnaje",
     "unknownCategory": "Neznáma kategória",
     "playersCount": "{{count}} hráčov",
-    "saving": "Ukladanie..."
+    "saving": "Ukladanie...",
+    "rankings": "rebríčky",
+    "loadingResource": "Načítavanie {{resource}}...",
+    "tournamentFormat": "formát turnaja",
+    "tournamentRules": "pravidlá turnaja",
+    "group": "Skupina",
+    "bracket": "Pavúk",
+    "round": "Kolo",
+    "data": "dáta",
+    "registering": "Registruje sa...",
+    "recalculating": "Prepočítava sa...",
+    "category": "kategória",
+    "stats": "Štatistiky",
+    "creating": "Vytvára sa...",
+    "deleting": "Maže sa...",
+    "saveChanges": "Uložiť zmeny",
+    "waitlistedCount": "({{count}} na čakacej listine)"
   },
   "nav": {
+    "home": "Domov",
     "rankings": "Rebríčky",
     "pairRankings": "Rebríčky párov",
     "tournaments": "Turnaje",
@@ -49,7 +69,18 @@
     "registerPair": "Registrovať pár",
     "cancel": "Zrušiť",
     "saveFormatConfig": "Uložiť formát a konfiguráciu",
-    "saveScoringRules": "Uložiť pravidlá skórovania"
+    "saveScoringRules": "Uložiť pravidlá skórovania",
+    "registerForCategories": "Registrovať do {{count}} kategórií",
+    "createTournament": "Vytvoriť turnaj",
+    "edit": "Upraviť",
+    "saveChanges": "Uložiť zmeny",
+    "configureRules": "Konfigurovať pravidlá",
+    "recalcSeeding": "Prepočítať nasadenie"
+  },
+  "filters": {
+    "allCategories": "Všetky kategórie",
+    "allStatuses": "Všetky stavy",
+    "allFormats": "Všetky formáty"
   },
   "auth": {
     "loginTitle": "Prihlásenie",
@@ -91,12 +122,17 @@
       "title": "Správa kategórií",
       "subtitle": "Vytvorte a spravujte turnajové kategórie"
     },
+    "tournamentSetup": {
+      "title": "Správa turnajov",
+      "description": "Vytvorte a spravujte turnaje"
+    },
     "rankings": {
       "title": "Rebríčky kategórií",
       "subtitle": "Zobraziť rebríčky hráčov v turnajových kategóriách"
     },
     "pairRankings": {
       "title": "Rebríčky párov",
+      "subtitle": "Zobraziť rebríčky všetkých debľových párov v každej kategórii",
       "selectCategory": "Vyberte debľovú kategóriu",
       "noCategoriesAvailable": "Žiadne debľové kategórie nie sú k dispozícii",
       "aboutTitle": "O rebríčkoch párov"
@@ -122,11 +158,105 @@
       "title": "Registrácia na turnaj",
       "description": "Prehľadávať a registrovať sa na nadchádzajúce turnaje"
     },
+    "registration": {
+      "title": "Registrácia hráčov",
+      "description": "Registrovať hráčov do turnajových kategórií",
+      "currentRegistrations": "Aktuálne registrácie",
+      "availableCategories": "Dostupné kategórie"
+    },
     "tournamentRulesSetup": {
       "title": "Nastavenie pravidiel turnaja"
     },
+    "tournamentRules": {
+      "title": "Pravidlá turnaja",
+      "defaultScoringRules": "Predvolené pravidlá skórovania",
+      "ruleOverrides": "Prepísané pravidlá",
+      "groupOverrides": "Prepísané pravidlá skupinovej fázy",
+      "bracketOverrides": "Prepísané pravidlá pavúka",
+      "roundOverrides": "Prepísané pravidlá kola",
+      "matchOverrides": "Prepísané pravidlá zápasu"
+    },
     "categoryRankings": {
       "leaderboard": "{{category}} - Rebríček"
+    },
+    "tournamentView": {
+      "defaultTitle": "Detaily turnaja"
+    }
+  },
+  "components": {
+    "playerList": {
+      "title": {
+        "pairs": "Registrované páry",
+        "singles": "Registrovaní hráči"
+      },
+      "loading": "Načítavam zoznam hráčov...",
+      "errorTitle": "Chyba pri načítaní hráčov",
+      "emptyTitle": "Zatiaľ nie sú registrovaní žiadni hráči",
+      "emptyMessage": "Tento turnaj momentálne nemá žiadnych registrovaných hráčov.",
+      "emptySubtext": "Buďte prvý, kto sa zaregistruje, keď sa otvorí registrácia!",
+      "searchPlaceholder": "Hľadať hráčov podľa mena...",
+      "clear": "Vymazať",
+      "waitlist": "Čakacia listina ({{count}} {{playerLabel}})",
+      "player": "hráč",
+      "players": "hráči",
+      "sortedBy": "Zoradené podľa: {{order}}",
+      "sortOrder": {
+        "registrationTime": "Času registrácie",
+        "alphabetical": "Abecedy"
+      },
+      "tableHeaders": {
+        "number": "#",
+        "pair": "Pár",
+        "playerName": "Meno hráča",
+        "score": "Skóre",
+        "ranking": "Rebríček",
+        "seed": "Nasadenie",
+        "status": "Stav",
+        "actions": "Akcie"
+      },
+      "noMatchSearch": "Žiadni registrovaní hráči nevyhovujú \"{{searchTerm}}\"",
+      "noRegisteredPlayers": "Zatiaľ nie sú registrovaní žiadni hráči.",
+      "noWaitlistedPlayers": "Na čakacej listine nie sú žiadni hráči.",
+      "noMatchSearchWaitlist": "Žiadni hráči na čakacej listine nevyhovujú \"{{searchTerm}}\"",
+      "unregister": "Odregistrovať",
+      "removing": "Odstraňovanie...",
+      "confirmUnregister": {
+        "title": "Potvrdiť odregistráciu",
+        "message": "Naozaj chcete odregistrovať",
+        "messageSuffix": "z tohto turnaja?",
+        "cancel": "Zrušiť",
+        "confirm": "Odregistrovať"
+      },
+      "errors": {
+        "failedToLoad": "Nepodarilo sa načítať zoznam hráčov",
+        "failedToUnregister": "Nepodarilo sa odregistrovať: {{message}}"
+      }
+    },
+    "formatVisualization": {
+      "formatTypes": {
+        "group": "Formát skupinovej fázy",
+        "knockout": "Vyraďovací turnaj",
+        "swiss": "Švajčiarsky systém",
+        "combined": "Kombinovaný formát",
+        "unknown": "Formát turnaja"
+      },
+      "actions": {
+        "expand": "Rozbaliť formát",
+        "collapse": "Zbaliť formát"
+      },
+      "loading": "Načítavam štruktúru turnaja...",
+      "errorTitle": "Nepodarilo sa načítať formát",
+      "errorMessage": "Nepodarilo sa načítať štruktúru formátu turnaja. Môže to byť z dôvodu, že formát ešte nebol nakonfigurovaný, alebo došlo k chybe pripojenia.",
+      "close": "Zavrieť",
+      "playersCount": "{{count}} hráčov",
+      "emptyStates": {
+        "noGroups": "Skupiny ešte neboli vytvorené. Skupiny sa vytvoria pri štarte turnaja.",
+        "noBrackets": "Pavúk ešte nebol vytvorený. Pavúk sa vygeneruje pri štarte turnaja.",
+        "unknownFormat": "Neznámy typ formátu:",
+        "unknownFormatMessage": "Tento turnaj používa typ formátu, ktorý zatiaľ nie je podporovaný pre vizualizáciu.",
+        "notConfiguredTitle": "Formát nie je nakonfigurovaný",
+        "notConfiguredMessage": "Štruktúra formátu turnaja ešte nebola nastavená. Bude dostupná po nakonfigurovaní formátu organizátorom turnaja."
+      }
     }
   },
   "form": {
@@ -150,7 +280,18 @@
       "selectExistingPair": "Vybrať existujúci pár",
       "createNewPair": "Vytvoriť nový pár",
       "selectPair": "Vybrať pár",
-      "selectPlayer2": "Vybrať hráča 2"
+      "selectPlayer2": "Vybrať hráča 2",
+      "selectDoublesCategory": "Vyberte debľovú kategóriu",
+      "selectPlayer": "Vybrať hráča",
+      "category": "Kategória",
+      "tournamentName": "Názov turnaja",
+      "clubName": "Názov klubu",
+      "addressOptional": "Adresa (Voliteľné)",
+      "maximumPlayers": "Maximálny počet hráčov",
+      "singleDayTournament": "Jednodňový turnaj",
+      "startDate": "Dátum začiatku",
+      "endDate": "Dátum konca",
+      "format": "Formát"
     },
     "options": {
       "allTypes": "Všetky typy",
@@ -163,6 +304,8 @@
       "mixed": "Mix",
       "male": "Muž",
       "female": "Žena",
+      "men": "Muži",
+      "women": "Ženy",
       "admin": "Administrátor",
       "organizer": "Organizátor",
       "player": "Hráč",
@@ -171,11 +314,22 @@
       "withAccount": "S účtom",
       "withoutAccount": "Bez účtu",
       "allPlayers": "Všetci hráči",
-      "selectGender": "Vyberte pohlavie"
+      "selectGender": "Vyberte pohlavie",
+      "selectCategory": "-- Vyberte kategóriu --",
+      "selectType": "Vyberte typ...",
+      "selectAgeGroup": "Vyberte vekovú skupinu...",
+      "allAges": "Všetky vekové kategórie"
     },
     "placeholders": {
       "selectPair": "-- Vyberte pár --",
-      "selectPartner": "-- Vyberte partnera --"
+      "selectPartner": "-- Vyberte partnera --",
+      "choosePlayer": "Vyberte hráča...",
+      "tournamentName": "napr. Letný šampionát 2025",
+      "selectCategory": "-- Vyberte kategóriu --",
+      "clubName": "napr. Tenisový klub Bratislava",
+      "address": "Ulica, Mesto, Krajina",
+      "tournamentDescription": "Voliteľné detaily turnaja...",
+      "leaveEmptyForUnlimited": "Nechajte prázdne pre neobmedzený počet"
     }
   },
   "table": {
@@ -205,7 +359,9 @@
       "dates": "Dátumy",
       "format": "Formát",
       "location": "Miesto",
-      "players": "Hráči"
+      "players": "Hráči",
+      "player1": "Hráč 1",
+      "player2": "Hráč 2"
     }
   },
   "modals": {
@@ -214,6 +370,12 @@
     },
     "editCategory": {
       "title": "Upraviť kategóriu"
+    },
+    "createTournament": {
+      "title": "Vytvoriť turnaj"
+    },
+    "editTournament": {
+      "title": "Upraviť turnaj"
     },
     "confirmDelete": {
       "title": "Potvrdiť vymazanie"
@@ -264,10 +426,49 @@
     },
     "confirmUnregistration": {
       "title": "Potvrdiť odregistráciu",
-      "message": "Naozaj sa chcete odregistrovať z {tournament}?"
+      "message": "Naozaj sa chcete odregistrovať z {{tournament}}?"
     },
     "registerPair": {
-      "title": "Registrovať pár na {tournament}"
+      "title": "Registrovať pár na {{tournament}}"
+    }
+  },
+  "ruleCascade": {
+    "scoringRules": "Pravidlá skórovania",
+    "historicalSnapshot": "Historický snapshot",
+    "rulesLockedAt": "Pravidlá zamknuté po dokončení zápasu:",
+    "effectiveRules": "Platné pravidlá",
+    "ruleCascadeTitle": "Kaskáda pravidiel",
+    "cascadeDescription": "Pravidlá sú zdedené z predvolených nastavení turnaja a môžu byť prepísané na každej úrovni. Neskoršie úrovne prepíšu skoršie.",
+    "overrides": "Prepísané",
+    "baseRules": "Základné pravidlá",
+    "snapshotNote": "Tieto pravidlá sú historický snapshot vytvorený po dokončení zápasu. Nemožno ich zmeniť a predstavujú presné pravidlá použité počas zápasu.",
+    "levels": {
+      "tournament": "Predvolené nastavenie turnaja",
+      "group": "Skupina {{number}}",
+      "bracket": "{{type}} pavúk",
+      "round": "Kolo {{number}}",
+      "match": "Zápas {{number}}"
+    },
+    "levelLabels": {
+      "tournament": "TURNAJ",
+      "group": "SKUPINA",
+      "bracket": "PAVÚK",
+      "round": "KOLO",
+      "match": "ZÁPAS"
+    },
+    "ruleNames": {
+      "formatType": "Formát skórovania",
+      "scoringFormat": "Formát skórovania",
+      "winningSets": "Víťazné sety",
+      "winningTiebreaks": "Víťazné tajbrejky",
+      "winningGames": "Víťazné hry",
+      "winningPoints": "Víťazné body",
+      "advantageRule": "Pravidlo výhody",
+      "tiebreakTrigger": "Spustenie tajbrejku",
+      "finalSetTiebreak": "Tajbrejk posledného setu",
+      "pointsToWin": "Body na výhru",
+      "gameFormat": "Formát hry",
+      "setFormat": "Formát setu"
     }
   },
   "alerts": {
@@ -279,7 +480,9 @@
     "bracketRulesUpdated": "Pravidlá pavúka boli úspešne aktualizované!",
     "groupRulesUpdated": "Pravidlá skupiny boli úspešne aktualizované!",
     "matchRulesUpdated": "Pravidlá zápasu boli úspešne aktualizované!",
-    "roundRulesUpdated": "Pravidlá kola boli úspešne aktualizované!"
+    "roundRulesUpdated": "Pravidlá kola boli úspešne aktualizované!",
+    "seedingRecalculated": "Nasadenie prepočítané pre {{categoryName}}: {{pairsUpdated}} párov aktualizovaných",
+    "failedToRecalculateSeeding": "Nepodarilo sa prepočítať nasadenie"
   },
   "badges": {
     "hasAccount": "Môže sa prihlásiť",
@@ -293,10 +496,15 @@
     "waitlisted": "Na čakacej listine",
     "withdrawn": "Odhlásený",
     "cancelled": "Zrušený",
+    "active": "Aktívny",
+    "suspended": "Pozastavený",
     "registeredDesc": "Máte potvrdené miesto v tomto turnaji",
     "waitlistedDesc": "Turnaj je naplnený. Budete upozornený, ak sa uvoľní miesto.",
     "withdrawnDesc": "Odhlásili ste sa z tohto turnaja",
-    "cancelledDesc": "Tento turnaj bol zrušený"
+    "cancelledDesc": "Tento turnaj bol zrušený",
+    "alreadyRegistered": "Už registrovaný",
+    "eligible": "Oprávnený",
+    "ineligible": "Neoprávnený"
   },
   "placeholders": {
     "tournamentName": "napr. Letný šampionát 2025",
@@ -319,12 +527,12 @@
     "overrides": "Výnimky"
   },
   "registration": {
-    "selectEntity": "Vyberte {entityType}",
-    "chooseEntity": "Vyberte {entityType}...",
-    "pairsInCategoryHint": "Zobrazujú sa iba páry v kategórii {categoryName}",
+    "selectEntity": "Vyberte {{entityType}}",
+    "chooseEntity": "Vyberte {{entityType}}...",
+    "pairsInCategoryHint": "Zobrazujú sa iba páry v kategórii {{categoryName}}",
     "allPlayersHint": "Zobrazujú sa všetci hráči v systéme",
     "registering": "Registrácia...",
-    "registerEntity": "Registrovať {entityType}",
+    "registerEntity": "Registrovať {{entityType}}",
     "capacityWarning": "Turnaj je naplnený. Budete požiadaný vybrať, kto bude presunutý do čakacej listiny."
   },
   "tournament": {
@@ -337,6 +545,13 @@
       "SINGLES": "Dvojhra",
       "DOUBLES": "Štvorhra",
       "MIXED_DOUBLES": "Zmiešaná štvorhra"
+    },
+    "pairs": "páry",
+    "statuses": {
+      "SCHEDULED": "Naplánovaný",
+      "IN_PROGRESS": "Prebieha",
+      "COMPLETED": "Ukončený",
+      "CANCELLED": "Zrušený"
     },
     "genders": {
       "MEN": "Muži",
@@ -415,14 +630,15 @@
     "formats": {
       "knockout": "Vyraďovací",
       "group": "Skupinová fáza",
+      "groupStage": "Skupinová fáza",
       "swiss": "Švajčiarsky systém",
       "combined": "Kombinovaný",
       "singleElimination": "Jednoduchá eliminácia",
       "doubleElimination": "Dvojitá eliminácia",
       "playUntilPlacement": "Hrať do umiestnenia",
-      "groupsOf": "Skupiny po {size}",
-      "rounds": "{count} kolá",
-      "topAdvance": "Skupiny po {size}, top {advance} postupujú",
+      "groupsOf": "Skupiny po {{size}}",
+      "rounds": "{{count}} kolá",
+      "topAdvance": "Skupiny po {{size}}, top {{advance}} postupujú",
       "matchGuarantee1": "Jednoduchá eliminácia (1 zápas zaručený)",
       "matchGuarantee2": "Dvojitá eliminácia (2 zápasy zaručené)"
     },
@@ -613,7 +829,7 @@
     "phoneDigits": "Telefón musí mať 7-15 číslic po znamienku +",
     "phoneFormat": "Telefón musí byť v medzinárodnom formáte: +KódKrajinyČíslo (napr. +421901234567)",
     "createPlayerFailed": "Vytvorenie profilu hráča zlyhalo",
-    "validationFailed": "Validácia zlyhala: {details}",
+    "validationFailed": "Validácia zlyhala: {{details}}",
     "boundaryTitle": "Ups! Niečo sa pokazilo",
     "boundaryMessage": "Vyskytla sa neočakávaná chyba pri načítaní tejto stránky. Môže to byť spôsobené:",
     "boundaryTechnical": "Dočasným technickým problémom",
@@ -622,15 +838,19 @@
     "tryAgain": "Skúsiť znova",
     "goHome": "Prejsť na hlavnú stránku",
     "errorDetails": "Detaily chyby (Vývojársky režim)",
-    "registrationFailed": "Registrácia zlyhala",
-    "failedToLoad": "Načítanie {resource} zlyhalo",
-    "failedToRegister": "Registrácia {resource} zlyhala",
-    "failedToUnregister": "Odregistrácia z {resource} zlyhala",
+    "registrationFailed": "Nepodarilo sa zaregistrovať do {{count}} kategórií: {{categories}}",
+    "failedToLoad": "Načítanie {{resource}} zlyhalo",
+    "failedToCreate": "Vytvorenie {{resource}} zlyhalo",
+    "failedToUpdate": "Aktualizácia {{resource}} zlyhala",
+    "failedToRegister": "Registrácia zlyhala - {{resource}}",
+    "failedToUnregister": "Odregistrácia z {{resource}} zlyhala",
+    "playersNotRegisteredInCategory": "Hráči musia byť registrovaní v turnajovej kategórii pred pridaním na čakaciu listinu",
     "failedToLoadTournamentRules": "Načítanie pravidiel turnaja zlyhalo",
     "failedToSaveTournamentFormat": "Uloženie formátu turnaja zlyhalo",
     "failedToSaveScoringRules": "Uloženie pravidiel skórovania zlyhalo",
     "categoryNotFound": "Kategória nebola nájdená",
-    "failedToLoadRankings": "Načítanie rebríčkov zlyhalo"
+    "failedToLoadRankings": "Načítanie rebríčkov zlyhalo",
+    "failedToRegisterPlayer": "Registrácia hráča do kategórií zlyhala"
   },
   "help": {
     "waitlistExplanation": "Čakacia listina obsahuje hráčov, ktorí sa chcú zapojiť, ale nemôžu, pretože turnaj je plný. Ak sa registrovaný hráč odhlási, prvá osoba na čakacej listine automaticky zaujme jeho miesto.",
@@ -638,32 +858,84 @@
     "phoneFormat": "Medzinárodný formát zahŕňa kód krajiny (napr. +421 pre Slovensko, +1 pre USA/Kanadu). Príklad: +421901234567",
     "rawConfigExplanation": "Surová JSON konfigurácia pre pokročilých používateľov a vývojárov. Zobrazuje presné nastavenia turnaja tak, ako sú uložené v databáze.",
     "whyDuplicatesMatter": "Prečo záleží na duplikátoch?",
+    "maximumPlayersHint": "Nechajte prázdne pre neobmedzenú kapacitu",
+    "recalculateSeeding": "Prepočítať nasadenie párov na základe aktuálnych rebríčkov hráčov",
     "duplicateExplanation": "Vytváranie duplicitných profilov môže viesť k nesprávnym výpočtom nasadenia a rebríčkov turnaja. Vytvorte nový profil iba vtedy, ak ste si istí, že ide o inú osobu.",
     "youWillBePlayer1": "Budete hráč 1. Vyberte svojho partnera nižšie.",
     "partnerMustMeetRequirements": "Partner musí spĺňať požiadavky kategórie (vek, pohlavie)",
-    "unregistrationNote": "Ak ste aktuálne registrovaný (nie na čakacej listine), vaše miesto bude dané ďalšiemu hráčovi na čakacej listine."
+    "unregistrationNote": "Ak ste aktuálne registrovaný (nie na čakacej listine), vaše miesto bude dané ďalšiemu hráčovi na čakacej listine.",
+    "onlyDoublesShown": "Zobrazujú sa iba debľové kategórie",
+    "aboutPairRankings": "O rebríčkoch párov",
+    "pairPointsDescription": "Celkové bodové skóre získané z výsledkov turnajov",
+    "seedingScoreDescription": "Kombinované skóre z individuálnych rebríčkov oboch hráčov používané na nasadenie v turnaji",
+    "winRateDescription": "Percento vyhranych zápasov",
+    "rankingsAutoUpdate": "Rebríčky sa automaticky aktualizujú po dokončení každého turnaja",
+    "defaultScoringRulesDescription": "Toto sú predvolené pravidlá skórovania, ktoré sa vzťahujú na všetky zápasy v tomto turnaji, pokiaľ nie sú prepísané.",
+    "ruleOverridesDescription": "Prepísané pravidlá vám umožňujú prispôsobiť skórovanie pre konkrétne skupiny, pavúky, kolá alebo zápasy.",
+    "profileCompleteness": "⚠️ označuje neúplný profil (chýba dátum narodenia alebo pohlavie)"
   },
   "messages": {
     "loadingTournaments": "Načítavajú sa turnaje...",
     "loadingPairs": "Načítavajú sa páry...",
     "noUpcomingTournaments": "Žiadne nadchádzajúce turnaje nie sú k dispozícii. Skúste to neskôr!",
     "noExistingPairs": "Pre túto kategóriu neboli nájdené žiadne existujúce páry. Vytvorte nový pár.",
-    "pairAddedToWaitlist": "Pár bol pridaný na čakaciu listinu pre {tournament}. {description}",
-    "pairRegisteredForTournament": "Pár bol úspešne registrovaný na {tournament}!",
-    "addedToWaitlist": "Pridaný na čakaciu listinu pre {tournament}. {description}",
-    "registeredForTournament": "Úspešne registrovaný na {tournament}!",
-    "unregisteredFromTournament": "Úspešne odregistrovaný z {tournament}",
-    "playerPromotedFromWaitlist": "{player} bol povýšený z čakacej listiny.",
+    "pairAddedToWaitlist": "Pár bol pridaný na čakaciu listinu pre {{tournament}}. {{description}}",
+    "pairRegisteredForTournament": "Pár bol úspešne registrovaný na {{tournament}}!",
+    "noCategoriesYet": "Zatiaľ neboli vytvorené žiadne kategórie.",
+    "addedToWaitlist": "Pridaný na čakaciu listinu pre {{tournament}}. {{description}}",
+    "registeredForTournament": "Úspešne registrovaný na {{tournament}}!",
+    "unregisteredFromTournament": "Úspešne odregistrovaný z {{tournament}}",
+    "playerPromotedFromWaitlist": "{{player}} bol povýšený z čakacej listiny.",
     "removedFromCategory": "Boli ste odstránený z kategórie (žiadna história účasti).",
     "loadingTournamentRules": "Načítavajú sa pravidlá turnaja...",
     "formatSavedSuccess": "Formát turnaja bol úspešne uložený!",
     "scoringRulesSavedSuccess": "Pravidlá skórovania boli úspešne uložené!",
     "noRankingsYet": "Pre túto kategóriu zatiaľ nie sú k dispozícii žiadne rebríčky. Rebríčky sa aktualizujú po dokončení turnaja.",
     "lastUpdated": "Naposledy aktualizované: {{date}}",
-    "showingRankedPlayers": "Zobrazuje sa {{count}} hodnotených hráčov"
+    "showingRankedPlayers": "Zobrazuje sa {{count}} hodnotených hráčov",
+    "noDoublesCategoriesAvailable": "Žiadne debľové kategórie nie sú k dispozícii",
+    "noPairRankingsYet": "Pre túto kategóriu zatiaľ nie sú k dispozícii žiadne rebríčky párov. Rebríčky sa zobrazia po dokončení turnajov.",
+    "noDefaultScoringRules": "Pre tento turnaj neboli nastavené žiadne predvolené pravidlá skórovania.",
+    "selectPlayerFirst": "Prosím vyberte hráča pre zobrazenie dostupných kategórií",
+    "checkingEligibility": "Kontrola oprávnenia...",
+    "selectCategoriesToRegister": "Vyberte jednu alebo viac kategórií na registráciu",
+    "registrationSuccess": "Úspešne registrovaný do {{count}} kategórií!"
   },
   "validation": {
     "selectPlayer2": "Vyberte hráča 2 pre nový pár",
-    "selectOrCreatePair": "Vyberte pár alebo vytvorte nový"
+    "selectOrCreatePair": "Vyberte pár alebo vytvorte nový",
+    "selectAtLeastOneCategory": "Prosím vyberte aspoň jednu kategóriu",
+    "requiredFields": "{{fields}} sú povinné",
+    "nameAndCategoryAndClub": "Názov, Kategória a Názov klubu",
+    "endDateAfterStartDate": "Dátum konca musí byť rovnaký alebo po dátume začiatku"
+  },
+  "pagination": {
+    "showingRange": "Zobrazuje sa {{from}}-{{to}} z {{total}} {{resource}}",
+    "total": "Celkom"
+  },
+  "categories": {
+    "stats": {
+      "tournaments": "Turnaje",
+      "registrations": "Registrácie"
+    },
+    "cannotChangeAfterCreation": "Typ, veková skupina a pohlavie nemôžu byť po vytvorení zmenené",
+    "categoryName": "Názov kategórie"
+  },
+  "organizer": {
+    "registerTitle": "Organizátor: Registrovať {{entityType}}",
+    "tournamentFull": "Turnaj je plný",
+    "loading": "Načítavanie...",
+    "selectEntity": "Prosím vyberte {{entityType}}",
+    "failedToLoadData": "Nepodarilo sa načítať dáta",
+    "selectOption": "Prosím vyberte možnosť",
+    "tournamentFullTitle": "Turnaj je plný - Vyberte možnosť",
+    "tournamentFullMessage": "Turnaj je naplnený ({{capacity}} {{entityType}}). Prosím vyberte možnosť:",
+    "addToWaitlist": "✓ Pridať nového {{entityType}} na čakaciu listinu",
+    "addToWaitlistDesc": "Ponechať všetky aktuálne registrácie a pridať nového {{entityType}} na čakaciu listinu",
+    "orDivider": "— ALEBO presunúť existujúcu registráciu na čakaciu listinu —",
+    "seedAndScore": "Nasadenie: {{seed}} | Skóre: {{score}}",
+    "seed": "Nasadenie: {{seed}}",
+    "processing": "Spracováva sa...",
+    "confirmAndRegister": "Potvrdiť a registrovať"
   }
 }

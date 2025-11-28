@@ -1,7 +1,8 @@
 // T052-T064: Player List Panel Component - Display registered players with status and rankings
 import { useState, useEffect, useMemo } from 'react';
 import { Card, Table, Badge, Button, Form, InputGroup, Collapse, Alert, Spinner, Modal } from 'react-bootstrap';
-import { getTournamentRegistrations, STATUS_LABELS, STATUS_VARIANTS } from '../services/tournamentRegistrationService';
+import { useTranslation } from 'react-i18next';
+import { getTournamentRegistrations, STATUS_VARIANTS } from '../services/tournamentRegistrationService';
 import { withdrawPairRegistration } from '../services/pairService';
 import apiClient from '../services/apiClient';
 import { useAuth } from '../utils/AuthContext';
@@ -13,6 +14,7 @@ import { useAuth } from '../utils/AuthContext';
  * @param {Object} tournament - Tournament object with formatType and waitlistDisplayOrder
  */
 const PlayerListPanel = ({ tournament }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const PlayerListPanel = ({ tournament }) => {
       setRegistrations(data.registrations || []);
       setRegistrationType(data.type || 'SINGLES');
     } catch (err) {
-      setError(err.message || 'Failed to load player list');
+      setError(err.message || t('components.playerList.errors.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +70,7 @@ const PlayerListPanel = ({ tournament }) => {
       // Reload registrations
       await loadRegistrations();
     } catch (err) {
-      setError(`Failed to unregister: ${err.message}`);
+      setError(t('components.playerList.errors.failedToUnregister', { message: err.message }));
     } finally {
       setUnregisteringId(null);
       setSelectedRegistration(null);
@@ -138,7 +140,7 @@ const PlayerListPanel = ({ tournament }) => {
   // T055: Render status badge
   const renderStatusBadge = (status) => (
     <Badge bg={STATUS_VARIANTS[status] || 'secondary'} className="px-2 py-1">
-      {STATUS_LABELS[status] || status}
+      {t(`status.${status.toLowerCase()}`)}
     </Badge>
   );
 
@@ -199,7 +201,7 @@ const PlayerListPanel = ({ tournament }) => {
                 onClick={() => handleUnregisterClick(registration)}
                 disabled={isUnregistering}
               >
-                {isUnregistering ? 'Removing...' : 'Unregister'}
+                {isUnregistering ? t('components.playerList.removing') : t('components.playerList.unregister')}
               </Button>
             </td>
           )}
@@ -236,7 +238,7 @@ const PlayerListPanel = ({ tournament }) => {
               onClick={() => handleUnregisterClick(registration)}
               disabled={isUnregistering}
             >
-              {isUnregistering ? 'Removing...' : 'Unregister'}
+              {isUnregistering ? t('components.playerList.removing') : t('components.playerList.unregister')}
             </Button>
           </td>
         )}
@@ -249,7 +251,7 @@ const PlayerListPanel = ({ tournament }) => {
       <Card className="border-0 shadow-sm">
         <Card.Body className="text-center py-5">
           <Spinner animation="border" variant="primary" />
-          <p className="mt-3 text-muted">Loading player list...</p>
+          <p className="mt-3 text-muted">{t('components.playerList.loading')}</p>
         </Card.Body>
       </Card>
     );
@@ -260,7 +262,7 @@ const PlayerListPanel = ({ tournament }) => {
       <Card className="border-0 shadow-sm">
         <Card.Body>
           <Alert variant="danger">
-            <Alert.Heading>Error Loading Players</Alert.Heading>
+            <Alert.Heading>{t('components.playerList.errorTitle')}</Alert.Heading>
             <p>{error}</p>
           </Alert>
         </Card.Body>
@@ -274,9 +276,9 @@ const PlayerListPanel = ({ tournament }) => {
       <Card className="border-0 shadow-sm">
         <Card.Body className="text-center py-5">
           <div className="text-muted">
-            <h5>No Players Registered Yet</h5>
-            <p>This tournament has no registered players at the moment.</p>
-            <small>Be the first to register when registration opens!</small>
+            <h5>{t('components.playerList.emptyTitle')}</h5>
+            <p>{t('components.playerList.emptyMessage')}</p>
+            <small>{t('components.playerList.emptySubtext')}</small>
           </div>
         </Card.Body>
       </Card>
@@ -290,7 +292,7 @@ const PlayerListPanel = ({ tournament }) => {
       <Card.Body className="p-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="mb-0">
-            {registrationType === 'DOUBLES' ? 'Registered Pairs' : 'Registered Players'}
+            {registrationType === 'DOUBLES' ? t('components.playerList.title.pairs') : t('components.playerList.title.singles')}
           </h4>
           <Badge bg="primary" className="px-3 py-2">
             {registeredPlayers.length} / {tournament.capacity || '∞'}
@@ -304,13 +306,13 @@ const PlayerListPanel = ({ tournament }) => {
               <span>🔍</span>
             </InputGroup.Text>
             <Form.Control
-              placeholder="Search players by name..."
+              placeholder={t('components.playerList.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
               <Button variant="outline-secondary" onClick={() => setSearchTerm('')}>
-                Clear
+                {t('components.playerList.clear')}
               </Button>
             )}
           </InputGroup>
@@ -322,15 +324,15 @@ const PlayerListPanel = ({ tournament }) => {
             <Table striped hover className="mb-0">
               <thead className="table-light">
                 <tr>
-                  <th style={{ width: '50px' }}>#</th>
-                  <th>{registrationType === 'DOUBLES' ? 'Pair' : 'Player Name'}</th>
-                  <th className="text-center">{registrationType === 'DOUBLES' ? 'Score' : 'Ranking'}</th>
-                  <th className="text-center">Seed</th>
+                  <th style={{ width: '50px' }}>{t('components.playerList.tableHeaders.number')}</th>
+                  <th>{registrationType === 'DOUBLES' ? t('components.playerList.tableHeaders.pair') : t('components.playerList.tableHeaders.playerName')}</th>
+                  <th className="text-center">{registrationType === 'DOUBLES' ? t('components.playerList.tableHeaders.score') : t('components.playerList.tableHeaders.ranking')}</th>
+                  <th className="text-center">{t('components.playerList.tableHeaders.seed')}</th>
                   {formatSpecificColumns.map(column => (
                     <th key={column} className="text-center">{column}</th>
                   ))}
-                  <th className="text-center">Status</th>
-                  {isOrganizer && <th className="text-center">Actions</th>}
+                  <th className="text-center">{t('components.playerList.tableHeaders.status')}</th>
+                  {isOrganizer && <th className="text-center">{t('components.playerList.tableHeaders.actions')}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -342,7 +344,7 @@ const PlayerListPanel = ({ tournament }) => {
           </div>
         ) : (
           <Alert variant="info" className="mb-0">
-            {searchTerm ? `No registered players match "${searchTerm}"` : 'No registered players yet.'}
+            {searchTerm ? t('components.playerList.noMatchSearch', { searchTerm }) : t('components.playerList.noRegisteredPlayers')}
           </Alert>
         )}
 
@@ -357,11 +359,18 @@ const PlayerListPanel = ({ tournament }) => {
                 className="d-flex align-items-center gap-2"
               >
                 <span>{showWaitlist ? '▼' : '▶'}</span>
-                <span>Waitlist ({waitlistedPlayers.length} {waitlistedPlayers.length === 1 ? 'player' : 'players'})</span>
+                <span>{t('components.playerList.waitlist', {
+                  count: waitlistedPlayers.length,
+                  playerLabel: waitlistedPlayers.length === 1 ? t('components.playerList.player') : t('components.playerList.players')
+                })}</span>
               </Button>
               {tournament?.waitlistDisplayOrder && (
                 <small className="text-muted ms-2">
-                  Sorted by: {tournament.waitlistDisplayOrder === 'REGISTRATION_TIME' ? 'Registration Time' : 'Alphabetical'}
+                  {t('components.playerList.sortedBy', {
+                    order: tournament.waitlistDisplayOrder === 'REGISTRATION_TIME'
+                      ? t('components.playerList.sortOrder.registrationTime')
+                      : t('components.playerList.sortOrder.alphabetical')
+                  })}
                 </small>
               )}
             </div>
@@ -373,15 +382,15 @@ const PlayerListPanel = ({ tournament }) => {
                     <Table striped hover className="mb-0">
                       <thead className="table-warning">
                         <tr>
-                          <th style={{ width: '50px' }}>#</th>
-                          <th>{registrationType === 'DOUBLES' ? 'Pair' : 'Player Name'}</th>
-                          <th className="text-center">{registrationType === 'DOUBLES' ? 'Score' : 'Ranking'}</th>
-                          <th className="text-center">Seed</th>
+                          <th style={{ width: '50px' }}>{t('components.playerList.tableHeaders.number')}</th>
+                          <th>{registrationType === 'DOUBLES' ? t('components.playerList.tableHeaders.pair') : t('components.playerList.tableHeaders.playerName')}</th>
+                          <th className="text-center">{registrationType === 'DOUBLES' ? t('components.playerList.tableHeaders.score') : t('components.playerList.tableHeaders.ranking')}</th>
+                          <th className="text-center">{t('components.playerList.tableHeaders.seed')}</th>
                           {formatSpecificColumns.map(column => (
                             <th key={column} className="text-center">{column}</th>
                           ))}
-                          <th className="text-center">Status</th>
-                          {isOrganizer && <th className="text-center">Actions</th>}
+                          <th className="text-center">{t('components.playerList.tableHeaders.status')}</th>
+                          {isOrganizer && <th className="text-center">{t('components.playerList.tableHeaders.actions')}</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -393,7 +402,7 @@ const PlayerListPanel = ({ tournament }) => {
                   </div>
                 ) : (
                   <Alert variant="info" className="mb-0">
-                    {searchTerm ? `No waitlisted players match "${searchTerm}"` : 'No waitlisted players.'}
+                    {searchTerm ? t('components.playerList.noMatchSearchWaitlist', { searchTerm }) : t('components.playerList.noWaitlistedPlayers')}
                   </Alert>
                 )}
               </div>
@@ -404,12 +413,12 @@ const PlayerListPanel = ({ tournament }) => {
         {/* Unregister Confirmation Modal */}
         <Modal show={showUnregisterModal} onHide={() => setShowUnregisterModal(false)}>
           <Modal.Header closeButton>
-            <Modal.Title>Confirm Unregistration</Modal.Title>
+            <Modal.Title>{t('components.playerList.confirmUnregister.title')}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {selectedRegistration && (
               <p>
-                Are you sure you want to unregister{' '}
+                {t('components.playerList.confirmUnregister.message')}{' '}
                 {registrationType === 'DOUBLES' ? (
                   <strong>
                     {selectedRegistration.pair?.player1?.name} & {selectedRegistration.pair?.player2?.name}
@@ -417,16 +426,16 @@ const PlayerListPanel = ({ tournament }) => {
                 ) : (
                   <strong>{selectedRegistration.player?.name}</strong>
                 )}
-                {' '}from this tournament?
+                {' '}{t('components.playerList.confirmUnregister.messageSuffix')}
               </p>
             )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowUnregisterModal(false)}>
-              Cancel
+              {t('components.playerList.confirmUnregister.cancel')}
             </Button>
             <Button variant="danger" onClick={handleUnregisterConfirm}>
-              Unregister
+              {t('components.playerList.confirmUnregister.confirm')}
             </Button>
           </Modal.Footer>
         </Modal>

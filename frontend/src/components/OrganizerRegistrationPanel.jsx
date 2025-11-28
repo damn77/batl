@@ -1,6 +1,7 @@
 // Organizer Registration Panel - Allow organizers to register players/pairs for tournaments
 import { useState, useEffect } from 'react';
 import { Card, Button, Spinner, Modal, Badge } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
 import { useRegistration } from '../hooks/useRegistration.jsx';
 import RegistrationForm from './RegistrationForm';
@@ -11,6 +12,7 @@ import apiClient from '../services/apiClient';
  * Includes capacity management and waitlist selection
  */
 const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [entities, setEntities] = useState([]); // Players or Pairs
     const [selectedId, setSelectedId] = useState('');
@@ -70,7 +72,7 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
             const regsResponse = await apiClient.get(`/tournaments/${tournament.id}/registrations`);
             setRegistrations(regsResponse.data.data.registrations || []);
         } catch (err) {
-            setError(`Failed to load data: ${err.message}`);
+            setError(`${t('organizer.failedToLoadData')}: ${err.message}`);
         } finally {
             setLoadingData(false);
         }
@@ -78,7 +80,7 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
 
     const handleRegister = async () => {
         if (!selectedId) {
-            setError(`Please select a ${isDoubles ? 'pair' : 'player'}`);
+            setError(t('organizer.selectEntity', { entityType: isDoubles ? t('common.pair') : t('common.player') }));
             return;
         }
 
@@ -99,7 +101,7 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
 
     const confirmWaitlistSwap = async () => {
         if (!entityToWaitlist) {
-            setError('Please select an option');
+            setError(t('organizer.selectOption'));
             return;
         }
 
@@ -123,7 +125,7 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
             <Card className="border-0 shadow-sm">
                 <Card.Body className="text-center py-4">
                     <Spinner animation="border" variant="primary" size="sm" />
-                    <p className="mt-2 mb-0 text-muted">Loading...</p>
+                    <p className="mt-2 mb-0 text-muted">{t('organizer.loading')}</p>
                 </Card.Body>
             </Card>
         );
@@ -134,8 +136,8 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
             <Card className="border-0 shadow-sm">
                 <Card.Body className="p-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5 className="mb-0">Organizer: Register {isDoubles ? 'Pair' : 'Player'}</h5>
-                        {isFull && <Badge bg="warning" text="dark">Tournament Full</Badge>}
+                        <h5 className="mb-0">{t('organizer.registerTitle', { entityType: isDoubles ? t('common.pair') : t('common.player') })}</h5>
+                        {isFull && <Badge bg="warning" text="dark">{t('organizer.tournamentFull')}</Badge>}
                     </div>
 
                     <RegistrationForm
@@ -159,12 +161,14 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
             {/* Waitlist Selection Modal */}
             <Modal show={showWaitlistModal} onHide={() => setShowWaitlistModal(false)} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>Tournament is Full - Select Option</Modal.Title>
+                    <Modal.Title>{t('organizer.tournamentFullTitle')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        The tournament is at capacity ({tournament.capacity} {isDoubles ? 'pairs' : 'players'}).
-                        Please choose an option:
+                        {t('organizer.tournamentFullMessage', {
+                            capacity: tournament.capacity,
+                            entityType: isDoubles ? t('common.pairs') : t('common.players')
+                        })}
                     </p>
 
                     <div className="list-group">
@@ -176,18 +180,17 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
                             onClick={() => handleWaitlistSelection('NEW_ENTITY')}
                         >
                             <div>
-                                <strong>✓ Add new {isDoubles ? 'pair' : 'player'} to waitlist</strong>
+                                <strong>{t('organizer.addToWaitlist', { entityType: isDoubles ? t('common.pair') : t('common.player') })}</strong>
                                 <br />
                                 <small className="text-muted">
-                                    Keep all current registrations and add the new {isDoubles ? 'pair' : 'player'} to
-                                    the waitlist
+                                    {t('organizer.addToWaitlistDesc', { entityType: isDoubles ? t('common.pair') : t('common.player') })}
                                 </small>
                             </div>
                         </button>
 
                         {/* Divider */}
                         <div className="list-group-item disabled bg-light">
-                            <small className="text-muted">— OR move an existing registration to waitlist —</small>
+                            <small className="text-muted">{t('organizer.orDivider')}</small>
                         </div>
 
                         {/* Existing registered entities */}
@@ -208,14 +211,14 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
                                             </strong>
                                             <br />
                                             <small>
-                                                Seed: {reg.seedPosition || '-'} | Score: {reg.pair?.seedingScore || 0}
+                                                {t('organizer.seedAndScore', { seed: reg.seedPosition || '-', score: reg.pair?.seedingScore || 0 })}
                                             </small>
                                         </div>
                                     ) : (
                                         <div>
                                             <strong>{reg.player?.name}</strong>
                                             <br />
-                                            <small>Seed: {reg.seedPosition || '-'}</small>
+                                            <small>{t('organizer.seed', { seed: reg.seedPosition || '-' })}</small>
                                         </div>
                                     )}
                                 </button>
@@ -224,14 +227,14 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowWaitlistModal(false)}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         variant="primary"
                         onClick={confirmWaitlistSwap}
                         disabled={!entityToWaitlist || loading}
                     >
-                        {loading ? 'Processing...' : 'Confirm and Register'}
+                        {loading ? t('organizer.processing') : t('organizer.confirmAndRegister')}
                     </Button>
                 </Modal.Footer>
             </Modal>

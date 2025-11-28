@@ -1,6 +1,7 @@
 // T072, T088-T091: Format Visualization Wrapper - Selects correct visualization with lazy loading
 import { useState } from 'react';
 import { Card, Button, Collapse, Alert, Spinner } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useFormatStructure } from '../services/tournamentViewService';
 import GroupStandingsTable from './GroupStandingsTable';
 import KnockoutBracket from './KnockoutBracket';
@@ -16,6 +17,7 @@ import ExpandableSection from './ExpandableSection';
  * @param {Object} tournament - Tournament object with formatType
  */
 const FormatVisualization = ({ tournament }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // T088: Lazy load format structure only when expanded
@@ -30,13 +32,13 @@ const FormatVisualization = ({ tournament }) => {
 
   // Format icons and labels
   const formatInfo = {
-    GROUP: { icon: '👥', label: 'Group Stage Format' },
-    KNOCKOUT: { icon: '🏆', label: 'Knockout Tournament' },
-    SWISS: { icon: '♟️', label: 'Swiss System' },
-    COMBINED: { icon: '🎯', label: 'Combined Format' }
+    GROUP: { icon: '👥', label: t('components.formatVisualization.formatTypes.group') },
+    KNOCKOUT: { icon: '🏆', label: t('components.formatVisualization.formatTypes.knockout') },
+    SWISS: { icon: '♟️', label: t('components.formatVisualization.formatTypes.swiss') },
+    COMBINED: { icon: '🎯', label: t('components.formatVisualization.formatTypes.combined') }
   };
 
-  const info = formatInfo[formatType] || { icon: '❓', label: 'Tournament Format' };
+  const info = formatInfo[formatType] || { icon: '❓', label: t('components.formatVisualization.formatTypes.unknown') };
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -56,7 +58,7 @@ const FormatVisualization = ({ tournament }) => {
             onClick={handleToggle}
             aria-expanded={isExpanded}
           >
-            {isExpanded ? '▼ Collapse' : '▶ Expand'} Format
+            {isExpanded ? `▼ ${t('components.formatVisualization.actions.collapse')}` : `▶ ${t('components.formatVisualization.actions.expand')}`}
           </Button>
         </div>
       </Card.Header>
@@ -68,17 +70,16 @@ const FormatVisualization = ({ tournament }) => {
             {isLoading && (
               <div className="text-center py-5">
                 <Spinner animation="border" variant="primary" />
-                <p className="mt-3 text-muted">Loading tournament structure...</p>
+                <p className="mt-3 text-muted">{t('components.formatVisualization.loading')}</p>
               </div>
             )}
 
             {/* Error state */}
             {isError && (
               <Alert variant="danger">
-                <Alert.Heading>Failed to Load Format</Alert.Heading>
+                <Alert.Heading>{t('components.formatVisualization.errorTitle')}</Alert.Heading>
                 <p>
-                  Unable to load the tournament format structure. This could be because the
-                  format has not been configured yet, or there was a connection error.
+                  {t('components.formatVisualization.errorMessage')}
                 </p>
                 <hr />
                 <div className="d-flex justify-content-end">
@@ -87,7 +88,7 @@ const FormatVisualization = ({ tournament }) => {
                     size="sm"
                     onClick={() => setIsExpanded(false)}
                   >
-                    Close
+                    {t('components.formatVisualization.close')}
                   </Button>
                 </div>
               </Alert>
@@ -102,7 +103,7 @@ const FormatVisualization = ({ tournament }) => {
                       <ExpandableSection
                         key={group.id}
                         title={group.name || `Group ${group.groupNumber}`}
-                        badge={<span className="badge bg-secondary">{group.players?.length || 0} players</span>}
+                        badge={<span className="badge bg-secondary">{t('components.formatVisualization.playersCount', { count: group.players?.length || 0 })}</span>}
                         defaultExpanded={false}
                       >
                         <GroupStandingsTable
@@ -113,7 +114,7 @@ const FormatVisualization = ({ tournament }) => {
                     ))}
                     {(!structure.groups || structure.groups.length === 0) && (
                       <Alert variant="info">
-                        Groups have not been created yet. Groups will be formed when the tournament starts.
+                        {t('components.formatVisualization.emptyStates.noGroups')}
                       </Alert>
                     )}
                   </div>
@@ -134,7 +135,7 @@ const FormatVisualization = ({ tournament }) => {
                     })}
                     {(!structure.brackets || structure.brackets.length === 0) && (
                       <Alert variant="info">
-                        Bracket has not been created yet. The bracket will be generated when the tournament starts.
+                        {t('components.formatVisualization.emptyStates.noBrackets')}
                       </Alert>
                     )}
                   </div>
@@ -159,9 +160,9 @@ const FormatVisualization = ({ tournament }) => {
 
                 {!['GROUP', 'KNOCKOUT', 'SWISS', 'COMBINED'].includes(formatType) && (
                   <Alert variant="warning">
-                    <strong>Unknown Format Type:</strong> {formatType}
+                    <strong>{t('components.formatVisualization.emptyStates.unknownFormat')}</strong> {formatType}
                     <br />
-                    This tournament uses a format type that is not yet supported for visualization.
+                    {t('components.formatVisualization.emptyStates.unknownFormatMessage')}
                   </Alert>
                 )}
               </>
@@ -170,10 +171,9 @@ const FormatVisualization = ({ tournament }) => {
             {/* Empty state - structure loaded but empty */}
             {!isLoading && !isError && !structure && (
               <Alert variant="info">
-                <Alert.Heading>Format Not Configured</Alert.Heading>
+                <Alert.Heading>{t('components.formatVisualization.emptyStates.notConfiguredTitle')}</Alert.Heading>
                 <p>
-                  The tournament format structure has not been set up yet.
-                  This will be available once the tournament organizer configures the format.
+                  {t('components.formatVisualization.emptyStates.notConfiguredMessage')}
                 </p>
               </Alert>
             )}

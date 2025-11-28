@@ -10,7 +10,6 @@ import {
   createTournament,
   updateTournament,
   TOURNAMENT_STATUS,
-  STATUS_LABELS,
   STATUS_VARIANTS
 } from '../services/tournamentService';
 import { listCategories } from '../services/categoryService';
@@ -219,9 +218,9 @@ const TournamentSetupPage = () => {
       setError(null);
 
       const result = await recalculateCategorySeeding(categoryId);
-      setSeedingSuccess(`Seeding recalculated for ${categoryName}: ${result.pairsUpdated} pairs updated`);
+      setSeedingSuccess(t('alerts.seedingRecalculated', { categoryName, pairsUpdated: result.pairsUpdated }));
     } catch (err) {
-      setError(`Failed to recalculate seeding: ${err.message}`);
+      setError(`${t('alerts.failedToRecalculateSeeding')}: ${err.message}`);
     } finally {
       setRecalculatingCategory(null);
     }
@@ -267,7 +266,7 @@ const TournamentSetupPage = () => {
                   <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                     <option value="">{t('filters.allStatuses')}</option>
                     {Object.keys(TOURNAMENT_STATUS).map(status => (
-                      <option key={status} value={status}>{STATUS_LABELS[status]}</option>
+                      <option key={status} value={status}>{t(`tournament.statuses.${status}`)}</option>
                     ))}
                   </Form.Select>
                 </Form.Group>
@@ -332,11 +331,11 @@ const TournamentSetupPage = () => {
                       </td>
                       <td>
                         {tournament.registeredCount || 0} / {tournament.capacity || '∞'}
-                        {tournament.waitlistedCount > 0 && ` (${tournament.waitlistedCount} waitlisted)`}
+                        {tournament.waitlistedCount > 0 && ` ${t('common.waitlistedCount', { count: tournament.waitlistedCount })}`}
                       </td>
                       <td>
                         <Badge bg={STATUS_VARIANTS[tournament.status]}>
-                          {STATUS_LABELS[tournament.status]}
+                          {t(`tournament.statuses.${tournament.status}`)}
                         </Badge>
                       </td>
                       <td>

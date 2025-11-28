@@ -24,13 +24,33 @@
     "advanced": "Advanced",
     "required": "*",
     "pair": "pair",
+    "pairs": "pairs",
+    "player": "player",
+    "players": "players",
     "tournament": "tournament",
     "tournaments": "tournaments",
     "unknownCategory": "Unknown Category",
     "playersCount": "{{count}} players",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "rankings": "rankings",
+    "loadingResource": "Loading {{resource}}...",
+    "tournamentFormat": "tournament format",
+    "tournamentRules": "tournament rules",
+    "group": "Group",
+    "bracket": "Bracket",
+    "round": "Round",
+    "data": "data",
+    "registering": "Registering...",
+    "recalculating": "Recalculating...",
+    "category": "category",
+    "stats": "Stats",
+    "creating": "Creating...",
+    "deleting": "Deleting...",
+    "saveChanges": "Save Changes",
+    "waitlistedCount": "({{count}} waitlisted)"
   },
   "nav": {
+    "home": "Home",
     "rankings": "Rankings",
     "pairRankings": "Pair Rankings",
     "tournaments": "Tournaments",
@@ -49,7 +69,18 @@
     "registerPair": "Register Pair",
     "cancel": "Cancel",
     "saveFormatConfig": "Save Format & Configuration",
-    "saveScoringRules": "Save Scoring Rules"
+    "saveScoringRules": "Save Scoring Rules",
+    "registerForCategories": "Register for {{count}} Categories",
+    "createTournament": "Create Tournament",
+    "edit": "Edit",
+    "saveChanges": "Save Changes",
+    "configureRules": "Configure Rules",
+    "recalcSeeding": "Recalc Seeding"
+  },
+  "filters": {
+    "allCategories": "All Categories",
+    "allStatuses": "All Statuses",
+    "allFormats": "All Formats"
   },
   "auth": {
     "loginTitle": "Login",
@@ -91,12 +122,17 @@
       "title": "Category Management",
       "subtitle": "Create and manage tournament categories"
     },
+    "tournamentSetup": {
+      "title": "Tournament Management",
+      "description": "Create and manage tournaments"
+    },
     "rankings": {
       "title": "Category Rankings",
       "subtitle": "View player rankings across tournament categories"
     },
     "pairRankings": {
       "title": "Pair Rankings",
+      "subtitle": "View rankings for all doubles pairs in each category",
       "selectCategory": "Select Doubles Category",
       "noCategoriesAvailable": "No doubles categories available",
       "aboutTitle": "About Pair Rankings"
@@ -122,11 +158,105 @@
       "title": "Tournament Registration",
       "description": "Browse and register for upcoming tournaments"
     },
+    "registration": {
+      "title": "Player Registration",
+      "description": "Register players for tournament categories",
+      "currentRegistrations": "Current Registrations",
+      "availableCategories": "Available Categories"
+    },
     "tournamentRulesSetup": {
       "title": "Tournament Rules Setup"
     },
+    "tournamentRules": {
+      "title": "Tournament Rules",
+      "defaultScoringRules": "Default Scoring Rules",
+      "ruleOverrides": "Rule Overrides",
+      "groupOverrides": "Group Stage Overrides",
+      "bracketOverrides": "Bracket Overrides",
+      "roundOverrides": "Round Overrides",
+      "matchOverrides": "Match Overrides"
+    },
     "categoryRankings": {
       "leaderboard": "{{category}} - Leaderboard"
+    },
+    "tournamentView": {
+      "defaultTitle": "Tournament Details"
+    }
+  },
+  "components": {
+    "playerList": {
+      "title": {
+        "pairs": "Registered Pairs",
+        "singles": "Registered Players"
+      },
+      "loading": "Loading player list...",
+      "errorTitle": "Error Loading Players",
+      "emptyTitle": "No Players Registered Yet",
+      "emptyMessage": "This tournament has no registered players at the moment.",
+      "emptySubtext": "Be the first to register when registration opens!",
+      "searchPlaceholder": "Search players by name...",
+      "clear": "Clear",
+      "waitlist": "Waitlist ({{count}} {{playerLabel}})",
+      "player": "player",
+      "players": "players",
+      "sortedBy": "Sorted by: {{order}}",
+      "sortOrder": {
+        "registrationTime": "Registration Time",
+        "alphabetical": "Alphabetical"
+      },
+      "tableHeaders": {
+        "number": "#",
+        "pair": "Pair",
+        "playerName": "Player Name",
+        "score": "Score",
+        "ranking": "Ranking",
+        "seed": "Seed",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "noMatchSearch": "No registered players match \"{{searchTerm}}\"",
+      "noRegisteredPlayers": "No registered players yet.",
+      "noWaitlistedPlayers": "No waitlisted players.",
+      "noMatchSearchWaitlist": "No waitlisted players match \"{{searchTerm}}\"",
+      "unregister": "Unregister",
+      "removing": "Removing...",
+      "confirmUnregister": {
+        "title": "Confirm Unregistration",
+        "message": "Are you sure you want to unregister",
+        "messageSuffix": "from this tournament?",
+        "cancel": "Cancel",
+        "confirm": "Unregister"
+      },
+      "errors": {
+        "failedToLoad": "Failed to load player list",
+        "failedToUnregister": "Failed to unregister: {{message}}"
+      }
+    },
+    "formatVisualization": {
+      "formatTypes": {
+        "group": "Group Stage Format",
+        "knockout": "Knockout Tournament",
+        "swiss": "Swiss System",
+        "combined": "Combined Format",
+        "unknown": "Tournament Format"
+      },
+      "actions": {
+        "expand": "Expand Format",
+        "collapse": "Collapse Format"
+      },
+      "loading": "Loading tournament structure...",
+      "errorTitle": "Failed to Load Format",
+      "errorMessage": "Unable to load the tournament format structure. This could be because the format has not been configured yet, or there was a connection error.",
+      "close": "Close",
+      "playersCount": "{{count}} players",
+      "emptyStates": {
+        "noGroups": "Groups have not been created yet. Groups will be formed when the tournament starts.",
+        "noBrackets": "Bracket has not been created yet. The bracket will be generated when the tournament starts.",
+        "unknownFormat": "Unknown Format Type:",
+        "unknownFormatMessage": "This tournament uses a format type that is not yet supported for visualization.",
+        "notConfiguredTitle": "Format Not Configured",
+        "notConfiguredMessage": "The tournament format structure has not been set up yet. This will be available once the tournament organizer configures the format."
+      }
     }
   },
   "form": {
@@ -150,7 +280,18 @@
       "selectExistingPair": "Select existing pair",
       "createNewPair": "Create new pair",
       "selectPair": "Select Pair",
-      "selectPlayer2": "Select Player 2"
+      "selectPlayer2": "Select Player 2",
+      "selectDoublesCategory": "Select Doubles Category",
+      "selectPlayer": "Select Player",
+      "category": "Category",
+      "tournamentName": "Tournament Name",
+      "clubName": "Club Name",
+      "addressOptional": "Address (Optional)",
+      "maximumPlayers": "Maximum Players",
+      "singleDayTournament": "Single Day Tournament",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "format": "Format"
     },
     "options": {
       "allTypes": "All Types",
@@ -163,6 +304,8 @@
       "mixed": "Mixed",
       "male": "Male",
       "female": "Female",
+      "men": "Men's",
+      "women": "Women's",
       "admin": "Admin",
       "organizer": "Organizer",
       "player": "Player",
@@ -171,11 +314,22 @@
       "withAccount": "With Account",
       "withoutAccount": "Without Account",
       "allPlayers": "All Players",
-      "selectGender": "Select Gender"
+      "selectGender": "Select Gender",
+      "selectCategory": "-- Select a category --",
+      "selectType": "Select type...",
+      "selectAgeGroup": "Select age group...",
+      "allAges": "All Ages"
     },
     "placeholders": {
       "selectPair": "-- Select a pair --",
-      "selectPartner": "-- Select partner --"
+      "selectPartner": "-- Select partner --",
+      "choosePlayer": "Choose a player...",
+      "tournamentName": "e.g. Summer Championship 2025",
+      "selectCategory": "-- Select category --",
+      "clubName": "e.g. Tennis Club Bratislava",
+      "address": "Street, City, Country",
+      "tournamentDescription": "Optional tournament details...",
+      "leaveEmptyForUnlimited": "Leave empty for unlimited"
     }
   },
   "table": {
@@ -205,7 +359,9 @@
       "dates": "Dates",
       "format": "Format",
       "location": "Location",
-      "players": "Players"
+      "players": "Players",
+      "player1": "Player 1",
+      "player2": "Player 2"
     }
   },
   "modals": {
@@ -214,6 +370,12 @@
     },
     "editCategory": {
       "title": "Edit Category"
+    },
+    "createTournament": {
+      "title": "Create Tournament"
+    },
+    "editTournament": {
+      "title": "Edit Tournament"
     },
     "confirmDelete": {
       "title": "Confirm Delete"
@@ -264,10 +426,49 @@
     },
     "confirmUnregistration": {
       "title": "Confirm Unregistration",
-      "message": "Are you sure you want to unregister from {tournament}?"
+      "message": "Are you sure you want to unregister from {{tournament}}?"
     },
     "registerPair": {
-      "title": "Register Pair for {tournament}"
+      "title": "Register Pair for {{tournament}}"
+    }
+  },
+  "ruleCascade": {
+    "scoringRules": "Scoring Rules",
+    "historicalSnapshot": "Historical Snapshot",
+    "rulesLockedAt": "Rules locked at match completion:",
+    "effectiveRules": "Effective Rules",
+    "ruleCascadeTitle": "Rule Cascade",
+    "cascadeDescription": "Rules are inherited from tournament defaults and can be overridden at each level. Later levels override earlier ones.",
+    "overrides": "Overrides",
+    "baseRules": "Base rules",
+    "snapshotNote": "These rules are a historical snapshot taken when the match was completed. They cannot be changed and represent the exact rules used during the match.",
+    "levels": {
+      "tournament": "Tournament Default",
+      "group": "Group {{number}}",
+      "bracket": "{{type}} Bracket",
+      "round": "Round {{number}}",
+      "match": "Match {{number}}"
+    },
+    "levelLabels": {
+      "tournament": "TOURNAMENT",
+      "group": "GROUP",
+      "bracket": "BRACKET",
+      "round": "ROUND",
+      "match": "MATCH"
+    },
+    "ruleNames": {
+      "formatType": "Scoring Format",
+      "scoringFormat": "Scoring Format",
+      "winningSets": "Winning Sets",
+      "winningTiebreaks": "Winning Tiebreaks",
+      "winningGames": "Winning Games",
+      "winningPoints": "Winning Points",
+      "advantageRule": "Advantage Rule",
+      "tiebreakTrigger": "Tiebreak Trigger",
+      "finalSetTiebreak": "Final Set Tiebreak",
+      "pointsToWin": "Points to Win",
+      "gameFormat": "Game Format",
+      "setFormat": "Set Format"
     }
   },
   "alerts": {
@@ -279,7 +480,9 @@
     "bracketRulesUpdated": "Bracket rules updated successfully!",
     "groupRulesUpdated": "Group rules updated successfully!",
     "matchRulesUpdated": "Match rules updated successfully!",
-    "roundRulesUpdated": "Round rules updated successfully!"
+    "roundRulesUpdated": "Round rules updated successfully!",
+    "seedingRecalculated": "Seeding recalculated for {{categoryName}}: {{pairsUpdated}} pairs updated",
+    "failedToRecalculateSeeding": "Failed to recalculate seeding"
   },
   "badges": {
     "hasAccount": "Can Login",
@@ -293,10 +496,15 @@
     "waitlisted": "Waitlisted",
     "withdrawn": "Withdrawn",
     "cancelled": "Cancelled",
+    "active": "Active",
+    "suspended": "Suspended",
     "registeredDesc": "You have a confirmed spot in this tournament",
     "waitlistedDesc": "Tournament is at capacity. You will be notified if a spot opens up.",
     "withdrawnDesc": "You have withdrawn from this tournament",
-    "cancelledDesc": "This tournament has been cancelled"
+    "cancelledDesc": "This tournament has been cancelled",
+    "alreadyRegistered": "Already Registered",
+    "eligible": "Eligible",
+    "ineligible": "Ineligible"
   },
   "placeholders": {
     "tournamentName": "e.g. Summer Championship 2025",
@@ -319,12 +527,12 @@
     "overrides": "Overrides"
   },
   "registration": {
-    "selectEntity": "Select {entityType}",
-    "chooseEntity": "Choose a {entityType}...",
-    "pairsInCategoryHint": "Only pairs in the {categoryName} category are shown",
+    "selectEntity": "Select {{entityType}}",
+    "chooseEntity": "Choose a {{entityType}}...",
+    "pairsInCategoryHint": "Only pairs in the {{categoryName}} category are shown",
     "allPlayersHint": "Showing all players in the system",
     "registering": "Registering...",
-    "registerEntity": "Register {entityType}",
+    "registerEntity": "Register {{entityType}}",
     "capacityWarning": "Tournament is at capacity. You'll be asked to select who to move to waitlist."
   },
   "tournament": {
@@ -337,6 +545,13 @@
       "SINGLES": "Singles",
       "DOUBLES": "Doubles",
       "MIXED_DOUBLES": "Mixed Doubles"
+    },
+    "pairs": "pairs",
+    "statuses": {
+      "SCHEDULED": "Scheduled",
+      "IN_PROGRESS": "In Progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
     },
     "genders": {
       "MEN": "Men",
@@ -415,14 +630,15 @@
     "formats": {
       "knockout": "Knockout",
       "group": "Group Stage",
+      "groupStage": "Group Stage",
       "swiss": "Swiss System",
       "combined": "Combined",
       "singleElimination": "Single Elimination",
       "doubleElimination": "Double Elimination",
       "playUntilPlacement": "Play until placement",
-      "groupsOf": "Groups of {size}",
-      "rounds": "{count} rounds",
-      "topAdvance": "Groups of {size}, top {advance} advance",
+      "groupsOf": "Groups of {{size}}",
+      "rounds": "{{count}} rounds",
+      "topAdvance": "Groups of {{size}}, top {{advance}} advance",
       "matchGuarantee1": "Single Elimination (1 match guarantee)",
       "matchGuarantee2": "Double Elimination (2 match guarantee)"
     },
@@ -613,7 +829,7 @@
     "phoneDigits": "Phone must have 7-15 digits after the + sign",
     "phoneFormat": "Phone must be in international format: +CountryCodeNumber (e.g., +12345678901)",
     "createPlayerFailed": "Failed to create player profile",
-    "validationFailed": "Validation failed: {details}",
+    "validationFailed": "Validation failed: {{details}}",
     "boundaryTitle": "Oops! Something went wrong",
     "boundaryMessage": "An unexpected error occurred while loading this page. This might be due to:",
     "boundaryTechnical": "A temporary technical issue",
@@ -622,15 +838,19 @@
     "tryAgain": "Try Again",
     "goHome": "Go to Homepage",
     "errorDetails": "Error Details (Development Mode)",
-    "registrationFailed": "Registration failed",
-    "failedToLoad": "Failed to load {resource}",
-    "failedToRegister": "Failed to register {resource}",
-    "failedToUnregister": "Failed to unregister from {resource}",
+    "registrationFailed": "Failed to register for {{count}} categories: {{categories}}",
+    "failedToLoad": "Failed to load {{resource}}",
+    "failedToCreate": "Failed to create {{resource}}",
+    "failedToUpdate": "Failed to update {{resource}}",
+    "failedToRegister": "Failed to register {{resource}}",
+    "failedToUnregister": "Failed to unregister from {{resource}}",
     "failedToLoadTournamentRules": "Failed to load tournament rules",
     "failedToSaveTournamentFormat": "Failed to save tournament format",
     "failedToSaveScoringRules": "Failed to save scoring rules",
     "categoryNotFound": "Category not found",
-    "failedToLoadRankings": "Failed to load rankings"
+    "failedToLoadRankings": "Failed to load rankings",
+    "failedToRegisterPlayer": "Failed to register player for categories",
+    "playersNotRegisteredInCategory": "Players must be registered in the tournament category before joining the waitlist"
   },
   "help": {
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
@@ -638,32 +858,84 @@
     "phoneFormat": "International format includes country code (e.g., +421 for Slovakia, +1 for USA/Canada). Example: +421901234567",
     "rawConfigExplanation": "Raw JSON configuration for advanced users and developers. This shows the exact tournament settings as stored in the database.",
     "whyDuplicatesMatter": "Why do duplicates matter?",
+    "maximumPlayersHint": "Leave empty for unlimited capacity",
+    "recalculateSeeding": "Recalculate pair seeding based on current player rankings",
     "duplicateExplanation": "Creating duplicate profiles can lead to incorrect tournament seeding and ranking calculations. Only create a new profile if you're certain this is a different person.",
     "youWillBePlayer1": "You will be Player 1. Select your partner below.",
     "partnerMustMeetRequirements": "Partner must meet category requirements (age, gender)",
-    "unregistrationNote": "If you are currently registered (not waitlisted), your spot will be given to the next player on the waitlist."
+    "unregistrationNote": "If you are currently registered (not waitlisted), your spot will be given to the next player on the waitlist.",
+    "onlyDoublesShown": "Only doubles categories are shown",
+    "aboutPairRankings": "About Pair Rankings",
+    "pairPointsDescription": "Total ranking points earned from tournament results",
+    "seedingScoreDescription": "Combined score from both players' individual rankings used for tournament seeding",
+    "winRateDescription": "Percentage of matches won",
+    "rankingsAutoUpdate": "Rankings are automatically updated after each tournament completion",
+    "defaultScoringRulesDescription": "These are the default scoring rules that apply to all matches in this tournament unless overridden.",
+    "ruleOverridesDescription": "Rule overrides allow you to customize scoring for specific groups, brackets, rounds, or matches.",
+    "profileCompleteness": "⚠️ indicates incomplete profile (missing birth date or gender)"
   },
   "messages": {
     "loadingTournaments": "Loading tournaments...",
     "loadingPairs": "Loading pairs...",
     "noUpcomingTournaments": "No upcoming tournaments available. Check back later!",
     "noExistingPairs": "No existing pairs found for this category. Please create a new pair.",
-    "pairAddedToWaitlist": "Pair added to waitlist for {tournament}. {description}",
-    "pairRegisteredForTournament": "Pair successfully registered for {tournament}!",
-    "addedToWaitlist": "Added to waitlist for {tournament}. {description}",
-    "registeredForTournament": "Successfully registered for {tournament}!",
-    "unregisteredFromTournament": "Successfully unregistered from {tournament}",
-    "playerPromotedFromWaitlist": "{player} has been promoted from the waitlist.",
+    "pairAddedToWaitlist": "Pair added to waitlist for {{tournament}}. {{description}}",
+    "pairRegisteredForTournament": "Pair successfully registered for {{tournament}}!",
+    "noCategoriesYet": "No categories have been created yet.",
+    "addedToWaitlist": "Added to waitlist for {{tournament}}. {{description}}",
+    "registeredForTournament": "Successfully registered for {{tournament}}!",
+    "unregisteredFromTournament": "Successfully unregistered from {{tournament}}",
+    "playerPromotedFromWaitlist": "{{player}} has been promoted from the waitlist.",
     "removedFromCategory": "You have been removed from the category (no participation history).",
     "loadingTournamentRules": "Loading tournament rules...",
     "formatSavedSuccess": "Tournament format saved successfully!",
     "scoringRulesSavedSuccess": "Scoring rules saved successfully!",
     "noRankingsYet": "No rankings available for this category yet. Rankings are updated after tournament completion.",
     "lastUpdated": "Last updated: {{date}}",
-    "showingRankedPlayers": "Showing {{count}} ranked players"
+    "showingRankedPlayers": "Showing {{count}} ranked players",
+    "noDoublesCategoriesAvailable": "No doubles categories available",
+    "noPairRankingsYet": "No pair rankings available for this category yet. Rankings will appear after tournaments are completed.",
+    "noDefaultScoringRules": "No default scoring rules have been set for this tournament.",
+    "selectPlayerFirst": "Please select a player to view available categories",
+    "checkingEligibility": "Checking eligibility...",
+    "selectCategoriesToRegister": "Select one or more categories to register for",
+    "registrationSuccess": "Successfully registered for {{count}} categories!"
   },
   "validation": {
     "selectPlayer2": "Please select Player 2 for the new pair",
-    "selectOrCreatePair": "Please select a pair or create a new one"
+    "selectOrCreatePair": "Please select a pair or create a new one",
+    "selectAtLeastOneCategory": "Please select at least one category",
+    "requiredFields": "{{fields}} are required",
+    "nameAndCategoryAndClub": "Name, Category, and Club Name",
+    "endDateAfterStartDate": "End date must be on or after start date"
+  },
+  "pagination": {
+    "showingRange": "Showing {{from}}-{{to}} of {{total}} {{resource}}",
+    "total": "Total"
+  },
+  "categories": {
+    "stats": {
+      "tournaments": "Tournaments",
+      "registrations": "Registrations"
+    },
+    "cannotChangeAfterCreation": "Type, age group, and gender cannot be changed after creation",
+    "categoryName": "Category name"
+  },
+  "organizer": {
+    "registerTitle": "Organizer: Register {{entityType}}",
+    "tournamentFull": "Tournament Full",
+    "loading": "Loading...",
+    "selectEntity": "Please select a {{entityType}}",
+    "failedToLoadData": "Failed to load data",
+    "selectOption": "Please select an option",
+    "tournamentFullTitle": "Tournament is Full - Select Option",
+    "tournamentFullMessage": "The tournament is at capacity ({{capacity}} {{entityType}}). Please choose an option:",
+    "addToWaitlist": "✓ Add new {{entityType}} to waitlist",
+    "addToWaitlistDesc": "Keep all current registrations and add the new {{entityType}} to the waitlist",
+    "orDivider": "— OR move an existing registration to waitlist —",
+    "seedAndScore": "Seed: {{seed}} | Score: {{score}}",
+    "seed": "Seed: {{seed}}",
+    "processing": "Processing...",
+    "confirmAndRegister": "Confirm and Register"
   }
 }

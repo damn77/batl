@@ -105,15 +105,16 @@ const CategoryManagementPage = () => {
         header: t('form.labels.ageGroup'),
         cell: ({ getValue }) => {
           const value = getValue();
-          return value === 'ALL_AGES' ? 'All Ages' : `${value.replace('AGE_', '')}+`;
+          return value === 'ALL_AGES' ? t('form.options.allAges') : `${value.replace('AGE_', '')}+`;
         }
       },
       {
         accessorKey: 'gender',
         header: t('form.labels.gender'),
         cell: ({ getValue }) => {
-          const genderMap = { MEN: "Men's", WOMEN: "Women's", MIXED: 'Mixed' };
-          return genderMap[getValue()] || getValue();
+          const value = getValue();
+          const genderMap = { MEN: t('form.options.men'), WOMEN: t('form.options.women'), MIXED: t('form.options.mixed') };
+          return genderMap[value] || value;
         }
       },
       {
@@ -123,8 +124,8 @@ const CategoryManagementPage = () => {
           const counts = row.original._counts || {};
           return (
             <div className="small">
-              <div>Tournaments: {counts.tournaments || 0}</div>
-              <div>Registrations: {counts.registrations || 0}</div>
+              <div>{t('categories.stats.tournaments')}: {counts.tournaments || 0}</div>
+              <div>{t('categories.stats.registrations')}: {counts.registrations || 0}</div>
             </div>
           );
         }
@@ -234,7 +235,7 @@ const CategoryManagementPage = () => {
       setShowDeleteConfirm(false);
       loadCategories();
     } catch (err) {
-      setError(err.message || 'Failed to delete category');
+      setError(err.message || t('errors.failedToDelete', { resource: t('common.category') }));
       setShowDeleteConfirm(false);
     } finally {
       setSubmitting(false);
@@ -265,22 +266,22 @@ const CategoryManagementPage = () => {
             <Row>
               <Col md={4}>
                 <Form.Group>
-                  <Form.Label>Type</Form.Label>
+                  <Form.Label>{t('form.labels.type')}</Form.Label>
                   <Form.Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">All Types</option>
-                    <option value="SINGLES">Singles</option>
-                    <option value="DOUBLES">Doubles</option>
+                    <option value="">{t('form.options.allTypes')}</option>
+                    <option value="SINGLES">{t('form.options.singles')}</option>
+                    <option value="DOUBLES">{t('form.options.doubles')}</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={4}>
                 <Form.Group>
-                  <Form.Label>Age Group</Form.Label>
+                  <Form.Label>{t('form.labels.ageGroup')}</Form.Label>
                   <Form.Select value={ageGroupFilter} onChange={(e) => setAgeGroupFilter(e.target.value)}>
-                    <option value="">All Age Groups</option>
+                    <option value="">{t('form.options.allAgeGroups')}</option>
                     {Object.keys(AGE_GROUPS).map(ag => (
                       <option key={ag} value={ag}>
-                        {ag === 'ALL_AGES' ? 'All Ages' : `${ag.replace('AGE_', '')}+`}
+                        {ag === 'ALL_AGES' ? t('form.options.allAges') : `${ag.replace('AGE_', '')}+`}
                       </option>
                     ))}
                   </Form.Select>
@@ -288,12 +289,12 @@ const CategoryManagementPage = () => {
               </Col>
               <Col md={4}>
                 <Form.Group>
-                  <Form.Label>Gender</Form.Label>
+                  <Form.Label>{t('form.labels.gender')}</Form.Label>
                   <Form.Select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
-                    <option value="">All Genders</option>
-                    <option value="MEN">Men&apos;s</option>
-                    <option value="WOMEN">Women&apos;s</option>
-                    <option value="MIXED">Mixed</option>
+                    <option value="">{t('form.options.allGenders')}</option>
+                    <option value="MEN">{t('form.options.men')}</option>
+                    <option value="WOMEN">{t('form.options.women')}</option>
+                    <option value="MIXED">{t('form.options.mixed')}</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -336,7 +337,7 @@ const CategoryManagementPage = () => {
                 </tbody>
               </Table>
               <div className="text-muted small">
-                {t('pagination.total')}: {categories.length} {t('nav.categories')}
+                {t('pagination.total')}: {categories.length} {t('nav.categories').toLowerCase()}
               </div>
             </Card.Body>
           </Card>
@@ -352,62 +353,62 @@ const CategoryManagementPage = () => {
               {formError && <Alert variant="danger">{formError}</Alert>}
 
               <Form.Group className="mb-3">
-                <Form.Label>Type *</Form.Label>
+                <Form.Label>{t('form.labels.type')} {t('common.required')}</Form.Label>
                 <Form.Select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   required
                 >
-                  <option value="">Select type...</option>
-                  <option value="SINGLES">Singles</option>
-                  <option value="DOUBLES">Doubles</option>
+                  <option value="">{t('form.options.selectType')}</option>
+                  <option value="SINGLES">{t('form.options.singles')}</option>
+                  <option value="DOUBLES">{t('form.options.doubles')}</option>
                 </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Age Group *</Form.Label>
+                <Form.Label>{t('form.labels.ageGroup')} {t('common.required')}</Form.Label>
                 <Form.Select
                   value={formData.ageGroup}
                   onChange={(e) => setFormData({ ...formData, ageGroup: e.target.value })}
                   required
                 >
-                  <option value="">Select age group...</option>
+                  <option value="">{t('form.options.selectAgeGroup')}</option>
                   {Object.keys(AGE_GROUPS).map(ag => (
                     <option key={ag} value={ag}>
-                      {ag === 'ALL_AGES' ? 'All Ages' : `${ag.replace('AGE_', '')}+`}
+                      {ag === 'ALL_AGES' ? t('form.options.allAges') : `${ag.replace('AGE_', '')}+`}
                     </option>
                   ))}
                 </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Gender *</Form.Label>
+                <Form.Label>{t('form.labels.gender')} {t('common.required')}</Form.Label>
                 <Form.Select
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   required
                 >
-                  <option value="">Select gender...</option>
-                  <option value="MEN">Men&apos;s</option>
-                  <option value="WOMEN">Women&apos;s</option>
-                  <option value="MIXED">Mixed</option>
+                  <option value="">{t('form.options.selectGender')}</option>
+                  <option value="MEN">{t('form.options.men')}</option>
+                  <option value="WOMEN">{t('form.options.women')}</option>
+                  <option value="MIXED">{t('form.options.mixed')}</option>
                 </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('form.labels.description')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Optional description..."
+                  placeholder={t('placeholders.description')}
                 />
               </Form.Group>
 
               {formData.type && formData.ageGroup && formData.gender && (
                 <Alert variant="info">
-                  Category name: <strong>{formatCategoryName(formData.type, formData.ageGroup, formData.gender)}</strong>
+                  {t('categories.categoryName')}: <strong>{formatCategoryName(formData.type, formData.ageGroup, formData.gender)}</strong>
                 </Alert>
               )}
             </Modal.Body>
@@ -433,11 +434,11 @@ const CategoryManagementPage = () => {
 
               <Alert variant="info">
                 <strong>{selectedCategory?.name}</strong>
-                <div className="small text-muted">Type, age group, and gender cannot be changed after creation</div>
+                <div className="small text-muted">{t('categories.cannotChangeAfterCreation')}</div>
               </Alert>
 
               <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('form.labels.description')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
