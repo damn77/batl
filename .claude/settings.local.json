@@ -18,7 +18,10 @@
       "Bash(\"$USERPROFILE/bin/render.exe\" config get)",
       "Bash(\"$USERPROFILE/bin/render.exe\" whoami --output json)",
       "Bash(\"$USERPROFILE/bin/render.exe\" projects --output json)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(git show:*)",
+      "Bash(xargs:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

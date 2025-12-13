@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import RegistrationStatusBadge from '../components/RegistrationStatusBadge';
 import TournamentFormatBadge from '../components/TournamentFormatBadge';
-import { listTournaments, STATUS_LABELS as TOURNAMENT_STATUS_LABELS } from '../services/tournamentService';
+import { listTournaments } from '../services/tournamentService';
 import {
   registerForTournament,
   unregisterFromTournament,
@@ -83,7 +83,7 @@ const TournamentRegistrationPage = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || t('errors.failedToLoad', { resource: t('common.tournaments') }));
+      setError(err.message || t('errors.failedToLoad', { resource: t('common.tournaments') }));
     } finally {
       setLoading(false);
     }
@@ -192,9 +192,8 @@ const TournamentRegistrationPage = () => {
     } catch (err) {
       console.error('Pair registration error:', err);
 
-      // Handle both apiClient custom error object and raw axios error
-      const errorData = err.response?.data?.error || err;
-      const violations = errorData?.details?.violations || errorData?.violations;
+      // apiClient returns custom error object with { status, code, message, details }
+      const violations = err.details?.violations;
 
       if (violations) {
         setError(
@@ -208,7 +207,7 @@ const TournamentRegistrationPage = () => {
           </div>
         );
       } else {
-        setError(errorData?.message || err.message || t('errors.failedToRegister', { resource: t('common.pair') }));
+        setError(err.message || t('errors.failedToRegister', { resource: t('common.pair') }));
       }
     } finally {
       setPairModalLoading(false);
@@ -249,8 +248,7 @@ const TournamentRegistrationPage = () => {
       // Auto-clear success after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
-      const errorData = err.response?.data?.error;
-      setError(errorData?.message || t('errors.failedToRegister', { resource: t('common.tournament') }));
+      setError(err.message || t('errors.failedToRegister', { resource: t('common.tournament') }));
     } finally {
       setLoadingRegistrations({ ...loadingRegistrations, [tournamentId]: false });
     }
@@ -294,8 +292,7 @@ const TournamentRegistrationPage = () => {
       // Auto-clear success after 7 seconds
       setTimeout(() => setSuccess(null), 7000);
     } catch (err) {
-      const errorData = err.response?.data?.error;
-      setError(errorData?.message || t('errors.failedToUnregister', { resource: t('common.tournament') }));
+      setError(err.message || t('errors.failedToUnregister', { resource: t('common.tournament') }));
     } finally {
       setLoadingRegistrations({ ...loadingRegistrations, [tournamentId]: false });
       setSelectedTournament(null);
@@ -458,7 +455,7 @@ const TournamentRegistrationPage = () => {
 
                       <ListGroup.Item>
                         <strong>{t('table.headers.status')}:</strong>{' '}
-                        <Badge bg="info">{TOURNAMENT_STATUS_LABELS[tournament.status]}</Badge>
+                        <Badge bg="info">{t(`tournament.statuses.${tournament.status}`)}</Badge>
                       </ListGroup.Item>
 
                       {/* Display tournament format with icon and tooltip */}

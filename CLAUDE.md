@@ -31,6 +31,64 @@ tests/
 
 NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management.: Follow standard conventions
 
+## Error Handling Best Practices
+
+**CRITICAL: API Client Error Structure**
+
+The frontend uses a custom `apiClient` (axios wrapper) at `frontend/src/services/apiClient.js` that transforms all axios errors into a standardized format. This transformation happens in the response interceptor.
+
+**Error Object Structure:**
+```javascript
+{
+  status: number,    // HTTP status code (e.g., 400, 404, 500)
+  code: string,      // Error code from backend or 'ERROR'/'NETWORK_ERROR'/'REQUEST_ERROR'
+  message: string,   // Human-readable error message from backend
+  details: object    // Additional error details (e.g., { violations: [...] })
+}
+```
+
+**CORRECT Error Handling Pattern:**
+```javascript
+try {
+  const result = await someApiCall();
+  // Handle success
+} catch (err) {
+  // ✅ CORRECT: Access error message directly
+  setError(err.message || t('errors.genericFallback'));
+
+  // ✅ CORRECT: Check for validation violations
+  if (err.details?.violations) {
+    // Handle violations array
+  }
+}
+```
+
+**INCORRECT Pattern (DO NOT USE):**
+```javascript
+catch (err) {
+  // ❌ WRONG: This is the raw axios pattern, will NOT work
+  const errorData = err.response?.data?.error;
+  setError(errorData?.message || 'fallback');
+
+  // ❌ WRONG: Violations are not here
+  const violations = err.response?.data?.error?.details?.violations;
+}
+```
+
+**Why This Matters:**
+- The `apiClient` interceptor already extracts `err.response?.data?.error?.message` → `err.message`
+- Using the old axios pattern means backend error messages are NEVER displayed to users
+- Users see generic fallback messages instead of specific API errors
+- This was a widespread bug fixed in 2025-11-27 across multiple pages
+
+**Files That Use Correct Pattern:**
+- `frontend/src/pages/TournamentRegistrationPage.jsx`
+- `frontend/src/pages/PlayerRegistrationPage.jsx`
+- `frontend/src/pages/PairRegistrationPage.jsx`
+
+**Reference Implementation:**
+See `frontend/src/services/apiClient.js` lines 38-55 for detailed documentation of the error structure and usage patterns.
+
 ## Development Process
 
 **CRITICAL: Keep Documentation in Sync with Code**

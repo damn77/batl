@@ -35,7 +35,24 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle errors globally
+/**
+ * Response interceptor - handle errors globally
+ *
+ * Error structure returned to components:
+ * {
+ *   status: number,           // HTTP status code
+ *   code: string,             // Error code from backend or 'ERROR'/'NETWORK_ERROR'/'REQUEST_ERROR'
+ *   message: string,          // Human-readable error message from backend
+ *   details: object           // Additional error details (e.g., violations array)
+ * }
+ *
+ * Usage in components:
+ * catch (err) {
+ *   // Display backend error message: err.message
+ *   // Check for violations: err.details?.violations
+ *   setError(err.message || t('errors.genericFallback'));
+ * }
+ */
 apiClient.interceptors.response.use(
   (response) => {
     // Log successful response in development

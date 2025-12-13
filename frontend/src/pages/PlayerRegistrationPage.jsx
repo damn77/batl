@@ -9,7 +9,6 @@ import {
   checkEligibility,
   bulkRegisterPlayer,
   getPlayerRegistrations,
-  STATUS_LABELS,
   STATUS_VARIANTS
 } from '../services/registrationService';
 
@@ -82,7 +81,7 @@ const PlayerRegistrationPage = () => {
         setEligibilityResults(results);
       }
     } catch (err) {
-      setError(t('errors.failedToLoad', { resource: t('common.data') }));
+      setError(err.message || t('errors.failedToLoad', { resource: t('common.data') }));
     } finally {
       setLoading(false);
     }
@@ -151,6 +150,7 @@ const PlayerRegistrationPage = () => {
         );
       }
     } catch (err) {
+      // Display backend error message first, fallback to generic
       setError(err.message || t('errors.failedToRegisterPlayer'));
     } finally {
       setRegistering(false);
@@ -233,7 +233,7 @@ const PlayerRegistrationPage = () => {
                     <ListGroup.Item key={reg.id} className="d-flex justify-content-between align-items-center">
                       <span>{reg.category?.name}</span>
                       <Badge bg={STATUS_VARIANTS[reg.status]}>
-                        {STATUS_LABELS[reg.status]}
+                        {t(`status.${reg.status.toLowerCase()}`)}
                       </Badge>
                     </ListGroup.Item>
                   ))}

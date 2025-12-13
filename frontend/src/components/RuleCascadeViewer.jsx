@@ -1,5 +1,6 @@
 // T050: RuleCascadeViewer - Display cascading rule overrides for matches
 import { Card, Table, Badge, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Displays the cascade of scoring rules from tournament defaults to match-specific overrides
@@ -13,15 +14,17 @@ import { Card, Table, Badge, Alert } from 'react-bootstrap';
  * @param {Date} props.effectiveRules.snapshotDate - Date when snapshot was taken (if SNAPSHOT)
  */
 const RuleCascadeViewer = ({ effectiveRules }) => {
+  const { t } = useTranslation();
+
   if (!effectiveRules) {
-    return <Alert variant="info">No rule information available</Alert>;
+    return <Alert variant="info">{t('alerts.noRuleInfo')}</Alert>;
   }
 
   const { source, rules, cascade, snapshotDate } = effectiveRules;
 
   // Helper to format rule values for display
   const formatRuleValue = (key, value) => {
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (typeof value === 'boolean') return value ? t('common.yes') : t('common.no');
     if (typeof value === 'number') return value.toString();
     if (typeof value === 'string') return value.replace(/_/g, ' ');
     return JSON.stringify(value);
@@ -29,15 +32,7 @@ const RuleCascadeViewer = ({ effectiveRules }) => {
 
   // Helper to get user-friendly rule name
   const getRuleName = (key) => {
-    const ruleNames = {
-      formatType: 'Scoring Format',
-      winningSets: 'Winning Sets',
-      winningTiebreaks: 'Winning Tiebreaks',
-      advantageRule: 'Advantage Rule',
-      tiebreakTrigger: 'Tiebreak Trigger',
-      finalSetTiebreak: 'Final Set Tiebreak'
-    };
-    return ruleNames[key] || key;
+    return t(`ruleCascade.ruleNames.${key}`, { defaultValue: key });
   };
 
   // Helper to get level badge variant
@@ -56,25 +51,25 @@ const RuleCascadeViewer = ({ effectiveRules }) => {
   const getLevelDisplayName = (cascadeItem) => {
     const { level, groupNumber, bracketType, roundNumber, matchNumber } = cascadeItem;
 
-    if (level === 'tournament') return 'Tournament Default';
-    if (level === 'group') return `Group ${groupNumber}`;
-    if (level === 'bracket') return `${bracketType} Bracket`;
-    if (level === 'round') return `Round ${roundNumber}`;
-    if (level === 'match') return `Match ${matchNumber}`;
+    if (level === 'tournament') return t('ruleCascade.levels.tournament');
+    if (level === 'group') return t('ruleCascade.levels.group', { number: groupNumber });
+    if (level === 'bracket') return t('ruleCascade.levels.bracket', { type: bracketType });
+    if (level === 'round') return t('ruleCascade.levels.round', { number: roundNumber });
+    if (level === 'match') return t('ruleCascade.levels.match', { number: matchNumber });
     return level;
   };
 
   return (
     <Card>
       <Card.Header>
-        <h5 className="mb-0">Scoring Rules {source === 'SNAPSHOT' && <Badge bg="secondary" className="ms-2">Historical Snapshot</Badge>}</h5>
+        <h5 className="mb-0">{t('ruleCascade.scoringRules')} {source === 'SNAPSHOT' && <Badge bg="secondary" className="ms-2">{t('ruleCascade.historicalSnapshot')}</Badge>}</h5>
         {source === 'SNAPSHOT' && snapshotDate && (
-          <small className="text-muted">Rules locked at match completion: {new Date(snapshotDate).toLocaleString()}</small>
+          <small className="text-muted">{t('ruleCascade.rulesLockedAt')} {new Date(snapshotDate).toLocaleString()}</small>
         )}
       </Card.Header>
       <Card.Body>
         {/* Effective Rules Summary */}
-        <h6 className="mb-3">Effective Rules</h6>
+        <h6 className="mb-3">{t('ruleCascade.effectiveRules')}</h6>
         <Table bordered size="sm" className="mb-4">
           <tbody>
             {Object.entries(rules).map(([key, value]) => (
@@ -89,10 +84,9 @@ const RuleCascadeViewer = ({ effectiveRules }) => {
         {/* Cascade Information (only for cascaded rules) */}
         {source === 'CASCADED' && cascade && cascade.length > 0 && (
           <>
-            <h6 className="mb-3">Rule Cascade</h6>
+            <h6 className="mb-3">{t('ruleCascade.ruleCascadeTitle')}</h6>
             <p className="text-muted small">
-              Rules are inherited from tournament defaults and can be overridden at each level.
-              Later levels override earlier ones.
+              {t('ruleCascade.cascadeDescription')}
             </p>
             <div className="d-flex flex-column gap-2">
               {cascade.map((item, index) => (
@@ -101,17 +95,17 @@ const RuleCascadeViewer = ({ effectiveRules }) => {
                     <div className="d-flex align-items-center justify-content-between">
                       <div>
                         <Badge bg={getLevelBadgeVariant(item.level)} className="me-2">
-                          {item.level.toUpperCase()}
+                          {t(`ruleCascade.levelLabels.${item.level}`)}
                         </Badge>
                         <strong>{getLevelDisplayName(item)}</strong>
                       </div>
                       {item.overrides && (
                         <small className="text-muted">
-                          Overrides: {Object.keys(item.overrides).map(getRuleName).join(', ')}
+                          {t('ruleCascade.overrides')}: {Object.keys(item.overrides).map(getRuleName).join(', ')}
                         </small>
                       )}
                       {item.source === 'default' && (
-                        <small className="text-muted">Base rules</small>
+                        <small className="text-muted">{t('ruleCascade.baseRules')}</small>
                       )}
                     </div>
                     {item.overrides && (
@@ -133,8 +127,7 @@ const RuleCascadeViewer = ({ effectiveRules }) => {
         {source === 'SNAPSHOT' && (
           <Alert variant="info" className="mt-3 mb-0">
             <small>
-              <strong>Note:</strong> These rules are a historical snapshot taken when the match was completed.
-              They cannot be changed and represent the exact rules used during the match.
+              <strong>{t('common.note')}:</strong> {t('ruleCascade.snapshotNote')}
             </small>
           </Alert>
         )}
