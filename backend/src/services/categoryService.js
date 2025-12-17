@@ -98,7 +98,7 @@ export async function listCategories(filters = {}) {
           select: {
             tournaments: true,
             registrations: true,
-            rankings: true
+            rankingTables: true
           }
         }
       },
@@ -134,7 +134,7 @@ export async function getCategoryById(id) {
         select: {
           tournaments: true,
           registrations: true,
-          rankings: true
+          rankingTables: true
         }
       }
     }
@@ -280,9 +280,14 @@ export async function getCategoryStats(id) {
       where: { categoryId: id },
       _count: true
     }),
-    // Top players
-    prisma.categoryRanking.findMany({
-      where: { categoryId: id },
+    // Top ranking entries for this category
+    prisma.rankingEntry.findMany({
+      where: {
+        ranking: {
+          categoryId: id,
+          isArchived: false
+        }
+      },
       take: 10,
       orderBy: { rank: 'asc' },
       include: {
@@ -315,11 +320,10 @@ export async function getCategoryStats(id) {
       total: topRankings.length,
       topPlayers: topRankings.map(r => ({
         rank: r.rank,
-        playerId: r.player.id,
-        playerName: r.player.name,
-        points: r.points,
-        wins: r.wins,
-        losses: r.losses
+        playerId: r.player?.id,
+        playerName: r.player?.name,
+        points: r.totalPoints,
+        tournamentCount: r.tournamentCount
       }))
     }
   };

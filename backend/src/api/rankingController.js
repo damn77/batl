@@ -1,103 +1,103 @@
-// T089-T091: Ranking Controller - HTTP handlers for ranking endpoints
+// Ranking Controller - HTTP handlers for ranking endpoints
 import * as rankingService from '../services/rankingService.js';
+import * as yearRolloverService from '../services/yearRolloverService.js';
 
 /**
- * T089: GET /api/v1/rankings/category/:categoryId - Get category leaderboard
- * Authorization: All authenticated users
+ * GET /api/v1/rankings
+ * Get all rankings (summary)
  */
-export async function getCategoryLeaderboard(req, res, next) {
+export async function getAllRankings(req, res, next) {
+  try {
+    const year = req.query.year ? parseInt(req.query.year) : undefined;
+    const rankings = await rankingService.getAllRankings(year);
+    return res.status(200).json({ success: true, data: rankings });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/rankings/:categoryId
+ * GET /api/v1/rankings/:categoryId/type/:type
+ * Get rankings for a category, optionally filtered by type
+ * Query params: page, limit, search, year
+ */
+export async function getRankingsForCategory(req, res, next) {
+  try {
+    const { categoryId, type } = req.params;
+    const year = req.query.year ? parseInt(req.query.year) : undefined;
+    const page = req.query.page ? parseInt(req.query.page) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const search = req.query.search || undefined;
+
+    const options = {};
+    if (page) options.page = page;
+    if (limit) options.limit = limit;
+    if (search) options.search = search;
+
+    const rankings = await rankingService.getRankingsForCategory(categoryId, year, options);
+
+    let data = rankings;
+    if (type) {
+      data = rankings.filter(r => r.type === type);
+    }
+
+    return res.status(200).json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/rankings/:categoryId/entries/:entryId/breakdown
+ * Get ranking entry details with tournament breakdown
+ */
+export async function getRankingEntryBreakdown(req, res, next) {
+  try {
+    const { entryId } = req.params;
+    const breakdown = await rankingService.getRankingEntryBreakdown(entryId);
+    return res.status(200).json({ success: true, data: breakdown });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function executeYearRollover(req, res, next) {
+  try {
+    const { categoryId, year } = req.body;
+    const result = await yearRolloverService.executeYearRollover(categoryId, year);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getArchivedRankings(req, res, next) {
+  try {
+    const { categoryId, year } = req.params;
+    const result = await yearRolloverService.getArchivedRankings(categoryId, parseInt(year));
+    res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteArchivedRanking(req, res, next) {
+  try {
+    const { categoryId, year } = req.params;
+    await rankingService.deleteArchivedRanking(categoryId, parseInt(year));
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function recalculateRankings(req, res, next) {
   try {
     const { categoryId } = req.params;
-    const { limit, offset } = req.validatedQuery || {};
-
-    const result = await rankingService.getCategoryLeaderboard(categoryId, {
-      limit: limit || 10,
-      offset: offset || 0
-    });
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        categoryId: result.categoryId,
-        categoryName: result.categoryName,
-        lastUpdated: result.lastUpdated,
-        rankings: result.rankings,
-        total: result.total
-      }
-    });
+    await rankingService.recalculateRankings(categoryId);
+    res.json({ success: true, message: 'Recalculation complete' });
   } catch (err) {
-    if (err.statusCode === 404) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: err.code || 'CATEGORY_NOT_FOUND',
-          message: err.message
-        }
-      });
-    }
-    next(err);
-  }
-}
-
-/**
- * T090: GET /api/v1/rankings/category/:categoryId/player/:playerId
- * Get player's ranking in specific category
- * Authorization: All authenticated users
- */
-export async function getPlayerRankingInCategory(req, res, next) {
-  try {
-    const { categoryId, playerId } = req.params;
-
-    const result = await rankingService.getPlayerRankingInCategory(categoryId, playerId);
-
-    return res.status(200).json({
-      success: true,
-      data: result
-    });
-  } catch (err) {
-    // T095: Handle NOT_RANKED error
-    if (err.statusCode === 404) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: err.code || 'NOT_FOUND',
-          message: err.message
-        }
-      });
-    }
-    next(err);
-  }
-}
-
-/**
- * T091: GET /api/v1/rankings/player/:playerId - Get player's all rankings
- * Authorization: All authenticated users
- */
-export async function getPlayerAllRankings(req, res, next) {
-  try {
-    const { playerId } = req.params;
-
-    const result = await rankingService.getPlayerAllRankings(playerId);
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        playerId: result.playerId,
-        playerName: result.playerName,
-        rankings: result.rankings,
-        lastUpdated: result.lastUpdated
-      }
-    });
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: err.code || 'PLAYER_NOT_FOUND',
-          message: err.message
-        }
-      });
-    }
     next(err);
   }
 }

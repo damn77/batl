@@ -8,7 +8,8 @@ import {
   updateTournament,
   deleteTournament,
   getFormatStructure,
-  getMatches
+  getMatches,
+  getTournamentPointPreview
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -59,6 +60,16 @@ router.get(
 );
 
 /**
+ * T061: GET /api/v1/tournaments/:id/point-preview
+ * Get point table preview for tournament
+ * Authorization: PUBLIC - No authentication required
+ */
+router.get(
+  '/:id/point-preview',
+  getTournamentPointPreview
+);
+
+/**
  * POST /api/v1/tournaments
  * Create a new tournament assigned to a category
  * Authorization: ADMIN or ORGANIZER roles required (T047)
@@ -94,6 +105,164 @@ router.delete(
   isAuthenticated,
   authorize('delete', 'Tournament'),
   deleteTournament
+);
+
+// ============================================
+// TOURNAMENT POINT CONFIGURATION (008-tournament-rankings)
+// ============================================
+
+/**
+ * T021: GET /api/v1/tournaments/:id/point-config
+ * Get tournament point configuration
+ * Authorization: PUBLIC - No authentication required
+ */
+router.get(
+  '/:id/point-config',
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+
+      const config = await prisma.tournamentPointConfig.findUnique({
+        where: { tournamentId: id }
+      });
+
+      if (!config) {
+        // Return default configuration if none exists
+        return res.json({
+          tournamentId: id,
+          calculationMethod: 'PLACEMENT',
+          multiplicativeValue: 2,
+          doublePointsEnabled: false,
+          isDefault: true
+        });
+      }
+
+      res.json(config);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * T020: PUT /api/v1/tournaments/:id/point-config
+ * Update tournament point configuration
+ * Authorization: ADMIN or ORGANIZER roles required
+ * Validation: Cannot change after tournament starts (T022)
+ */
+router.put(
+  '/:id/point-config',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      const { validateTournamentPointConfig } = await import('../validators/tournamentPointValidators.js');
+
+      // Validate input
+      const validatedData = validateTournamentPointConfig(req.body);
+
+      // T022: Check if tournament has started
+      const tournament = await prisma.tournament.findUnique({
+        where: { id },
+        select: { status: true }
+      });
+
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      if (tournament.status !== 'SCHEDULED') {
+        return res.status(400).json({
+          error: 'Cannot modify point configuration after tournament has started',
+          code: 'TOURNAMENT_ALREADY_STARTED'
+        });
+      }
+
+      // Create or update point configuration
+      const config = await prisma.tournamentPointConfig.upsert({
+        where: { tournamentId: id },
+        update: validatedData,
+        create: {
+          tournamentId: id,
+          ...validatedData
+        }
+      });
+
+      res.json(config);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * T019: POST /api/v1/tournaments/:id/calculate-points
+ * Calculate and award points for tournament participants
+ * Authorization: ADMIN or ORGANIZER roles required
+ * Body: { results: [{playerId/pairId, placement?, finalRoundReached?}] }
+ */
+router.post(
+  '/:id/calculate-points',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { results } = req.body;
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      const { awardPointsSinglesTournament, awardPointsDoublesTournament } = await import('../../services/pointCalculationService.js');
+
+      if (!results || !Array.isArray(results) || results.length === 0) {
+        return res.status(400).json({
+          error: 'Results array is required and must not be empty'
+        });
+      }
+
+      // Get tournament with category and point config
+      const tournament = await prisma.tournament.findUnique({
+        where: { id },
+        include: {
+          category: true,
+          pointConfig: true
+        }
+      });
+
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      // Use point config or defaults
+      const pointConfig = tournament.pointConfig || {
+        calculationMethod: 'PLACEMENT',
+        multiplicativeValue: 2,
+        doublePointsEnabled: false
+      };
+
+      let awardedResults;
+
+      // Award points based on tournament type
+      if (tournament.category.type === 'SINGLES') {
+        awardedResults = await awardPointsSinglesTournament(id, results, pointConfig);
+      } else {
+        awardedResults = await awardPointsDoublesTournament(id, results, pointConfig);
+      }
+
+      res.json({
+        message: 'Points calculated and awarded successfully',
+        tournamentId: id,
+        resultsCount: awardedResults.length,
+        calculationMethod: pointConfig.calculationMethod
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 export default router;

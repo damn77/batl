@@ -12,6 +12,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-02
 - **Vitest** (Testing Framework) (003-tournament-registration) - Jest-compatible API, native ES modules support, Vite integration
 - Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10 (004-tournament-rules)
 - Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21 (006-doubles-pairs)
+- Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM (PostgreSQL), Joi/Zod validation, bcryptjs, Passport.js (008-tournament-rankings)
+- PostgreSQL via Prisma ORM (008-tournament-rankings)
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -126,9 +128,9 @@ After completing an implementation phase that introduces new UI functionality, g
 This ensures QA can verify new features work correctly before deployment.
 
 ## Recent Changes
+- 008-tournament-rankings: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM (PostgreSQL), Joi/Zod validation, bcryptjs, Passport.js
 - 006-doubles-pairs: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21
 - 005-tournament-view: Added SQLite via Prisma ORM (development/production-ready)
-- 004-tournament-rules: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10
 
 <!-- MANUAL ADDITIONS START -->
 
@@ -213,5 +215,94 @@ This ensures QA can verify new features work correctly before deployment.
   - Rankings leaderboard with win rate calculations
 
 **Related Specs**: [spec.md](specs/002-category-system/spec.md), [tasks.md](specs/002-category-system/tasks.md)
+
+---
+
+### 008-tournament-rankings (Completed: 2025-12-17)
+
+**Summary**: Comprehensive tournament ranking and points system with automated point calculation, seeding scores, and year-over-year tracking.
+
+**API Endpoints** (18 total):
+- **Rankings** (7): Public ranking views and admin management at `/api/v1/rankings`
+  - GET `/rankings` - All rankings summary
+  - GET `/rankings/:categoryId` - Rankings for category (all types)
+  - GET `/rankings/:categoryId/type/:type` - Specific ranking type (SINGLES, PAIR, MEN, WOMEN)
+  - GET `/rankings/:categoryId/entries/:entryId/breakdown` - Tournament points breakdown
+  - GET `/rankings/:categoryId/archived/:year` - Historical rankings
+  - POST `/rankings/admin/year-rollover` - Annual rollover (ADMIN)
+  - POST `/rankings/:categoryId/recalculate` - Force recalculation (ADMIN)
+- **Point Configuration** (3): Tournament point setup at `/api/v1/tournaments/:id/point-config`
+  - GET - View point configuration
+  - PUT - Update point configuration (before tournament starts)
+  - POST `/calculate-points` - Calculate and award points (after tournament completion)
+- **Seeding** (2): Player/pair seeding scores at `/api/v1/seeding-score`
+  - GET `/:entityType/:entityId/category/:categoryId` - Individual seeding score
+  - POST `/bulk` - Bulk seeding scores for bracket generation
+- **Point Tables** (3): Admin configuration at `/api/v1/admin/point-tables`
+  - GET - All point tables
+  - GET `/:range` - Point table for participant range
+  - PUT `/:id` - Update point value
+- **Point Preview** (1): Tournament point preview at `/api/v1/tournaments/:id/point-preview`
+
+**Database Models**:
+- `Ranking`: One per category/year/type combination (SINGLES, PAIR, MEN, WOMEN)
+- `RankingEntry`: Individual ranking entry for player or pair with rank, points, seeding score
+- `TournamentResult`: Links tournament participation to ranking entries with awarded points
+- `TournamentPointConfig`: Per-tournament point calculation configuration (PLACEMENT vs FINAL_ROUND)
+- `PointTable`: Admin-configurable point values for round-based calculations
+
+**Key Business Rules**:
+1. **Multiple Rankings Per Doubles Category**: Separate rankings for pairs and individual players (Mixed: PAIR+MEN+WOMEN, Men's: PAIR+MEN, Women's: PAIR+WOMEN)
+2. **Point Calculation Methods**:
+   - **PLACEMENT**: Points = (participants - placement + 1) × multiplicativeValue
+   - **FINAL_ROUND**: Points from lookup table based on participant range and final round reached
+3. **Seeding Score**: Sum of best N tournament results (default N=7, configurable per category)
+4. **Tiebreaker Logic**: totalPoints → lastTournamentDate (more recent) → tournamentCount (fewer) → alphabetical
+5. **Year Rollover**: Automated annual archival of previous year's rankings and creation of new year's rankings
+6. **Point Table Ranges**: 2-4, 5-8, 9-16, 17-32, 33-64, 65+ participants
+
+**Implementation Highlights**:
+- **Automated Point Calculation**: POST `/tournaments/:id/calculate-points` after tournament completion
+- **Real-time Rank Recalculation**: Rankings automatically updated after point awards using multi-level tiebreaker
+- **Pagination & Search**: Support for 1000+ player categories with search by player/pair names
+- **Point Table Caching**: In-memory cache with invalidation on admin updates
+- **Historical Archives**: Year-based archival system with configurable retention
+- **Comprehensive Indexing**: Optimized database indexes for tiebreaker queries
+
+**Frontend Implementation**:
+- **Services**: rankingService, seedingService, pointTableService (axios-based API clients)
+- **Pages**:
+  - CategoryRankingsPage - Public rankings with type tabs (SINGLES/PAIR/MEN/WOMEN)
+  - TournamentPointConfigPage - Point configuration for organizers
+  - PointTablesPage - Admin point table management
+  - RankingEntryDetailModal - Detailed tournament points breakdown
+- **Components**:
+  - RankingsTable - TanStack Table with sorting and rank badges
+  - PointPreviewPanel - Real-time point calculation preview
+- **Routes**:
+  - `/rankings` - Public category rankings (all users)
+  - `/organizer/tournaments/:id/points` - Point configuration (ORGANIZER/ADMIN)
+  - `/admin/point-tables` - Point table management (ADMIN)
+- **Features**:
+  - Year selector for historical rankings
+  - Ranking type tabs (dynamic based on category gender)
+  - Seeding score display in registration flows
+  - Point preview before tournament start
+  - Search and pagination for large rankings
+
+**Seeding Integration**:
+- Player/pair registration displays current seeding score
+- Seeding scores calculated from best N tournaments (default 7)
+- Bracket generation service uses seeding scores for fair tournament draws
+- Recalculation endpoint for organizers to update seeding after point awards
+
+**Technical Details**:
+- Point calculation happens post-tournament via explicit API call
+- Supports both placement-based and round-based point systems
+- Double points multiplier for special tournaments (Grand Slams, etc.)
+- Immutable tournament results (preserve historical point awards)
+- Comprehensive error handling with specific error codes
+
+**Related Specs**: [spec.md](specs/008-tournament-rankings/spec.md), [tasks.md](specs/008-tournament-rankings/tasks.md), [plan.md](specs/008-tournament-rankings/plan.md)
 
 <!-- MANUAL ADDITIONS END -->

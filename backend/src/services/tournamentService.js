@@ -6,6 +6,8 @@ import * as registrationService from './registrationService.js';
 import * as locationService from './locationService.js';
 import * as organizerService from './organizerService.js';
 import * as ruleComplexityService from './ruleComplexityService.js';
+import { getParticipantRange } from '../utils/participantRange.js';
+import { getPointTableForRange } from './pointTableService.js';
 
 const prisma = new PrismaClient();
 
@@ -1088,4 +1090,45 @@ export async function deleteTournament(id) {
   }
 
   await prisma.tournament.delete({ where: { id } });
+}
+/**
+ * Get point preview for a tournament based on current registration count
+ * @param {string} id - Tournament ID
+ * @returns {Promise<Object>} Point preview data
+ */
+export async function getTournamentPointPreview(id) {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id },
+    include: {
+      category: true
+    }
+  });
+
+  if (!tournament) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  let participantCount = 0;
+  if (tournament.category.type === 'DOUBLES') {
+    participantCount = await prisma.pairRegistration.count({
+      where: { tournamentId: id, status: 'REGISTERED' }
+    });
+  } else {
+    participantCount = await prisma.tournamentRegistration.count({
+      where: { tournamentId: id, status: 'REGISTERED' }
+    });
+  }
+
+  // Determine range and table
+  // If count < 2, we still show 2-4 table as preview
+  const effectiveCount = Math.max(participantCount, 2);
+  const range = getParticipantRange(effectiveCount);
+  const pointTable = getPointTableForRange(range);
+
+  return {
+    tournamentId: id,
+    participantCount,
+    effectiveRange: range,
+    pointTable
+  };
 }

@@ -21,7 +21,10 @@
       "Bash(npm run lint)",
       "Bash(git show:*)",
       "Bash(xargs:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(if [ -f \"D:\\Workspace\\BATL\\specs\\008-tournament-rankings\\quickstart.md\" ])",
+      "Bash(then echo \"quickstart.md exists\")",
+      "Bash(else echo \"quickstart.md not found\")"
     ],
     "deny": [],
     "ask": []

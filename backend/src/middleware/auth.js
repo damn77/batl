@@ -137,4 +137,7 @@ export const hasRole = (...roles) => {
   };
 };
 
+// Alias for hasRole (for consistency with route files)
+export const authorize = hasRole;
+
 export default passport;
