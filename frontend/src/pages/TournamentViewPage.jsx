@@ -8,6 +8,7 @@ import TournamentInfoPanel from '../components/TournamentInfoPanel';
 import PlayerListPanel from '../components/PlayerListPanel';
 import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel';
 import FormatVisualization from '../components/FormatVisualization';
+import PointPreviewPanel from '../components/PointPreviewPanel';
 import { useTournament } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
 
@@ -113,6 +114,13 @@ const TournamentViewPage = () => {
             <Row className="mt-4">
               <Col>
                 <FormatVisualization tournament={tournament} />
+              </Col>
+            </Row>
+
+            {/* T066: Point Preview */}
+            <Row className="mt-4">
+              <Col>
+                <PointPreviewPanel tournamentId={tournament.id} />
               </Col>
             </Row>
           </>

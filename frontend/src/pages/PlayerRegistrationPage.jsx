@@ -11,6 +11,7 @@ import {
   getPlayerRegistrations,
   STATUS_VARIANTS
 } from '../services/registrationService';
+import { getSeedingScore } from '../services/seedingService';
 
 const PlayerRegistrationPage = () => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ const PlayerRegistrationPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [eligibilityResults, setEligibilityResults] = useState({});
   const [currentRegistrations, setCurrentRegistrations] = useState([]);
+  const [seedingScores, setSeedingScores] = useState({});
 
   const [loading, setLoading] = useState(false);
   const [checkingEligibility, setCheckingEligibility] = useState(false);
@@ -112,6 +114,19 @@ const PlayerRegistrationPage = () => {
     }
 
     setEligibilityResults(results);
+
+    // Calculate seeding scores
+    const scores = {};
+    await Promise.all(categories.map(async (category) => {
+      try {
+        const score = await getSeedingScore('PLAYER', selectedPlayer, category.id);
+        scores[category.id] = score;
+      } catch (err) {
+        scores[category.id] = 0;
+      }
+    }));
+    setSeedingScores(scores);
+
     setCheckingEligibility(false);
   };
 
@@ -300,15 +315,21 @@ const PlayerRegistrationPage = () => {
                                 ))}
                               </div>
                             )}
+
+                            <div className="ms-4 mt-1 text-muted small">
+                              {t('table.headers.seedingScore')}: <strong>{seedingScores[category.id] || 0}</strong>
+                            </div>
                           </div>
 
-                          {alreadyRegistered ? (
-                            <Badge bg="info">{t('status.registered')}</Badge>
-                          ) : isEligible ? (
-                            <Badge bg="success">{t('status.eligible')}</Badge>
-                          ) : (
-                            <Badge bg="danger">{t('status.ineligible')}</Badge>
-                          )}
+                          {
+                            alreadyRegistered ? (
+                              <Badge bg="info">{t('status.registered')}</Badge>
+                            ) : isEligible ? (
+                              <Badge bg="success">{t('status.eligible')}</Badge>
+                            ) : (
+                              <Badge bg="danger">{t('status.ineligible')}</Badge>
+                            )
+                          }
                         </ListGroup.Item>
                       );
                     })}
@@ -324,7 +345,7 @@ const PlayerRegistrationPage = () => {
             )}
           </Col>
         </Row>
-      </Container>
+      </Container >
     </>
   );
 };

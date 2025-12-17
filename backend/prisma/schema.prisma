@@ -98,6 +98,24 @@ enum MatchGuaranteeType {
   UNTIL_PLACEMENT
 }
 
+// Ranking System Enums (008-tournament-rankings)
+enum RankingType {
+  SINGLES // For singles categories
+  PAIR // For pair rankings in doubles
+  MEN // For individual men in doubles
+  WOMEN // For individual women in doubles
+}
+
+enum RankingEntityType {
+  PLAYER // Individual player
+  PAIR // Doubles pair
+}
+
+enum CalculationMethod {
+  PLACEMENT // Points based on final placement
+  FINAL_ROUND // Points based on last round won
+}
+
 // Models
 
 model User {
@@ -177,7 +195,6 @@ model PlayerProfile {
 
   // Category System Relationships (T010)
   categoryRegistrations   CategoryRegistration[]
-  categoryRankings        CategoryRanking[]
   tournamentRegistrations TournamentRegistration[]
 
   // Tournament Rules Relationships (T008-T009)
@@ -188,6 +205,10 @@ model PlayerProfile {
   // Doubles Pairs Relationships (006-doubles-pairs)
   doublesPairsAsPlayer1 DoublesPair[] @relation("DoublesPairPlayer1")
   doublesPairsAsPlayer2 DoublesPair[] @relation("DoublesPairPlayer2")
+  
+  // Ranking System Relationships (008-tournament-rankings)
+  rankingEntries    RankingEntry[]
+  tournamentResults TournamentResult[]
 
   @@index([userId])
   @@index([createdBy])
@@ -206,17 +227,22 @@ model Category {
   gender      Gender // Men, Women, or Mixed
   name        String // Auto-generated display name
   description String? // Optional category description
+  
+  // Ranking System Fields (008-tournament-rankings)
+  countedTournamentsLimit Int @default(7) // Number of best tournaments counted for seeding
+  
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
   // Relationships
   tournaments   Tournament[]
   registrations CategoryRegistration[]
-  rankings      CategoryRanking[]
 
   // Doubles Pairs Relationships (006-doubles-pairs)
   doublesPairs DoublesPair[]
-  pairRankings PairRanking[]
+  
+  // Ranking System Relationships (008-tournament-rankings)
+  rankingTables Ranking[]
 
   // Constraints (T015)
   @@unique([type, ageGroup, gender]) // Prevent duplicate categories (FR-005)
@@ -314,6 +340,10 @@ model Tournament {
   brackets Bracket[]
   rounds   Round[]
   matches  Match[]
+  
+  // Ranking System Relationships (008-tournament-rankings)
+  pointConfig       TournamentPointConfig?
+  tournamentResults TournamentResult[]
 
   // Constraints (T015)
   @@index([categoryId])
@@ -348,27 +378,6 @@ model CategoryRegistration {
   @@index([categoryId])
   @@index([status])
   @@index([hasParticipated])
-}
-
-model CategoryRanking {
-  id          String   @id @default(uuid())
-  playerId    String // Foreign key to PlayerProfile
-  categoryId  String // Foreign key to Category
-  rank        Int // Current rank in category (1 = first place)
-  points      Float    @default(0) // Ranking points
-  wins        Int      @default(0) // Total wins in category
-  losses      Int      @default(0) // Total losses in category
-  lastUpdated DateTime @updatedAt // When ranking was last recalculated
-  createdAt   DateTime @default(now())
-
-  // Relationships
-  player   PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  category Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  // Constraints (T015)
-  @@unique([playerId, categoryId]) // One ranking per player per category (FR-013)
-  @@index([categoryId, rank]) // Fast leaderboard queries
-  @@index([playerId])
 }
 
 // Tournament Registration Model (003-tournament-registration)
@@ -550,10 +559,13 @@ model DoublesPair {
   player1           PlayerProfile      @relation("DoublesPairPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
   player2           PlayerProfile      @relation("DoublesPairPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
   category          Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  pairRankings      PairRanking[]
   pairRegistrations PairRegistration[]
   matchesAsPair1    Match[]            @relation("MatchPair1")
   matchesAsPair2    Match[]            @relation("MatchPair2")
+  
+  // Ranking System Relationships (008-tournament-rankings)
+  rankingEntries    RankingEntry[]
+  tournamentResults TournamentResult[]
 
   // Constraints
   @@unique([player1Id, player2Id, categoryId]) // Prevents duplicate pairs in same category
@@ -561,27 +573,6 @@ model DoublesPair {
   @@index([player2Id, deletedAt]) // Fast lookup of pairs containing player2
   @@index([categoryId, deletedAt]) // Fast lookup of active pairs in category
   @@index([categoryId, seedingScore, deletedAt]) // Tournament bracket generation
-}
-
-model PairRanking {
-  id          String   @id @default(uuid())
-  pairId      String // Foreign key to DoublesPair
-  categoryId  String // Foreign key to Category
-  rank        Int // Current rank position (1 = first place)
-  points      Float    @default(0) // Total points earned by this specific pair
-  wins        Int      @default(0) // Total wins by this pair
-  losses      Int      @default(0) // Total losses by this pair
-  lastUpdated DateTime @updatedAt // When ranking was last recalculated
-  createdAt   DateTime @default(now())
-
-  // Relationships
-  pair     DoublesPair @relation(fields: [pairId], references: [id], onDelete: Cascade)
-  category Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  // Constraints
-  @@unique([pairId, categoryId]) // One ranking per pair per category
-  @@index([categoryId, rank]) // Fast leaderboard queries
-  @@index([pairId])
 }
 
 model PairRegistration {
@@ -606,4 +597,113 @@ model PairRegistration {
   @@index([tournamentId, status]) // Fast lookup of registrations by tournament and status
   @@index([tournamentId, registrationTimestamp]) // Tie-breaking for seeding
   @@index([pairId, status]) // Fast lookup of pair's active registrations
+}
+
+// Ranking System Models (008-tournament-rankings)
+
+model Ranking {
+  id          String            @id @default(uuid())
+  categoryId  String // Foreign key to Category
+  year        Int // Calendar year (e.g., 2025)
+  type        RankingType // SINGLES, PAIR, MEN, WOMEN
+  isArchived  Boolean           @default(false) // True for past years
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relationships
+  category Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  entries  RankingEntry[]
+
+  // Constraints
+  @@unique([categoryId, year, type]) // One ranking per category/year/type combination
+  @@index([categoryId, year, isArchived])
+  @@index([year, isArchived])
+}
+
+model RankingEntry {
+  id                 String    @id @default(uuid())
+  rankingId          String // Foreign key to Ranking
+  entityType         RankingEntityType // PLAYER or PAIR
+  playerId           String? // Foreign key to PlayerProfile (for PLAYER type)
+  pairId             String? // Foreign key to DoublesPair (for PAIR type)
+  rank               Int // Current rank position (1 = first place)
+  totalPoints        Float     @default(0) // Sum of tournament points
+  tournamentCount    Int       @default(0) // Number of tournaments participated
+  lastTournamentDate DateTime? // Date of most recent tournament
+  seedingScore       Float     @default(0) // Sum of best N tournaments for seeding
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relationships
+  ranking          Ranking           @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+  player           PlayerProfile?    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  pair             DoublesPair?      @relation(fields: [pairId], references: [id], onDelete: Cascade)
+  tournamentResults TournamentResult[]
+
+  // Constraints
+  @@unique([rankingId, playerId]) // One entry per player per ranking
+  @@unique([rankingId, pairId]) // One entry per pair per ranking
+  @@index([rankingId, rank]) // Fast leaderboard queries
+  @@index([playerId])
+  @@index([pairId])
+  @@index([rankingId, totalPoints]) // For sorting
+  @@index([rankingId, totalPoints, lastTournamentDate, tournamentCount]) // Comprehensive tiebreaker index
+}
+
+model TournamentResult {
+  id                String   @id @default(uuid())
+  tournamentId      String // Foreign key to Tournament
+  rankingEntryId    String // Foreign key to RankingEntry
+  entityType        RankingEntityType // PLAYER or PAIR
+  playerId          String? // Foreign key to PlayerProfile (for PLAYER type)
+  pairId            String? // Foreign key to DoublesPair (for PAIR type)
+  placement         Int? // Final placement (1st, 2nd, 3rd, etc.) - for PLACEMENT method
+  finalRoundReached String? // Last round won (e.g., "FINAL", "SEMIFINAL") - for FINAL_ROUND method
+  pointsAwarded     Float    @default(0) // Points earned in this tournament
+  awardDate         DateTime @default(now()) // When points were awarded
+  createdAt         DateTime @default(now())
+
+  // Relationships
+  tournament   Tournament      @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  rankingEntry RankingEntry    @relation(fields: [rankingEntryId], references: [id], onDelete: Cascade)
+  player       PlayerProfile?  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  pair         DoublesPair?    @relation(fields: [pairId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([tournamentId, rankingEntryId]) // One result per tournament per ranking entry
+  @@index([tournamentId])
+  @@index([rankingEntryId])
+  @@index([playerId])
+  @@index([pairId])
+  @@index([awardDate])
+}
+
+model PointTable {
+  id               String   @id @default(uuid())
+  participantRange String // "2-4", "5-8", "9-16", "17-32"
+  roundName        String // "FINAL", "SEMIFINAL", "QUARTERFINAL", etc.
+  points           Float // Points awarded for reaching this round
+  isConsolation    Boolean  @default(false) // True for consolation bracket rounds
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Constraints
+  @@unique([participantRange, roundName, isConsolation])
+  @@index([participantRange])
+}
+
+model TournamentPointConfig {
+  id                   String            @id @default(uuid())
+  tournamentId         String            @unique // Foreign key to Tournament
+  calculationMethod    CalculationMethod @default(PLACEMENT) // PLACEMENT or FINAL_ROUND
+  multiplicativeValue  Float             @default(2) // Multiplier for PLACEMENT method
+  doublePointsEnabled  Boolean           @default(false) // 2x multiplier for special tournaments
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  // Relationships
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@index([tournamentId])
 }

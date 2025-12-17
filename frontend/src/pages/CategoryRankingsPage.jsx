@@ -1,34 +1,27 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Container, Row, Col, Card, Badge, Alert, Spinner, Table } from 'react-bootstrap';
-import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender } from '@tanstack/react-table';
+import { useState, useEffect, useCallback } from 'react';
+import { Container, Row, Col, Card, Alert, Spinner, Nav, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
+import RankingsTable from '../components/RankingsTable';
+import RankingEntryDetailModal from '../components/RankingEntryDetailModal';
 import { listCategories } from '../services/categoryService';
-import { getCategoryLeaderboard, formatWinRate, formatRank, getRankBadgeVariant } from '../services/rankingService';
+import { getRankingsForCategory } from '../services/rankingService';
 
 const CategoryRankingsPage = () => {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
   const [rankings, setRankings] = useState([]);
-  const [categoryName, setCategoryName] = useState('');
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [activeType, setActiveType] = useState('SINGLES');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCategory) {
-      loadRankings();
-    } else {
-      setRankings([]);
-    }
-  }, [selectedCategory]);
 
   const loadCategories = async () => {
     try {
@@ -36,9 +29,8 @@ const CategoryRankingsPage = () => {
       const data = await listCategories();
       setCategories(data.categories || []);
 
-      // Auto-select first category if available
       if (data.categories && data.categories.length > 0) {
-        setSelectedCategory(data.categories[0].id);
+        setSelectedCategory(data.categories[0]);
       }
     } catch (err) {
       setError(t('errors.failedToLoad', { resource: t('nav.categories').toLowerCase() }));
@@ -47,86 +39,66 @@ const CategoryRankingsPage = () => {
     }
   };
 
-  const loadRankings = async () => {
+  const loadRankings = useCallback(async () => {
+    if (!selectedCategory) {
+      setRankings([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-
-      const data = await getCategoryLeaderboard(selectedCategory, { limit: 50 });
-      setRankings(data.rankings || []);
-      setCategoryName(data.categoryName);
-      setLastUpdated(data.lastUpdated);
+      const data = await getRankingsForCategory(selectedCategory.id, null, selectedYear);
+      setRankings(data || []);
     } catch (err) {
-      if (err.code === 'CATEGORY_NOT_FOUND') {
-        setError(t('errors.categoryNotFound'));
-      } else {
-        setError(err.message || t('errors.failedToLoadRankings'));
-      }
+      setError(err.message || t('errors.failedToLoadRankings'));
       setRankings([]);
     } finally {
       setLoading(false);
     }
+  }, [selectedCategory, selectedYear, t]);
+
+  // Load categories on mount
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  // Load rankings when dependencies change
+  useEffect(() => {
+    loadRankings();
+  }, [loadRankings]);
+
+  // Handle active type switching when rankings change
+  useEffect(() => {
+    if (rankings.length > 0) {
+      const availableTypes = rankings.map(r => r.type);
+      if (!availableTypes.includes(activeType)) {
+        setActiveType(availableTypes[0]);
+      }
+    }
+  }, [rankings, activeType]);
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
   };
 
-  // Table columns
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: 'rank',
-        header: t('table.headers.rank'),
-        size: 80,
-        cell: ({ getValue }) => (
-          <Badge bg={getRankBadgeVariant(getValue())} className="fs-6">
-            {formatRank(getValue())}
-          </Badge>
-        )
-      },
-      {
-        accessorKey: 'playerName',
-        header: t('table.headers.playerName'),
-        cell: ({ getValue }) => <strong>{getValue()}</strong>
-      },
-      {
-        accessorKey: 'points',
-        header: t('table.headers.points'),
-        size: 100,
-        cell: ({ getValue }) => <strong>{getValue()}</strong>
-      },
-      {
-        accessorKey: 'wins',
-        header: t('table.headers.wins'),
-        size: 80
-      },
-      {
-        accessorKey: 'losses',
-        header: t('table.headers.losses'),
-        size: 80
-      },
-      {
-        accessorKey: 'winRate',
-        header: t('table.headers.winRate'),
-        size: 100,
-        cell: ({ getValue }) => formatWinRate(getValue())
-      }
-    ],
-    [t]
-  );
+  const getActiveRanking = () => {
+    return rankings.find(r => r.type === activeType);
+  };
 
-  const table = useReactTable({
-    data: rankings,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel()
-  });
+  const handleRowClick = (entry) => {
+    setSelectedEntry(entry);
+    setShowModal(true);
+  };
+
+  const activeRanking = getActiveRanking();
 
   if (loadingCategories) {
     return (
       <>
         <NavBar />
-        <Container className="mt-4">
-          <div className="text-center py-5">
-            <Spinner animation="border" />
-          </div>
+        <Container className="mt-4 text-center">
+          <Spinner animation="border" />
         </Container>
       </>
     );
@@ -151,31 +123,37 @@ const CategoryRankingsPage = () => {
               <Card.Header>
                 <strong>{t('nav.categories')}</strong>
               </Card.Header>
-              <Card.Body className="p-0">
-                <div className="list-group list-group-flush">
-                  {categories.map(category => (
-                    <button
-                      key={category.id}
-                      className={`list-group-item list-group-item-action ${
-                        selectedCategory === category.id ? 'active' : ''
+              <div className="list-group list-group-flush">
+                {categories.map(category => (
+                  <button
+                    key={category.id}
+                    className={`list-group-item list-group-item-action ${selectedCategory?.id === category.id ? 'active' : ''
                       }`}
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      {category.name}
-                      <Badge
-                        bg="secondary"
-                        className="float-end"
-                      >
-                        {category._counts?.rankings || 0}
-                      </Badge>
-                    </button>
-                  ))}
-                </div>
-              </Card.Body>
+                    onClick={() => handleCategorySelect(category)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </Card>
           </Col>
 
           <Col md={9}>
+            {selectedCategory && (
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="m-0">{selectedCategory.name}</h3>
+                <Form.Select
+                  style={{ width: 'auto' }}
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                >
+                  {years.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </Form.Select>
+              </div>
+            )}
+
             {!selectedCategory ? (
               <Alert variant="info">{t('alerts.selectCategory')}</Alert>
             ) : loading ? (
@@ -183,55 +161,45 @@ const CategoryRankingsPage = () => {
                 <Spinner animation="border" />
               </div>
             ) : rankings.length === 0 ? (
-              <Alert variant="info">
-                {t('messages.noRankingsYet')}
-              </Alert>
+              <Alert variant="info">{t('messages.noRankingsYet')}</Alert>
             ) : (
               <Card>
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                  <strong>{t('pages.categoryRankings.leaderboard', { category: categoryName })}</strong>
-                  {lastUpdated && (
-                    <small className="text-muted">
-                      {t('messages.lastUpdated', { date: new Date(lastUpdated).toLocaleDateString() })}
-                    </small>
-                  )}
+                <Card.Header>
+                  <Nav variant="tabs" activeKey={activeType} onSelect={(k) => setActiveType(k)}>
+                    {rankings.map(ranking => (
+                      <Nav.Item key={ranking.id}>
+                        <Nav.Link eventKey={ranking.type}>
+                          {t(`rankingTypes.${ranking.type}`)}
+                        </Nav.Link>
+                      </Nav.Item>
+                    ))}
+                  </Nav>
                 </Card.Header>
                 <Card.Body className="p-0">
-                  <Table hover className="mb-0">
-                    <thead>
-                      {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
-                          {headerGroup.headers.map(header => (
-                            <th
-                              key={header.id}
-                              style={{ width: header.column.getSize() }}
-                            >
-                              {flexRender(header.column.columnDef.header, header.getContext())}
-                            </th>
-                          ))}
-                        </tr>
-                      ))}
-                    </thead>
-                    <tbody>
-                      {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
-                          {row.getVisibleCells().map(cell => (
-                            <td key={cell.id}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                  {activeRanking ? (
+                    <RankingsTable
+                      data={activeRanking.entries}
+                      onRowClick={handleRowClick}
+                    />
+                  ) : (
+                    <div className="p-3 text-center text-muted">
+                      {t('messages.noDataForType')}
+                    </div>
+                  )}
                 </Card.Body>
-                <Card.Footer className="text-muted small">
-                  {t('messages.showingRankedPlayers', { count: rankings.length })}
-                </Card.Footer>
               </Card>
             )}
           </Col>
         </Row>
+
+        {selectedCategory && selectedEntry && (
+          <RankingEntryDetailModal
+            show={showModal}
+            onHide={() => setShowModal(false)}
+            categoryId={selectedCategory.id}
+            entryId={selectedEntry.id}
+          />
+        )}
       </Container>
     </>
   );

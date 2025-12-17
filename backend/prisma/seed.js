@@ -466,109 +466,94 @@ async function main() {
   console.log(`✅ Created Group A and Group B with 4 players each`);
 
   // ============================================
-  // 9. CATEGORY RANKINGS - Feature 002
+  // 9. CATEGORY RANKINGS - Feature 008 (New System)
   // ============================================
-  console.log('\n🏅 Creating category rankings...\n');
+  console.log('\n🏅 Creating category rankings (New System)...\n');
 
-  // Create rankings for some players in different categories
+  const currentYear = new Date().getFullYear();
+
+  // Define categories
   const mensOpenCategory = createdCategories.find(c => c.name === "Men's Singles Open");
   const womensOpenCategory = createdCategories.find(c => c.name === "Women's Singles Open");
   const mens35Category = createdCategories.find(c => c.name === "Men's Singles 35+");
+  const mensDoublesCategory = createdCategories.find(c => c.name === "Men's Doubles Open");
+  const womensDoublesCategory = createdCategories.find(c => c.name === "Women's Doubles Open");
+  const mixedDoublesCategory = createdCategories.find(c => c.name === "Mixed Doubles Open");
 
-  // Men's Open rankings
+  // Define player groups
   const menPlayers = createdProfiles.filter(p => p.gender === 'MEN');
-  for (let i = 0; i < Math.min(8, menPlayers.length); i++) {
-    await prisma.categoryRanking.upsert({
-      where: {
-        playerId_categoryId: {
-          categoryId: mensOpenCategory.id,
-          playerId: menPlayers[i].id
-        }
-      },
-      update: {
-        points: 1000 - i * 100,
-        wins: 10 - i,
-        losses: i,
-        rank: i + 1
-      },
-      create: {
-        categoryId: mensOpenCategory.id,
-        playerId: menPlayers[i].id,
-        points: 1000 - i * 100,
-        wins: 10 - i,
-        losses: i,
-        rank: i + 1
-      }
-    });
-  }
-  console.log(`✅ Created rankings for ${Math.min(8, menPlayers.length)} players in Men's Open`);
-
-  // Women's Open rankings
-  for (let i = 0; i < Math.min(6, womenPlayers.length); i++) {
-    await prisma.categoryRanking.upsert({
-      where: {
-        playerId_categoryId: {
-          categoryId: womensOpenCategory.id,
-          playerId: womenPlayers[i].id
-        }
-      },
-      update: {
-        points: 900 - i * 80,
-        wins: 8 - i,
-        losses: i,
-        rank: i + 1
-      },
-      create: {
-        categoryId: womensOpenCategory.id,
-        playerId: womenPlayers[i].id,
-        points: 900 - i * 80,
-        wins: 8 - i,
-        losses: i,
-        rank: i + 1
-      }
-    });
-  }
-  console.log(`✅ Created rankings for ${Math.min(6, womenPlayers.length)} players in Women's Open`);
-
-  // Men's 35+ rankings
+  // womenPlayers is already defined above
   const men35Plus = menPlayers.filter(p => {
     const age = new Date().getFullYear() - p.birthDate.getFullYear();
     return age >= 35;
   });
-  for (let i = 0; i < Math.min(5, men35Plus.length); i++) {
-    await prisma.categoryRanking.upsert({
+
+  // Helper to create ranking and entries
+  async function seedRanking(category, type, entities, entityType) {
+    // Create Ranking
+    const ranking = await prisma.ranking.upsert({
       where: {
-        playerId_categoryId: {
-          categoryId: mens35Category.id,
-          playerId: men35Plus[i].id
+        categoryId_year_type: {
+          categoryId: category.id,
+          year: currentYear,
+          type: type
         }
       },
-      update: {
-        points: 800 - i * 75,
-        wins: 7 - i,
-        losses: i,
-        rank: i + 1
-      },
+      update: {},
       create: {
-        categoryId: mens35Category.id,
-        playerId: men35Plus[i].id,
-        points: 800 - i * 75,
-        wins: 7 - i,
-        losses: i,
-        rank: i + 1
+        categoryId: category.id,
+        year: currentYear,
+        type: type
       }
     });
+
+    // Create Entries
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      const points = 1000 - i * 100;
+
+      const entryData = {
+        rankingId: ranking.id,
+        entityType: entityType,
+        rank: i + 1,
+        totalPoints: points,
+        tournamentCount: 5, // Mock data
+        seedingScore: points // Mock data
+      };
+
+      if (entityType === 'PLAYER') {
+        entryData.playerId = entity.id;
+      } else {
+        entryData.pairId = entity.id;
+      }
+
+      await prisma.rankingEntry.upsert({
+        where: entityType === 'PLAYER'
+          ? { rankingId_playerId: { rankingId: ranking.id, playerId: entity.id } }
+          : { rankingId_pairId: { rankingId: ranking.id, pairId: entity.id } },
+        update: entryData,
+        create: entryData
+      });
+    }
+    console.log(`✅ Created ${type} ranking for ${category.name} with ${entities.length} entries`);
+    return ranking;
   }
-  console.log(`✅ Created rankings for ${Math.min(5, men35Plus.length)} players in Men's 35+`);
+
+  // Men's Open (SINGLES)
+  await seedRanking(mensOpenCategory, 'SINGLES', menPlayers.slice(0, 8), 'PLAYER');
+
+  // Women's Open (SINGLES)
+  await seedRanking(womensOpenCategory, 'SINGLES', womenPlayers.slice(0, 6), 'PLAYER');
+
+  // Men's 35+ (SINGLES)
+  await seedRanking(mens35Category, 'SINGLES', men35Plus.slice(0, 5), 'PLAYER');
 
   // ============================================
   // 10. DOUBLES PAIRS - Feature 006 (Doubles Pairs)
   // ============================================
   console.log('\n👯 Creating doubles pairs...\n');
 
-  const mensDoublesCategory = createdCategories.find(c => c.name === "Men's Doubles Open");
-  const womensDoublesCategory = createdCategories.find(c => c.name === "Women's Doubles Open");
-  const mixedDoublesCategory = createdCategories.find(c => c.name === "Mixed Doubles Open");
+
 
   // Create Men's Doubles pairs (using men players with rankings)
   const menWithRankings = menPlayers.slice(0, 8);
@@ -701,54 +686,73 @@ async function main() {
   console.log(`✅ Registered ${mensPairs.length} pairs for ${doublesTournament.name}`);
 
   // ============================================
-  // 12. PAIR RANKINGS - Feature 006
+  // 12. PAIR RANKINGS - Feature 008 (New System)
   // ============================================
-  console.log('\n🏅 Creating pair rankings...\n');
+  console.log('\n🏅 Creating pair rankings (New System)...\n');
 
-  // Create pair rankings for men's doubles
-  for (let i = 0; i < mensPairs.length; i++) {
-    await prisma.pairRanking.create({
-      data: {
-        pairId: mensPairs[i].id,
-        categoryId: mensDoublesCategory.id,
-        points: 500 - i * 100,
-        wins: 5 - i,
-        losses: i,
-        rank: i + 1
-      }
+  // Men's Doubles (PAIR)
+  await seedRanking(mensDoublesCategory, 'PAIR', mensPairs, 'PAIR');
+
+  // Women's Doubles (PAIR)
+  await seedRanking(womensDoublesCategory, 'PAIR', womensPairs, 'PAIR');
+
+  // Mixed Doubles (PAIR)
+  await seedRanking(mixedDoublesCategory, 'PAIR', mixedPairs, 'PAIR');
+
+  // ============================================
+  // 13. POINT TABLES - Feature 008 (Tournament Rankings)
+  // ============================================
+  console.log('\n📊 Creating default point tables for ranking system...\n');
+
+  const pointTables = [
+    // Range: 2-4 participants
+    { participantRange: '2-4', roundName: 'FINAL', points: 20, isConsolation: false },
+    { participantRange: '2-4', roundName: 'SEMIFINAL', points: 10, isConsolation: false },
+
+    // Range: 5-8 participants
+    { participantRange: '5-8', roundName: 'FINAL', points: 25, isConsolation: false },
+    { participantRange: '5-8', roundName: 'SEMIFINAL', points: 15, isConsolation: false },
+    { participantRange: '5-8', roundName: 'QUARTERFINAL', points: 8, isConsolation: false },
+    { participantRange: '5-8', roundName: 'CONSOLATION_FINAL', points: 12, isConsolation: true },
+
+    // Range: 9-16 participants
+    { participantRange: '9-16', roundName: 'FINAL', points: 30, isConsolation: false },
+    { participantRange: '9-16', roundName: 'SEMIFINAL', points: 20, isConsolation: false },
+    { participantRange: '9-16', roundName: 'QUARTERFINAL', points: 10, isConsolation: false },
+    { participantRange: '9-16', roundName: 'ROUND_16', points: 5, isConsolation: false },
+    { participantRange: '9-16', roundName: 'CONSOLATION_FINAL', points: 15, isConsolation: true },
+    { participantRange: '9-16', roundName: 'CONSOLATION_SEMIFINAL', points: 8, isConsolation: true },
+
+    // Range: 17-32 participants
+    { participantRange: '17-32', roundName: 'FINAL', points: 40, isConsolation: false },
+    { participantRange: '17-32', roundName: 'SEMIFINAL', points: 28, isConsolation: false },
+    { participantRange: '17-32', roundName: 'QUARTERFINAL', points: 18, isConsolation: false },
+    { participantRange: '17-32', roundName: 'ROUND_16', points: 10, isConsolation: false },
+    { participantRange: '17-32', roundName: 'ROUND_32', points: 5, isConsolation: false },
+    { participantRange: '17-32', roundName: 'CONSOLATION_FINAL', points: 20, isConsolation: true },
+    { participantRange: '17-32', roundName: 'CONSOLATION_SEMIFINAL', points: 12, isConsolation: true },
+    { participantRange: '17-32', roundName: 'CONSOLATION_QUARTERFINAL', points: 6, isConsolation: true },
+  ];
+
+  for (const tableData of pointTables) {
+    await prisma.pointTable.upsert({
+      where: {
+        participantRange_roundName_isConsolation: {
+          participantRange: tableData.participantRange,
+          roundName: tableData.roundName,
+          isConsolation: tableData.isConsolation
+        }
+      },
+      update: { points: tableData.points },
+      create: tableData
     });
   }
-  console.log(`✅ Created rankings for ${mensPairs.length} men's doubles pairs`);
 
-  // Create pair rankings for women's doubles
-  for (let i = 0; i < womensPairs.length; i++) {
-    await prisma.pairRanking.create({
-      data: {
-        pairId: womensPairs[i].id,
-        categoryId: womensDoublesCategory.id,
-        points: 400 - i * 80,
-        wins: 4 - i,
-        losses: i,
-        rank: i + 1
-      }
-    });
-  }
-  console.log(`✅ Created rankings for ${womensPairs.length} women's doubles pairs`);
-
-  // Create pair rankings for mixed doubles
-  for (let i = 0; i < mixedPairs.length; i++) {
-    await prisma.pairRanking.create({
-      data: {
-        pairId: mixedPairs[i].id,
-        categoryId: mixedDoublesCategory.id,
-        points: 450 - i * 90,
-        wins: 4 - i,
-        losses: i,
-        rank: i + 1
-      }
-    });
-  }
-  console.log(`✅ Created rankings for ${mixedPairs.length} mixed doubles pairs`);
+  console.log(`✅ Created ${pointTables.length} point table entries across 4 participant ranges`);
+  console.log('   - 2-4 participants: 2 rounds');
+  console.log('   - 5-8 participants: 4 rounds (3 main + 1 consolation)');
+  console.log('   - 9-16 participants: 6 rounds (4 main + 2 consolation)');
+  console.log('   - 17-32 participants: 8 rounds (5 main + 3 consolation)');
 
   // ============================================
   // SUMMARY
@@ -810,6 +814,96 @@ async function main() {
   console.log('   - View pair rankings at: /rankings/pairs');
 
   console.log('\n🎉 Ready to test all features!\n');
+
+  // ============================================
+  // 14. PHASE 9 SEED DATA - Feature 008
+  // ============================================
+  console.log('\n📊 Creating Phase 9 seed data...\n');
+
+  // T076: Create completed tournament
+  const completedTournament = await prisma.tournament.create({
+    data: {
+      name: "Winter Open 2024",
+      categoryId: mensOpenCategory.id,
+      description: "Completed tournament from last year",
+      locationId: createdLocations[0].id,
+      organizerId: organizerProfile.id,
+      capacity: 16,
+      entryFee: 50,
+      startDate: new Date('2024-12-01'),
+      endDate: new Date('2024-12-03'),
+      registrationOpenDate: new Date('2024-11-01'),
+      registrationCloseDate: new Date('2024-11-25'),
+      status: 'COMPLETED',
+      formatType: 'KNOCKOUT',
+      formatConfig: JSON.stringify({ matchGuarantee: 'MATCH_1' }),
+      defaultScoringRules: JSON.stringify({
+        scoringFormat: 'SETS',
+        winningSets: 2,
+        winningGames: 6,
+        advantageRule: 'ADVANTAGE',
+        tiebreakTrigger: '6-6'
+      }),
+      pointConfig: {
+        create: {
+          calculationMethod: 'PLACEMENT',
+          multiplicativeValue: 1.0
+        }
+      }
+    }
+  });
+  console.log(`✅ Created completed tournament: ${completedTournament.name}`);
+
+  // T080: Create archived rankings for 2024
+  const archivedYear = 2024;
+  await prisma.ranking.create({
+    data: {
+      categoryId: mensOpenCategory.id,
+      year: archivedYear,
+      type: 'SINGLES',
+      isArchived: true,
+      entries: {
+        create: menPlayers.slice(0, 5).map((p, i) => ({
+          entityType: 'PLAYER',
+          playerId: p.id,
+          rank: i + 1,
+          totalPoints: 500 - i * 50,
+          tournamentCount: 3,
+          seedingScore: 500 - i * 50
+        }))
+      }
+    }
+  });
+  console.log(`✅ Created archived ranking for 2024`);
+
+  // T081: Multiple rankings per doubles category
+  await seedRanking(mensDoublesCategory, 'MEN', menPlayers.slice(0, 8), 'PLAYER');
+  console.log(`✅ Created individual MEN ranking for Men's Doubles`);
+
+  // T079: Tiebreaker test scenarios
+  // Update two players to have same points
+  if (menPlayers.length >= 2) {
+    const ranking = await prisma.ranking.findUnique({
+      where: { categoryId_year_type: { categoryId: mensOpenCategory.id, year: currentYear, type: 'SINGLES' } }
+    });
+
+    if (ranking) {
+      // Player 1: 1000 pts, 5 tournaments
+      await prisma.rankingEntry.update({
+        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menPlayers[0].id } },
+        data: { totalPoints: 1000, tournamentCount: 5 }
+      });
+
+      // Player 2: 1000 pts, 3 tournaments (should be ranked higher due to fewer tournaments)
+      await prisma.rankingEntry.update({
+        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menPlayers[1].id } },
+        data: { totalPoints: 1000, tournamentCount: 3 }
+      });
+      console.log(`✅ Created tiebreaker scenario: Player 1 (1000pts, 5 tourneys) vs Player 2 (1000pts, 3 tourneys)`);
+    }
+  }
+
+  console.log('\n✅ Seed data creation completed successfully!');
 }
 
 main()

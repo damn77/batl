@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Row,
@@ -82,10 +82,8 @@ const PairRankingsPage = () => {
       });
       setRankingsData(data);
     } catch (err) {
-      const errorData = err.response?.data?.error;
-      setError(
-        errorData?.message || t('errors.failedToLoad', { resource: t('pages.pairRankings.title') }) + `: ${err.message}`
-      );
+      // ✅ CORRECT: apiClient already transforms errors, use err.message directly
+      setError(err.message || t('errors.failedToLoad', { resource: t('pages.pairRankings.title') }));
       setRankingsData(null);
     } finally {
       setLoading(false);

@@ -21,9 +21,10 @@ import CategoryRankingsPage from './pages/CategoryRankingsPage';
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
 import TournamentViewPage from './pages/TournamentViewPage';
 import PairRegistrationPage from './pages/PairRegistrationPage'; // 006-doubles-pairs (T033)
-import PairRankingsPage from './pages/PairRankingsPage'; // 006-doubles-pairs (T051)
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
+import TournamentPointConfigPage from './pages/TournamentPointConfigPage';
+import PointTablesPage from './pages/admin/PointTablesPage';
 
 // Separate component to use modal context
 function AppContent() {
@@ -44,129 +45,143 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/rankings" element={<CategoryRankingsPage />} />
-        {/* 006-doubles-pairs (T051): Pair rankings page - public access */}
-        <Route path="/rankings/pairs" element={<PairRankingsPage />} />
         {/* T023: Tournament view page - public access, no authentication required */}
         <Route path="/tournaments/:id" element={<TournamentViewPage />} />
 
-          {/* Protected routes - Admin */}
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute requiredRole="ADMIN">
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute requiredRole="ADMIN">
-                <AdminUsersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users/:id"
-            element={
-              <ProtectedRoute requiredRole="ADMIN">
-                <UserDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/dashboard"
-            element={
-              <ProtectedRoute requiredRole="ORGANIZER">
-                <OrganizerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/players"
-            element={
-              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
-                <OrganizerPlayersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/players/:id"
-            element={
-              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
-                <PlayerDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/categories"
-            element={
-              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
-                <CategoryManagementPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/tournaments"
-            element={
-              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
-                <TournamentSetupPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/organizer/tournament/:id/rules"
-            element={
-              <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
-                <TournamentRulesSetupPage />
-              </ProtectedRoute>
-            }
-          />
+        {/* Protected routes - Admin */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminUsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:id"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <UserDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/point-tables"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <PointTablesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/dashboard"
+          element={
+            <ProtectedRoute requiredRole="ORGANIZER">
+              <OrganizerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/players"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <OrganizerPlayersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/players/:id"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <PlayerDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/categories"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <CategoryManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/tournaments"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <TournamentSetupPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/tournament/:id/rules"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <TournamentRulesSetupPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/tournament/:id/points"
+          element={
+            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+              <TournamentPointConfigPage />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Protected routes - Player */}
-          <Route
-            path="/player/register"
-            element={
-              <ProtectedRoute>
-                <PlayerRegistrationPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 006-doubles-pairs (T033): Pair registration page */}
-          <Route
-            path="/player/pairs"
-            element={
-              <ProtectedRoute>
-                <PairRegistrationPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/player/tournaments"
-            element={
-              <ProtectedRoute requiredRole="PLAYER">
-                <TournamentRegistrationPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/player/profile"
-            element={
-              <ProtectedRoute requiredRole="PLAYER">
-                <PlayerProfilePage />
-              </ProtectedRoute>
-            }
-          />
+        {/* Protected routes - Player */}
+        <Route
+          path="/player/register"
+          element={
+            <ProtectedRoute>
+              <PlayerRegistrationPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* 006-doubles-pairs (T033): Pair registration page */}
+        <Route
+          path="/player/pairs"
+          element={
+            <ProtectedRoute>
+              <PairRegistrationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/player/tournaments"
+          element={
+            <ProtectedRoute requiredRole="PLAYER">
+              <TournamentRegistrationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/player/profile"
+          element={
+            <ProtectedRoute requiredRole="PLAYER">
+              <PlayerProfilePage />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Protected routes - All authenticated users */}
-          <Route
-            path="/tournament/:id/rules"
-            element={
-              <ProtectedRoute>
-                <TournamentRulesViewPage />
-              </ProtectedRoute>
-            }
-          />
+        {/* Protected routes - All authenticated users */}
+        <Route
+          path="/tournament/:id/rules"
+          element={
+            <ProtectedRoute>
+              <TournamentRulesViewPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Default route */}
         <Route path="/" element={<Navigate to="/rankings" replace />} />

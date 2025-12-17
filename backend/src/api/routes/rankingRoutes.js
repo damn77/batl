@@ -1,55 +1,72 @@
-// T092: Ranking Routes - Wire up ranking endpoints (read-only)
+// Ranking Routes - Tournament Ranking System
 import express from 'express';
 import {
-  getCategoryLeaderboard,
-  getPlayerRankingInCategory,
-  getPlayerAllRankings
+  getAllRankings,
+  getRankingsForCategory,
+  getRankingEntryBreakdown,
+  executeYearRollover,
+  getArchivedRankings,
+  deleteArchivedRanking,
+  recalculateRankings
 } from '../rankingController.js';
-import { getPairRankings } from '../pairController.js';
-import { validateQuery, schemas } from '../../middleware/validate.js';
+import { isAuthenticated, authorize } from '../../middleware/auth.js';
 
 const router = express.Router();
 
 /**
- * GET /api/v1/rankings/category/:categoryId
- * Get category leaderboard with top ranked players
- * Authorization: PUBLIC - No authentication required
+ * GET /api/v1/rankings
+ * Get all rankings summary
+ * Authorization: PUBLIC
  */
-router.get(
-  '/category/:categoryId',
-  validateQuery(schemas.categoryLeaderboardQuery),
-  getCategoryLeaderboard
-);
+router.get('/', getAllRankings);
 
 /**
- * GET /api/v1/rankings/category/:categoryId/player/:playerId
- * Get specific player's ranking in a category
- * Authorization: PUBLIC - No authentication required
+ * GET /api/v1/rankings/:categoryId
+ * Get rankings for a category
+ * Authorization: PUBLIC
  */
-router.get(
-  '/category/:categoryId/player/:playerId',
-  getPlayerRankingInCategory
-);
+router.get('/:categoryId', getRankingsForCategory);
 
 /**
- * GET /api/v1/rankings/player/:playerId
- * Get player's rankings across all categories
- * Authorization: PUBLIC - No authentication required
+ * GET /api/v1/rankings/:categoryId/type/:type
+ * Get rankings for a category filtered by type (SINGLES, PAIR, MEN, WOMEN)
+ * Authorization: PUBLIC
  */
-router.get(
-  '/player/:playerId',
-  getPlayerAllRankings
-);
+router.get('/:categoryId/type/:type', getRankingsForCategory);
 
 /**
- * GET /api/v1/rankings/pairs/:categoryId
- * Get pair rankings leaderboard for doubles category
- * Authorization: PUBLIC - No authentication required
- * Feature: 006-doubles-pairs - User Story 2 (T045)
+ * GET /api/v1/rankings/:categoryId/entries/:entryId/breakdown
+ * Get ranking entry details with tournament breakdown
+ * Authorization: PUBLIC
  */
-router.get(
-  '/pairs/:categoryId',
-  getPairRankings
-);
+router.get('/:categoryId/entries/:entryId/breakdown', getRankingEntryBreakdown);
+
+/**
+ * POST /api/v1/rankings/admin/year-rollover
+ * Execute year rollover (archive old, create new)
+ * Authorization: ADMIN
+ */
+router.post('/admin/year-rollover', isAuthenticated, authorize('ADMIN'), executeYearRollover);
+
+/**
+ * GET /api/v1/rankings/:categoryId/archived/:year
+ * Get archived rankings for a specific year
+ * Authorization: PUBLIC
+ */
+router.get('/:categoryId/archived/:year', getArchivedRankings);
+
+/**
+ * DELETE /api/v1/rankings/:categoryId/archive/:year
+ * Delete archived rankings
+ * Authorization: ADMIN
+ */
+router.delete('/:categoryId/archive/:year', isAuthenticated, authorize('ADMIN'), deleteArchivedRanking);
+
+/**
+ * POST /api/v1/rankings/:categoryId/recalculate
+ * Force recalculation of rankings
+ * Authorization: ADMIN
+ */
+router.post('/:categoryId/recalculate', isAuthenticated, authorize('ADMIN'), recalculateRankings);
 
 export default router;

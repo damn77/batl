@@ -18,6 +18,7 @@ import {
   registerPairForTournament
 } from '../services/pairService';
 import { listPlayers } from '../services/playerService';
+import { getSeedingScore } from '../services/seedingService';
 import { useAuth } from '../utils/AuthContext';
 
 /**
@@ -35,6 +36,7 @@ const TournamentRegistrationPage = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [selectedTournament, setSelectedTournament] = useState(null);
+  const [seedingScores, setSeedingScores] = useState({});
   const [showUnregisterModal, setShowUnregisterModal] = useState(false);
 
   // Pair registration modal state
@@ -80,6 +82,20 @@ const TournamentRegistrationPage = () => {
         const userProfile = playersData.profiles?.find(p => p.userId === user.id);
         if (userProfile) {
           setUserProfileId(userProfile.id);
+
+          // Calculate seeding scores for SINGLES tournaments
+          const scores = {};
+          await Promise.all(tournamentList.map(async (t) => {
+            if (t.category?.type === 'SINGLES') {
+              try {
+                const score = await getSeedingScore('PLAYER', userProfile.id, t.categoryId);
+                scores[t.id] = score;
+              } catch (e) {
+                scores[t.id] = 0;
+              }
+            }
+          }));
+          setSeedingScores(scores);
         }
       }
     } catch (err) {
@@ -457,6 +473,12 @@ const TournamentRegistrationPage = () => {
                         <strong>{t('table.headers.status')}:</strong>{' '}
                         <Badge bg="info">{t(`tournament.statuses.${tournament.status}`)}</Badge>
                       </ListGroup.Item>
+
+                      {seedingScores[tournament.id] !== undefined && (
+                        <ListGroup.Item>
+                          <strong>{t('table.headers.seedingScore')}:</strong> {seedingScores[tournament.id]}
+                        </ListGroup.Item>
+                      )}
 
                       {/* Display tournament format with icon and tooltip */}
                       {tournament.formatType && (

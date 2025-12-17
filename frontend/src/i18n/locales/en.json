@@ -47,7 +47,14 @@
     "creating": "Creating...",
     "deleting": "Deleting...",
     "saveChanges": "Save Changes",
-    "waitlistedCount": "({{count}} waitlisted)"
+    "waitlistedCount": "({{count}} waitlisted)",
+    "participants": "Participants",
+    "points": "Points",
+    "consolation": "Consolation",
+    "main": "Main",
+    "pointDistribution": "Point Distribution",
+    "details": "details",
+    "unknown": "Unknown"
   },
   "nav": {
     "home": "Home",
@@ -75,7 +82,10 @@
     "edit": "Edit",
     "saveChanges": "Save Changes",
     "configureRules": "Configure Rules",
-    "recalcSeeding": "Recalc Seeding"
+    "configurePoints": "Configure Points",
+    "recalcSeeding": "Recalc Seeding",
+    "saveConfiguration": "Save Configuration",
+    "backToTournaments": "Back to Tournaments"
   },
   "filters": {
     "allCategories": "All Categories",
@@ -164,6 +174,9 @@
       "currentRegistrations": "Current Registrations",
       "availableCategories": "Available Categories"
     },
+    "pointConfig": {
+      "title": "Point Configuration"
+    },
     "tournamentRulesSetup": {
       "title": "Tournament Rules Setup"
     },
@@ -181,6 +194,10 @@
     },
     "tournamentView": {
       "defaultTitle": "Tournament Details"
+    },
+    "pointTables": {
+      "title": "Point Table Configuration",
+      "description": "Configure points awarded for each round based on participant count."
     }
   },
   "components": {
@@ -291,7 +308,10 @@
       "singleDayTournament": "Single Day Tournament",
       "startDate": "Start Date",
       "endDate": "End Date",
-      "format": "Format"
+      "format": "Format",
+      "calculationMethod": "Calculation Method",
+      "multiplicativeValue": "Multiplicative Value",
+      "doublePointsEnabled": "Double Points"
     },
     "options": {
       "allTypes": "All Types",
@@ -332,6 +352,27 @@
       "leaveEmptyForUnlimited": "Leave empty for unlimited"
     }
   },
+  "rankingTypes": {
+    "SINGLES": "Singles",
+    "PAIR": "Pairs",
+    "MEN": "Men's Singles",
+    "WOMEN": "Women's Singles"
+  },
+  "headers": {
+    "pointCalculationSettings": "Point Calculation Settings"
+  },
+  "pointConfig": {
+    "methods": {
+      "placement": {
+        "label": "Placement Based",
+        "description": "Points are awarded based on final placement (1st, 2nd, 3rd, etc.)"
+      },
+      "finalRound": {
+        "label": "Round Based",
+        "description": "Points are awarded based on the final round reached (Final, Semifinal, etc.)"
+      }
+    }
+  },
   "table": {
     "headers": {
       "name": "Name",
@@ -361,7 +402,10 @@
       "location": "Location",
       "players": "Players",
       "player1": "Player 1",
-      "player2": "Player 2"
+      "player2": "Player 2",
+      "tournaments": "Tournaments",
+      "tournamentName": "Tournament",
+      "placement": "Placement"
     }
   },
   "modals": {
@@ -477,14 +521,17 @@
     "noCategoriesFound": "No categories found. Create your first category to get started.",
     "noTournamentsFound": "No tournaments found. Create your first tournament to get started.",
     "noRuleInfo": "No rule information available",
+    "configurationSaved": "Configuration saved successfully",
     "bracketRulesUpdated": "Bracket rules updated successfully!",
     "groupRulesUpdated": "Group rules updated successfully!",
     "matchRulesUpdated": "Match rules updated successfully!",
     "roundRulesUpdated": "Round rules updated successfully!",
     "seedingRecalculated": "Seeding recalculated for {{categoryName}}: {{pairsUpdated}} pairs updated",
-    "failedToRecalculateSeeding": "Failed to recalculate seeding"
+    "failedToRecalculateSeeding": "Failed to recalculate seeding",
+    "pointConfigReadOnly": "Configuration is read-only because tournament status is {{status}}"
   },
   "badges": {
+    "bonus": "BONUS",
     "hasAccount": "Can Login",
     "noAccount": "Invited Player",
     "registered": "Registered",
@@ -810,6 +857,7 @@
     }
   },
   "errors": {
+    "loadingPoints": "Error loading points",
     "loginFailed": "Login failed. Please verify your email and password are correct.",
     "registerFailed": "Registration failed",
     "createUserFailed": "Failed to create user",
@@ -853,6 +901,8 @@
     "playersNotRegisteredInCategory": "Players must be registered in the tournament category before joining the waitlist"
   },
   "help": {
+    "multiplicativeValue": "Multiplier applied to base points (e.g. 1.5 for 150% points)",
+    "doublePointsDescription": "Award double points for this tournament (e.g. for Grand Slams or special events)",
     "waitlistExplanation": "The waitlist holds players who want to join but can't because the tournament is full. If a registered player withdraws, the first person on the waitlist automatically takes their spot.",
     "seedingScoreExplanation": "Seeding score is calculated from both players' individual rankings and determines the pair's initial tournament placement.",
     "phoneFormat": "International format includes country code (e.g., +421 for Slovakia, +1 for USA/Canada). Example: +421901234567",
@@ -895,11 +945,13 @@
     "showingRankedPlayers": "Showing {{count}} ranked players",
     "noDoublesCategoriesAvailable": "No doubles categories available",
     "noPairRankingsYet": "No pair rankings available for this category yet. Rankings will appear after tournaments are completed.",
+    "noDataForType": "No data available for this ranking type",
     "noDefaultScoringRules": "No default scoring rules have been set for this tournament.",
     "selectPlayerFirst": "Please select a player to view available categories",
     "checkingEligibility": "Checking eligibility...",
     "selectCategoriesToRegister": "Select one or more categories to register for",
-    "registrationSuccess": "Successfully registered for {{count}} categories!"
+    "registrationSuccess": "Successfully registered for {{count}} categories!",
+    "pointPreviewDescription": "Based on {{count}} participants (Range: {{range}})"
   },
   "validation": {
     "selectPlayer2": "Please select Player 2 for the new pair",

@@ -383,7 +383,6 @@ export async function getFormatStructure(req, res, next) {
     const { id } = req.params;
 
     const structure = await tournamentService.getFormatStructure(id);
-
     return res.status(200).json({
       success: true,
       data: structure
@@ -445,6 +444,20 @@ export async function getMatches(req, res, next) {
         }
       });
     }
+    next(err);
+  }
+}
+
+/**
+ * T061: GET /api/v1/tournaments/:id/point-preview
+ * Get point table preview for tournament
+ */
+export async function getTournamentPointPreview(req, res, next) {
+  try {
+    const { id } = req.params;
+    const preview = await tournamentService.getTournamentPointPreview(id);
+    res.json(preview);
+  } catch (err) {
     next(err);
   }
 }

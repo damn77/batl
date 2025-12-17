@@ -355,6 +355,14 @@ const TournamentSetupPage = () => {
                         >
                           {t('buttons.configureRules')}
                         </Button>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}
+                          className="me-2"
+                        >
+                          {t('buttons.configurePoints')}
+                        </Button>
                         {/* T064: Recalculate seeding button for DOUBLES categories */}
                         {tournament.category?.type === 'DOUBLES' && (
                           <Button

@@ -78,16 +78,6 @@ const NavBar = () => {
                 {t('nav.rankings')}
               </span>
             </li>
-            {/* 006-doubles-pairs (T034): Pair rankings link */}
-            <li className="nav-item">
-              <span
-                className="nav-link"
-                onClick={() => navigate('/rankings/pairs')}
-                style={{ cursor: 'pointer' }}
-              >
-                {t('nav.pairRankings')}
-              </span>
-            </li>
 
             {/* Organizer/Admin Links */}
             {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (

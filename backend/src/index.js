@@ -14,6 +14,8 @@ import registrationRoutes from './api/routes/registrationRoutes.js';
 import rankingRoutes from './api/routes/rankingRoutes.js';
 import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
 import pairRoutes from './api/routes/pairRoutes.js';
+import seedingRoutes from './api/routes/seedingRoutes.js';
+import pointTableRoutes from './api/routes/pointTableRoutes.js';
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -23,6 +25,7 @@ import {
   matchOverridesRouter
 } from './api/routes/tournamentRulesRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
+import { initializePointTableCache } from './services/pointTableService.js';
 
 const app = express();
 
@@ -125,6 +128,8 @@ app.use('/api/v1/tournaments', tournamentRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
 app.use('/api/v1/pairs', pairRoutes);
+app.use('/api/v1/seeding-score', seedingRoutes);
+app.use('/api/v1/admin/point-tables', pointTableRoutes);
 app.use('/api/tournaments', tournamentRegistrationRoutes);
 // Tournament rules routes with specific base paths
 app.use('/api/v1/tournament-rules', tournamentRulesRouter);
@@ -142,9 +147,22 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`BATL backend server running on http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+async function startServer() {
+  try {
+    // Initialize point table cache on startup
+    console.log('🔄 Initializing point table cache...');
+    await initializePointTableCache();
+
+    app.listen(PORT, () => {
+      console.log(`BATL backend server running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 export default app;

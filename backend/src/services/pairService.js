@@ -169,15 +169,6 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: {
-            where: { categoryId },
-            select: {
-              points: true,
-              rank: true,
-              wins: true,
-              losses: true,
-            },
-          },
         },
       },
       player2: {
@@ -186,21 +177,9 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: {
-            where: { categoryId },
-            select: {
-              points: true,
-              rank: true,
-              wins: true,
-              losses: true,
-            },
-          },
         },
       },
       category: true,
-      pairRankings: {
-        where: { categoryId },
-      },
       pairRegistrations: {
         where: {
           status: {
@@ -246,15 +225,6 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
             name: true,
             gender: true,
             birthDate: true,
-            categoryRankings: {
-              where: { categoryId },
-              select: {
-                points: true,
-                rank: true,
-                wins: true,
-                losses: true,
-              },
-            },
           },
         },
         player2: {
@@ -263,21 +233,9 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
             name: true,
             gender: true,
             birthDate: true,
-            categoryRankings: {
-              where: { categoryId },
-              select: {
-                points: true,
-                rank: true,
-                wins: true,
-                losses: true,
-              },
-            },
           },
         },
         category: true,
-        pairRankings: {
-          where: { categoryId },
-        },
         pairRegistrations: {
           where: {
             status: {
@@ -295,16 +253,35 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
   }
 
   // Calculate initial seeding score (sum of both players' ranking points)
-  const player1Ranking = await prisma.categoryRanking.findFirst({
-    where: { playerId: p1, categoryId },
-  });
+  // Calculate initial seeding score (sum of both players' ranking points)
+  const currentYear = new Date().getFullYear();
 
-  const player2Ranking = await prisma.categoryRanking.findFirst({
-    where: { playerId: p2, categoryId },
-  });
+  const [player1Entry, player2Entry] = await Promise.all([
+    prisma.rankingEntry.findFirst({
+      where: {
+        playerId: p1,
+        ranking: {
+          categoryId,
+          year: currentYear,
+          type: { not: 'PAIR' }
+        }
+      },
+      select: { seedingScore: true }
+    }),
+    prisma.rankingEntry.findFirst({
+      where: {
+        playerId: p2,
+        ranking: {
+          categoryId,
+          year: currentYear,
+          type: { not: 'PAIR' }
+        }
+      },
+      select: { seedingScore: true }
+    })
+  ]);
 
-  const initialSeedingScore =
-    (player1Ranking?.points || 0) + (player2Ranking?.points || 0);
+  const initialSeedingScore = (player1Entry?.seedingScore || 0) + (player2Entry?.seedingScore || 0);
 
   // Create new pair
   pairLogger.info('Creating new pair', {
@@ -328,15 +305,6 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: {
-            where: { categoryId },
-            select: {
-              points: true,
-              rank: true,
-              wins: true,
-              losses: true,
-            },
-          },
         },
       },
       player2: {
@@ -345,21 +313,9 @@ export async function createOrGetPair(player1Id, player2Id, categoryId, options 
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: {
-            where: { categoryId },
-            select: {
-              points: true,
-              rank: true,
-              wins: true,
-              losses: true,
-            },
-          },
         },
       },
       category: true,
-      pairRankings: {
-        where: { categoryId },
-      },
       pairRegistrations: {
         where: {
           status: {
@@ -393,7 +349,7 @@ export async function getPairById(pairId, includeDeleted = false) {
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: true,
+
         },
       },
       player2: {
@@ -402,11 +358,9 @@ export async function getPairById(pairId, includeDeleted = false) {
           name: true,
           gender: true,
           birthDate: true,
-          categoryRankings: true,
         },
       },
       category: true,
-      pairRankings: true,
       pairRegistrations: {
         where: {
           status: {
@@ -500,13 +454,6 @@ export async function listPairs(filters = {}) {
           id: true,
           name: true,
           type: true,
-        },
-      },
-      pairRankings: {
-        where: categoryId ? { categoryId } : {},
-        select: {
-          points: true,
-          rank: true,
         },
       },
     },
@@ -614,33 +561,36 @@ export async function calculateSeedingScore(pairId) {
   }
 
   // Get both players' individual rankings in this category
-  const [player1Ranking, player2Ranking] = await Promise.all([
-    prisma.categoryRanking.findUnique({
+  // Get both players' individual rankings in this category
+  const currentYear = new Date().getFullYear();
+
+  const [player1Entry, player2Entry] = await Promise.all([
+    prisma.rankingEntry.findFirst({
       where: {
-        playerId_categoryId: {
-          playerId: pair.player1Id,
+        playerId: pair.player1Id,
+        ranking: {
           categoryId: pair.categoryId,
-        },
+          year: currentYear,
+          type: { not: 'PAIR' }
+        }
       },
-      select: {
-        points: true,
-      },
+      select: { seedingScore: true }
     }),
-    prisma.categoryRanking.findUnique({
+    prisma.rankingEntry.findFirst({
       where: {
-        playerId_categoryId: {
-          playerId: pair.player2Id,
+        playerId: pair.player2Id,
+        ranking: {
           categoryId: pair.categoryId,
-        },
+          year: currentYear,
+          type: { not: 'PAIR' }
+        }
       },
-      select: {
-        points: true,
-      },
-    }),
+      select: { seedingScore: true }
+    })
   ]);
 
   // Sum the points (default to 0 if no ranking exists)
-  const seedingScore = (player1Ranking?.points || 0) + (player2Ranking?.points || 0);
+  const seedingScore = (player1Entry?.seedingScore || 0) + (player2Entry?.seedingScore || 0);
 
   return seedingScore;
 }

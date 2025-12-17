@@ -3,71 +3,78 @@ import apiClient from './apiClient';
 /**
  * Ranking Service - API calls for category rankings
  * Backend endpoints: /api/v1/rankings
- * Note: Rankings are read-only (updated by backend after tournament completion)
  */
 
 /**
- * Get category leaderboard (top rankings)
- * @param {string} categoryId - Category UUID
- * @param {Object} options - Optional pagination (limit, offset)
- * @returns {Promise} Category rankings with metadata
+ * Get all rankings summary
+ * @param {number} year - Optional year
+ * @returns {Promise} List of rankings
  */
-export const getCategoryLeaderboard = async (categoryId, options = {}) => {
+export const getAllRankings = async (year) => {
+  const params = year ? `?year=${year}` : '';
+  const response = await apiClient.get(`/v1/rankings${params}`);
+  return response.data.data;
+};
+
+/**
+ * Get rankings for a category
+ * @param {string} categoryId - Category UUID
+ * @param {string} type - Optional ranking type (SINGLES, PAIR, MEN, WOMEN)
+ * @param {number} year - Optional year
+ * @param {Object} options - Optional pagination and search options
+ * @param {number} options.page - Page number
+ * @param {number} options.limit - Items per page
+ * @param {string} options.search - Search term for player/pair names
+ * @returns {Promise} List of rankings (filtered by type if provided)
+ */
+export const getRankingsForCategory = async (categoryId, type, year, options = {}) => {
+  let url = `/v1/rankings/${categoryId}`;
+  if (type) {
+    url += `/type/${type}`;
+  }
+
   const params = new URLSearchParams();
-
+  if (year) params.append('year', year);
+  if (options.page) params.append('page', options.page);
   if (options.limit) params.append('limit', options.limit);
-  if (options.offset) params.append('offset', options.offset);
+  if (options.search) params.append('search', options.search);
 
-  const query = params.toString();
-  const url = query
-    ? `/v1/rankings/category/${categoryId}?${query}`
-    : `/v1/rankings/category/${categoryId}`;
-
-  const response = await apiClient.get(url);
-  return response.data.data; // { categoryId, categoryName, rankings: [], total, lastUpdated }
+  const queryString = params.toString() ? `?${params.toString()}` : '';
+  const response = await apiClient.get(`${url}${queryString}`);
+  return response.data.data;
 };
 
 /**
- * Get player's ranking in a specific category
+ * Get ranking entry breakdown
  * @param {string} categoryId - Category UUID
- * @param {string} playerId - Player UUID
- * @returns {Promise} Player's ranking in category
+ * @param {string} entryId - Ranking entry UUID
+ * @returns {Promise} Ranking entry details
  */
-export const getPlayerRankingInCategory = async (categoryId, playerId) => {
-  const response = await apiClient.get(`/v1/rankings/category/${categoryId}/player/${playerId}`);
-  return response.data.data; // { rank, playerId, playerName, points, wins, losses, winRate }
-};
-
-/**
- * Get all rankings for a player across all categories
- * @param {string} playerId - Player UUID
- * @returns {Promise} Player's rankings in all categories
- */
-export const getPlayerAllRankings = async (playerId) => {
-  const response = await apiClient.get(`/v1/rankings/player/${playerId}`);
-  return response.data.data; // { playerId, playerName, rankings: [] }
+export const getRankingEntryBreakdown = async (categoryId, entryId) => {
+  const response = await apiClient.get(`/v1/rankings/${categoryId}/entries/${entryId}/breakdown`);
+  return response.data.data;
 };
 
 /**
  * Get pair rankings for a doubles category
- * Feature: 006-doubles-pairs - User Story 2 (T047)
- * @param {string} categoryId - Category UUID (must be DOUBLES type)
- * @param {Object} options - Optional pagination (page, limit)
- * @returns {Promise} Pair rankings with metadata
+ * @param {string} categoryId - Category UUID
+ * @param {Object} options - Query options
+ * @param {number} options.page - Page number for pagination
+ * @param {number} options.limit - Items per page
+ * @param {number} options.year - Optional year filter
+ * @returns {Promise} Pair rankings with pagination
  */
 export const getPairRankings = async (categoryId, options = {}) => {
+  const { page = 1, limit = 50, year } = options;
   const params = new URLSearchParams();
 
-  if (options.page) params.append('page', options.page);
-  if (options.limit) params.append('limit', options.limit);
+  if (page) params.append('page', page);
+  if (limit) params.append('limit', limit);
+  if (year) params.append('year', year);
 
-  const query = params.toString();
-  const url = query
-    ? `/v1/rankings/pairs/${categoryId}?${query}`
-    : `/v1/rankings/pairs/${categoryId}`;
-
-  const response = await apiClient.get(url);
-  return response.data.data; // { category, rankings: [], pagination: {} }
+  const queryString = params.toString() ? `?${params.toString()}` : '';
+  const response = await apiClient.get(`/v1/rankings/${categoryId}/type/PAIR${queryString}`);
+  return response.data.data;
 };
 
 // Helper to format win rate as percentage

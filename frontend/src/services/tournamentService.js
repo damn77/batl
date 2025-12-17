@@ -90,3 +90,42 @@ export const STATUS_VARIANTS = {
   COMPLETED: 'success',
   CANCELLED: 'secondary'
 };
+
+/**
+ * Get tournament point configuration
+ * @param {string} id - Tournament UUID
+ * @returns {Promise} Point configuration object
+ */
+export const getTournamentPointConfig = async (id) => {
+  const response = await apiClient.get(`/v1/tournaments/${id}/point-config`);
+  return response.data.data;
+};
+
+/**
+ * Update tournament point configuration
+ * @param {string} id - Tournament UUID
+ * @param {Object} config - { calculationMethod, multiplicativeValue, doublePointsEnabled }
+ * @returns {Promise} Updated point configuration
+ */
+export const updateTournamentPointConfig = async (id, config) => {
+  const response = await apiClient.put(`/v1/tournaments/${id}/point-config`, config);
+  return response.data.data;
+};
+
+/**
+ * Calculate and award points for a completed tournament
+ * @param {string} id - Tournament UUID
+ * @param {Object} results - { results: [{ playerId/pairId, placement, finalRoundReached }] }
+ * @returns {Promise} Calculation result summary
+ */
+export const calculateTournamentPoints = async (id, results) => {
+  const response = await apiClient.post(`/v1/tournaments/${id}/calculate-points`, results);
+  return response.data.data;
+};
+
+// Point calculation methods
+export const POINT_CALCULATION_METHODS = {
+  PLACEMENT: 'PLACEMENT',
+  FINAL_ROUND: 'FINAL_ROUND'
+};
+
