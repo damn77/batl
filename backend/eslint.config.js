@@ -1,6 +1,35 @@
 import js from '@eslint/js';
 
 export default [
+  // Ignore patterns (migrated from .eslintignore)
+  {
+    ignores: [
+      // Dependencies
+      'node_modules/',
+      // Build outputs
+      'dist/',
+      'build/',
+      'coverage/',
+      // Test coverage
+      '.nyc_output/',
+      // Logs
+      '*.log',
+      // Environment files
+      '.env',
+      '.env.*',
+      // Database files
+      '*.db',
+      '*.sqlite',
+      '*.sqlite3',
+      'prisma/migrations/**/migration.sql.bak',
+      // Prisma generated client
+      'prisma/generated/',
+      // Temporary files
+      '*.tmp',
+      'tmp/',
+      'temp/',
+    ],
+  },
   js.configs.recommended,
   {
     languageOptions: {
