@@ -58,6 +58,36 @@ export const validateQuery = (schema) => {
   };
 };
 
+// Middleware to validate route parameters
+export const validateParams = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.params, {
+      abortEarly: false,
+      stripUnknown: false // Keep all params
+    });
+
+    if (error) {
+      const details = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message
+      }));
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid route parameters',
+          details
+        }
+      });
+    }
+
+    // Replace req.params with validated values (converted types)
+    req.params = value;
+    next();
+  };
+};
+
 // Common validation schemas
 export const schemas = {
   // Email validation
@@ -462,5 +492,6 @@ export const schemas = {
 export default {
   validateBody,
   validateQuery,
+  validateParams,
   schemas
 };

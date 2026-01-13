@@ -24,7 +24,8 @@
       "Bash(find:*)",
       "Bash(if [ -f \"D:\\Workspace\\BATL\\specs\\008-tournament-rankings\\quickstart.md\" ])",
       "Bash(then echo \"quickstart.md exists\")",
-      "Bash(else echo \"quickstart.md not found\")"
+      "Bash(else echo \"quickstart.md not found\")",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []

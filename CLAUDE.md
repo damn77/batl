@@ -1,6 +1,6 @@
 ﻿# BATL Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-11-02
+Auto-generated from all feature plans. Last updated: 2026-01-10
 
 ## Active Technologies
 - Node.js 20+ (ES Modules) (002-category-system)
@@ -14,6 +14,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-02
 - Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21 (006-doubles-pairs)
 - Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM (PostgreSQL), Joi/Zod validation, bcryptjs, Passport.js (008-tournament-rankings)
 - PostgreSQL via Prisma ORM (008-tournament-rankings)
+- Node.js 20+ (ES Modules) + Express 5.1.0, fs/promises (file operations), Joi (validation) (009-bracket-generation)
+- JSON file (bracket-templates-all.json) - read-only, no database persistence needed (009-bracket-generation)
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -128,9 +130,9 @@ After completing an implementation phase that introduces new UI functionality, g
 This ensures QA can verify new features work correctly before deployment.
 
 ## Recent Changes
+- 009-bracket-generation: Added Node.js 20+ (ES Modules) + Express 5.1.0, fs/promises (file operations), Joi (validation)
 - 008-tournament-rankings: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM (PostgreSQL), Joi/Zod validation, bcryptjs, Passport.js
 - 006-doubles-pairs: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21
-- 005-tournament-view: Added SQLite via Prisma ORM (development/production-ready)
 
 <!-- MANUAL ADDITIONS START -->
 
@@ -304,5 +306,88 @@ This ensures QA can verify new features work correctly before deployment.
 - Comprehensive error handling with specific error codes
 
 **Related Specs**: [spec.md](specs/008-tournament-rankings/spec.md), [tasks.md](specs/008-tournament-rankings/tasks.md), [plan.md](specs/008-tournament-rankings/plan.md)
+
+---
+
+### 009-bracket-generation (Completed: 2026-01-10)
+
+**Summary**: Backend API for knockout tournament bracket generation providing bracket structure templates and seeding configuration based on player count (4-128 players).
+
+**API Endpoints** (2 total):
+- **Bracket Structure** (1): GET `/api/v1/brackets/structure/:playerCount` - Returns bracket pattern, preliminary matches, byes, and bracket size
+- **Seeding Configuration** (1): GET `/api/v1/brackets/seeding/:playerCount` - Returns number of seeded players based on tournament size
+
+**Data Source**:
+- `docs/bracket-templates-all.json`: 125 pre-calculated bracket templates (one per player count from 4-128)
+- No database persistence needed - read-only JSON file with in-memory caching
+
+**Key Business Rules**:
+1. **Bracket Structure Format**: String pattern where "0" = preliminary match required, "1" = bye (automatic advancement)
+2. **Seeding Ranges**: Number of seeded players determined by tournament size:
+   - 4-9 players: 2 seeded
+   - 10-19 players: 4 seeded
+   - 20-39 players: 8 seeded
+   - 40-128 players: 16 seeded
+3. **Manual Seeding**: Seeding positions within bracket determined manually by organizers (no automated placement)
+4. **Derived Field Calculation**:
+   - Bracket size = next power of 2 ≥ player count
+   - Preliminary matches = count of "0" characters in structure
+   - Byes = count of "1" characters in structure
+
+**Implementation Highlights**:
+- **No Frontend**: Backend-only feature for API consumption
+- **In-Memory Caching**: Templates loaded once on first request and cached
+- **Public Endpoints**: No authentication required (read-only bracket information)
+- **Test-First Development**: All 38 tests written before implementation per FR-012
+- **Validation Middleware**: Reusable `validateParams` middleware added to validate.js
+- **Interpretation Field**: API responses include field explanations for self-documenting API (User Story 3)
+
+**Technical Details**:
+- Node.js 20+ with ES Modules
+- Express 5.1.0 for routing
+- Joi 18.0.1 for request validation (playerCount: integer, 4-128)
+- Jest 30.2.0 for testing
+- fs/promises for async file loading
+- Error responses follow BATL API format: `{success: false, error: {code, message, details}}`
+
+**Test Coverage**:
+- Template validation: 5 tests (validate all 125 templates)
+- Bracket service unit tests: 8 tests (structure calculation logic)
+- Seeding service unit tests: 8 tests (seeding range logic)
+- Integration tests: 17 tests (9 structure + 8 seeding endpoint tests)
+- **Total: 38 bracket tests, all passing ✅**
+
+**Files Created**:
+- `backend/src/services/bracketService.js` - Core bracket logic with getSeedingConfig
+- `backend/src/api/validators/bracketValidator.js` - Joi validation schemas
+- `backend/src/api/bracketController.js` - Request handlers for both endpoints
+- `backend/src/api/routes/bracketRoutes.js` - Express router configuration
+- `backend/__tests__/unit/bracketTemplates.test.js` - Template validation tests
+- `backend/__tests__/unit/bracketService.test.js` - Service unit tests
+- `backend/__tests__/unit/seedingService.test.js` - Seeding unit tests
+- `backend/__tests__/integration/bracketRoutes.test.js` - API integration tests (updated)
+
+**Files Modified**:
+- `backend/src/middleware/validate.js` - Added `validateParams` middleware (reusable for future features)
+- `backend/src/index.js` - Registered bracket routes at `/api/v1/brackets`
+- `specs/009-bracket-generation/quickstart.md` - Corrected preliminary match count examples
+
+**Usage Example**:
+```bash
+# Get bracket structure for 11 players
+curl http://localhost:3000/api/v1/brackets/structure/11
+# Returns: { playerCount: 11, structure: "1110 0101", preliminaryMatches: 3, byes: 5, bracketSize: 16, interpretation: {...} }
+
+# Get seeding requirements for 15 players
+curl http://localhost:3000/api/v1/brackets/seeding/15
+# Returns: { playerCount: 15, seededPlayers: 4, range: {min: 10, max: 19}, note: "..." }
+```
+
+**Integration Points**:
+- Bracket templates consumed by tournament organizers for draw creation
+- Seeding configuration used with Feature 008 (tournament-rankings) seeding scores
+- Foundation for future bracket management and automated draw generation features
+
+**Related Specs**: [spec.md](specs/009-bracket-generation/spec.md), [tasks.md](specs/009-bracket-generation/tasks.md), [plan.md](specs/009-bracket-generation/plan.md), [contracts/api-endpoints.md](specs/009-bracket-generation/contracts/api-endpoints.md), [quickstart.md](specs/009-bracket-generation/quickstart.md)
 
 <!-- MANUAL ADDITIONS END -->

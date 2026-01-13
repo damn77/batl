@@ -16,6 +16,7 @@ import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRou
 import pairRoutes from './api/routes/pairRoutes.js';
 import seedingRoutes from './api/routes/seedingRoutes.js';
 import pointTableRoutes from './api/routes/pointTableRoutes.js';
+import bracketRoutes from './api/routes/bracketRoutes.js';
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -137,6 +138,7 @@ app.use('/api/v1/match-rules', matchRulesRouter);
 // Rule override routes for different entity levels
 app.use('/api/v1/groups', groupRulesRouter);
 app.use('/api/v1/brackets', bracketRulesRouter);
+app.use('/api/v1/brackets', bracketRoutes); // Feature 009: Bracket generation (structure/seeding endpoints)
 app.use('/api/v1/rounds', roundRulesRouter);
 app.use('/api/v1/matches', matchOverridesRouter);
 
