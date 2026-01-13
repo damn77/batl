@@ -1,6 +1,6 @@
 ﻿# BATL Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-01-10
+Auto-generated from all feature plans. Last updated: 2026-01-13
 
 ## Active Technologies
 - Node.js 20+ (ES Modules) (002-category-system)
@@ -16,6 +16,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-10
 - PostgreSQL via Prisma ORM (008-tournament-rankings)
 - Node.js 20+ (ES Modules) + Express 5.1.0, fs/promises (file operations), Joi (validation) (009-bracket-generation)
 - JSON file (bracket-templates-all.json) - read-only, no database persistence needed (009-bracket-generation)
+- Node.js 20+ (ES Modules) + Express 5.1.0, Joi (validation), seedrandom 3.0.5+ (deterministic PRNG), Jest 30.2.0 (010-seeding-placement)
+- seedrandom (Deterministic Randomization) (010-seeding-placement) - For reproducible randomization in tests and seeding placement
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
