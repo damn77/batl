@@ -165,6 +165,11 @@ async function startServer() {
   }
 }
 
-startServer();
+// Only start server if this file is run directly (not imported by tests)
+// In ES modules, we check if import.meta.url matches the file being executed
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`
+    || process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
+  startServer();
+}
 
 export default app;
