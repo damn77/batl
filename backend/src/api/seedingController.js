@@ -2,9 +2,34 @@ import * as seedingService from '../services/seedingService.js';
 import * as seedingPlacementService from '../services/seedingPlacementService.js';
 import { generateBracketSchema } from './validators/seedingValidator.js';
 import { logAudit, AuditActions } from '../services/auditService.js';
+import * as seedingPlacementService from '../services/seedingPlacementService.js';
+import { generateBracketSchema } from './validators/seedingValidator.js';
+import { logAudit, AuditActions } from '../services/auditService.js';
 
 /**
  * GET /api/v1/seeding-score/:entityType/:entityId/category/:categoryId
+ *
+ * Retrieves the seeding score for a specific player or pair in a category.
+ * Seeding score is calculated from the top N tournament results (default 7).
+ * Integrates with Feature 008 (tournament-rankings) for score calculation.
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.params - URL parameters
+ * @param {string} req.params.entityType - Entity type ('PLAYER' or 'PAIR')
+ * @param {string} req.params.entityId - Player or pair ID
+ * @param {string} req.params.categoryId - Category ID
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ *
+ * @returns {Promise<void>} JSON response with seeding score
+ *
+ * @example
+ * // GET /api/v1/seeding-score/PLAYER/p123/category/cat-456
+ * // Response:
+ * // {
+ * //   success: true,
+ * //   data: { seedingScore: 750 }
+ * // }
  *
  * Retrieves the seeding score for a specific player or pair in a category.
  * Seeding score is calculated from the top N tournament results (default 7).
@@ -40,6 +65,42 @@ export async function getSeedingScore(req, res, next) {
 
 /**
  * POST /api/v1/seeding-score/bulk
+ *
+ * Calculates seeding scores for multiple players or pairs in batch.
+ * Useful for bracket generation and tournament setup where multiple
+ * seeding scores are needed simultaneously.
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.categoryId - Category ID for score calculation
+ * @param {Array<Object>} req.body.entities - Array of entities to score
+ * @param {string} req.body.entities[].entityType - Entity type ('PLAYER' or 'PAIR')
+ * @param {string} req.body.entities[].entityId - Entity ID
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ *
+ * @returns {Promise<void>} JSON response with array of seeding scores
+ *
+ * @example
+ * // POST /api/v1/seeding-score/bulk
+ * // Request:
+ * // {
+ * //   categoryId: "cat-123",
+ * //   entities: [
+ * //     { entityType: "PLAYER", entityId: "p1" },
+ * //     { entityType: "PLAYER", entityId: "p2" },
+ * //     { entityType: "PAIR", entityId: "pair-5" }
+ * //   ]
+ * // }
+ * // Response:
+ * // {
+ * //   success: true,
+ * //   data: [
+ * //     { entityType: "PLAYER", entityId: "p1", seedingScore: 750 },
+ * //     { entityType: "PLAYER", entityId: "p2", seedingScore: 680 },
+ * //     { entityType: "PAIR", entityId: "pair-5", seedingScore: 820 }
+ * //   ]
+ * // }
  *
  * Calculates seeding scores for multiple players or pairs in batch.
  * Useful for bracket generation and tournament setup where multiple
