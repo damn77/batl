@@ -15,6 +15,7 @@ import rankingRoutes from './api/routes/rankingRoutes.js';
 import tournamentRegistrationRoutes from './api/routes/tournamentRegistrationRoutes.js';
 import pairRoutes from './api/routes/pairRoutes.js';
 import seedingRoutes from './api/routes/seedingRoutes.js';
+import seedingPlacementRoutes from './api/routes/seedingPlacementRoutes.js';
 import pointTableRoutes from './api/routes/pointTableRoutes.js';
 import bracketRoutes from './api/routes/bracketRoutes.js';
 import {
@@ -130,6 +131,7 @@ app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/rankings', rankingRoutes);
 app.use('/api/v1/pairs', pairRoutes);
 app.use('/api/v1/seeding-score', seedingRoutes);
+app.use('/api/v1/seeding', seedingPlacementRoutes); // Feature 010: Seeding placement
 app.use('/api/v1/admin/point-tables', pointTableRoutes);
 app.use('/api/tournaments', tournamentRegistrationRoutes);
 // Tournament rules routes with specific base paths
