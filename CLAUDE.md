@@ -1,6 +1,6 @@
 ﻿# BATL Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-01-10
+Auto-generated from all feature plans. Last updated: 2026-01-13
 
 ## Active Technologies
 - Node.js 20+ (ES Modules) (002-category-system)
@@ -16,6 +16,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-10
 - PostgreSQL via Prisma ORM (008-tournament-rankings)
 - Node.js 20+ (ES Modules) + Express 5.1.0, fs/promises (file operations), Joi (validation) (009-bracket-generation)
 - JSON file (bracket-templates-all.json) - read-only, no database persistence needed (009-bracket-generation)
+- Node.js 20+ (ES Modules) + Express 5.1.0, Joi (validation), seedrandom 3.0.5+ (deterministic PRNG), Jest 30.2.0 (010-seeding-placement)
+- seedrandom (Deterministic Randomization) (010-seeding-placement) - For reproducible randomization in tests and seeding placement
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -389,5 +391,99 @@ curl http://localhost:3000/api/v1/brackets/seeding/15
 - Foundation for future bracket management and automated draw generation features
 
 **Related Specs**: [spec.md](specs/009-bracket-generation/spec.md), [tasks.md](specs/009-bracket-generation/tasks.md), [plan.md](specs/009-bracket-generation/plan.md), [contracts/api-endpoints.md](specs/009-bracket-generation/contracts/api-endpoints.md), [quickstart.md](specs/009-bracket-generation/quickstart.md)
+
+---
+
+### 010-seeding-placement (Completed: 2026-01-14)
+
+**Summary**: Automated tournament seeding placement system that places top-ranked players in optimal bracket positions using recursive algorithms and fair randomization for knockout tournaments (4-128 players).
+
+**API Endpoints** (1 total):
+- **Generate Seeded Bracket** (1): POST `/api/v1/seeding/generate-bracket` - Generates a complete seeded bracket with optimal player placement based on rankings
+
+**Request Format**:
+```json
+{
+  "categoryId": "string (required)",
+  "playerCount": "number (4-128, required)",
+  "randomSeed": "string (optional, for deterministic randomization)",
+  "tournamentId": "string (optional)",
+  "unseededPlayers": "array (optional, future use)"
+}
+```
+
+**Key Business Rules**:
+1. **Recursive Seeding Algorithm**: Seeds 1-N/2 follow previous level's placement rules recursively (2→4→8→16)
+2. **Fair Randomization**: Lower-ranked seeds (beyond top N/2) are randomized across bracket segments for fairness
+3. **Seeding Ranges by Tournament Size**:
+   - 4-9 players: 2 seeds (1st at top, 2nd at bottom)
+   - 10-19 players: 4 seeds (1-2 fixed, 3-4 randomized in halves)
+   - 20-39 players: 8 seeds (1-4 fixed, 5-8 randomized in quarters)
+   - 40-128 players: 16 seeds (1-8 fixed, 9-16 randomized in eighths)
+4. **Deterministic Randomization**: Uses seedrandom library for reproducible test results and audit trails
+5. **Integration with Rankings**: Automatically retrieves top N players from Feature 008 (tournament-rankings) by seeding score
+
+**Implementation Highlights**:
+- **Test-Driven Development**: All 89 tests written before implementation
+- **Recursive Placement Functions**: placeTwoSeeds → placeFourSeeds → placeEightSeeds → placeSixteenSeeds
+- **Chi-Square Validated Fairness**: Statistical tests verify randomization produces fair distribution across bracket segments
+- **Service Integration**: Integrates with Feature 008 (rankings) for player scores and Feature 009 (bracket structure) for tournament templates
+- **Comprehensive Error Handling**: Specific error codes for missing categories, insufficient rankings, invalid player counts
+
+**Technical Details**:
+- Node.js 20+ with ES Modules
+- Express 5.1.0 for routing
+- Joi 18.0.1 for request validation
+- Jest 30.2.0 for testing (ES Modules support)
+- seedrandom 3.0.5+ for deterministic PRNG
+- PostgreSQL via Prisma ORM (via Feature 008 integration)
+
+**Test Coverage** (89 tests total, all passing ✅):
+- **Unit Tests (47)**: placeTwoSeeds (12), placeFourSeeds (10), placeEightSeeds (12), placeSixteenSeeds (13)
+- **Randomization Fairness (8)**: Chi-square tests for shuffle, 4-seed, 8-seed, 16-seed distributions
+- **Integration Tests (24)**: API endpoint tests for all 4 user stories plus validation tests
+- **Function Tests (10)**: getSeedCount() validation across all player count ranges
+
+**Files Created**:
+- `backend/src/services/seedingPlacementService.js` - Core seeding logic with recursive placement functions
+- `backend/src/api/validators/seedingValidator.js` - Joi validation schemas
+- `backend/src/api/routes/seedingPlacementRoutes.js` - Express router for seeding endpoints
+- `backend/__tests__/unit/seedingPlacement2Seed.test.js` - 2-seed placement unit tests (12 tests)
+- `backend/__tests__/unit/seedingPlacement4Seed.test.js` - 4-seed placement unit tests (10 tests)
+- `backend/__tests__/unit/seedingPlacement8Seed.test.js` - 8-seed placement unit tests (12 tests)
+- `backend/__tests__/unit/seedingPlacement16Seed.test.js` - 16-seed placement unit tests (13 tests)
+- `backend/__tests__/unit/randomizationFairness.test.js` - Chi-square fairness tests (8 tests)
+- `backend/__tests__/integration/seedingRoutes.test.js` - API integration tests (24 tests)
+
+**Files Modified**:
+- `backend/src/api/seedingController.js` - Added generateBracket handler
+- `backend/src/index.js` - Registered seeding routes at `/api/v1/seeding`
+- `backend/package.json` - Added seedrandom@^3.0.5 dependency
+
+**Usage Example**:
+```bash
+# Generate seeded bracket for 15-player tournament (4 seeds)
+curl -X POST http://localhost:3000/api/v1/seeding/generate-bracket \
+  -H "Content-Type: application/json" \
+  -d '{"categoryId":"cat-123","playerCount":15}'
+
+# Response includes:
+# - bracket.positions: Array of 16 positions with seeds 1-4 placed
+# - bracket.randomSeed: Deterministic seed used for randomization
+# - seedingInfo: Metadata about seeding (count, range, note)
+```
+
+**Algorithm Details**:
+- **2-Seed**: Seed 1 at position 1 (top), Seed 2 at last position (bottom)
+- **4-Seed**: Recursive 2-seed for 1-2, randomize 3-4 at half boundaries
+- **8-Seed**: Recursive 4-seed for 1-4, randomize 5-8 across 4 quarters
+- **16-Seed**: Recursive 8-seed for 1-8, randomize 9-16 across 8 eighths
+
+**Integration Points**:
+- Consumes Feature 008 rankings via `getRankingsForCategory()` to retrieve top N seeded players
+- Consumes Feature 009 bracket structure via `getBracketByPlayerCount()` for tournament templates
+- Provides seeded brackets for tournament organizers to use in draw management
+
+**Related Specs**: [spec.md](specs/010-seeding-placement/spec.md), [tasks.md](specs/010-seeding-placement/tasks.md), [plan.md](specs/010-seeding-placement/plan.md), [contracts/api-endpoints.md](specs/010-seeding-placement/contracts/api-endpoints.md)
 
 <!-- MANUAL ADDITIONS END -->
