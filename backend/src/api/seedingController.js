@@ -2,9 +2,6 @@ import * as seedingService from '../services/seedingService.js';
 import * as seedingPlacementService from '../services/seedingPlacementService.js';
 import { generateBracketSchema } from './validators/seedingValidator.js';
 import { logAudit, AuditActions } from '../services/auditService.js';
-import * as seedingPlacementService from '../services/seedingPlacementService.js';
-import { generateBracketSchema } from './validators/seedingValidator.js';
-import { logAudit, AuditActions } from '../services/auditService.js';
 
 /**
  * GET /api/v1/seeding-score/:entityType/:entityId/category/:categoryId

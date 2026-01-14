@@ -82,3 +82,7 @@ desktop.ini
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Claude Code temporary files/directories
+**/tmpclaude-*
+tmpclaude-*
