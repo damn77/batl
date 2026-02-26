@@ -75,23 +75,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MATCH-01 | Phase ? | Pending |
-| MATCH-02 | Phase ? | Pending |
-| MATCH-03 | Phase ? | Pending |
-| MATCH-04 | Phase ? | Pending |
-| MATCH-05 | Phase ? | Pending |
-| LIFE-01 | Phase ? | Pending |
-| LIFE-02 | Phase ? | Pending |
-| LIFE-03 | Phase ? | Pending |
-| LIFE-04 | Phase ? | Pending |
-| STATS-01 | Phase ? | Pending |
-| STATS-02 | Phase ? | Pending |
+| MATCH-01 | Phase 1 | Pending |
+| MATCH-02 | Phase 1 | Pending |
+| MATCH-03 | Phase 1 | Pending |
+| MATCH-04 | Phase 1 | Pending |
+| MATCH-05 | Phase 1 | Pending |
+| LIFE-01 | Phase 2 | Pending |
+| LIFE-02 | Phase 2 | Pending |
+| LIFE-03 | Phase 2 | Pending |
+| LIFE-04 | Phase 2 | Pending |
+| STATS-01 | Phase 3 | Pending |
+| STATS-02 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11 ⚠️ (will be resolved during roadmap creation)
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation*
