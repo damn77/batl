@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, Button, Collapse, Alert, Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useFormatStructure } from '../services/tournamentViewService';
+import { useAuth } from '../utils/AuthContext';
 import GroupStandingsTable from './GroupStandingsTable';
 import KnockoutBracket from './KnockoutBracket';
 import SwissRoundPairings from './SwissRoundPairings';
@@ -19,12 +20,16 @@ import ExpandableSection from './ExpandableSection';
 const FormatVisualization = ({ tournament }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { user } = useAuth();
 
   // T088: Lazy load format structure only when expanded
   const { structure, isLoading, isError } = useFormatStructure(
     tournament?.id,
     isExpanded
   );
+
+  // T050: Get current user's player profile ID for My Match feature
+  const currentUserPlayerId = user?.playerProfileId || null;
 
   if (!tournament) return null;
 
@@ -130,6 +135,8 @@ const FormatVisualization = ({ tournament }) => {
                           tournamentId={tournament.id}
                           bracket={bracket}
                           rounds={bracketRounds}
+                          currentUserPlayerId={currentUserPlayerId}
+                          isDoubles={tournament.categoryType === 'DOUBLES'}
                         />
                       );
                     })}

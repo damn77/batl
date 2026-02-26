@@ -84,6 +84,7 @@ enum MatchStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  BYE
 }
 
 enum BracketType {
@@ -490,7 +491,8 @@ model Match {
   roundId            String? // Foreign key to Round (for knockout/swiss)
   matchNumber        Int // Match number within tournament
   player1Id          String // Foreign key to PlayerProfile (for singles, or representative player for doubles)
-  player2Id          String // Foreign key to PlayerProfile (for singles, or representative player for doubles)
+  player2Id          String? // Foreign key to PlayerProfile (for singles, or representative player for doubles) - Optional for BYE matches
+  isBye              Boolean @default(false) // T011: Indicates if match is a first-round BYE
   pair1Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
   pair2Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
   status             MatchStatus @default(SCHEDULED)
@@ -507,8 +509,8 @@ model Match {
   group      Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   bracket    Bracket?      @relation(fields: [bracketId], references: [id], onDelete: Cascade)
   round      Round?        @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player1    PlayerProfile @relation("MatchPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
-  player2    PlayerProfile @relation("MatchPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
+  player1    PlayerProfile  @relation("MatchPlayer1", fields: [player1Id], references: [id], onDelete: Restrict)
+  player2    PlayerProfile? @relation("MatchPlayer2", fields: [player2Id], references: [id], onDelete: Restrict)
   pair1      DoublesPair?  @relation("MatchPair1", fields: [pair1Id], references: [id], onDelete: Restrict) // 006-doubles-pairs
   pair2      DoublesPair?  @relation("MatchPair2", fields: [pair2Id], references: [id], onDelete: Restrict) // 006-doubles-pairs
 

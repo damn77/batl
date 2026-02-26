@@ -1,4 +1,44 @@
 /* T078-T084: Knockout Bracket Styles - CSS Grid layout with connectors and scroll */
+/* T002: CSS Custom Properties for theming (FR-015) */
+
+:root {
+  /* Player slot backgrounds (FR-005, FR-006) */
+  --bracket-top-player: #f0f0f0;
+  --bracket-bottom-player: #ffffff;
+  --bracket-winner: #d1e7dd;
+  --bracket-error: #f8d7da;
+
+  /* Match border colors by status */
+  --bracket-status-scheduled: #6c757d;
+  --bracket-status-in-progress: #0d6efd;
+  --bracket-status-completed: #198754;
+  --bracket-status-cancelled: #dc3545;
+  --bracket-status-bye: #ffc107;
+
+  /* Connector lines between matches */
+  --bracket-connector: #dee2e6;
+  --bracket-connector-highlight: #0d6efd;
+
+  /* UI controls */
+  --bracket-control-active: #0d6efd;
+  --bracket-control-inactive: #6c757d;
+
+  /* Zoom/pan constraints (for reference, used in JS) */
+  --bracket-min-scale: 0.25;
+  --bracket-max-scale: 4.0;
+  --bracket-default-scale: 1.0;
+
+  /* T006: Layout spacing custom properties */
+  --bracket-match-gap: 2rem;
+  --bracket-round-gap: 3rem;
+  --bracket-match-min-width: 200px;
+  --bracket-match-min-height: 80px;
+
+  /* Animation durations */
+  --bracket-zoom-duration: 0.15s;
+  --bracket-pan-duration: 0.1s;
+  --bracket-highlight-duration: 0.3s;
+}
 
 .bracket-wrapper {
   position: relative;
@@ -26,13 +66,14 @@
   display: flex;
   flex-direction: column;
   min-width: 200px;
+  position: relative;
 }
 
 .round-header {
   text-align: center;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--bracket-connector);
 }
 
 .round-header h6 {
@@ -45,22 +86,31 @@
   flex-direction: column;
   justify-content: space-around;
   flex: 1;
-  gap: 2rem;
+  gap: 1rem;
+  min-height: 200px;
 }
 
 .match-wrapper {
   position: relative;
 }
 
+/* T027: Hide BYE matches while maintaining space for bracket structure */
+.match-wrapper.bye-hidden {
+  visibility: hidden;
+}
+
 /* T080: Bracket match card */
 .bracket-match {
-  background: white;
-  border: 2px solid #dee2e6;
+  background: var(--bracket-bottom-player);
+  border: 2px solid var(--bracket-connector);
   border-radius: 0.5rem;
   padding: 0.75rem;
-  min-height: 80px;
+  min-height: 120px; /* Increased for uniform sizing */
+  height: 120px; /* Fixed height for uniformity */
   position: relative;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .bracket-match:hover {
@@ -75,22 +125,27 @@
 
 /* T084: Match status colors */
 .bracket-match.status-scheduled {
-  border-color: #6c757d;
+  border-color: var(--bracket-status-scheduled);
 }
 
 .bracket-match.status-in_progress {
-  border-color: #0d6efd;
-  background: #e7f3ff;
+  border-color: var(--bracket-status-in-progress);
+  background: color-mix(in srgb, var(--bracket-status-in-progress) 10%, white);
 }
 
 .bracket-match.status-completed {
-  border-color: #198754;
+  border-color: var(--bracket-status-completed);
 }
 
 .bracket-match.status-cancelled {
-  border-color: #dc3545;
-  background: #f8d7da;
+  border-color: var(--bracket-status-cancelled);
+  background: var(--bracket-error);
   opacity: 0.7;
+}
+
+.bracket-match.status-bye {
+  border-color: var(--bracket-status-bye);
+  background: color-mix(in srgb, var(--bracket-status-bye) 15%, white);
 }
 
 /* Match players */
@@ -107,9 +162,21 @@
   border-bottom: none;
 }
 
+/* Top player styling (FR-005) */
+.bracket-player.top-player {
+  background-color: var(--bracket-top-player);
+}
+
+/* Winner styling - declared after top-player so it takes precedence (FR-006) */
 .bracket-player.winner {
-  background-color: #d1e7dd;
+  background-color: var(--bracket-winner);
   font-weight: 600;
+}
+
+/* Error state (FR-014) */
+.bracket-match.error-state {
+  background-color: var(--bracket-error);
+  border-color: var(--bracket-status-cancelled);
 }
 
 .player-name {
@@ -150,27 +217,45 @@
 }
 
 /* T081: Match connector lines (between rounds) */
+/* Horizontal connector from each match to the gap between rounds */
 .bracket-round:not(:last-child) .match-wrapper::after {
   content: '';
   position: absolute;
   top: 50%;
-  right: -3rem;
-  width: 3rem;
+  right: -1.5rem;
+  width: 1.5rem;
   height: 2px;
-  background: #dee2e6;
-  z-index: -1;
+  background: var(--bracket-connector);
+  transform: translateY(-50%);
 }
 
-/* Vertical connectors for multiple matches merging */
-.bracket-round:not(:last-child) .match-wrapper:nth-child(odd)::before {
+/* Vertical connector bar in the gap between rounds */
+.bracket-round:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1.5rem;
+  width: 2px;
+  height: 100%;
+  background: var(--bracket-connector);
+}
+
+/* Horizontal connector from the gap to next round matches */
+.bracket-round:not(:first-child) .match-wrapper::before {
   content: '';
   position: absolute;
   top: 50%;
-  right: -3rem;
-  width: 2px;
-  height: calc(100% + 2rem);
-  background: #dee2e6;
-  z-index: -1;
+  left: -1.5rem;
+  width: 1.5rem;
+  height: 2px;
+  background: var(--bracket-connector);
+  transform: translateY(-50%);
+}
+
+/* Highlighted connector (for My Match navigation) */
+.bracket-round:not(:last-child) .match-wrapper.highlighted::after {
+  background: var(--bracket-connector-highlight);
+  height: 3px;
 }
 
 /* T083: Scroll indicators */
@@ -178,7 +263,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(13, 110, 253, 0.9);
+  background: color-mix(in srgb, var(--bracket-control-active) 90%, transparent);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -217,12 +302,17 @@
   }
 
   .bracket-round:not(:last-child) .match-wrapper::after {
-    right: -2rem;
-    width: 2rem;
+    right: -1rem;
+    width: 1rem;
   }
 
-  .bracket-round:not(:last-child) .match-wrapper:nth-child(odd)::before {
-    right: -2rem;
+  .bracket-round:not(:last-child)::after {
+    right: -1rem;
+  }
+
+  .bracket-round:not(:first-child) .match-wrapper::before {
+    left: -1rem;
+    width: 1rem;
   }
 }
 
@@ -243,4 +333,308 @@
 
 .bracket-container::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* T006: Enhanced layout styles */
+
+/* Knockout bracket container */
+.knockout-bracket {
+  position: relative;
+}
+
+/* Seed badge styling */
+.seed-badge {
+  font-size: 0.75rem;
+  color: var(--bracket-control-inactive);
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+/* BYE slot styling */
+.bracket-player.bye-slot {
+  background-color: color-mix(in srgb, var(--bracket-status-bye) 20%, white);
+  justify-content: center;
+}
+
+.bye-text {
+  font-weight: 600;
+  color: var(--bracket-status-bye);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Match court display */
+.match-court {
+  font-size: 0.75rem;
+  color: var(--bracket-control-inactive);
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+/* Highlighted match (My Match feature) */
+.bracket-match.highlighted {
+  box-shadow: 0 0 0 3px var(--bracket-connector-highlight);
+  animation: highlight-pulse var(--bracket-highlight-duration) ease-in-out 2;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px var(--bracket-connector-highlight);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--bracket-connector-highlight) 50%, transparent);
+  }
+}
+
+/* Compact mode (for zoomed out view) */
+.bracket-match.compact {
+  padding: 0.25rem;
+  min-height: 40px;
+}
+
+.bracket-match.compact .bracket-player {
+  padding: 0.1rem 0.25rem;
+  font-size: 0.75rem;
+}
+
+.bracket-match.compact .match-status-badge {
+  font-size: 0.6rem;
+  padding: 0.1rem 0.2rem;
+}
+
+.bracket-match.compact .seed-badge,
+.bracket-match.compact .winner-icon {
+  display: none;
+}
+
+/* Clickable match styling */
+.bracket-match[role="button"] {
+  cursor: pointer;
+}
+
+.bracket-match[role="button"]:focus {
+  outline: 2px solid var(--bracket-control-active);
+  outline-offset: 2px;
+}
+
+/* In-progress match status indicator */
+.bracket-match.status-in-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--bracket-status-in-progress) 0%,
+    color-mix(in srgb, var(--bracket-status-in-progress) 50%, white) 50%,
+    var(--bracket-status-in-progress) 100%
+  );
+  background-size: 200% 100%;
+  animation: in-progress-slide 1.5s ease-in-out infinite;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+@keyframes in-progress-slide {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Doubles match name styling (smaller for 4 names) */
+.bracket-match .bracket-player .player-name {
+  max-width: 180px;
+}
+
+/* Note: Round matches layout is defined earlier in file using flexbox.
+   CSS Grid positioning for vertical alignment is handled via inline styles
+   on match-wrapper elements based on calculateMatchPosition() */
+
+/* T029, T031: Zoom/pan viewport styles */
+.bracket-viewport {
+  position: relative;
+  overflow: auto; /* Allow scrolling to see full bracket */
+  touch-action: pan-x pan-y; /* Allow touch scrolling */
+  user-select: none;
+  max-height: 70vh;
+  min-height: 300px;
+}
+
+.bracket-viewport-content {
+  transform-origin: 0 0;
+  will-change: transform;
+  cursor: grab;
+}
+
+.bracket-viewport-content.dragging {
+  cursor: grabbing;
+  transition: none !important;
+}
+
+.bracket-viewport-content:not(.dragging) {
+  transition: transform var(--bracket-zoom-duration) ease-out;
+}
+
+/* Bracket controls positioning */
+.bracket-controls-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--bracket-connector);
+  backdrop-filter: blur(4px);
+}
+
+/* Navigation hint for large brackets */
+.bracket-nav-hint {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.bracket-viewport:hover .bracket-nav-hint {
+  opacity: 1;
+}
+
+.bracket-viewport.zoomed .bracket-nav-hint {
+  display: none;
+}
+
+/* Minimap for large brackets (optional enhancement) */
+.bracket-minimap {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  width: 120px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--bracket-connector);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  z-index: 15;
+}
+
+.bracket-minimap-viewport {
+  position: absolute;
+  border: 2px solid var(--bracket-control-active);
+  background: rgba(13, 110, 253, 0.1);
+  pointer-events: none;
+}
+
+/* T051: Enhanced responsive styles for mobile */
+@media (max-width: 576px) {
+  .knockout-bracket h5 {
+    font-size: 1rem;
+  }
+
+  .bracket-controls-wrapper {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bracket-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bracket-my-match {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bracket-round {
+    min-width: 140px;
+  }
+
+  .bracket-match {
+    padding: 0.5rem;
+    min-height: 60px;
+  }
+
+  .bracket-player {
+    font-size: 0.8rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .player-name {
+    max-width: 100px;
+  }
+
+  .match-score {
+    font-size: 0.75rem;
+  }
+
+  .match-status-badge {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.2rem;
+  }
+
+  .round-header h6 {
+    font-size: 0.85rem;
+  }
+
+  .bracket-nav-hint {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+  }
+}
+
+/* T052: Enhanced accessibility */
+.bracket-match:focus-visible {
+  outline: 3px solid var(--bracket-control-active);
+  outline-offset: 2px;
+}
+
+.bracket-controls button:focus-visible {
+  outline: 3px solid var(--bracket-control-active);
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .bracket-viewport-content,
+  .bracket-match,
+  .bracket-match.highlighted {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .scroll-indicator {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bracket-match {
+    border-width: 3px;
+  }
+
+  .bracket-player.winner {
+    background-color: #000;
+    color: #fff;
+  }
+
+  .bracket-connector,
+  .bracket-round:not(:last-child) .match-wrapper::after,
+  .bracket-round:not(:last-child) .match-wrapper:nth-child(odd)::before {
+    background: #000;
+  }
 }

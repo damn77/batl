@@ -91,6 +91,13 @@ const TournamentViewPage = () => {
               </Col>
             </Row>
 
+            {/* T072: Format Visualization - Brackets, Groups, Swiss Rounds */}
+            <Row className="mt-4">
+              <Col>
+                <FormatVisualization tournament={tournament} />
+              </Col>
+            </Row>
+
             {/* Organizer Registration Panel */}
             {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
               <Row className="mt-4">
@@ -107,13 +114,6 @@ const TournamentViewPage = () => {
             <Row className="mt-4">
               <Col>
                 <PlayerListPanel tournament={tournament} />
-              </Col>
-            </Row>
-
-            {/* T072: Format Visualization - Brackets, Groups, Swiss Rounds */}
-            <Row className="mt-4">
-              <Col>
-                <FormatVisualization tournament={tournament} />
               </Col>
             </Row>
 

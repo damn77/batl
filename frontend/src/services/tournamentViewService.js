@@ -242,6 +242,16 @@ export const useMatches = (id, filters = {}, shouldFetch = false) => {
 };
 
 /**
+ * T011: Get bracket structure from bracket generation API
+ * @param {number} playerCount - Number of players (4-128)
+ * @returns {Promise} Bracket structure with pattern, matches, byes
+ */
+export const getBracketStructure = async (playerCount) => {
+  const response = await apiClient.get(`/v1/brackets/structure/${playerCount}`);
+  return response.data.data;
+};
+
+/**
  * T046: Parse formatConfig JSON to human-readable format
  * Handles KNOCKOUT, GROUP, SWISS, and COMBINED format types
  * @param {string} formatType - KNOCKOUT, GROUP, SWISS, or COMBINED
