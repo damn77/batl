@@ -36,10 +36,9 @@ A complete tournament runs from registration to final standings without the orga
 
 <!-- What needs to be built next -->
 
-- [ ] Players can submit match results in a format-aware score entry form
-- [ ] Organizer receives result submissions and can confirm or reject them
-- [ ] Dispute handling: first submission wins, other player can flag a conflict
-- [ ] Tournament progresses automatically as results are confirmed (bracket advances)
+- [ ] Any match participant can submit or update a match result via a format-aware score entry form
+- [ ] Organizer can submit or update any match result; organizer edit locks players out from further changes
+- [ ] Tournament bracket advances automatically when a knockout result is set
 - [ ] Organizer can manage the live draw — assign players to positions, override seeding
 - [ ] Group stage visualization and result entry (round-robin matches)
 - [ ] Swiss system pairing and result tracking
@@ -77,8 +76,8 @@ A complete tournament runs from registration to final standings without the orga
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Self-report results (player submits, organizer confirms) | Reduces organizer workload; players are accountable | — Pending |
-| First submission wins, other player can dispute | Simple default; avoids blocking tournament progress | — Pending |
+| No approval workflow — any participant can submit/update | Reduces organizer bottleneck; simpler UX | — Pending |
+| Organizer edit locks players out from further changes | Organizer has final authority without requiring explicit "confirm" step | — Pending |
 | In-app notifications only | Avoids email infrastructure complexity in v1 | — Pending |
 | Knockout bracket visualization already built (011) | Group/Swiss visualizations still needed | — Pending |
 

@@ -9,14 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Match Results
 
-- [ ] **MATCH-01**: Player can submit their match result using a format-aware score entry form that shows the correct inputs based on the tournament's scoring rules (sets, match score, or tiebreak-only)
-- [ ] **MATCH-02**: A submitted result appears as "pending confirmation" until the organizer confirms or rejects it
-- [ ] **MATCH-03**: Player can see the current status of their submitted results (pending / confirmed / rejected)
-- [ ] **MATCH-04**: Organizer can view all pending result submissions for their active tournaments in a single list
-- [ ] **MATCH-05**: Organizer can confirm a pending submission with a single action
-- [ ] **MATCH-06**: Organizer can reject a submitted result with an optional rejection reason
-- [ ] **MATCH-07**: Organizer can manually enter a match result for any match (for walkover, forfeit, or no-show scenarios)
-- [ ] **MATCH-08**: Confirmed results are immutable — the score and winner cannot be changed after confirmation
+- [ ] **MATCH-01**: Any player participating in a match can submit the match result using a format-aware score entry form that shows the correct inputs based on the tournament's scoring rules (sets, match score, or tiebreak-only)
+- [ ] **MATCH-02**: Any player participating in a match can update a previously submitted result, as long as the organizer has not yet modified it
+- [ ] **MATCH-03**: Organizer can submit or update the match result for any match at any time
+- [ ] **MATCH-04**: Once the organizer modifies a match result, players can no longer update it (organizer-locked)
+- [ ] **MATCH-05**: Organizer can enter a result for special outcomes (walkover, forfeit, no-show)
 
 ### Tournament Lifecycle
 
@@ -34,11 +31,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 Deferred to future release. Tracked but not in current roadmap.
 
-### Match Results (Dispute Handling)
+### Match Results
 
-- **MATCH-V2-01**: Second player can dispute a submitted result they believe is incorrect
-- **MATCH-V2-02**: When a dispute is raised, both submitted scores are shown to the organizer side-by-side for resolution
-- **MATCH-V2-03**: Organizer can resolve a dispute by selecting one score or entering the correct score manually
+- **MATCH-V2-01**: Result edit history — log of who changed what and when, visible to organizer
 
 ### Tournament Lifecycle
 
@@ -85,9 +80,6 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MATCH-03 | Phase ? | Pending |
 | MATCH-04 | Phase ? | Pending |
 | MATCH-05 | Phase ? | Pending |
-| MATCH-06 | Phase ? | Pending |
-| MATCH-07 | Phase ? | Pending |
-| MATCH-08 | Phase ? | Pending |
 | LIFE-01 | Phase ? | Pending |
 | LIFE-02 | Phase ? | Pending |
 | LIFE-03 | Phase ? | Pending |
@@ -96,9 +88,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATS-02 | Phase ? | Pending |
 
 **Coverage:**
-- v1 requirements: 14 total
+- v1 requirements: 11 total
 - Mapped to phases: 0
-- Unmapped: 14 ⚠️ (will be resolved during roadmap creation)
+- Unmapped: 11 ⚠️ (will be resolved during roadmap creation)
 
 ---
 *Requirements defined: 2026-02-26*
