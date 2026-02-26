@@ -19,18 +19,18 @@ Progress: [██░░░░░░░░] 22%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 5 min
-- Total execution time: 5 min
+- Total plans completed: 2
+- Average duration: 4 min
+- Total execution time: 7 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Match Result Submission | 1/3 | 5 min | 5 min |
+| 1. Match Result Submission | 2/3 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min)
+- Last 5 plans: 01-01 (5 min), 01-02 (2 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -49,6 +49,9 @@ Recent decisions affecting current work:
 - [01-01]: Organizer-lock read inside Prisma transaction — prevents race condition window between player read and organizer write
 - [01-01]: Joi alternatives() for body schema — keeps scored and special-outcome paths semantically distinct
 - [01-01]: Canonical result JSON format established: { winner, submittedBy, sets, outcome } — submittedBy always server-derived
+- [01-02]: Tiebreak label is "Loser's score" — consistent with 7-6(4) tennis notation
+- [01-02]: BigTiebreakForm inline validation is non-blocking (display only) — backend Joi validates authoritatively
+- [01-02]: Winner auto-derived from scores in sub-components — parent modal owns final submit state
 
 ### Pending Todos
 
@@ -61,5 +64,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 01-01-PLAN.md — backend API for match result submission
+Stopped at: Completed 01-02-PLAN.md — frontend utilities, matchService, SetsScoreForm, BigTiebreakForm
 Resume file: None
