@@ -28,7 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. An organizer can submit or update the result for any match at any time, overriding any player-submitted result
   4. Once an organizer modifies a result, the score entry form is no longer editable by players for that match
   5. An organizer can record a special outcome (walkover, forfeit, no-show) for any match without entering a score
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Backend API: PATCH /api/v1/matches/:id/result with participant check, organizer-lock, and special outcomes
+- [ ] 01-02-PLAN.md — Frontend utilities: bracketColors update, isMatchParticipant(), matchService, SetsScoreForm, BigTiebreakForm
+- [ ] 01-03-PLAN.md — Frontend composition: MatchResultModal + bracket wiring (KnockoutBracket, BracketMatch)
 
 ### Phase 2: Tournament Lifecycle and Bracket Progression
 **Goal**: Tournament status transitions driven by organizer actions and confirmed results, with automatic knockout bracket advancement
@@ -57,6 +62,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Match Result Submission | 0/? | Not started | - |
+| 1. Match Result Submission | 0/3 | Not started | - |
 | 2. Tournament Lifecycle and Bracket Progression | 0/? | Not started | - |
 | 3. Player Statistics | 0/? | Not started | - |
