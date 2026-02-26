@@ -1,104 +1,133 @@
-// T078-T084: Knockout Bracket Component - CSS Grid layout with horizontal scroll
-import { useState, useEffect } from 'react';
+// T004: KnockoutBracket Component - Enhanced with new architecture
+// T078-T084: CSS Grid layout with horizontal scroll
+// T030: Integrated with zoom/pan navigation
+// FR-001: Triangular bracket layout (first round left, final right)
+// FR-002: Match positioned vertically between predecessor matches
+// FR-010, FR-011, FR-012: Zoom, pan, and reset navigation
+
+import { useState, useRef, useMemo } from 'react';
 import { Alert, Spinner, Badge } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 import { useMatches } from '../services/tournamentViewService';
+import BracketMatch from './BracketMatch';
+import BracketControls from './BracketControls';
+import BracketMyMatch from './BracketMyMatch';
+import { useBracketNavigation } from '../hooks/useBracketNavigation';
+import { mergeColors } from '../config/bracketColors';
+import {
+  hasFirstRoundByes,
+  findMyMatch,
+  getHighlightedMatchIds
+} from '../utils/bracketUtils';
 import './KnockoutBracket.css';
 
 /**
- * T080: BracketMatch - Individual match display in bracket
- */
-const BracketMatch = ({ match }) => {
-  if (!match) {
-    return (
-      <div className="bracket-match empty">
-        <div className="bracket-player">TBD</div>
-        <div className="bracket-player">TBD</div>
-      </div>
-    );
-  }
-
-  // T084: Match status colors
-  const statusColors = {
-    SCHEDULED: 'secondary',
-    IN_PROGRESS: 'primary',
-    COMPLETED: 'success',
-    CANCELLED: 'danger'
-  };
-
-  const result = match.matchResult || {};
-  const winner = result.winner;
-
-  // Calculate score summary
-  const getScoreSummary = () => {
-    if (!result.sets || result.sets.length === 0) return null;
-    return result.sets.map((set, i) => (
-      <span key={i} className="set-score">
-        {set.player1Score}-{set.player2Score}
-      </span>
-    ));
-  };
-
-  return (
-    <div className={`bracket-match status-${match.status?.toLowerCase() || 'scheduled'}`}>
-      <div className={`bracket-player ${winner === 'PLAYER1' ? 'winner' : ''}`}>
-        <span className="player-name">{match.player1?.name || 'TBD'}</span>
-        {winner === 'PLAYER1' && <span className="winner-icon">🏆</span>}
-      </div>
-      <div className={`bracket-player ${winner === 'PLAYER2' ? 'winner' : ''}`}>
-        <span className="player-name">{match.player2?.name || 'TBD'}</span>
-        {winner === 'PLAYER2' && <span className="winner-icon">🏆</span>}
-      </div>
-      {getScoreSummary() && (
-        <div className="match-score">
-          {getScoreSummary()}
-        </div>
-      )}
-      <Badge
-        bg={statusColors[match.status] || 'secondary'}
-        className="match-status-badge"
-      >
-        {match.status === 'SCHEDULED' && '⏰'}
-        {match.status === 'IN_PROGRESS' && '▶'}
-        {match.status === 'COMPLETED' && '✓'}
-        {match.status === 'CANCELLED' && '✕'}
-      </Badge>
-    </div>
-  );
-};
-
-/**
  * T079: BracketRound - Displays all matches in a single round
+ * Uses flexbox layout with vertical spacing for tournament bracket display
  */
-const BracketRound = ({ round, matches }) => {
+const BracketRound = ({
+  round,
+  matches,
+  colors,
+  isDoubles,
+  highlightedMatchIds = [],
+  onMatchClick,
+  showFirstRoundByes
+}) => {
+  // Count actual matches (non-BYE) for display
+  const actualMatchCount = matches.filter(m => !m.isBye && m.status !== 'BYE').length;
+
   return (
-    <div className="bracket-round">
+    <div className="bracket-round" data-round={round.roundNumber}>
       <div className="round-header">
         <h6>{round.name || `Round ${round.roundNumber}`}</h6>
-        <small className="text-muted">{matches.length} matches</small>
+        <small className="text-muted">{actualMatchCount} matches</small>
       </div>
       <div className="round-matches">
-        {matches.map((match, index) => (
-          <div key={match?.id || index} className="match-wrapper">
-            <BracketMatch match={match} />
-            {/* T081: Match connector lines (via CSS) */}
-          </div>
-        ))}
+        {matches.map((match, index) => {
+          const isHighlighted = highlightedMatchIds.includes(match?.id);
+          const isBye = match?.isBye || match?.status === 'BYE';
+          // Hide BYEs visually but keep space (only in round 1 when showFirstRoundByes is false)
+          const hideBye = isBye && round.roundNumber === 1 && !showFirstRoundByes;
+
+          return (
+            <div
+              key={match?.id || index}
+              className={`match-wrapper ${isHighlighted ? 'highlighted' : ''} ${hideBye ? 'bye-hidden' : ''}`}
+              data-match-number={match.matchNumber || index + 1}
+            >
+              <BracketMatch
+                match={match}
+                colors={colors}
+                isHighlighted={isHighlighted}
+                isDoubles={isDoubles}
+                onClick={onMatchClick}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
+BracketRound.propTypes = {
+  round: PropTypes.shape({
+    id: PropTypes.string,
+    roundNumber: PropTypes.number.isRequired,
+    name: PropTypes.string
+  }).isRequired,
+  matches: PropTypes.array.isRequired,
+  colors: PropTypes.object,
+  isDoubles: PropTypes.bool,
+  highlightedMatchIds: PropTypes.arrayOf(PropTypes.string),
+  onMatchClick: PropTypes.func,
+  showFirstRoundByes: PropTypes.bool
+};
+
 /**
- * T078-T084: KnockoutBracket - Main bracket component with CSS Grid layout
- * Includes horizontal scroll, visual indicators, and status colors
+ * T078-T084, T030: KnockoutBracket - Main bracket component with CSS Grid layout
+ * Enhanced with zoom/pan support, BYE toggle, and My Match navigation
  *
  * @param {string} tournamentId - Tournament UUID
  * @param {Object} bracket - Bracket object with id, name, and type
  * @param {Array} rounds - Array of round objects
+ * @param {string} currentUserPlayerId - Current user's player profile ID (optional)
+ * @param {Function} onMatchClick - Click handler for matches (optional)
+ * @param {number} initialScale - Initial zoom scale (optional, default 1.0)
+ * @param {boolean} showByes - Initial BYE visibility (optional, default false)
+ * @param {Object} colors - Custom color configuration (optional)
+ * @param {boolean} isDoubles - Whether this is a doubles tournament (optional)
+ * @param {string} className - Additional CSS class (optional)
  */
-const KnockoutBracket = ({ tournamentId, bracket, rounds }) => {
+const KnockoutBracket = ({
+  tournamentId,
+  bracket,
+  rounds,
+  currentUserPlayerId,
+  onMatchClick,
+  initialScale = 1.0,
+  showByes: initialShowByes = false,
+  colors: customColors,
+  isDoubles = false,
+  className = ''
+}) => {
+  // State
   const [showBracket, setShowBracket] = useState(false);
-  const [scrollIndicator, setScrollIndicator] = useState({ left: false, right: false });
+  const [showFirstRoundByes, setShowFirstRoundByes] = useState(initialShowByes);
+
+  // Refs
+  const containerRef = useRef(null);
+  const viewportRef = useRef(null);
+
+  // Navigation hook (T030)
+  const navigation = useBracketNavigation({
+    initialScale,
+    containerRef: viewportRef
+  });
+
+  // Merge colors with defaults
+  const colors = useMemo(() => mergeColors(customColors), [customColors]);
 
   // T088-T089: Lazy load matches only when bracket is expanded
   const { matches, isLoading, isError } = useMatches(
@@ -107,47 +136,105 @@ const KnockoutBracket = ({ tournamentId, bracket, rounds }) => {
     showBracket
   );
 
-  // T082-T083: Horizontal scroll indicators
-  useEffect(() => {
-    if (!showBracket) return;
+  // Check if tournament has first-round BYEs
+  const hasByes = useMemo(() => {
+    if (!matches || matches.length === 0 || !rounds || rounds.length === 0) return false;
 
-    const container = document.querySelector('.bracket-container');
-    if (!container) return;
+    // Enrich matches with roundNumber for BYE detection
+    const enrichedMatches = matches.map(match => {
+      const round = rounds.find(r => r.id === match.roundId);
+      return {
+        ...match,
+        roundNumber: round?.roundNumber || 0
+      };
+    });
 
-    const checkScroll = () => {
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-      setScrollIndicator({
-        left: scrollLeft > 0,
-        right: scrollLeft + clientWidth < scrollWidth - 10
-      });
-    };
+    return hasFirstRoundByes(enrichedMatches);
+  }, [matches, rounds]);
 
-    checkScroll();
-    container.addEventListener('scroll', checkScroll);
-    window.addEventListener('resize', checkScroll);
+  // My Match context (for User Story 4)
+  const myMatchContext = useMemo(() => {
+    if (!currentUserPlayerId || !matches || !rounds || rounds.length === 0) return null;
 
-    return () => {
-      container.removeEventListener('scroll', checkScroll);
-      window.removeEventListener('resize', checkScroll);
-    };
-  }, [showBracket, matches]);
+    // Enrich matches with roundNumber for My Match feature
+    const enrichedMatches = matches.map(match => {
+      const round = rounds.find(r => r.id === match.roundId);
+      return {
+        ...match,
+        roundNumber: round?.roundNumber || 0
+      };
+    });
 
-  // Organize matches by round
-  const matchesByRound = rounds.map(round => {
-    const roundMatches = (matches || []).filter(m => m.roundId === round.id);
-    return { round, matches: roundMatches };
-  });
+    return findMyMatch(enrichedMatches, currentUserPlayerId);
+  }, [matches, rounds, currentUserPlayerId]);
+
+  // Compute highlighted matches from My Match context
+  const highlightedMatchIds = useMemo(() => {
+    if (myMatchContext && myMatchContext.isParticipant) {
+      return getHighlightedMatchIds(myMatchContext);
+    }
+    return [];
+  }, [myMatchContext]);
+
+  // Organize matches by round - backend provides all matches including BYEs
+  const matchesByRound = useMemo(() => {
+    if (!matches || matches.length === 0) return [];
+
+    // Enrich matches with roundNumber from rounds data
+    const enrichedMatches = matches.map(match => {
+      const round = rounds.find(r => r.id === match.roundId);
+      return {
+        ...match,
+        roundNumber: round?.roundNumber || 0
+      };
+    });
+
+    // Group matches by round and sort by matchNumber (bracket position)
+    return rounds.map(round => {
+      const roundMatches = enrichedMatches
+        .filter(m => m.roundId === round.id)
+        .sort((a, b) => (a.matchNumber || 0) - (b.matchNumber || 0));
+
+      return { round, matches: roundMatches };
+    });
+  }, [rounds, matches]);
+
+  // Toggle BYE visibility
+  const handleToggleByes = () => {
+    setShowFirstRoundByes(prev => !prev);
+  };
+
+  // Wrapper classes
+  const wrapperClasses = [
+    'knockout-bracket',
+    className
+  ].filter(Boolean).join(' ');
+
+  // Viewport classes
+  const viewportClasses = [
+    'bracket-viewport',
+    navigation.isDragging && 'dragging',
+    navigation.scale !== 1 && 'zoomed'
+  ].filter(Boolean).join(' ');
+
+  const viewportContentClasses = [
+    'bracket-viewport-content',
+    navigation.isDragging && 'dragging'
+  ].filter(Boolean).join(' ');
 
   return (
-    <div>
+    <div className={wrapperClasses}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5>{bracket.name || bracket.bracketType || 'Main Bracket'}</h5>
-        <button
-          className="btn btn-outline-primary btn-sm"
-          onClick={() => setShowBracket(!showBracket)}
-        >
-          {showBracket ? '▼ Collapse' : '▶ Expand'} Bracket
-        </button>
+        <div className="d-flex gap-2">
+          {/* Expand/Collapse button */}
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => setShowBracket(!showBracket)}
+          >
+            {showBracket ? '\u25BC Collapse' : '\u25B6 Expand'} Bracket
+          </button>
+        </div>
       </div>
 
       {showBracket && (
@@ -165,47 +252,95 @@ const KnockoutBracket = ({ tournamentId, bracket, rounds }) => {
             </Alert>
           )}
 
-          {matches && (
-            <div className="bracket-wrapper">
-              {/* T083: Scroll indicators */}
-              {scrollIndicator.left && (
-                <div className="scroll-indicator left">
-                  <span>← Scroll</span>
-                </div>
-              )}
-              {scrollIndicator.right && (
-                <div className="scroll-indicator right">
-                  <span>Scroll →</span>
-                </div>
-              )}
+          {matches && matches.length > 0 && (
+            <div className="bracket-wrapper" ref={containerRef}>
+              {/* Controls bar (T030) */}
+              <div className="bracket-controls-wrapper">
+                <BracketControls
+                  scale={navigation.scale}
+                  onZoomIn={navigation.zoomIn}
+                  onZoomOut={navigation.zoomOut}
+                  onReset={navigation.reset}
+                  onToggleByes={handleToggleByes}
+                  showByes={showFirstRoundByes}
+                  hasByes={hasByes}
+                  canZoomIn={navigation.canZoomIn}
+                  canZoomOut={navigation.canZoomOut}
+                  colors={colors}
+                />
 
-              {/* T082: Horizontal scrollable container */}
-              <div className="bracket-container">
-                <div className="bracket-grid">
-                  {matchesByRound.map(({ round, matches: roundMatches }) => (
-                    <BracketRound
-                      key={round.id}
-                      round={round}
-                      matches={roundMatches}
-                    />
-                  ))}
+                {/* My Match navigation (T047) */}
+                <BracketMyMatch
+                  context={myMatchContext}
+                  onNavigate={(matchIds) => {
+                    if (matchIds.length > 0) {
+                      navigation.centerOnElement(matchIds[0]);
+                    }
+                  }}
+                  colors={colors}
+                  className="ms-2"
+                />
+              </div>
+
+              {/* Zoomable/pannable viewport (T030) */}
+              <div
+                ref={viewportRef}
+                className={viewportClasses}
+                onWheel={navigation.handleWheel}
+                onMouseDown={navigation.handleMouseDown}
+                onMouseMove={navigation.handleMouseMove}
+                onMouseUp={navigation.handleMouseUp}
+                onTouchStart={navigation.handleTouchStart}
+                onTouchMove={navigation.handleTouchMove}
+                onTouchEnd={navigation.handleTouchEnd}
+              >
+                <div
+                  className={viewportContentClasses}
+                  style={navigation.containerStyle}
+                >
+                  <div className="bracket-container">
+                    <div className="bracket-grid">
+                      {matchesByRound.map(({ round, matches: roundMatches }) => (
+                        <BracketRound
+                          key={round.id}
+                          round={round}
+                          matches={roundMatches}
+                          colors={colors}
+                          isDoubles={isDoubles}
+                          highlightedMatchIds={highlightedMatchIds}
+                          onMatchClick={onMatchClick}
+                          showFirstRoundByes={showFirstRoundByes}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation hint */}
+                <div className="bracket-nav-hint">
+                  Scroll to zoom, drag to pan
                 </div>
               </div>
 
               {/* Legend */}
-              <div className="mt-3 d-flex gap-3 flex-wrap">
+              <div className="mt-3 d-flex gap-3 flex-wrap align-items-center">
                 <small className="text-muted">
-                  <Badge bg="secondary" className="me-1">⏰</Badge> Scheduled
+                  <Badge bg="secondary" className="me-1">{'\u23F0'}</Badge> Scheduled
                 </small>
                 <small className="text-muted">
-                  <Badge bg="primary" className="me-1">▶</Badge> In Progress
+                  <Badge bg="primary" className="me-1">{'\u25B6'}</Badge> In Progress
                 </small>
                 <small className="text-muted">
-                  <Badge bg="success" className="me-1">✓</Badge> Completed
+                  <Badge bg="success" className="me-1">{'\u2713'}</Badge> Completed
                 </small>
                 <small className="text-muted">
-                  <Badge bg="danger" className="me-1">✕</Badge> Cancelled
+                  <Badge bg="danger" className="me-1">{'\u2715'}</Badge> Cancelled
                 </small>
+                {hasByes && (
+                  <small className="text-muted">
+                    <Badge bg="warning" className="me-1">BYE</Badge> Automatic advance
+                  </small>
+                )}
               </div>
             </div>
           )}
@@ -219,6 +354,27 @@ const KnockoutBracket = ({ tournamentId, bracket, rounds }) => {
       )}
     </div>
   );
+};
+
+KnockoutBracket.propTypes = {
+  tournamentId: PropTypes.string.isRequired,
+  bracket: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    bracketType: PropTypes.string
+  }).isRequired,
+  rounds: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    roundNumber: PropTypes.number.isRequired,
+    name: PropTypes.string
+  })).isRequired,
+  currentUserPlayerId: PropTypes.string,
+  onMatchClick: PropTypes.func,
+  initialScale: PropTypes.number,
+  showByes: PropTypes.bool,
+  colors: PropTypes.object,
+  isDoubles: PropTypes.bool,
+  className: PropTypes.string
 };
 
 export default KnockoutBracket;

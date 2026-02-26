@@ -1,6 +1,6 @@
 ﻿# BATL Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-01-13
+Auto-generated from all feature plans. Last updated: 2026-01-14
 
 ## Active Technologies
 - Node.js 20+ (ES Modules) (002-category-system)
@@ -18,6 +18,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-13
 - JSON file (bracket-templates-all.json) - read-only, no database persistence needed (009-bracket-generation)
 - Node.js 20+ (ES Modules) + Express 5.1.0, Joi (validation), seedrandom 3.0.5+ (deterministic PRNG), Jest 30.2.0 (010-seeding-placement)
 - seedrandom (Deterministic Randomization) (010-seeding-placement) - For reproducible randomization in tests and seeding placement
+- JavaScript ES2022+ (React 19, Node.js 20+) + React 19, React Bootstrap 2.10, Vite 7 (011-knockout-bracket-view)
+- N/A (frontend-only, consumes existing APIs) (011-knockout-bracket-view)
 
 - NEEDS CLARIFICATION - First feature, tech stack not yet selected. Requirements: must support web applications, database integration, email/password authentication, and session management. + NEEDS CLARIFICATION - Will depend on language choice. Required capabilities: web framework, database ORM/driver, password hashing library, session management, email delivery integration. (001-user-management)
 
@@ -132,9 +134,9 @@ After completing an implementation phase that introduces new UI functionality, g
 This ensures QA can verify new features work correctly before deployment.
 
 ## Recent Changes
+- 011-knockout-bracket-view: Added JavaScript ES2022+ (React 19, Node.js 20+) + React 19, React Bootstrap 2.10, Vite 7
 - 009-bracket-generation: Added Node.js 20+ (ES Modules) + Express 5.1.0, fs/promises (file operations), Joi (validation)
 - 008-tournament-rankings: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM (PostgreSQL), Joi/Zod validation, bcryptjs, Passport.js
-- 006-doubles-pairs: Added Node.js 20+ (ES Modules) + Express 5.1.0, Prisma ORM, React 19, React Bootstrap 2.10, TanStack React Table 8.21
 
 <!-- MANUAL ADDITIONS START -->
 
@@ -485,5 +487,62 @@ curl -X POST http://localhost:3000/api/v1/seeding/generate-bracket \
 - Provides seeded brackets for tournament organizers to use in draw management
 
 **Related Specs**: [spec.md](specs/010-seeding-placement/spec.md), [tasks.md](specs/010-seeding-placement/tasks.md), [plan.md](specs/010-seeding-placement/plan.md), [contracts/api-endpoints.md](specs/010-seeding-placement/contracts/api-endpoints.md)
+
+---
+
+### 011-knockout-bracket-view (Completed: 2026-01-14)
+
+**Summary**: Frontend-only feature for displaying knockout tournament brackets with triangular layout, zoom/pan navigation, BYE toggle, and "My Match" navigation for logged-in participants.
+
+**Components Created** (4 total):
+- `frontend/src/components/KnockoutBracket.jsx` - Main bracket container with grid layout, zoom/pan viewport
+- `frontend/src/components/BracketMatch.jsx` - Individual match display with player names, scores, status
+- `frontend/src/components/BracketControls.jsx` - Zoom in/out, reset, BYE toggle controls
+- `frontend/src/components/BracketMyMatch.jsx` - "My Match" navigation for participants
+
+**Hook Created**:
+- `frontend/src/hooks/useBracketNavigation.js` - Custom hook for zoom/pan state management
+
+**Utility Files**:
+- `frontend/src/config/bracketColors.js` - Configurable color theme for brackets
+- `frontend/src/utils/bracketUtils.js` - Match positioning, BYE detection, My Match utilities
+
+**Key Features**:
+1. **Triangular Layout (FR-001)**: First round on left, final on right using CSS Grid
+2. **Match Positioning (FR-002)**: Each match vertically centered between predecessor matches
+3. **Player Display (FR-003, FR-004)**: Singles (2 names) and doubles (4 names) support
+4. **Winner Highlighting (FR-006)**: Green background for winners
+5. **BYE Toggle (FR-007, FR-008)**: Hide/show first-round BYE matches
+6. **Zoom/Pan Navigation (FR-010, FR-011)**: 0.25x-4.0x zoom, mouse/touch drag
+7. **Reset Button (FR-012)**: Restore default viewport
+8. **My Match (FR-013)**: Navigate logged-in participants to their match
+9. **Error State (FR-014)**: Red background for missing match data
+10. **Configurable Colors (FR-015)**: JavaScript config file for theming
+
+**CSS Features**:
+- CSS custom properties for theming
+- Responsive mobile styles
+- Reduced motion and high contrast accessibility
+- Touch-action: none to prevent browser zoom conflicts
+
+**User Stories Implemented**:
+- **P1**: View tournament bracket with player names, scores, winner highlighting
+- **P2**: Navigate large brackets with zoom, pan, and reset
+- **P3**: Toggle first-round BYE visibility
+- **P4**: "My Match" button for participants
+
+**Integration Points**:
+- Integrated into `FormatVisualization.jsx` for KNOCKOUT format tournaments
+- Consumes existing matches API from Feature 005 (tournament-view)
+- Uses auth context for current user's player profile ID
+
+**Technical Details**:
+- React 19 + Vite 7
+- React Bootstrap 2.10 for UI components
+- CSS Grid for bracket layout
+- CSS Transform for zoom/pan
+- No new backend APIs required
+
+**Related Specs**: [spec.md](specs/011-knockout-bracket-view/spec.md), [tasks.md](specs/011-knockout-bracket-view/tasks.md), [plan.md](specs/011-knockout-bracket-view/plan.md), [contracts/component-interfaces.md](specs/011-knockout-bracket-view/contracts/component-interfaces.md)
 
 <!-- MANUAL ADDITIONS END -->
