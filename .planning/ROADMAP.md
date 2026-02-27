@@ -44,7 +44,11 @@ Plans:
   2. When a knockout match result is set, the winner's name appears in the correct next-round bracket slot without any manual organizer action
   3. When the final match result of a tournament is confirmed, the tournament status automatically changes to COMPLETED
   4. The knockout bracket visualization (Feature 011) reflects the live bracket state — players already advanced are shown in their correct slots
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Backend lifecycle engine: tournamentLifecycleService (startTournament, advanceBracketSlot, checkAndCompleteTournament), matchResultService hook, PATCH /:id/start route
+- [ ] 02-02-PLAN.md — Frontend: Start Tournament button, champion banner, read-only bracket gate for players after COMPLETED
 
 ### Phase 3: Player Statistics
 **Goal**: Players can view their full match history and win/loss record on their public profile
@@ -63,5 +67,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Match Result Submission | 3/3 | Complete   | 2026-02-27 |
-| 2. Tournament Lifecycle and Bracket Progression | 0/? | Not started | - |
+| 2. Tournament Lifecycle and Bracket Progression | 0/2 | Not started | - |
 | 3. Player Statistics | 0/? | Not started | - |
