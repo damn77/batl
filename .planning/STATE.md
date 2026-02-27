@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-02-27T09:36:56.350Z"
+status: in_progress
+last_updated: "2026-02-27T21:04:00Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,32 +18,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Phase 1 — Match Result Submission
+**Current focus:** Phase 1.1 — Bracket Generation and Seeding Persistence
 
 ## Current Position
 
-Phase: 1 of 3 (Match Result Submission)
-Plan: 3 of 3 in current phase (paused at human-verify checkpoint)
+Phase: 1.1 of 2 (Bracket Generation and Seeding Persistence)
+Plan: 1 of 3 in current phase (01.1-01 complete)
 Status: In progress
-Last activity: 2026-02-27 — Completed 01-03 Tasks 1+2 (MatchResultModal, KnockoutBracket wiring, BracketMatch special outcome display); awaiting human verification
+Last activity: 2026-02-27 — Completed 01.1-01: Prisma schema changes (Match.player1Id nullable, Tournament.registrationClosed) + RED test scaffolding for DRAW-01 through DRAW-08
 
-Progress: [████████░░] 78%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (01-03 Tasks 1+2 done, awaiting human-verify to close)
-- Average duration: 5 min
-- Total execution time: 15 min
+- Total plans completed: 4 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01 complete)
+- Average duration: 4 min
+- Total execution time: 17 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Match Result Submission | 2/3 (+01-03 in progress) | 15 min | 5 min |
+| 1. Match Result Submission | 3/3 | 15 min | 5 min |
+| 1.1 Bracket Generation and Seeding Persistence | 1/3 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min), 01-02 (2 min), 01-03 (8 min Tasks 1+2)
+- Last 5 plans: 01-01 (5 min), 01-02 (2 min), 01-03 (8 min), 01.1-01 (2 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [01-02]: Winner auto-derived from scores in sub-components — parent modal owns final submit state
 - [Phase 01]: MatchResultModal derives three rendering modes from boolean flags (isReadOnly, isOrganizer, isParticipant) rather than a separate mode prop
 - [Phase 01]: handleMatchClick in KnockoutBracket forwards to external onMatchClick prop for backward compat with Feature 011 callers
+- [01.1-01]: Match.player1Id made nullable (String?) so future-round placeholder matches can be created without player IDs upfront
+- [01.1-01]: Tournament.registrationClosed added as Boolean default(false) to gate bracket generation behind organizer action
+- [01.1-01]: onDelete: Restrict kept on player1 relation (not changed to SetNull) to preserve referential integrity when player exists
 
 ### Pending Todos
 
@@ -84,5 +88,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Paused at 01-03 Task 3 (human-verify checkpoint) — MatchResultModal + bracket wiring complete, awaiting user end-to-end verification
+Stopped at: Completed 01.1-01-PLAN.md — schema migration + RED test scaffolding for DRAW-01 through DRAW-08
 Resume file: None

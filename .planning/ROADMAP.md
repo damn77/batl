@@ -44,7 +44,7 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 01.1-01-PLAN.md — Schema migration: Match.player1Id nullable + Tournament.registrationClosed boolean + RED test scaffolds
+- [x] 01.1-01-PLAN.md — Schema migration: Match.player1Id nullable + Tournament.registrationClosed boolean + RED test scaffolds
 - [ ] 01.1-02-PLAN.md — bracketPersistenceService: closeRegistration, generateBracket (Prisma transaction), swapSlots — all 15 unit tests GREEN
 - [ ] 01.1-03-PLAN.md — Backend routes + controller: PATCH close-registration, POST bracket, PATCH bracket/slots — 12 integration tests GREEN
 - [ ] 01.1-04-PLAN.md — Frontend service + BracketGenerationSection component (close → generate → swap → save workflow)
@@ -82,6 +82,6 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Match Result Submission | 3/3 | Complete | 2026-02-27 |
-| 01.1. Bracket Generation and Seeding Persistence | 0/5 | Not started | - |
+| 01.1. Bracket Generation and Seeding Persistence | 1/5 | In progress | - |
 | 2. Tournament Lifecycle and Bracket Progression | 0/2 | Not started | - |
 | 3. Player Statistics | 0/? | Not started | - |
