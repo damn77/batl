@@ -63,6 +63,12 @@ function formatScore(match, matchResult) {
     return 'BYE';
   }
 
+  // Special outcome: show compact label instead of a score (WALKOVER→W/O, FORFEIT→FF, NO_SHOW→N/S)
+  if (matchResult?.outcome) {
+    const labels = { WALKOVER: 'W/O', FORFEIT: 'FF', NO_SHOW: 'N/S' };
+    return labels[matchResult.outcome] || matchResult.outcome;
+  }
+
   if (!matchResult?.sets || matchResult.sets.length === 0) {
     return match.status === 'COMPLETED' ? '-' : null;
   }
@@ -173,6 +179,10 @@ const BracketMatch = ({
   const bottomPlayerState = getPlayerState(match, 'bottom', matchResult);
   const score = formatScore(match, matchResult);
 
+  // Special outcome detection — drives blue winner highlight vs standard green
+  const isSpecialOutcome = !!matchResult?.outcome;
+  const specialOutcomeColor = _colors?.specialOutcomeWinner || '#cfe2ff';
+
   // Build CSS classes
   const matchClasses = [
     'bracket-match',
@@ -197,7 +207,10 @@ const BracketMatch = ({
       onKeyDown={onClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
     >
       {/* Top player/pair (FR-005: light grey background) */}
-      <div className={`bracket-player top-player ${topPlayerState === 'winner' ? 'winner' : ''}`}>
+      <div
+        className={`bracket-player top-player ${topPlayerState === 'winner' && !isSpecialOutcome ? 'winner' : ''}`}
+        style={topPlayerState === 'winner' && isSpecialOutcome ? { backgroundColor: specialOutcomeColor } : {}}
+      >
         <span className="player-name">
           {getPlayerName(match.player1, match.pair1, isDoubles)}
           {match.player1?.seed && <span className="seed-badge">[{match.player1.seed}]</span>}
@@ -207,7 +220,10 @@ const BracketMatch = ({
 
       {/* Bottom player/pair (FR-005: white background) */}
       {!isBye && (
-        <div className={`bracket-player ${bottomPlayerState === 'winner' ? 'winner' : ''}`}>
+        <div
+          className={`bracket-player ${bottomPlayerState === 'winner' && !isSpecialOutcome ? 'winner' : ''}`}
+          style={bottomPlayerState === 'winner' && isSpecialOutcome ? { backgroundColor: specialOutcomeColor } : {}}
+        >
           <span className="player-name">
             {getPlayerName(match.player2, match.pair2, isDoubles)}
             {match.player2?.seed && <span className="seed-badge">[{match.player2.seed}]</span>}
