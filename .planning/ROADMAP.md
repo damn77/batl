@@ -35,6 +35,16 @@ Plans:
 - [ ] 01-02-PLAN.md — Frontend utilities: bracketColors update, isMatchParticipant(), matchService, SetsScoreForm, BigTiebreakForm
 - [ ] 01-03-PLAN.md — Frontend composition: MatchResultModal + bracket wiring (KnockoutBracket, BracketMatch)
 
+### Phase 01.1: Bracket Generation and Seeding Persistence (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 01.1 to break down)
+
 ### Phase 2: Tournament Lifecycle and Bracket Progression
 **Goal**: Tournament status transitions driven by organizer actions and confirmed results, with automatic knockout bracket advancement
 **Depends on**: Phase 1

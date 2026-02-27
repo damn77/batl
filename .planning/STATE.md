@@ -72,9 +72,14 @@ Recent decisions affecting current work:
 
 None.
 
+### Roadmap Evolution
+
+- Phase 1.1 inserted after Phase 1: Bracket Generation and Seeding Persistence (URGENT) — bracket/round/match records must exist in DB before Phase 2 lifecycle engine can advance slots or detect tournament completion
+
 ### Blockers/Concerns
 
 - [Phase 2]: Verify `TournamentRules` already stores "top N from each group advance" config (needed for Phase 3 combined format, deferred to v2)
+- [Phase 2]: Plans 02-01 and 02-02 depend on Phase 1.1 completing first — bracket Match records must exist before advanceBracketSlot() is callable
 
 ## Session Continuity
 
