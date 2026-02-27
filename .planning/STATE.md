@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-27T21:16:01Z"
+last_updated: "2026-02-27T21:21:35Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
 ---
 
 # Project State
@@ -23,29 +23,29 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1.1 of 2 (Bracket Generation and Seeding Persistence)
-Plan: 3 of 3 in current phase (01.1-03 complete — PHASE 1.1 COMPLETE)
+Plan: 4 of 6 in current phase (01.1-04 complete)
 Status: In progress
-Last activity: 2026-02-27 — Completed 01.1-03: bracketPersistenceController + routes + 14 integration tests GREEN
+Last activity: 2026-02-27 — Completed 01.1-04: bracketPersistenceService (frontend) + BracketGenerationSection component
 
-Progress: [██████████] 100%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03 complete)
+- Total plans completed: 7 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03, 01.1-04 complete)
 - Average duration: 4 min
-- Total execution time: 24 min
+- Total execution time: 27 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Match Result Submission | 3/3 | 15 min | 5 min |
-| 1.1 Bracket Generation and Seeding Persistence | 3/3 | 9 min | 3 min |
+| 1.1 Bracket Generation and Seeding Persistence | 4/6 | 12 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (8 min), 01.1-01 (2 min), 01.1-02 (4 min), 01.1-03 (3 min)
-- Trend: -
+- Last 5 plans: 01.1-01 (2 min), 01.1-02 (4 min), 01.1-03 (3 min), 01.1-04 (3 min)
+- Trend: Stable ~3 min/plan
 
 *Updated after each plan completion*
 
@@ -76,6 +76,9 @@ Recent decisions affecting current work:
 - [01.1-02]: bracketId set on Match records in addition to roundId so matches are queryable via both Bracket and Round relationships
 - [01.1-03]: Integration tests use jest.unstable_mockModule to mock bracketPersistenceService — avoids needing a live DB with seeded users/tournaments for CI
 - [01.1-03]: 401 (unauthenticated) tested instead of 403 (PLAYER role) — isAuthenticated fires before authorize, making 401 the practical auth gate assertion in integration tests without real sessions
+- [01.1-04]: Slot editor rendered separately below KnockoutBracket (not as editMode prop) — avoids modifying KnockoutBracket internals while providing full edit capability
+- [01.1-04]: registeredPlayers loaded once via useEffect on mount — single fetch reused across all three states (State A count, State B list, State C dropdowns)
+- [01.1-04]: Both mutateFormatStructure() and mutateMatches() called after generate/save to force SWR cache invalidation and prevent stale bracket data
 
 ### Pending Todos
 
@@ -93,5 +96,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 01.1-03-PLAN.md — bracketPersistenceController + routes + 14 integration tests GREEN. Phase 1.1 complete.
+Stopped at: Completed 01.1-04-PLAN.md — bracketPersistenceService (frontend API client) + BracketGenerationSection component (3-state draw workflow).
 Resume file: None
