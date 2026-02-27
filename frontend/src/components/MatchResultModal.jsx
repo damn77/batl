@@ -1,0 +1,257 @@
+import { useState } from 'react';
+import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { submitMatchResult } from '../services/matchService';
+import SetsScoreForm from './SetsScoreForm';
+import BigTiebreakForm from './BigTiebreakForm';
+
+/**
+ * MatchResultModal — role-aware match result dialog.
+ *
+ * Three rendering modes (derived from props, not a mode prop):
+ *
+ * 1. Read-only (organizer-locked, non-organizer viewer):
+ *    matchResult?.submittedBy === 'ORGANIZER' && !isOrganizer
+ *    Shows score read-only with "Result confirmed by organizer" alert.
+ *
+ * 2. Player editable:
+ *    isParticipant && !isOrganizer and match is NOT organizer-locked.
+ *    Shows format-aware score entry form. No special outcome toggle.
+ *
+ * 3. Organizer editable:
+ *    isOrganizer (regardless of lock state).
+ *    Shows format-aware score entry plus a special outcome radio toggle.
+ *
+ * Props:
+ *   match         {Object|null}   — match object (null = modal is closed)
+ *   onClose       {Function}      — () => void
+ *   isOrganizer   {boolean}       — user.role === 'ADMIN' || 'ORGANIZER'
+ *   isParticipant {boolean}       — from isMatchParticipant(match, currentUserPlayerId)
+ *   scoringRules  {Object}        — { formatType, winningSets, winningTiebreaks }
+ *   mutate        {Function}      — SWR mutate() to re-fetch bracket matches
+ */
+const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringRules, mutate }) => {
+  const { t } = useTranslation();
+
+  // Parse existing result for pre-population and lock detection
+  const matchResult = match?.result
+    ? (typeof match.result === 'string'
+        ? (() => { try { return JSON.parse(match.result); } catch { return null; } })()
+        : match.result)
+    : null;
+
+  // Merge match-level rule overrides over tournament-level scoring rules
+  const effectiveScoringRules = {
+    ...scoringRules,
+    ...(match?.ruleOverrides
+      ? (() => { try { return JSON.parse(match.ruleOverrides); } catch { return {}; } })()
+      : {})
+  };
+
+  const isOrganizerLocked = matchResult?.submittedBy === 'ORGANIZER';
+  const isReadOnly = isOrganizerLocked && !isOrganizer;
+
+  // Form state — pre-populate with existing result if available
+  const [formValue, setFormValue] = useState(
+    matchResult ? { sets: matchResult.sets || [], winner: matchResult.winner || null } : { sets: [], winner: null }
+  );
+
+  // Special outcome state (organizer-only)
+  const [specialOutcome, setSpecialOutcome] = useState('WALKOVER');
+  const [specialWinner, setSpecialWinner] = useState('PLAYER1');
+
+  // 'score' | 'special' — organizer mode toggle
+  const [mode, setMode] = useState('score');
+
+  // Error and submission state
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    setError(null);
+    setSubmitting(true);
+    try {
+      let resultData;
+
+      if (isOrganizer && mode === 'special') {
+        resultData = { outcome: specialOutcome, winner: specialWinner };
+      } else {
+        if (!formValue.winner) {
+          setError(t('match.errors.noWinner', 'Please complete all scores so a winner can be determined'));
+          setSubmitting(false);
+          return;
+        }
+        resultData = {
+          formatType: effectiveScoringRules?.formatType || 'SETS',
+          winner: formValue.winner,
+          sets: formValue.sets,
+        };
+      }
+
+      await submitMatchResult(match.id, resultData);
+      mutate(); // re-fetch bracket matches via SWR
+      onClose();
+    } catch (err) {
+      setError(err.message || t('errors.genericFallback', 'An error occurred'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Guard: don't render if no match selected
+  if (!match) return null;
+
+  const player1Name = match.player1?.name || match.pair1?.name || 'Player 1';
+  const player2Name = match.player2?.name || match.pair2?.name || 'Player 2';
+
+  return (
+    <Modal show={!!match} onHide={onClose} centered size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {player1Name} vs {player2Name}
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        {isReadOnly ? (
+          /* Mode 1: Read-only (organizer-locked, non-organizer viewer) */
+          <>
+            <Alert variant="info">
+              {t('match.lockedMessage', 'Result confirmed by organizer')}
+            </Alert>
+
+            {matchResult?.outcome ? (
+              <p>
+                <strong>{matchResult.outcome}</strong>{' '}
+                &mdash;{' '}
+                {matchResult.winner === 'PLAYER1' ? player1Name : player2Name} wins
+              </p>
+            ) : effectiveScoringRules?.formatType === 'BIG_TIEBREAK' ? (
+              <BigTiebreakForm
+                scoringRules={effectiveScoringRules}
+                value={formValue}
+                onChange={() => {}}
+                player1Name={player1Name}
+                player2Name={player2Name}
+                disabled
+              />
+            ) : (
+              <SetsScoreForm
+                scoringRules={effectiveScoringRules}
+                value={formValue}
+                onChange={() => {}}
+                player1Name={player1Name}
+                player2Name={player2Name}
+                disabled
+              />
+            )}
+          </>
+        ) : isOrganizer ? (
+          /* Mode 3: Organizer editable — score or special outcome */
+          <>
+            <div className="mb-3">
+              <Form.Check
+                type="radio"
+                inline
+                id="mode-score"
+                label="Enter score"
+                name="resultMode"
+                checked={mode === 'score'}
+                onChange={() => setMode('score')}
+              />
+              <Form.Check
+                type="radio"
+                inline
+                id="mode-special"
+                label="Special outcome"
+                name="resultMode"
+                checked={mode === 'special'}
+                onChange={() => setMode('special')}
+              />
+            </div>
+
+            {mode === 'score' ? (
+              effectiveScoringRules?.formatType === 'BIG_TIEBREAK' ? (
+                <BigTiebreakForm
+                  scoringRules={effectiveScoringRules}
+                  value={formValue}
+                  onChange={setFormValue}
+                  player1Name={player1Name}
+                  player2Name={player2Name}
+                />
+              ) : (
+                <SetsScoreForm
+                  scoringRules={effectiveScoringRules}
+                  value={formValue}
+                  onChange={setFormValue}
+                  player1Name={player1Name}
+                  player2Name={player2Name}
+                />
+              )
+            ) : (
+              /* Special outcome form */
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Outcome type</Form.Label>
+                  <Form.Select
+                    value={specialOutcome}
+                    onChange={(e) => setSpecialOutcome(e.target.value)}
+                  >
+                    <option value="WALKOVER">Walkover (W/O)</option>
+                    <option value="FORFEIT">Forfeit (FF)</option>
+                    <option value="NO_SHOW">No-show (N/S)</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Winner</Form.Label>
+                  <Form.Select
+                    value={specialWinner}
+                    onChange={(e) => setSpecialWinner(e.target.value)}
+                  >
+                    <option value="PLAYER1">{player1Name}</option>
+                    <option value="PLAYER2">{player2Name}</option>
+                  </Form.Select>
+                </Form.Group>
+              </Form>
+            )}
+          </>
+        ) : (
+          /* Mode 2: Player editable */
+          effectiveScoringRules?.formatType === 'BIG_TIEBREAK' ? (
+            <BigTiebreakForm
+              scoringRules={effectiveScoringRules}
+              value={formValue}
+              onChange={setFormValue}
+              player1Name={player1Name}
+              player2Name={player2Name}
+            />
+          ) : (
+            <SetsScoreForm
+              scoringRules={effectiveScoringRules}
+              value={formValue}
+              onChange={setFormValue}
+              player1Name={player1Name}
+              player2Name={player2Name}
+            />
+          )
+        )}
+      </Modal.Body>
+
+      {!isReadOnly && (
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
+          </Button>
+        </Modal.Footer>
+      )}
+    </Modal>
+  );
+};
+
+export default MatchResultModal;
