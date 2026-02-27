@@ -24,7 +24,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DRAW-05**: Bracket is locked once the tournament is IN_PROGRESS — no regeneration possible
 - [x] **DRAW-06**: Organizer can batch-swap any two player slots in the generated bracket and save all changes at once
 - [x] **DRAW-07**: BYE slots cannot be included in player slot swaps
-- [ ] **DRAW-08**: All bracket persistence API endpoints return correct HTTP status codes and BATL standard error format
+- [x] **DRAW-08**: All bracket persistence API endpoints return correct HTTP status codes and BATL standard error format
 
 ### Tournament Lifecycle
 
@@ -98,7 +98,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-05 | Phase 01.1 | Complete |
 | DRAW-06 | Phase 01.1 | Complete |
 | DRAW-07 | Phase 01.1 | Complete |
-| DRAW-08 | Phase 01.1 | Pending |
+| DRAW-08 | Phase 01.1 | Complete |
 | LIFE-01 | Phase 2 | Pending |
 | LIFE-02 | Phase 2 | Pending |
 | LIFE-03 | Phase 2 | Pending |

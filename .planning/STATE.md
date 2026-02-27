@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-27T21:10:38Z"
+last_updated: "2026-02-27T21:16:01Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -23,28 +23,28 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1.1 of 2 (Bracket Generation and Seeding Persistence)
-Plan: 2 of 3 in current phase (01.1-02 complete)
+Plan: 3 of 3 in current phase (01.1-03 complete — PHASE 1.1 COMPLETE)
 Status: In progress
-Last activity: 2026-02-27 — Completed 01.1-02: bracketPersistenceService implementation with closeRegistration(), generateBracket(), swapSlots() and all 16 unit tests GREEN
+Last activity: 2026-02-27 — Completed 01.1-03: bracketPersistenceController + routes + 14 integration tests GREEN
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02 complete)
+- Total plans completed: 6 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03 complete)
 - Average duration: 4 min
-- Total execution time: 21 min
+- Total execution time: 24 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Match Result Submission | 3/3 | 15 min | 5 min |
-| 1.1 Bracket Generation and Seeding Persistence | 2/3 | 6 min | 3 min |
+| 1.1 Bracket Generation and Seeding Persistence | 3/3 | 9 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2 min), 01-03 (8 min), 01.1-01 (2 min), 01.1-02 (4 min)
+- Last 5 plans: 01-03 (8 min), 01.1-01 (2 min), 01.1-02 (4 min), 01.1-03 (3 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -74,6 +74,8 @@ Recent decisions affecting current work:
 - [01.1-02]: jest.unstable_mockModule() required instead of jest.mock() for ES module mocking in Jest 30 with --experimental-vm-modules
 - [01.1-02]: Service exports regenerateBracket() as explicit alias for generateBracket() to make regeneration intent clear at call sites
 - [01.1-02]: bracketId set on Match records in addition to roundId so matches are queryable via both Bracket and Round relationships
+- [01.1-03]: Integration tests use jest.unstable_mockModule to mock bracketPersistenceService — avoids needing a live DB with seeded users/tournaments for CI
+- [01.1-03]: 401 (unauthenticated) tested instead of 403 (PLAYER role) — isAuthenticated fires before authorize, making 401 the practical auth gate assertion in integration tests without real sessions
 
 ### Pending Todos
 
@@ -91,5 +93,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 01.1-02-PLAN.md — bracketPersistenceService implementation + 16 unit tests GREEN
+Stopped at: Completed 01.1-03-PLAN.md — bracketPersistenceController + routes + 14 integration tests GREEN. Phase 1.1 complete.
 Resume file: None
