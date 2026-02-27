@@ -81,10 +81,20 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
           setSubmitting(false);
           return;
         }
+        const sanitizedSets = formValue.sets
+          .filter(s => s.player1Score !== '' && s.player2Score !== '')
+          .map(s => ({
+            setNumber: parseInt(s.setNumber, 10),
+            player1Score: parseInt(s.player1Score, 10),
+            player2Score: parseInt(s.player2Score, 10),
+            tiebreakScore: (s.tiebreakScore !== '' && s.tiebreakScore != null)
+              ? parseInt(s.tiebreakScore, 10)
+              : null,
+          }));
         resultData = {
           formatType: effectiveScoringRules?.formatType || 'SETS',
           winner: formValue.winner,
-          sets: formValue.sets,
+          sets: sanitizedSets,
         };
       }
 
