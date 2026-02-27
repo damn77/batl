@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { submitMatchResult } from '../services/matchService';
@@ -55,6 +55,16 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
   const [formValue, setFormValue] = useState(
     matchResult ? { sets: matchResult.sets || [], winner: matchResult.winner || null } : { sets: [], winner: null }
   );
+
+  // Re-sync form when a different match is selected (useState initializer only runs on mount)
+  useEffect(() => {
+    const result = match?.result
+      ? (typeof match.result === 'string'
+          ? (() => { try { return JSON.parse(match.result); } catch { return null; } })()
+          : match.result)
+      : null;
+    setFormValue(result ? { sets: result.sets || [], winner: result.winner || null } : { sets: [], winner: null });
+  }, [match?.id, match?.result]);
 
   // Special outcome state (organizer-only)
   const [specialOutcome, setSpecialOutcome] = useState('WALKOVER');
