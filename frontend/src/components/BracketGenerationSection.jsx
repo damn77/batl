@@ -52,9 +52,10 @@ const BracketGenerationSection = ({
   useEffect(() => {
     if (!tournament?.id) return;
     apiClient
-      .get(`/v1/registrations?tournamentId=${tournament.id}`)
+      .get(`/tournaments/${tournament.id}/registrations`)
       .then(r => {
-        const players = (r.data.data?.registrations || []).map(reg => reg.player);
+        const regs = r.data.data?.registrations || [];
+        const players = regs.map(reg => reg.player || reg.pair).filter(Boolean);
         setRegisteredPlayers(players);
       })
       .catch(() => {

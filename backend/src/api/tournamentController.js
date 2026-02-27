@@ -134,6 +134,7 @@ export async function getTournamentById(req, res, next) {
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
+        registrationClosed: tournament.registrationClosed,
         lastStatusChange: tournament.lastStatusChange,
         createdAt: tournament.createdAt,
         updatedAt: tournament.updatedAt,
