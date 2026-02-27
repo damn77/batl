@@ -40,6 +40,12 @@ async function main() {
       password: 'Player123!',
       role: 'PLAYER',
       description: 'Test player with account'
+    },
+    {
+      email: 'player2@batl.example.com',
+      password: 'Player123!',
+      role: 'PLAYER',
+      description: 'Test player 2 with account'
     }
   ];
 
@@ -66,7 +72,7 @@ async function main() {
     console.log(`✅ ${userData.description}: ${user.email}`);
   }
 
-  const [admin, organizer, organizer2, playerUser] = createdUsers;
+  const [admin, organizer, organizer2, playerUser, player2User] = createdUsers;
 
   // ============================================
   // 2. PLAYER PROFILES - Feature 001
@@ -82,7 +88,7 @@ async function main() {
     { userId: null, name: 'Jane Doe', email: 'jane.doe@example.com', phone: '+12345678902', birthDate: new Date('1992-07-10'), gender: 'WOMEN' },
     { userId: null, name: 'Mike Johnson', email: 'mike.j@example.com', phone: '+12345678903', birthDate: new Date('1975-11-05'), gender: 'MEN' },
     { userId: null, name: 'Sarah Williams', email: 'sarah.w@example.com', phone: '+12345678904', birthDate: new Date('1988-01-25'), gender: 'WOMEN' },
-    { userId: null, name: 'David Brown', email: 'david.b@example.com', phone: '+12345678905', birthDate: new Date('1983-09-15'), gender: 'MEN' },
+    { userId: player2User.id, name: 'David Brown', email: 'david.b@example.com', phone: '+12345678905', birthDate: new Date('1983-09-15'), gender: 'MEN' },
     { userId: null, name: 'Emily Davis', email: 'emily.d@example.com', phone: '+12345678906', birthDate: new Date('1995-04-12'), gender: 'WOMEN' },
     { userId: null, name: 'Robert Wilson', email: 'robert.w@example.com', phone: '+12345678907', birthDate: new Date('1978-06-30'), gender: 'MEN' },
     { userId: null, name: 'Lisa Miller', email: 'lisa.m@example.com', phone: '+12345678908', birthDate: new Date('1987-12-20'), gender: 'WOMEN' },
@@ -765,7 +771,8 @@ async function main() {
   console.log(`👥 Users: ${createdUsers.length}`);
   console.log('   - 1 Admin: admin@batl.example.com (ChangeMe123!)');
   console.log('   - 2 Organizers: organizer@batl.example.com, organizer2@batl.example.com (Organizer123!)');
-  console.log('   - 1 Player: player@batl.example.com (Player123!)');
+  console.log('   - 1 Player: player@batl.example.com / Player123! → Alex Player');
+  console.log('   - 1 Player: player2@batl.example.com / Player123! → David Brown');
 
   console.log(`\n🎾 Player Profiles: ${createdProfiles.length}`);
   console.log(`   - ${createdProfiles.filter(p => p.gender === 'MEN').length} Men`);
