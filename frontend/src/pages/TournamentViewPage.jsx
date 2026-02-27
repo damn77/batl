@@ -25,7 +25,7 @@ const TournamentViewPage = () => {
   const { user } = useAuth();
 
   // T021: Use SWR hook for data fetching with automatic revalidation
-  const { tournament, isLoading, isError } = useTournament(id);
+  const { tournament, isLoading, isError, mutate: mutateTournament } = useTournament(id);
 
   // Determine tournaments list link based on user role
   const getTournamentsLink = () => {
@@ -94,7 +94,7 @@ const TournamentViewPage = () => {
             {/* T072: Format Visualization - Brackets, Groups, Swiss Rounds */}
             <Row className="mt-4">
               <Col>
-                <FormatVisualization tournament={tournament} />
+                <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
               </Col>
             </Row>
 

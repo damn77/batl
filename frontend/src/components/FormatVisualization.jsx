@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { Card, Button, Collapse, Alert, Spinner } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { useFormatStructure } from '../services/tournamentViewService';
+import { useFormatStructure, useMatches } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
 import GroupStandingsTable from './GroupStandingsTable';
 import KnockoutBracket from './KnockoutBracket';
 import SwissRoundPairings from './SwissRoundPairings';
 import CombinedFormatDisplay from './CombinedFormatDisplay';
 import ExpandableSection from './ExpandableSection';
+import BracketGenerationSection from './BracketGenerationSection';
 
 /**
  * FormatVisualization - Main wrapper that selects correct visualization based on formatType
@@ -17,19 +18,30 @@ import ExpandableSection from './ExpandableSection';
  *
  * @param {Object} tournament - Tournament object with formatType
  */
-const FormatVisualization = ({ tournament }) => {
+const FormatVisualization = ({ tournament, mutateTournament }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const { user } = useAuth();
 
   // T088: Lazy load format structure only when expanded
-  const { structure, isLoading, isError } = useFormatStructure(
+  const { structure, isLoading, isError, mutate: mutateFormatStructure } = useFormatStructure(
     tournament?.id,
     isExpanded
   );
 
   // T050: Get current user's player profile ID for My Match feature
   const currentUserPlayerId = user?.playerProfileId || null;
+
+  // Role check for organizer/admin draw workflow
+  const isOrganizerOrAdmin = user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
+
+  // For organizer KNOCKOUT view: fetch matches so BracketGenerationSection can populate slot dropdowns
+  const bracketId = structure?.brackets?.[0]?.id;
+  const { matches, mutate: mutateMatches } = useMatches(
+    tournament?.id,
+    bracketId ? { bracketId } : {},
+    isExpanded && !!bracketId
+  );
 
   if (!tournament) return null;
 
@@ -127,23 +139,38 @@ const FormatVisualization = ({ tournament }) => {
 
                 {formatType === 'KNOCKOUT' && (
                   <div className="d-flex flex-column gap-4">
-                    {structure.brackets?.map(bracket => {
-                      const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
-                      return (
-                        <KnockoutBracket
-                          key={bracket.id}
-                          tournamentId={tournament.id}
-                          bracket={bracket}
-                          rounds={bracketRounds}
-                          currentUserPlayerId={currentUserPlayerId}
-                          isDoubles={tournament.categoryType === 'DOUBLES'}
-                        />
-                      );
-                    })}
-                    {(!structure.brackets || structure.brackets.length === 0) && (
-                      <Alert variant="info">
-                        {t('components.formatVisualization.emptyStates.noBrackets')}
-                      </Alert>
+                    {isOrganizerOrAdmin ? (
+                      /* Organizer/Admin: full draw workflow with BracketGenerationSection */
+                      <BracketGenerationSection
+                        tournament={tournament}
+                        mutateTournament={mutateTournament}
+                        mutateFormatStructure={mutateFormatStructure}
+                        mutateMatches={mutateMatches}
+                        structure={structure}
+                        matches={matches}
+                      />
+                    ) : (
+                      /* Player/public: read-only bracket view */
+                      <>
+                        {structure.brackets?.map(bracket => {
+                          const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
+                          return (
+                            <KnockoutBracket
+                              key={bracket.id}
+                              tournamentId={tournament.id}
+                              bracket={bracket}
+                              rounds={bracketRounds}
+                              currentUserPlayerId={currentUserPlayerId}
+                              isDoubles={tournament.categoryType === 'DOUBLES'}
+                            />
+                          );
+                        })}
+                        {(!structure.brackets || structure.brackets.length === 0) && (
+                          <Alert variant="info">
+                            {t('components.formatVisualization.emptyStates.noBrackets')}
+                          </Alert>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
