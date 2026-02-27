@@ -12,7 +12,7 @@ This milestone closes the critical gap between BATL as a sophisticated registrat
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Match Result Submission** - Players submit format-aware scores; organizer confirms, overrides, or enters special outcomes; organizer-lock prevents further player edits
+- [x] **Phase 1: Match Result Submission** - Players submit format-aware scores; organizer confirms, overrides, or enters special outcomes; organizer-lock prevents further player edits (completed 2026-02-27)
 - [ ] **Phase 2: Tournament Lifecycle and Bracket Progression** - Organizer starts tournaments; confirmed results advance knockout winners automatically; tournament auto-completes when final match is confirmed
 - [ ] **Phase 3: Player Statistics** - Players view full match history and win/loss record; statistics are public on player profile pages
 
@@ -62,6 +62,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Match Result Submission | 2/3 | In Progress|  |
+| 1. Match Result Submission | 3/3 | Complete   | 2026-02-27 |
 | 2. Tournament Lifecycle and Bracket Progression | 0/? | Not started | - |
 | 3. Player Statistics | 0/? | Not started | - |
