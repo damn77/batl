@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-27T21:04:00Z"
+last_updated: "2026-02-27T21:10:38Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -23,28 +23,28 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 1.1 of 2 (Bracket Generation and Seeding Persistence)
-Plan: 1 of 3 in current phase (01.1-01 complete)
+Plan: 2 of 3 in current phase (01.1-02 complete)
 Status: In progress
-Last activity: 2026-02-27 — Completed 01.1-01: Prisma schema changes (Match.player1Id nullable, Tournament.registrationClosed) + RED test scaffolding for DRAW-01 through DRAW-08
+Last activity: 2026-02-27 — Completed 01.1-02: bracketPersistenceService implementation with closeRegistration(), generateBracket(), swapSlots() and all 16 unit tests GREEN
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01 complete)
+- Total plans completed: 5 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02 complete)
 - Average duration: 4 min
-- Total execution time: 17 min
+- Total execution time: 21 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Match Result Submission | 3/3 | 15 min | 5 min |
-| 1.1 Bracket Generation and Seeding Persistence | 1/3 | 2 min | 2 min |
+| 1.1 Bracket Generation and Seeding Persistence | 2/3 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min), 01-02 (2 min), 01-03 (8 min), 01.1-01 (2 min)
+- Last 5 plans: 01-02 (2 min), 01-03 (8 min), 01.1-01 (2 min), 01.1-02 (4 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
 - [01.1-01]: Match.player1Id made nullable (String?) so future-round placeholder matches can be created without player IDs upfront
 - [01.1-01]: Tournament.registrationClosed added as Boolean default(false) to gate bracket generation behind organizer action
 - [01.1-01]: onDelete: Restrict kept on player1 relation (not changed to SetNull) to preserve referential integrity when player exists
+- [01.1-02]: jest.unstable_mockModule() required instead of jest.mock() for ES module mocking in Jest 30 with --experimental-vm-modules
+- [01.1-02]: Service exports regenerateBracket() as explicit alias for generateBracket() to make regeneration intent clear at call sites
+- [01.1-02]: bracketId set on Match records in addition to roundId so matches are queryable via both Bracket and Round relationships
 
 ### Pending Todos
 
@@ -88,5 +91,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 01.1-01-PLAN.md — schema migration + RED test scaffolding for DRAW-01 through DRAW-08
+Stopped at: Completed 01.1-02-PLAN.md — bracketPersistenceService implementation + 16 unit tests GREEN
 Resume file: None

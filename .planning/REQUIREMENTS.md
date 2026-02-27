@@ -17,13 +17,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Draw Generation (Phase 01.1)
 
-- [ ] **DRAW-01**: Organizer can close registration for a tournament as an explicit action, preventing further player registrations
-- [ ] **DRAW-02**: Organizer can generate a seeded tournament draw that persists Bracket, Round, and Match records in the database using rankings-based seeding placement
-- [ ] **DRAW-03**: Draw generation requires registration to be closed first (prerequisite guard)
-- [ ] **DRAW-04**: Organizer can regenerate the draw (delete and replace all bracket records atomically) at any point before the tournament starts
-- [ ] **DRAW-05**: Bracket is locked once the tournament is IN_PROGRESS — no regeneration possible
-- [ ] **DRAW-06**: Organizer can batch-swap any two player slots in the generated bracket and save all changes at once
-- [ ] **DRAW-07**: BYE slots cannot be included in player slot swaps
+- [x] **DRAW-01**: Organizer can close registration for a tournament as an explicit action, preventing further player registrations
+- [x] **DRAW-02**: Organizer can generate a seeded tournament draw that persists Bracket, Round, and Match records in the database using rankings-based seeding placement
+- [x] **DRAW-03**: Draw generation requires registration to be closed first (prerequisite guard)
+- [x] **DRAW-04**: Organizer can regenerate the draw (delete and replace all bracket records atomically) at any point before the tournament starts
+- [x] **DRAW-05**: Bracket is locked once the tournament is IN_PROGRESS — no regeneration possible
+- [x] **DRAW-06**: Organizer can batch-swap any two player slots in the generated bracket and save all changes at once
+- [x] **DRAW-07**: BYE slots cannot be included in player slot swaps
 - [ ] **DRAW-08**: All bracket persistence API endpoints return correct HTTP status codes and BATL standard error format
 
 ### Tournament Lifecycle
@@ -91,13 +91,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MATCH-03 | Phase 1 | Complete |
 | MATCH-04 | Phase 1 | Complete |
 | MATCH-05 | Phase 1 | Complete |
-| DRAW-01 | Phase 01.1 | Pending |
-| DRAW-02 | Phase 01.1 | Pending |
-| DRAW-03 | Phase 01.1 | Pending |
-| DRAW-04 | Phase 01.1 | Pending |
-| DRAW-05 | Phase 01.1 | Pending |
-| DRAW-06 | Phase 01.1 | Pending |
-| DRAW-07 | Phase 01.1 | Pending |
+| DRAW-01 | Phase 01.1 | Complete |
+| DRAW-02 | Phase 01.1 | Complete |
+| DRAW-03 | Phase 01.1 | Complete |
+| DRAW-04 | Phase 01.1 | Complete |
+| DRAW-05 | Phase 01.1 | Complete |
+| DRAW-06 | Phase 01.1 | Complete |
+| DRAW-07 | Phase 01.1 | Complete |
 | DRAW-08 | Phase 01.1 | Pending |
 | LIFE-01 | Phase 2 | Pending |
 | LIFE-02 | Phase 2 | Pending |
