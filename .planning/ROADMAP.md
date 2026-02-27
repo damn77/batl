@@ -13,6 +13,7 @@ This milestone closes the critical gap between BATL as a sophisticated registrat
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Match Result Submission** - Players submit format-aware scores; organizer confirms, overrides, or enters special outcomes; organizer-lock prevents further player edits (completed 2026-02-27)
+- [ ] **Phase 01.1: Bracket Generation and Seeding Persistence** (INSERTED) - Organizer closes registration, generates seeded draw, manually edits slots, and saves — persisting Bracket/Round/Match records Phase 2 needs
 - [ ] **Phase 2: Tournament Lifecycle and Bracket Progression** - Organizer starts tournaments; confirmed results advance knockout winners automatically; tournament auto-completes when final match is confirmed
 - [ ] **Phase 3: Player Statistics** - Players view full match history and win/loss record; statistics are public on player profile pages
 
@@ -37,17 +38,21 @@ Plans:
 
 ### Phase 01.1: Bracket Generation and Seeding Persistence (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Organizer closes registration, generates a seeded bracket draw persisted as Bracket/Round/Match DB records, reviews the bracket, manually swaps slots, and saves — giving Phase 2 real database records to advance winners through
+**Requirements**: DRAW-01, DRAW-02, DRAW-03, DRAW-04, DRAW-05, DRAW-06, DRAW-07, DRAW-08
 **Depends on:** Phase 1
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 01.1 to break down)
+- [ ] 01.1-01-PLAN.md — Schema migration: Match.player1Id nullable + Tournament.registrationClosed boolean + RED test scaffolds
+- [ ] 01.1-02-PLAN.md — bracketPersistenceService: closeRegistration, generateBracket (Prisma transaction), swapSlots — all 15 unit tests GREEN
+- [ ] 01.1-03-PLAN.md — Backend routes + controller: PATCH close-registration, POST bracket, PATCH bracket/slots — 12 integration tests GREEN
+- [ ] 01.1-04-PLAN.md — Frontend service + BracketGenerationSection component (close → generate → swap → save workflow)
+- [ ] 01.1-05-PLAN.md — Wire BracketGenerationSection into FormatVisualization + human-verify checkpoint
 
 ### Phase 2: Tournament Lifecycle and Bracket Progression
 **Goal**: Tournament status transitions driven by organizer actions and confirmed results, with automatic knockout bracket advancement
-**Depends on**: Phase 1
+**Depends on**: Phase 1, Phase 01.1
 **Requirements**: LIFE-01, LIFE-02, LIFE-03, LIFE-04
 **Success Criteria** (what must be TRUE):
   1. An organizer can press "Start Tournament" and the status transitions from SCHEDULED to IN_PROGRESS, closing player registration simultaneously
@@ -72,10 +77,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 → 01.1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Match Result Submission | 3/3 | Complete   | 2026-02-27 |
+| 1. Match Result Submission | 3/3 | Complete | 2026-02-27 |
+| 01.1. Bracket Generation and Seeding Persistence | 0/5 | Not started | - |
 | 2. Tournament Lifecycle and Bracket Progression | 0/2 | Not started | - |
 | 3. Player Statistics | 0/? | Not started | - |

@@ -9,11 +9,22 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Match Results
 
-- [ ] **MATCH-01**: Any player participating in a match can submit the match result using a format-aware score entry form that shows the correct inputs based on the tournament's scoring rules (sets, match score, or tiebreak-only)
-- [ ] **MATCH-02**: Any player participating in a match can update a previously submitted result, as long as the organizer has not yet modified it
-- [ ] **MATCH-03**: Organizer can submit or update the match result for any match at any time
-- [ ] **MATCH-04**: Once the organizer modifies a match result, players can no longer update it (organizer-locked)
-- [ ] **MATCH-05**: Organizer can enter a result for special outcomes (walkover, forfeit, no-show)
+- [x] **MATCH-01**: Any player participating in a match can submit the match result using a format-aware score entry form that shows the correct inputs based on the tournament's scoring rules (sets, match score, or tiebreak-only)
+- [x] **MATCH-02**: Any player participating in a match can update a previously submitted result, as long as the organizer has not yet modified it
+- [x] **MATCH-03**: Organizer can submit or update the match result for any match at any time
+- [x] **MATCH-04**: Once the organizer modifies a match result, players can no longer update it (organizer-locked)
+- [x] **MATCH-05**: Organizer can enter a result for special outcomes (walkover, forfeit, no-show)
+
+### Draw Generation (Phase 01.1)
+
+- [ ] **DRAW-01**: Organizer can close registration for a tournament as an explicit action, preventing further player registrations
+- [ ] **DRAW-02**: Organizer can generate a seeded tournament draw that persists Bracket, Round, and Match records in the database using rankings-based seeding placement
+- [ ] **DRAW-03**: Draw generation requires registration to be closed first (prerequisite guard)
+- [ ] **DRAW-04**: Organizer can regenerate the draw (delete and replace all bracket records atomically) at any point before the tournament starts
+- [ ] **DRAW-05**: Bracket is locked once the tournament is IN_PROGRESS — no regeneration possible
+- [ ] **DRAW-06**: Organizer can batch-swap any two player slots in the generated bracket and save all changes at once
+- [ ] **DRAW-07**: BYE slots cannot be included in player slot swaps
+- [ ] **DRAW-08**: All bracket persistence API endpoints return correct HTTP status codes and BATL standard error format
 
 ### Tournament Lifecycle
 
@@ -75,11 +86,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MATCH-01 | Phase 1 | Pending |
-| MATCH-02 | Phase 1 | Pending |
-| MATCH-03 | Phase 1 | Pending |
-| MATCH-04 | Phase 1 | Pending |
-| MATCH-05 | Phase 1 | Pending |
+| MATCH-01 | Phase 1 | Complete |
+| MATCH-02 | Phase 1 | Complete |
+| MATCH-03 | Phase 1 | Complete |
+| MATCH-04 | Phase 1 | Complete |
+| MATCH-05 | Phase 1 | Complete |
+| DRAW-01 | Phase 01.1 | Pending |
+| DRAW-02 | Phase 01.1 | Pending |
+| DRAW-03 | Phase 01.1 | Pending |
+| DRAW-04 | Phase 01.1 | Pending |
+| DRAW-05 | Phase 01.1 | Pending |
+| DRAW-06 | Phase 01.1 | Pending |
+| DRAW-07 | Phase 01.1 | Pending |
+| DRAW-08 | Phase 01.1 | Pending |
 | LIFE-01 | Phase 2 | Pending |
 | LIFE-02 | Phase 2 | Pending |
 | LIFE-03 | Phase 2 | Pending |
@@ -88,10 +107,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATS-02 | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 11 total
-- Mapped to phases: 11
+- v1 requirements: 19 total
+- Mapped to phases: 19
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Last updated: 2026-02-27 — added DRAW-01 through DRAW-08 for Phase 01.1*
