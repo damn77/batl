@@ -1,0 +1,346 @@
+/**
+ * Bracket Persistence Service
+ *
+ * Bridges the in-memory seeding placement service (Feature 010) with the Prisma
+ * database. Provides three core operations:
+ *   - closeRegistration(): locks tournament registration before draw generation
+ *   - generateBracket(): fetches players, calls generateSeededBracket(), persists
+ *     Bracket + Round + Match records atomically
+ *   - swapSlots(): batch-updates match player slots atomically
+ *
+ * Feature: Phase 01.1 - Bracket Generation and Seeding Persistence
+ * Requirements: DRAW-01 through DRAW-07
+ */
+
+import { PrismaClient } from '@prisma/client';
+import { generateSeededBracket } from './seedingPlacementService.js';
+
+const prisma = new PrismaClient();
+
+/**
+ * Helper: create structured errors with a machine-readable code property.
+ * Used by unit tests to assert on error.code rather than error.message.
+ *
+ * @param {string} code - Machine-readable error code (e.g. 'TOURNAMENT_NOT_FOUND')
+ * @param {string} message - Human-readable error message
+ * @returns {Error} Error object with .code property set
+ */
+function makeError(code, message) {
+  const err = new Error(message);
+  err.code = code;
+  return err;
+}
+
+/**
+ * Close tournament registration so bracket generation can proceed.
+ *
+ * Business rules (DRAW-01):
+ *   - Tournament must exist → TOURNAMENT_NOT_FOUND
+ *   - Registration must not already be closed → ALREADY_CLOSED
+ *   - Sets registrationClosed = true and returns updated tournament
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @returns {Promise<Object>} Updated tournament record
+ * @throws {Error} TOURNAMENT_NOT_FOUND | ALREADY_CLOSED
+ */
+export async function closeRegistration(tournamentId) {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { id: true, status: true, registrationClosed: true }
+  });
+
+  if (!tournament) {
+    throw makeError('TOURNAMENT_NOT_FOUND', `Tournament ${tournamentId} not found`);
+  }
+
+  if (tournament.registrationClosed) {
+    throw makeError('ALREADY_CLOSED', `Tournament ${tournamentId} registration is already closed`);
+  }
+
+  return prisma.tournament.update({
+    where: { id: tournamentId },
+    data: { registrationClosed: true }
+  });
+}
+
+/**
+ * Generate a seeded bracket and persist it to the database atomically.
+ *
+ * Business rules (DRAW-02 through DRAW-05):
+ *   - Tournament must exist → TOURNAMENT_NOT_FOUND
+ *   - Registration must be closed first → REGISTRATION_NOT_CLOSED (DRAW-03)
+ *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED (DRAW-05)
+ *   - Need at least 4 registered players/pairs → INSUFFICIENT_PLAYERS
+ *   - Deletes existing Bracket/Round/Match records before creating new ones (DRAW-04)
+ *   - Creates Bracket + Rounds + Matches in a single Prisma transaction
+ *
+ * Round structure:
+ *   - totalRounds = log2(bracketSize)
+ *   - Round 1 matches use player IDs from the positions array (from seeding service)
+ *   - Rounds 2+ are placeholder matches (both player IDs null, status SCHEDULED)
+ *   - BYE matches in Round 1 get isBye=true and status=BYE
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @param {Object} [options={}] - Generation options
+ * @param {string} [options.randomSeed] - Optional deterministic seed for reproducibility
+ * @param {string} [options.doublesMethod='PAIR_SCORE'] - 'PAIR_SCORE' | 'AVERAGE_SCORE'
+ * @returns {Promise<{bracket: Object, roundCount: number, matchCount: number}>}
+ * @throws {Error} TOURNAMENT_NOT_FOUND | REGISTRATION_NOT_CLOSED | BRACKET_LOCKED | INSUFFICIENT_PLAYERS
+ */
+export async function generateBracket(tournamentId, options = {}) {
+  const { randomSeed, doublesMethod = 'PAIR_SCORE' } = options;
+
+  // Step 1: Load tournament with category info
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: {
+      id: true,
+      status: true,
+      registrationClosed: true,
+      categoryId: true,
+      category: { select: { type: true } }
+    }
+  });
+
+  // Step 2: Guard — tournament must exist
+  if (!tournament) {
+    throw makeError('TOURNAMENT_NOT_FOUND', `Tournament ${tournamentId} not found`);
+  }
+
+  // Step 3: Guard — registration must be closed (DRAW-03)
+  if (!tournament.registrationClosed) {
+    throw makeError(
+      'REGISTRATION_NOT_CLOSED',
+      'Registration must be closed before generating bracket'
+    );
+  }
+
+  // Step 4: Guard — bracket is locked if tournament is in progress or completed (DRAW-05)
+  if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
+    throw makeError(
+      'BRACKET_LOCKED',
+      `Cannot modify bracket when tournament status is ${tournament.status}`
+    );
+  }
+
+  // Step 5: Load registered players or pairs based on category type
+  const categoryType = tournament.category?.type;
+  let playerCount;
+
+  if (categoryType === 'DOUBLES') {
+    const pairRegs = await prisma.pairRegistration.findMany({
+      where: { tournamentId, status: 'REGISTERED' },
+      include: { pair: { select: { id: true } } }
+    });
+    playerCount = pairRegs.length;
+  } else {
+    // SINGLES (default)
+    const registrations = await prisma.tournamentRegistration.findMany({
+      where: { tournamentId, status: 'REGISTERED' },
+      include: { player: { select: { id: true, name: true } } },
+      orderBy: { registrationTimestamp: 'asc' }
+    });
+    playerCount = registrations.length;
+  }
+
+  // Step 6: Guard — minimum 4 players required
+  if (playerCount < 4) {
+    throw makeError(
+      'INSUFFICIENT_PLAYERS',
+      'Need at least 4 players to generate bracket'
+    );
+  }
+
+  // Step 7: Call seeding placement service to get bracket positions
+  // For AVERAGE_SCORE doubles mode: falls through to PAIR_SCORE for now
+  // (AVERAGE_SCORE is a stub that delegates to PAIR_SCORE per plan note)
+  const seedingResult = await generateSeededBracket(
+    tournament.categoryId,
+    playerCount,
+    randomSeed
+  );
+
+  const { positions, bracketSize } = seedingResult.bracket;
+
+  // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
+  let createdBracket;
+  let roundCount;
+  let matchCount = 0;
+
+  const result = await prisma.$transaction(async (tx) => {
+    // Step 8a: Delete existing records in cascade order (DRAW-04)
+    // FK constraints require: Match → Round → Bracket deletion order
+    await tx.match.deleteMany({ where: { tournamentId } });
+    await tx.round.deleteMany({ where: { tournamentId } });
+    await tx.bracket.deleteMany({ where: { tournamentId } });
+
+    // Step 8b: Create Bracket record
+    const bracket = await tx.bracket.create({
+      data: {
+        tournamentId,
+        bracketType: 'MAIN',
+        matchGuarantee: 'MATCH_1'
+      }
+    });
+
+    // Step 8c: Create Rounds and Matches
+    const totalRounds = Math.log2(bracketSize);
+    let matchNumber = 1;
+
+    for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
+      // Create Round record
+      const round = await tx.round.create({
+        data: {
+          tournamentId,
+          bracketId: bracket.id,
+          roundNumber: roundNum
+        }
+      });
+
+      if (roundNum === 1) {
+        // Round 1: create matches from positions array (paired in groups of 2)
+        const matchesInRound = bracketSize / 2;
+        for (let i = 0; i < matchesInRound; i++) {
+          const pos1 = positions[i * 2];
+          const pos2 = positions[i * 2 + 1];
+
+          // Determine if this match is a BYE
+          const isByeMatch = !!(pos1?.isBye || !pos2 || pos2?.isBye);
+
+          let matchData;
+          if (categoryType === 'DOUBLES') {
+            // Doubles: use pair IDs, not player IDs
+            matchData = {
+              tournamentId,
+              bracketId: bracket.id,
+              roundId: round.id,
+              matchNumber: matchNumber++,
+              isBye: isByeMatch,
+              status: isByeMatch ? 'BYE' : 'SCHEDULED',
+              pair1Id: pos1?.entityId || null,
+              pair2Id: isByeMatch ? null : (pos2?.entityId || null),
+              player1Id: null,
+              player2Id: null
+            };
+          } else {
+            // Singles: use player IDs
+            matchData = {
+              tournamentId,
+              bracketId: bracket.id,
+              roundId: round.id,
+              matchNumber: matchNumber++,
+              isBye: isByeMatch,
+              status: isByeMatch ? 'BYE' : 'SCHEDULED',
+              player1Id: pos1?.entityId || null,
+              player2Id: isByeMatch ? null : (pos2?.entityId || null)
+            };
+          }
+
+          await tx.match.create({ data: matchData });
+          matchCount++;
+        }
+      } else {
+        // Rounds 2+: placeholder matches — both player IDs null
+        const matchesInRound = bracketSize / Math.pow(2, roundNum);
+        for (let i = 0; i < matchesInRound; i++) {
+          await tx.match.create({
+            data: {
+              tournamentId,
+              bracketId: bracket.id,
+              roundId: round.id,
+              matchNumber: matchNumber++,
+              isBye: false,
+              status: 'SCHEDULED',
+              player1Id: null,
+              player2Id: null
+            }
+          });
+          matchCount++;
+        }
+      }
+    }
+
+    return { bracket, totalRounds, matchCount };
+  });
+
+  return {
+    bracket: result.bracket,
+    roundCount: result.totalRounds,
+    matchCount: result.matchCount
+  };
+}
+
+/**
+ * Regenerate an existing bracket by delegating to generateBracket().
+ *
+ * The generateBracket() function already handles deletion of existing records
+ * before creating new ones (DRAW-04), so regenerateBracket() is an alias that
+ * makes the intent explicit in callers.
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @param {Object} [options={}] - Same options as generateBracket()
+ * @returns {Promise<{bracket: Object, roundCount: number, matchCount: number}>}
+ */
+export async function regenerateBracket(tournamentId, options = {}) {
+  return generateBracket(tournamentId, options);
+}
+
+/**
+ * Atomically swap player slots across multiple matches.
+ *
+ * Business rules (DRAW-06, DRAW-07):
+ *   - Tournament must exist → TOURNAMENT_NOT_FOUND
+ *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED
+ *   - None of the targeted matches may be BYE matches → BYE_SLOT_NOT_SWAPPABLE
+ *   - All updates happen in a single transaction (no partial updates on failure)
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @param {Array<{matchId: string, field: 'player1Id'|'player2Id', newPlayerId: string}>} swaps
+ * @returns {Promise<{swapped: number}>} Number of swaps applied
+ * @throws {Error} TOURNAMENT_NOT_FOUND | BRACKET_LOCKED | BYE_SLOT_NOT_SWAPPABLE
+ */
+export async function swapSlots(tournamentId, swaps) {
+  // Step 1: Verify tournament exists and is not locked
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { id: true, status: true }
+  });
+
+  if (!tournament) {
+    throw makeError('TOURNAMENT_NOT_FOUND', `Tournament ${tournamentId} not found`);
+  }
+
+  if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
+    throw makeError(
+      'BRACKET_LOCKED',
+      `Cannot swap slots when tournament status is ${tournament.status}`
+    );
+  }
+
+  // Step 2: Load targeted matches and check for BYE guard
+  const matchIds = swaps.map((s) => s.matchId);
+  const matches = await prisma.match.findMany({
+    where: { id: { in: matchIds } }
+  });
+
+  // Step 3: Guard — no BYE matches allowed (DRAW-07)
+  const byeMatch = matches.find((m) => m.isBye);
+  if (byeMatch) {
+    throw makeError(
+      'BYE_SLOT_NOT_SWAPPABLE',
+      `Match ${byeMatch.id} is a BYE match and cannot have slots swapped`
+    );
+  }
+
+  // Step 4: Atomically apply all swaps in a single transaction (DRAW-06)
+  await prisma.$transaction(async (tx) => {
+    for (const swap of swaps) {
+      await tx.match.update({
+        where: { id: swap.matchId },
+        data: { [swap.field]: swap.newPlayerId }
+      });
+    }
+  });
+
+  return { swapped: swaps.length };
+}
