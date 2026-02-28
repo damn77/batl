@@ -114,15 +114,29 @@ export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
   // No next round — this was the final round, nothing to advance to
   if (!nextRound) return;
 
-  // Compute next-round match slot
-  const nextMatchNumber = Math.ceil(updatedMatch.matchNumber / 2);
-  const isOdd = updatedMatch.matchNumber % 2 === 1;
-
-  // Find the target match in the next round
-  const nextMatch = await tx.match.findFirst({
-    where: { roundId: nextRound.id, matchNumber: nextMatchNumber }
+  // Determine position of this match within its round (sorted by matchNumber).
+  // matchNumbers are globally sequential across all rounds, so we cannot use
+  // Math.ceil(matchNumber / 2) directly — instead find the round-local index.
+  const currentRoundMatches = await tx.match.findMany({
+    where: { roundId: updatedMatch.roundId },
+    orderBy: { matchNumber: 'asc' },
+    select: { id: true }
   });
 
+  const posInRound = currentRoundMatches.findIndex(m => m.id === updatedMatch.id);
+  if (posInRound < 0) return;
+
+  const nextPosInRound = Math.floor(posInRound / 2);
+  const isOdd = posInRound % 2 === 0; // even position → player1 slot, odd position → player2 slot
+
+  // Find the target match in the next round by position
+  const nextRoundMatches = await tx.match.findMany({
+    where: { roundId: nextRound.id },
+    orderBy: { matchNumber: 'asc' },
+    select: { id: true }
+  });
+
+  const nextMatch = nextRoundMatches[nextPosInRound];
   if (!nextMatch) return;
 
   // Determine pair advancement for doubles matches

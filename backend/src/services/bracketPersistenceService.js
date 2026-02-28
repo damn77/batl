@@ -234,6 +234,10 @@ export async function generateBracket(tournamentId, options = {}) {
     const totalRounds = Math.log2(bracketSize);
     let matchNumber = 1;
 
+    // Collected during Round 1 creation for BYE pre-population in Round 2
+    const byeInfo = []; // { posInRound, playerId, pairId }
+    let round2MatchIds = []; // IDs of Round 2 matches in creation order
+
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
       // Create Round record
       const round = await tx.round.create({
@@ -284,12 +288,21 @@ export async function generateBracket(tournamentId, options = {}) {
 
           await tx.match.create({ data: matchData });
           matchCount++;
+
+          // Track BYE matches so we can pre-populate their Round 2 slot below
+          if (isByeMatch) {
+            byeInfo.push({
+              posInRound: i,
+              playerId: categoryType !== 'DOUBLES' ? (pos1?.entityId || null) : null,
+              pairId: categoryType === 'DOUBLES' ? (pos1?.entityId || null) : null
+            });
+          }
         }
       } else {
-        // Rounds 2+: placeholder matches — both player IDs null
+        // Rounds 2+: placeholder matches — player IDs start null (BYEs pre-populated below)
         const matchesInRound = bracketSize / Math.pow(2, roundNum);
         for (let i = 0; i < matchesInRound; i++) {
-          await tx.match.create({
+          const created = await tx.match.create({
             data: {
               tournamentId,
               bracketId: bracket.id,
@@ -301,9 +314,30 @@ export async function generateBracket(tournamentId, options = {}) {
               player2Id: null
             }
           });
+          if (roundNum === 2) round2MatchIds.push(created.id);
           matchCount++;
         }
       }
+    }
+
+    // Step 8d: Pre-populate Round 2 slots for BYE players.
+    // BYE matches auto-advance their player — no result is ever submitted for them,
+    // so advanceBracketSlot never runs. We seed Round 2 here at bracket creation time.
+    for (const bye of byeInfo) {
+      const round2Idx = Math.floor(bye.posInRound / 2);
+      const isPlayer1Slot = bye.posInRound % 2 === 0;
+      const targetMatchId = round2MatchIds[round2Idx];
+      if (!targetMatchId) continue;
+
+      const updateData = {};
+      if (categoryType === 'DOUBLES') {
+        if (isPlayer1Slot) updateData.pair1Id = bye.pairId;
+        else updateData.pair2Id = bye.pairId;
+      } else {
+        if (isPlayer1Slot) updateData.player1Id = bye.playerId;
+        else updateData.player2Id = bye.playerId;
+      }
+      await tx.match.update({ where: { id: targetMatchId }, data: updateData });
     }
 
     return { bracket, totalRounds, matchCount };
