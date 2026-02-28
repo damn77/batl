@@ -35,8 +35,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Player Statistics
 
-- [ ] **STATS-01**: Player can view their full match history showing tournament name, category, opponent name, score, and match outcome (win/loss)
-- [ ] **STATS-02**: Player match history is publicly visible on their player profile page
+- [x] **STATS-01**: Player can view their full match history showing tournament name, category, opponent name, score, and match outcome (win/loss)
+- [x] **STATS-02**: Player match history is publicly visible on their player profile page
 
 ## v2 Requirements
 
@@ -103,8 +103,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIFE-02 | Phase 2 | Complete |
 | LIFE-03 | Phase 2 | Complete |
 | LIFE-04 | Phase 2 | Complete |
-| STATS-01 | Phase 3 | Pending |
-| STATS-02 | Phase 3 | Pending |
+| STATS-01 | Phase 3 | Complete |
+| STATS-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 19 total

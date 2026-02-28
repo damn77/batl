@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T10:00:27.358Z"
+last_updated: "2026-02-28T13:31:25.248Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Progress: [█████████░] 89%
 
 *Updated after each plan completion*
 | Phase 02 P02 | 45 | 3 tasks | 6 files |
+| Phase 03-player-statistics P01 | 2 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 02]: tournamentStatus prop threaded from TournamentViewPage through FormatVisualization to KnockoutBracket — minimal prop drilling avoids modifying KnockoutBracket internals
 - [Phase 02-02]: Set score validation is blocking for players and advisory for organizers — matches existing permission model
 - [Phase 02-02]: Players blocked from opening result modal when opponent slot is TBD — prevents incomplete match submissions
+- [Phase 03-player-statistics]: Route registered at /api/players (pre-existing prefix), match-history placed before /:id to prevent Express path shadowing
+- [Phase 03-player-statistics]: Score formatting and outcome derivation done server-side in service layer — frontend receives display-ready strings
 
 ### Pending Todos
 
