@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Table, Spinner, Alert, Badge, Form, Pagination } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { getPlayerMatchHistory } from '../services/playerService';
 
 const MatchHistoryTab = ({ playerId }) => {
@@ -166,6 +167,7 @@ const MatchHistoryTab = ({ playerId }) => {
             <thead>
               <tr>
                 <th>Tournament</th>
+                <th>Date</th>
                 <th>Category</th>
                 <th>Opponent</th>
                 <th>Score</th>
@@ -175,7 +177,10 @@ const MatchHistoryTab = ({ playerId }) => {
             <tbody>
               {matches.map((match) => (
                 <tr key={match.matchId}>
-                  <td>{match.tournamentName}</td>
+                  <td>
+                    <Link to={`/tournaments/${match.tournamentId}`}>{match.tournamentName}</Link>
+                  </td>
+                  <td>{match.completedAt ? new Date(match.completedAt).toLocaleDateString() : '-'}</td>
                   <td>{match.category?.name || '-'}</td>
                   <td>{match.opponentName || '-'}</td>
                   <td>{match.score}</td>
