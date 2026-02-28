@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: unknown
-last_updated: "2026-02-28T19:15:29.845Z"
+milestone_name: Tournament Core
+status: milestone_complete
+last_updated: "2026-02-28T19:53:18.422Z"
 progress:
   total_phases: 4
   completed_phases: 4
@@ -15,10 +15,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-26)
+See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Phase 3 — Player Statistics
+**Current focus:** Planning next milestone — v1.1
 
 ## Current Position
 
