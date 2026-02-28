@@ -13,6 +13,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { advanceBracketSlot, checkAndCompleteTournament } from './tournamentLifecycleService.js';
 
 const prisma = new PrismaClient();
 
@@ -161,8 +162,34 @@ export async function submitResult({ matchId, body, isOrganizer, submitterPlayer
         status: 'COMPLETED',
         completedAt: new Date(),
         updatedAt: new Date()
+      },
+      select: {
+        id: true,
+        matchNumber: true,
+        roundId: true,
+        bracketId: true,
+        tournamentId: true,
+        player1Id: true,
+        player2Id: true,
+        pair1Id: true,
+        pair2Id: true,
+        isBye: true,
+        result: true,
+        status: true,
+        completedAt: true,
+        updatedAt: true
       }
     });
+
+    // Extract winner ID from the result JSON
+    const parsedResult = JSON.parse(updated.result);
+    const winnerId = parsedResult.winner === 'PLAYER1' ? updated.player1Id : updated.player2Id;
+
+    // Advance bracket slot: populate next-round match with the winner
+    await advanceBracketSlot(tx, updated, winnerId);
+
+    // Detect tournament completion (organizer-only)
+    await checkAndCompleteTournament(tx, updated.tournamentId, isOrganizer);
 
     return updated;
   });
