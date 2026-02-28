@@ -10,7 +10,8 @@ import {
   deleteTournament,
   getFormatStructure,
   getMatches,
-  getTournamentPointPreview
+  getTournamentPointPreview,
+  startTournament
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -90,6 +91,19 @@ router.post(
   authorize('create', 'Tournament'),
   validateBody(schemas.tournamentCreation),
   createTournament
+);
+
+/**
+ * PATCH /api/v1/tournaments/:id/start
+ * Start a tournament — transitions SCHEDULED → IN_PROGRESS, closes registration
+ * Authorization: ADMIN or ORGANIZER roles required (LIFE-01, LIFE-02)
+ * Note: Registered BEFORE the generic /:id route to avoid path shadowing
+ */
+router.patch(
+  '/:id/start',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  startTournament
 );
 
 /**
