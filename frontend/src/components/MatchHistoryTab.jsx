@@ -30,10 +30,14 @@ const MatchHistoryTab = ({ playerId }) => {
         // Accumulate unique categories from each fetch result
         if (result.matches && result.matches.length > 0) {
           setCategories((prev) => {
-            const existingIds = new Set(prev.map((c) => c.id));
+            const seenIds = new Set(prev.map((c) => c.id));
             const newCats = result.matches
               .map((m) => m.category)
-              .filter((c) => c && c.id && !existingIds.has(c.id));
+              .filter((c) => {
+                if (!c || !c.id || seenIds.has(c.id)) return false;
+                seenIds.add(c.id); // deduplicate within current batch too
+                return true;
+              });
             if (newCats.length === 0) return prev;
             return [...prev, ...newCats];
           });
