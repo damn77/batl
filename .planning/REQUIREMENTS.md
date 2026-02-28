@@ -22,6 +22,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 - [ ] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
 - [ ] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
 - [ ] **LIFE-04**: Tournament auto-completes only when all brackets (main + consolation) are fully played
+- [ ] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
 
 ### Visualization
 
@@ -65,7 +66,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -76,6 +77,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIFE-02 | Phase 5 | Pending |
 | LIFE-03 | Phase 5 | Pending |
 | LIFE-04 | Phase 5 | Pending |
+| LIFE-05 | Phase 5 | Pending |
 | VIEW-01 | Phase 6 | Pending |
 | VIEW-02 | Phase 6 | Pending |
 | VIEW-03 | Phase 6 | Pending |
@@ -83,10 +85,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PTS-02 | Phase 7 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 12 total
-- Mapped to phases: 12
+- v1.1 requirements: 13 total
+- Mapped to phases: 13
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 — traceability confirmed after roadmap creation*

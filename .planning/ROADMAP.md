@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
+- 🚧 **v1.1 Consolation Brackets** — Phases 4–7 (in progress)
 
 ## Phases
 
@@ -18,7 +19,78 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 
 </details>
 
+### 🚧 v1.1 Consolation Brackets (In Progress)
+
+**Milestone Goal:** Extend knockout tournaments with a consolation bracket that guarantees every player at least 2 real matches (MATCH_2), running the full loop from configuration through point awards.
+
+- [ ] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time
+- [ ] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish
+- [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible
+- [ ] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI
+
+## Phase Details
+
+### Phase 4: Configuration and Consolation Draw
+**Goal**: Organizer can configure Match Guarantee on a tournament and, at draw time, the consolation bracket structure is automatically generated as a mirror draw alongside the main bracket
+**Depends on**: v1.0 (bracketPersistenceService, KnockoutFormatConfigSchema, Bracket/Round/Match DB models already in place)
+**Requirements**: CONF-01, DRAW-01
+**Success Criteria** (what must be TRUE):
+  1. Organizer sees a Match Guarantee field (None / MATCH_2) on the tournament create/edit form and can save it
+  2. When a MATCH_2 tournament draw is executed, a CONSOLATION bracket record is created alongside the MAIN bracket with the correct mirror-draw match structure (loser of Main Match N vs loser of Main Match N+1)
+  3. An existing tournament with Match Guarantee = None generates only a MAIN bracket when drawn (backward-compatible behavior unchanged)
+  4. The formatConfig matchGuarantee value is read by bracketPersistenceService rather than hardcoded to MATCH_1
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+
+### Phase 5: Loser Routing and Consolation Progression
+**Goal**: Main bracket losers are automatically placed in their consolation slots when they have not yet played 2 real matches; consolation winners advance through consolation rounds; the tournament does not complete until all brackets are fully played
+**Depends on**: Phase 4
+**Requirements**: DRAW-02, LIFE-01, LIFE-02, LIFE-03, LIFE-04, LIFE-05
+**Success Criteria** (what must be TRUE):
+  1. When a main bracket match result is submitted, the loser is automatically placed in the corresponding consolation bracket slot if they have played fewer than 2 real matches
+  2. BYE matches (isBye=true) and matches with a CANCELLED outcome are not counted toward a player's real-match total for consolation eligibility
+  3. A player who lost their first main bracket match after receiving a BYE is routed to consolation because they have only 1 real match
+  4. When a consolation match result is submitted, the winner automatically advances to the next consolation round (same auto-advance mechanism as the main bracket)
+  5. A tournament in MATCH_2 mode remains IN_PROGRESS until all consolation matches have been played; submitting the main bracket final result alone does not trigger auto-completion
+  6. A player/pair can opt out of consolation participation at any time; the opt-out is recorded as an automatic forfeit (opponent advances without playing)
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+
+### Phase 6: Visualization and Result Entry
+**Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked
+**Depends on**: Phase 5
+**Requirements**: VIEW-01, VIEW-02, VIEW-03
+**Success Criteria** (what must be TRUE):
+  1. The tournament detail page renders both the main bracket and consolation bracket (using the existing KnockoutBracket component), with a clear tab or section separator between them
+  2. A participant can open the result entry modal for a consolation match and submit a score, which is saved and reflected in the bracket view
+  3. Consolation matches whose player slots are not yet determined (awaiting main bracket outcomes) display "TBD" for each unresolved player name and disable the result entry action
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+
+### Phase 7: Consolation Points
+**Goal**: Consolation bracket point tables are seeded with the correct values and wired into point calculation so players who win at least one consolation match receive consolation points based on their final consolation round
+**Depends on**: Phase 6
+**Requirements**: PTS-01, PTS-02
+**Success Criteria** (what must be TRUE):
+  1. The database contains pre-seeded PointTable rows with isConsolation=true matching values from the spec (notes/013-bracket-points-rules.md)
+  2. An organizer running point calculation for a completed MATCH_2 tournament sees consolation points awarded to players who won at least one consolation match
+  3. A player who lost all consolation matches (zero consolation wins) receives no consolation points
+  4. An admin can view and edit consolation point table values in the existing Point Tables admin UI without any code change
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 4 → 5 → 6 → 7
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -26,3 +98,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 | 01.1. Bracket Generation and Seeding Persistence | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
+| 4. Configuration and Consolation Draw | v1.1 | 0/TBD | Not started | - |
+| 5. Loser Routing and Consolation Progression | v1.1 | 0/TBD | Not started | - |
+| 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
+| 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
