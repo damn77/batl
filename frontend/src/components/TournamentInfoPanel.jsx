@@ -87,7 +87,7 @@ const TournamentInfoPanel = ({ tournament }) => {
 
     if (now < openDate) {
       return { status: t('tournament.registrationStatus.notYetOpen'), variant: 'info' };
-    } else if (now > closeDate) {
+    } else if (now > closeDate || tournament.registrationClosed) {
       return { status: t('tournament.registrationStatus.closed'), variant: 'secondary' };
     } else {
       return { status: t('tournament.registrationStatus.open'), variant: 'success' };

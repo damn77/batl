@@ -140,6 +140,19 @@ This ensures QA can verify new features work correctly before deployment.
 
 <!-- MANUAL ADDITIONS START -->
 
+## Git Workflow
+
+**CRITICAL: Never commit directly to master.**
+
+- All commits must be made on a feature branch, never on `master`
+- `master` is protected on origin and only accepts changes via pull request
+- Before starting any work, ensure you are on a feature branch (e.g., `git checkout -b <branch-name>`)
+- If commits accidentally land on `master`, move them to a branch immediately:
+  ```bash
+  git branch <branch-name>       # create branch at current HEAD
+  git reset --hard origin/master # reset master back to remote state
+  ```
+
 ## Feature Implementation Notes
 
 ### 001-user-management (Completed: 2025-10-31)

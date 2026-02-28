@@ -100,7 +100,7 @@ const TournamentRulesSetupPage = () => {
         params: { changeType }
       });
       return response.data;
-    } catch (err) {
+    } catch (_err) {
       // If validation endpoint doesn't exist or fails, assume no impact
       return null;
     }

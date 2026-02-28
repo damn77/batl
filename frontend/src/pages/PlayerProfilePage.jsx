@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import { Alert, Spinner } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import apiClient from '../services/apiClient';
 
 const PlayerProfilePage = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -127,7 +125,6 @@ const PlayerProfilePage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       const errorMessage = err.message || err.response?.data?.error?.message || 'Failed to update profile';
-      const errorCode = err.code || err.response?.data?.error?.code;
       const errorDetails = err.details || err.response?.data?.error?.details;
 
       // Handle field-specific errors

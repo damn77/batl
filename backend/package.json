@@ -15,7 +15,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
     "prisma:studio": "prisma studio",
-    "db:reset": "npm run db:clear-sessions && prisma migrate reset --force",
+    "db:reset": "npm run db:clear-sessions && prisma migrate reset --force && node prisma/seed-knockout-test.js",
     "db:clear-sessions": "node -e \"const fs = require('fs'); const path = require('path'); const dir = './sessions'; if (fs.existsSync(dir)) { fs.readdirSync(dir).forEach(f => fs.unlinkSync(path.join(dir, f))); console.log('Sessions cleared'); } else { console.log('No sessions directory'); }\""
   },
   "keywords": [

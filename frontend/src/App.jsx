@@ -11,7 +11,6 @@ import UserDetailPage from './pages/UserDetailPage';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import OrganizerPlayersPage from './pages/OrganizerPlayersPage';
 import PlayerDetailPage from './pages/PlayerDetailPage';
-import PlayerProfilePage from './pages/PlayerProfilePage';
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import TournamentSetupPage from './pages/TournamentSetupPage';
 import TournamentRulesSetupPage from './pages/TournamentRulesSetupPage';
@@ -25,6 +24,8 @@ import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import TournamentPointConfigPage from './pages/TournamentPointConfigPage';
 import PointTablesPage from './pages/admin/PointTablesPage';
+import PlayerPublicProfilePage from './pages/PlayerPublicProfilePage';
+import TournamentsListPage from './pages/TournamentsListPage';
 
 // Separate component to use modal context
 function AppContent() {
@@ -45,6 +46,10 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/rankings" element={<CategoryRankingsPage />} />
+        {/* Phase 3 - STATS-02: Public player profile (no auth required) */}
+        <Route path="/players/:id" element={<PlayerPublicProfilePage />} />
+        {/* Phase 3 - navigation: Completed tournaments list (public) */}
+        <Route path="/tournaments" element={<TournamentsListPage />} />
         {/* T023: Tournament view page - public access, no authentication required */}
         <Route path="/tournaments/:id" element={<TournamentViewPage />} />
 
@@ -168,7 +173,7 @@ function AppContent() {
           path="/player/profile"
           element={
             <ProtectedRoute requiredRole="PLAYER">
-              <PlayerProfilePage />
+              <Navigate to={`/players/${user?.playerId}`} replace />
             </ProtectedRoute>
           }
         />

@@ -4,7 +4,8 @@ import {
   listPlayersHandler,
   getPlayerHandler,
   updatePlayerHandler,
-  checkDuplicatesHandler
+  checkDuplicatesHandler,
+  getMatchHistoryHandler
 } from '../playerController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -34,6 +35,12 @@ router.get(
   '/',
   validateQuery(schemas.playerListQuery),
   listPlayersHandler
+);
+
+// Match history - PUBLIC (no auth required)
+router.get(
+  '/:id/match-history',
+  getMatchHistoryHandler
 );
 
 // Get specific player profile - PUBLIC (with limited fields) or authenticated (full fields)

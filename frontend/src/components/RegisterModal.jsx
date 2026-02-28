@@ -87,7 +87,7 @@ const RegisterModal = ({ show, onHide, onSwitchToLogin }) => {
     try {
       setLoading(true);
 
-      const { confirmPassword, ...registrationData } = formData;
+      const { confirmPassword: _confirmPassword, ...registrationData } = formData;
       const data = await registerAPI(registrationData);
 
       // Check if profile was linked to existing tournament history

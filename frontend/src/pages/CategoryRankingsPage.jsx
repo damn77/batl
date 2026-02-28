@@ -32,7 +32,7 @@ const CategoryRankingsPage = () => {
       if (data.categories && data.categories.length > 0) {
         setSelectedCategory(data.categories[0]);
       }
-    } catch (err) {
+    } catch (_err) {
       setError(t('errors.failedToLoad', { resource: t('nav.categories').toLowerCase() }));
     } finally {
       setLoadingCategories(false);

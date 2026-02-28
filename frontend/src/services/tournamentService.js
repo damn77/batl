@@ -123,6 +123,16 @@ export const calculateTournamentPoints = async (id, results) => {
   return response.data.data;
 };
 
+/**
+ * Start a tournament — transitions SCHEDULED → IN_PROGRESS (LIFE-01, LIFE-02)
+ * @param {string} id - Tournament UUID
+ * @returns {Promise<{id: string, status: string}>}
+ */
+export const startTournament = async (id) => {
+  const response = await apiClient.patch(`/v1/tournaments/${id}/start`);
+  return response.data.data;
+};
+
 // Point calculation methods
 export const POINT_CALCULATION_METHODS = {
   PLACEMENT: 'PLACEMENT',

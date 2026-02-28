@@ -59,10 +59,15 @@ const TournamentRegistrationPage = () => {
       setLoading(true);
       setError(null);
 
-      // Load only SCHEDULED tournaments
-      // The API now includes myRegistration field for each tournament (optimization to avoid N+1 queries)
-      const data = await listTournaments({ status: 'SCHEDULED', limit: 100 });
-      const tournamentList = data.tournaments || [];
+      // Load SCHEDULED and IN_PROGRESS tournaments (players need to see active tournaments they're in)
+      const [scheduledData, inProgressData] = await Promise.all([
+        listTournaments({ status: 'SCHEDULED', limit: 100 }),
+        listTournaments({ status: 'IN_PROGRESS', limit: 100 })
+      ]);
+      const tournamentList = [
+        ...(scheduledData.tournaments || []),
+        ...(inProgressData.tournaments || [])
+      ];
       setTournaments(tournamentList);
 
       // Build registration map from the tournaments (myRegistration field)
@@ -90,7 +95,7 @@ const TournamentRegistrationPage = () => {
               try {
                 const score = await getSeedingScore('PLAYER', userProfile.id, t.categoryId);
                 scores[t.id] = score;
-              } catch (e) {
+              } catch (_e) {
                 scores[t.id] = 0;
               }
             }

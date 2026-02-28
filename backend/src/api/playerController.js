@@ -3,7 +3,8 @@ import {
   listPlayerProfiles,
   findPlayerById,
   updatePlayerProfile,
-  findDuplicates
+  findDuplicates,
+  getPlayerMatchHistory
 } from '../services/playerService.js';
 import { logAudit, AuditActions } from '../services/auditService.js';
 
@@ -161,10 +162,36 @@ export const checkDuplicatesHandler = async (req, res, next) => {
   }
 };
 
+// Get match history for a player - PUBLIC (no auth required)
+export const getMatchHistoryHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100); // cap at 100
+    const categoryId = req.query.categoryId || null;
+    const sortBy = ['tournamentName', 'completedAt'].includes(req.query.sortBy) ? req.query.sortBy : 'completedAt';
+    const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc';
+
+    const result = await getPlayerMatchHistory({ playerId: id, page, limit, categoryId, sortBy, sortOrder });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Player not found' }
+      });
+    }
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   createPlayerHandler,
   listPlayersHandler,
   getPlayerHandler,
   updatePlayerHandler,
-  checkDuplicatesHandler
+  checkDuplicatesHandler,
+  getMatchHistoryHandler
 };

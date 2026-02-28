@@ -23,7 +23,7 @@ export const VIEWPORT_CONSTRAINTS = {
  * @param {number} totalRounds - Total number of rounds in bracket
  * @returns {{gridColumn: number, gridRowStart: number, gridRowEnd: number}}
  */
-export function calculateMatchPosition(roundNumber, matchNumber, totalRounds) {
+export function calculateMatchPosition(roundNumber, matchNumber, _totalRounds) {
   // Column is simply the round number
   const gridColumn = roundNumber;
 
@@ -141,7 +141,6 @@ export function hasFirstRoundByes(matches) {
   // Find total number of matches to determine bracket size
   // Bracket size = next power of 2 >= participant count
   // For a complete bracket: Round 1 should have bracketSize/2 matches
-  const allMatches = matches.length;
   const rounds = Math.max(...matches.map(m => m.roundNumber));
 
   // Expected bracket size is 2^rounds
@@ -279,4 +278,34 @@ export function getHighlightedMatchIds(myMatchContext) {
   }
 
   return ids;
+}
+
+/**
+ * Check if the logged-in player is a participant in a match.
+ * Works for both singles (player1/player2) and doubles (pair1/pair2 members).
+ * Used by KnockoutBracket to gate the match click handler.
+ *
+ * @param {Object} match - Match object from useMatches SWR hook
+ * @param {string|null} currentPlayerId - Logged-in user's playerProfile.id (null if no profile)
+ * @returns {boolean}
+ */
+export function isMatchParticipant(match, currentPlayerId) {
+  if (!currentPlayerId || !match) return false;
+
+  // Singles: direct player match
+  if (match.player1?.id === currentPlayerId || match.player2?.id === currentPlayerId) {
+    return true;
+  }
+
+  // Doubles: check pair members
+  if (
+    match.pair1?.player1?.id === currentPlayerId ||
+    match.pair1?.player2?.id === currentPlayerId ||
+    match.pair2?.player1?.id === currentPlayerId ||
+    match.pair2?.player2?.id === currentPlayerId
+  ) {
+    return true;
+  }
+
+  return false;
 }

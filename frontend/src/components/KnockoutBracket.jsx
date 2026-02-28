@@ -12,13 +12,16 @@ import { useMatches } from '../services/tournamentViewService';
 import BracketMatch from './BracketMatch';
 import BracketControls from './BracketControls';
 import BracketMyMatch from './BracketMyMatch';
+import MatchResultModal from './MatchResultModal';
 import { useBracketNavigation } from '../hooks/useBracketNavigation';
 import { mergeColors } from '../config/bracketColors';
 import {
   hasFirstRoundByes,
   findMyMatch,
-  getHighlightedMatchIds
+  getHighlightedMatchIds,
+  isMatchParticipant
 } from '../utils/bracketUtils';
+import { useAuth } from '../utils/AuthContext';
 import './KnockoutBracket.css';
 
 /**
@@ -106,6 +109,8 @@ const KnockoutBracket = ({
   rounds,
   currentUserPlayerId,
   onMatchClick,
+  scoringRules,
+  tournamentStatus,
   initialScale = 1.0,
   showByes: initialShowByes = false,
   colors: customColors,
@@ -115,6 +120,8 @@ const KnockoutBracket = ({
   // State
   const [showBracket, setShowBracket] = useState(false);
   const [showFirstRoundByes, setShowFirstRoundByes] = useState(initialShowByes);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [selectedMatchIsParticipant, setSelectedMatchIsParticipant] = useState(false);
 
   // Refs
   const containerRef = useRef(null);
@@ -126,11 +133,15 @@ const KnockoutBracket = ({
     containerRef: viewportRef
   });
 
+  // Auth context — used for role check and participant gating
+  const { user } = useAuth();
+  const isOrganizer = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
+
   // Merge colors with defaults
   const colors = useMemo(() => mergeColors(customColors), [customColors]);
 
   // T088-T089: Lazy load matches only when bracket is expanded
-  const { matches, isLoading, isError } = useMatches(
+  const { matches, isLoading, isError, mutate } = useMatches(
     tournamentId,
     { bracketId: bracket.id },
     showBracket
@@ -198,6 +209,25 @@ const KnockoutBracket = ({
       return { round, matches: roundMatches };
     });
   }, [rounds, matches]);
+
+  // Match click handler — gates access by role and participation
+  const handleMatchClick = (match) => {
+    if (!user) return; // unauthenticated — no modal
+    if (match?.isBye || match?.status === 'BYE') return; // BYE slots are not clickable
+    // Read-only for non-organizers when tournament is completed (LIFE-03)
+    if (!isOrganizer && tournamentStatus === 'COMPLETED') return;
+    // Block players from opening modal when opponent is TBD — result can't be submitted yet
+    const bothSlotsFilledSingles = match?.player1Id && match?.player2Id;
+    const bothSlotsFilledDoubles = match?.pair1Id && match?.pair2Id;
+    const bothSlotsFilled = bothSlotsFilledSingles || bothSlotsFilledDoubles;
+    if (!isOrganizer && !bothSlotsFilled) return;
+    const participant = isMatchParticipant(match, user.playerId);
+    if (!isOrganizer && !participant) return; // non-participant player — no modal
+    setSelectedMatch(match);
+    setSelectedMatchIsParticipant(participant);
+    // Forward to external handler if provided (backward compatibility with Feature 011)
+    if (onMatchClick) onMatchClick(match);
+  };
 
   // Toggle BYE visibility
   const handleToggleByes = () => {
@@ -308,7 +338,7 @@ const KnockoutBracket = ({
                           colors={colors}
                           isDoubles={isDoubles}
                           highlightedMatchIds={highlightedMatchIds}
-                          onMatchClick={onMatchClick}
+                          onMatchClick={handleMatchClick}
                           showFirstRoundByes={showFirstRoundByes}
                         />
                       ))}
@@ -352,6 +382,16 @@ const KnockoutBracket = ({
           )}
         </>
       )}
+
+      {/* Match result modal — opens on click for participants and organizers */}
+      <MatchResultModal
+        match={selectedMatch}
+        onClose={() => setSelectedMatch(null)}
+        isOrganizer={isOrganizer}
+        isParticipant={selectedMatchIsParticipant}
+        scoringRules={scoringRules}
+        mutate={mutate}
+      />
     </div>
   );
 };
@@ -370,6 +410,8 @@ KnockoutBracket.propTypes = {
   })).isRequired,
   currentUserPlayerId: PropTypes.string,
   onMatchClick: PropTypes.func,
+  scoringRules: PropTypes.object,
+  tournamentStatus: PropTypes.string,
   initialScale: PropTypes.number,
   showByes: PropTypes.bool,
   colors: PropTypes.object,

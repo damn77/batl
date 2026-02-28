@@ -1,6 +1,7 @@
 // T052-T064: Player List Panel Component - Display registered players with status and rankings
 import { useState, useEffect, useMemo } from 'react';
 import { Card, Table, Badge, Button, Form, InputGroup, Collapse, Alert, Spinner, Modal } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTournamentRegistrations, STATUS_VARIANTS } from '../services/tournamentRegistrationService';
 import { withdrawPairRegistration } from '../services/pairService';
@@ -175,9 +176,17 @@ const PlayerListPanel = ({ tournament }) => {
         <tr key={registration.id || index}>
           <td>{index + 1}</td>
           <td>
-            <strong>{registration.pair?.player1?.name || 'Unknown'}</strong>
+            <strong>
+              {registration.pair?.player1?.id
+                ? <Link to={`/players/${registration.pair.player1.id}`}>{registration.pair.player1.name || 'Unknown'}</Link>
+                : (registration.pair?.player1?.name || 'Unknown')}
+            </strong>
             <span className="text-muted"> & </span>
-            <strong>{registration.pair?.player2?.name || 'Unknown'}</strong>
+            <strong>
+              {registration.pair?.player2?.id
+                ? <Link to={`/players/${registration.pair.player2.id}`}>{registration.pair.player2.name || 'Unknown'}</Link>
+                : (registration.pair?.player2?.name || 'Unknown')}
+            </strong>
           </td>
           <td className="text-center">
             {registration.pair?.seedingScore || '-'}
@@ -214,7 +223,11 @@ const PlayerListPanel = ({ tournament }) => {
       <tr key={registration.id || index}>
         <td>{index + 1}</td>
         <td>
-          <strong>{registration.player?.name || 'Unknown'}</strong>
+          <strong>
+            {registration.player?.id
+              ? <Link to={`/players/${registration.player.id}`}>{registration.player.name || 'Unknown'}</Link>
+              : (registration.player?.name || 'Unknown')}
+          </strong>
         </td>
         <td className="text-center">
           {registration.player?.ranking || '-'}

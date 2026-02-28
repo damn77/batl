@@ -14,7 +14,7 @@ import {
  * @param {boolean} showDescription - Whether to show status description tooltip (default: false)
  */
 const RegistrationStatusBadge = ({ status, showDescription = false }) => {
-  const { t } = useTranslation(); // Hook triggers re-render on language change
+  useTranslation(); // Hook triggers re-render on language change
 
   if (!status) return null;
 

@@ -18,6 +18,7 @@ import seedingRoutes from './api/routes/seedingRoutes.js';
 import seedingPlacementRoutes from './api/routes/seedingPlacementRoutes.js';
 import pointTableRoutes from './api/routes/pointTableRoutes.js';
 import bracketRoutes from './api/routes/bracketRoutes.js';
+import matchRoutes from './api/routes/matchRoutes.js'; // Feature 01: Match result submission
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -143,6 +144,7 @@ app.use('/api/v1/brackets', bracketRulesRouter);
 app.use('/api/v1/brackets', bracketRoutes); // Feature 009: Bracket generation (structure/seeding endpoints)
 app.use('/api/v1/rounds', roundRulesRouter);
 app.use('/api/v1/matches', matchOverridesRouter);
+app.use('/api/v1/matches', matchRoutes); // Feature 01: Match result submission (PATCH /:id/result)
 
 // 404 handler - must be after all routes
 app.use(notFoundHandler);

@@ -8,7 +8,7 @@ import { getFormatTypeInfo } from '../services/tournamentViewService';
  * FR-002: Display tournament format type and configuration
  */
 const TournamentFormatBadge = ({ formatType, formatConfig }) => {
-  const { t } = useTranslation(); // Hook triggers re-render on language change
+  useTranslation(); // Hook triggers re-render on language change
 
   if (!formatType) return null;
 

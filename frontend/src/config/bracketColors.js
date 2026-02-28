@@ -27,6 +27,9 @@ export const bracketColors = {
   // UI controls
   controlActive: '#0d6efd',    // Bootstrap primary - active button
   controlInactive: '#6c757d',  // Bootstrap secondary - inactive button
+
+  // Special outcome winners (W/O, FF, N/S) — blue to distinguish from standard green winners
+  specialOutcomeWinner: '#cfe2ff',  // Bootstrap info-bg - walkover/forfeit/no-show winner
 };
 
 /**

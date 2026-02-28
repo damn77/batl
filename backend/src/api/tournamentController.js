@@ -1,6 +1,8 @@
 // T038, T041-T045: Tournament Controller - HTTP handlers for tournament endpoints
 // T010-T011: New endpoints for tournament view feature
+// Phase 02-01: Tournament lifecycle endpoints
 import * as tournamentService from '../services/tournamentService.js';
+import { startTournament as startTournamentService } from '../services/tournamentLifecycleService.js';
 
 /**
  * T042: GET /api/v1/tournaments - List all tournaments with optional filtering
@@ -134,6 +136,7 @@ export async function getTournamentById(req, res, next) {
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,
+        registrationClosed: tournament.registrationClosed,
         lastStatusChange: tournament.lastStatusChange,
         createdAt: tournament.createdAt,
         updatedAt: tournament.updatedAt,
@@ -147,7 +150,8 @@ export async function getTournamentById(req, res, next) {
         // T008: Computed fields
         registrationCount: tournament.registrationCount,
         waitlistCount: tournament.waitlistCount,
-        ruleComplexity: tournament.ruleComplexity
+        ruleComplexity: tournament.ruleComplexity,
+        champion: tournament.champion || null
       }
     });
   } catch (err) {
@@ -458,6 +462,30 @@ export async function getTournamentPointPreview(req, res, next) {
     const preview = await tournamentService.getTournamentPointPreview(id);
     res.json(preview);
   } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/v1/tournaments/:id/start
+ * Start a tournament — transitions SCHEDULED → IN_PROGRESS, closes registration
+ * Authorization: ADMIN or ORGANIZER roles required (LIFE-01, LIFE-02)
+ */
+export async function startTournament(req, res, next) {
+  try {
+    const { id } = req.params;
+    const tournament = await startTournamentService(id);
+    return res.status(200).json({
+      success: true,
+      data: { id: tournament.id, status: tournament.status }
+    });
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({
+        success: false,
+        error: { code: err.code, message: err.message }
+      });
+    }
     next(err);
   }
 }

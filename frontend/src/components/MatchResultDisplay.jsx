@@ -77,7 +77,7 @@ const MatchResultDisplay = ({ match, compact = false }) => {
         </div>
         {sets.length > 0 && (
           <div className="text-muted small mt-1">
-            {sets.map((set, i) => `${set.player1Score}-${set.player2Score}`).join(', ')}
+            {sets.map((set, _i) => `${set.player1Score}-${set.player2Score}`).join(', ')}
           </div>
         )}
       </div>

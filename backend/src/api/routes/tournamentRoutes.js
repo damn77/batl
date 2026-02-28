@@ -1,5 +1,6 @@
 // T046-T047: Tournament Routes - Wire up tournament endpoints with auth/validation
 // T014: Add new routes for format-structure and matches endpoints
+// Phase 01.1: Bracket generation and seeding persistence routes
 import express from 'express';
 import {
   listTournaments,
@@ -9,11 +10,21 @@ import {
   deleteTournament,
   getFormatStructure,
   getMatches,
-  getTournamentPointPreview
+  getTournamentPointPreview,
+  startTournament
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
 import { validateBody, validateQuery, schemas } from '../../middleware/validate.js';
+import {
+  closeTournamentRegistration,
+  generateTournamentBracket,
+  swapBracketSlots
+} from '../bracketPersistenceController.js';
+import {
+  generateBracketSchema,
+  swapSlotsSchema
+} from '../validators/bracketPersistenceValidator.js';
 
 const router = express.Router();
 
@@ -80,6 +91,19 @@ router.post(
   authorize('create', 'Tournament'),
   validateBody(schemas.tournamentCreation),
   createTournament
+);
+
+/**
+ * PATCH /api/v1/tournaments/:id/start
+ * Start a tournament — transitions SCHEDULED → IN_PROGRESS, closes registration
+ * Authorization: ADMIN or ORGANIZER roles required (LIFE-01, LIFE-02)
+ * Note: Registered BEFORE the generic /:id route to avoid path shadowing
+ */
+router.patch(
+  '/:id/start',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  startTournament
 );
 
 /**
@@ -263,6 +287,48 @@ router.post(
       next(error);
     }
   }
+);
+
+// ============================================
+// PHASE 01.1: BRACKET GENERATION AND SEEDING PERSISTENCE
+// ============================================
+
+/**
+ * PATCH /api/v1/tournaments/:id/close-registration
+ * Close registration for a tournament (prerequisite for generate draw)
+ * Authorization: ORGANIZER or ADMIN
+ */
+router.patch(
+  '/:id/close-registration',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  closeTournamentRegistration
+);
+
+/**
+ * POST /api/v1/tournaments/:id/bracket
+ * Generate and persist the tournament bracket draw
+ * Authorization: ORGANIZER or ADMIN
+ */
+router.post(
+  '/:id/bracket',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  validateBody(generateBracketSchema),
+  generateTournamentBracket
+);
+
+/**
+ * PATCH /api/v1/tournaments/:id/bracket/slots
+ * Batch swap player slots in the generated bracket
+ * Authorization: ORGANIZER or ADMIN
+ */
+router.patch(
+  '/:id/bracket/slots',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  validateBody(swapSlotsSchema),
+  swapBracketSlots
 );
 
 export default router;
