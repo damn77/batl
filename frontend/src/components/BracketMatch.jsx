@@ -7,6 +7,7 @@
 
 import PropTypes from 'prop-types';
 import { Badge } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { bracketColors as defaultColors } from '../config/bracketColors';
 
 /**
@@ -212,7 +213,13 @@ const BracketMatch = ({
         style={topPlayerState === 'winner' && isSpecialOutcome ? { backgroundColor: specialOutcomeColor } : {}}
       >
         <span className="player-name">
-          {getPlayerName(match.player1, match.pair1, isDoubles)}
+          {!isDoubles && match.player1?.id ? (
+            <Link to={`/players/${match.player1.id}`} onClick={e => e.stopPropagation()}>
+              {getPlayerName(match.player1, match.pair1, isDoubles)}
+            </Link>
+          ) : (
+            getPlayerName(match.player1, match.pair1, isDoubles)
+          )}
           {match.player1?.seed && <span className="seed-badge">[{match.player1.seed}]</span>}
         </span>
         {topPlayerState === 'winner' && <span className="winner-icon" aria-label="Winner">&#127942;</span>}
@@ -225,7 +232,13 @@ const BracketMatch = ({
           style={bottomPlayerState === 'winner' && isSpecialOutcome ? { backgroundColor: specialOutcomeColor } : {}}
         >
           <span className="player-name">
-            {getPlayerName(match.player2, match.pair2, isDoubles)}
+            {!isDoubles && match.player2?.id ? (
+              <Link to={`/players/${match.player2.id}`} onClick={e => e.stopPropagation()}>
+                {getPlayerName(match.player2, match.pair2, isDoubles)}
+              </Link>
+            ) : (
+              getPlayerName(match.player2, match.pair2, isDoubles)
+            )}
             {match.player2?.seed && <span className="seed-badge">[{match.player2.seed}]</span>}
           </span>
           {bottomPlayerState === 'winner' && <span className="winner-icon" aria-label="Winner">&#127942;</span>}
