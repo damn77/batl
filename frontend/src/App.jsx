@@ -11,7 +11,6 @@ import UserDetailPage from './pages/UserDetailPage';
 import OrganizerDashboard from './pages/OrganizerDashboard';
 import OrganizerPlayersPage from './pages/OrganizerPlayersPage';
 import PlayerDetailPage from './pages/PlayerDetailPage';
-import PlayerProfilePage from './pages/PlayerProfilePage';
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import TournamentSetupPage from './pages/TournamentSetupPage';
 import TournamentRulesSetupPage from './pages/TournamentRulesSetupPage';
@@ -174,7 +173,7 @@ function AppContent() {
           path="/player/profile"
           element={
             <ProtectedRoute requiredRole="PLAYER">
-              <PlayerProfilePage />
+              <Navigate to={`/players/${user?.playerId}`} replace />
             </ProtectedRoute>
           }
         />
