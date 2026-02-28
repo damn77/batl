@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-02-28T08:58:52Z"
+status: unknown
+last_updated: "2026-02-28T08:59:21.243Z"
 progress:
-  total_phases: 2
-  completed_phases: 1
-  total_plans: 9
-  completed_plans: 8
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -83,6 +83,9 @@ Recent decisions affecting current work:
 - [02-01]: advanceBracketSlot + checkAndCompleteTournament run inside the existing Prisma transaction in submitResult() — atomicity guaranteed with match result write
 - [02-01]: checkAndCompleteTournament guards on isOrganizer flag — player submissions never trigger COMPLETED transition
 - [02-01]: PATCH /:id/start route registered before PATCH /:id in Express router to prevent path shadowing
+- [Phase 02]: PlayerProfile uses single name field (not firstName/lastName) — champion name assembled directly from name field
+- [Phase 02]: window.confirm() used for Start Tournament confirmation — plan explicitly allows lightweight dialogs over modal components
+- [Phase 02]: tournamentStatus prop threaded from TournamentViewPage through FormatVisualization to KnockoutBracket — minimal prop drilling avoids modifying KnockoutBracket internals
 
 ### Pending Todos
 
