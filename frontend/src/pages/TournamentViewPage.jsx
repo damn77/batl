@@ -1,5 +1,6 @@
 // T022-T038: Tournament View Page - Comprehensive tournament information display
-import { Container, Row, Col, Alert, Spinner, Breadcrumb } from 'react-bootstrap';
+import { useState } from 'react';
+import { Container, Row, Col, Alert, Spinner, Breadcrumb, Button } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
@@ -10,6 +11,7 @@ import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel
 import FormatVisualization from '../components/FormatVisualization';
 import PointPreviewPanel from '../components/PointPreviewPanel';
 import { useTournament } from '../services/tournamentViewService';
+import { startTournament } from '../services/tournamentService';
 import { useAuth } from '../utils/AuthContext';
 
 /**
@@ -26,6 +28,19 @@ const TournamentViewPage = () => {
 
   // T021: Use SWR hook for data fetching with automatic revalidation
   const { tournament, isLoading, isError, mutate: mutateTournament } = useTournament(id);
+
+  const [startError, setStartError] = useState(null);
+
+  const handleStartTournament = async () => {
+    if (!window.confirm('Start this tournament? Registration will close immediately and players will no longer be able to register.')) return;
+    try {
+      setStartError(null);
+      await startTournament(tournament.id);
+      mutateTournament(); // SWR cache bust — reloads tournament with new status
+    } catch (err) {
+      setStartError(err.message || 'Failed to start tournament');
+    }
+  };
 
   // Determine tournaments list link based on user role
   const getTournamentsLink = () => {
@@ -83,6 +98,25 @@ const TournamentViewPage = () => {
           <>
             {/* T024: Tournament Header - Name, status badge, category badge, format badge */}
             <TournamentHeader tournament={tournament} />
+
+            {/* Champion banner — shown when tournament is COMPLETED (LIFE-03) */}
+            {tournament.status === 'COMPLETED' && tournament.champion && (
+              <Alert variant="warning" className="mt-3 text-center fs-5">
+                Champion: <strong>{tournament.champion.name}</strong>
+              </Alert>
+            )}
+
+            {/* Start Tournament — ORGANIZER/ADMIN only, SCHEDULED tournaments only (LIFE-01, LIFE-02) */}
+            {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && tournament.status === 'SCHEDULED' && (
+              <Row className="mt-3">
+                <Col className="d-flex justify-content-end">
+                  {startError && <Alert variant="danger" className="me-3 mb-0 py-2">{startError}</Alert>}
+                  <Button variant="success" onClick={handleStartTournament}>
+                    Start Tournament
+                  </Button>
+                </Col>
+              </Row>
+            )}
 
             {/* T026-T031: Tournament Info Panel - Two-column layout with all tournament details */}
             <Row className="mt-4">

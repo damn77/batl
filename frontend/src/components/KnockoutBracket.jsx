@@ -110,6 +110,7 @@ const KnockoutBracket = ({
   currentUserPlayerId,
   onMatchClick,
   scoringRules,
+  tournamentStatus,
   initialScale = 1.0,
   showByes: initialShowByes = false,
   colors: customColors,
@@ -213,6 +214,8 @@ const KnockoutBracket = ({
   const handleMatchClick = (match) => {
     if (!user) return; // unauthenticated — no modal
     if (match?.isBye || match?.status === 'BYE') return; // BYE slots are not clickable
+    // Read-only for non-organizers when tournament is completed (LIFE-03)
+    if (!isOrganizer && tournamentStatus === 'COMPLETED') return;
     const participant = isMatchParticipant(match, user.playerId);
     if (!isOrganizer && !participant) return; // non-participant player — no modal
     setSelectedMatch(match);
@@ -403,6 +406,7 @@ KnockoutBracket.propTypes = {
   currentUserPlayerId: PropTypes.string,
   onMatchClick: PropTypes.func,
   scoringRules: PropTypes.object,
+  tournamentStatus: PropTypes.string,
   initialScale: PropTypes.number,
   showByes: PropTypes.bool,
   colors: PropTypes.object,

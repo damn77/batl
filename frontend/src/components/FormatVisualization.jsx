@@ -161,6 +161,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                               bracket={bracket}
                               rounds={bracketRounds}
                               currentUserPlayerId={currentUserPlayerId}
+                              tournamentStatus={tournament.status}
                               isDoubles={tournament.categoryType === 'DOUBLES'}
                             />
                           );
