@@ -1,0 +1,92 @@
+# Requirements: BATL v1.1 — Consolation Brackets
+
+**Defined:** 2026-02-28
+**Core Value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
+
+## v1.1 Requirements
+
+Requirements for consolation bracket support (MATCH_2 guarantee level). Each maps to roadmap phases.
+
+### Configuration
+
+- [ ] **CONF-01**: Organizer can set Match Guarantee (None / MATCH_2) when creating or editing a knockout tournament
+
+### Draw Generation
+
+- [ ] **DRAW-01**: When the main bracket is drawn, the system automatically generates the consolation bracket structure (mirror draw: loser of Main Match N vs loser of Main Match N+1)
+- [ ] **DRAW-02**: Consolation bracket match slots populate with actual players as main bracket matches complete
+
+### Lifecycle
+
+- [ ] **LIFE-01**: When a main bracket match completes, the loser is automatically routed to their consolation slot if their real-match count is less than 2
+- [ ] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
+- [ ] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
+- [ ] **LIFE-04**: Tournament auto-completes only when all brackets (main + consolation) are fully played
+
+### Visualization
+
+- [ ] **VIEW-01**: Tournament page displays the consolation bracket alongside the main bracket
+- [ ] **VIEW-02**: Participants can enter and view results for consolation bracket matches using the existing result modal
+- [ ] **VIEW-03**: Consolation matches waiting for main bracket outcomes show TBD players and are blocked from result entry
+
+### Points
+
+- [ ] **PTS-01**: Point calculation awards consolation bracket points based on the last consolation round the player won (player must win at least 1 consolation match to receive consolation points)
+- [ ] **PTS-02**: Consolation point tables (`isConsolation=true`) are pre-seeded with values from `notes/013-bracket-points-rules.md` and are admin-editable via the existing Point Tables admin UI
+
+## Future Requirements (v1.2+)
+
+### Guarantee Levels
+
+- **GUAR-01**: MATCH_1 guarantee level — at least 1 real match (edge case: BYE players who lose their first match enter consolation)
+- **GUAR-02**: UNTIL_PLACEMENT guarantee — play until bracket placement is fully determined (2 consolation stages)
+
+### Other Formats
+
+- **GROUP-01**: Group stage visualization and result entry (round-robin)
+- **SWISS-01**: Swiss system pairing and result tracking
+- **COMBO-01**: Combined format: group stage → knockout with automatic advancement
+
+### Player Experience
+
+- **STATS-01**: Win/loss record per category per season, head-to-head view
+- **ORG-01**: Organizer dashboard with active tournaments, pending result confirmations
+- **AUDIT-01**: Result edit history — log of who changed what and when
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| MATCH_1 / UNTIL_PLACEMENT guarantee levels | More edge cases; MATCH_2 covers the primary use case. Defer to v1.2. |
+| Multiple consolation stages | Required only for UNTIL_PLACEMENT; deferred with that feature |
+| Group/Swiss consolation brackets | Format not yet implemented; consolation only for Knockout in v1.1 |
+| Real-time live scoring | Results entered after matches, not during |
+| Push/email notifications | In-app only |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CONF-01 | Phase 4 | Pending |
+| DRAW-01 | Phase 4 | Pending |
+| DRAW-02 | Phase 5 | Pending |
+| LIFE-01 | Phase 5 | Pending |
+| LIFE-02 | Phase 5 | Pending |
+| LIFE-03 | Phase 5 | Pending |
+| LIFE-04 | Phase 5 | Pending |
+| VIEW-01 | Phase 6 | Pending |
+| VIEW-02 | Phase 6 | Pending |
+| VIEW-03 | Phase 6 | Pending |
+| PTS-01 | Phase 7 | Pending |
+| PTS-02 | Phase 7 | Pending |
+
+**Coverage:**
+- v1.1 requirements: 12 total
+- Mapped to phases: 12
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-02-28*
+*Last updated: 2026-02-28 after initial definition*
