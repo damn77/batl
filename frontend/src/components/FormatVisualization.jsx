@@ -139,8 +139,8 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
 
                 {formatType === 'KNOCKOUT' && (
                   <div className="d-flex flex-column gap-4">
-                    {isOrganizerOrAdmin ? (
-                      /* Organizer/Admin: full draw workflow with BracketGenerationSection */
+                    {isOrganizerOrAdmin && tournament.status === 'SCHEDULED' ? (
+                      /* Organizer/Admin SCHEDULED: full draw workflow with BracketGenerationSection */
                       <BracketGenerationSection
                         tournament={tournament}
                         mutateTournament={mutateTournament}
@@ -150,7 +150,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                         matches={matches}
                       />
                     ) : (
-                      /* Player/public: read-only bracket view */
+                      /* Everyone (incl. organizers for IN_PROGRESS/COMPLETED): bracket view */
                       <>
                         {structure.brackets?.map(bracket => {
                           const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
