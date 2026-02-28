@@ -493,11 +493,49 @@ export async function getTournamentWithRelatedData(id) {
   // eslint-disable-next-line no-unused-vars
   const { groups, brackets, rounds, matches, ...tournamentData } = tournament;
 
+  // Add champion field when tournament is complete (LIFE-03 frontend display)
+  let champion = null;
+  if (tournament.status === 'COMPLETED') {
+    // Find the final MAIN bracket match (highest roundNumber, COMPLETED, not BYE)
+    const finalMatch = await prisma.match.findFirst({
+      where: {
+        tournamentId: id,
+        bracket: { bracketType: 'MAIN' },
+        isBye: false,
+        status: 'COMPLETED'
+      },
+      orderBy: [
+        { round: { roundNumber: 'desc' } },
+        { matchNumber: 'asc' }
+      ],
+      include: {
+        player1: { select: { id: true, name: true } },
+        player2: { select: { id: true, name: true } }
+      }
+    });
+
+    if (finalMatch?.result) {
+      try {
+        const resultJson = JSON.parse(finalMatch.result);
+        const winnerPlayer = resultJson.winner === 'PLAYER1' ? finalMatch.player1 : finalMatch.player2;
+        if (winnerPlayer) {
+          champion = {
+            id: winnerPlayer.id,
+            name: winnerPlayer.name
+          };
+        }
+      } catch {
+        champion = null;
+      }
+    }
+  }
+
   return {
     ...tournamentData,
     registrationCount,
     waitlistCount,
-    ruleComplexity
+    ruleComplexity,
+    champion
   };
 }
 

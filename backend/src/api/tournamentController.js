@@ -150,7 +150,8 @@ export async function getTournamentById(req, res, next) {
         // T008: Computed fields
         registrationCount: tournament.registrationCount,
         waitlistCount: tournament.waitlistCount,
-        ruleComplexity: tournament.ruleComplexity
+        ruleComplexity: tournament.ruleComplexity,
+        champion: tournament.champion || null
       }
     });
   } catch (err) {
