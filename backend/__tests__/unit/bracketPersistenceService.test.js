@@ -68,31 +68,45 @@ const { closeRegistration, generateBracket, regenerateBracket, swapSlots } =
 
 /**
  * Build a minimal positions array for a bracket of given size.
- * All positions are unseeded non-BYE slots unless byeAt specifies indices.
+ * byeMatchAt: array of match indices (0-based) that are BYE matches.
+ * In each BYE match, the even position (first slot) holds the real player and
+ * the odd position (second slot) is the actual BYE slot (entityId: null).
  */
-function makeSinglesPositions(bracketSize, { byeAt = [] } = {}) {
-  return Array.from({ length: bracketSize }, (_, i) => ({
-    positionNumber: i + 1,
-    positionIndex: i,
-    seed: null,
-    entityId: `player-${i + 1}`,
-    entityType: 'PLAYER',
-    entityName: `Player ${i + 1}`,
-    isBye: byeAt.includes(i),
-    isPreliminary: false
-  }));
+function makeSinglesPositions(bracketSize, { byeMatchAt = [] } = {}) {
+  return Array.from({ length: bracketSize }, (_, posIdx) => {
+    const matchIdx = Math.floor(posIdx / 2);
+    const isByeSlot = byeMatchAt.includes(matchIdx) && posIdx % 2 === 1;
+    return {
+      positionNumber: posIdx + 1,
+      positionIndex: posIdx,
+      seed: null,
+      entityId: isByeSlot ? null : `player-${posIdx + 1}`,
+      entityType: 'PLAYER',
+      entityName: isByeSlot ? null : `Player ${posIdx + 1}`,
+      isBye: isByeSlot,
+      isPreliminary: false
+    };
+  });
 }
 
-/** Standard seeded bracket result from the seeding service */
-function makeSeededBracketResult(bracketSize = 8, byeAt = []) {
+/**
+ * Standard seeded bracket result from the seeding service.
+ * byeMatchAt: match-indexed array specifying which matches are BYEs.
+ * structure is match-indexed (bracketSize/2 chars): '1'=BYE, '0'=preliminary.
+ */
+function makeSeededBracketResult(bracketSize = 8, byeMatchAt = []) {
+  const matchCount = bracketSize / 2;
+  const structure = Array.from({ length: matchCount }, (_, i) =>
+    byeMatchAt.includes(i) ? '1' : '0'
+  ).join('');
   return {
     bracket: {
       categoryId: 'cat-1',
       playerCount: bracketSize,
       bracketSize,
-      structure: '1'.repeat(bracketSize),
+      structure,
       seedCount: 2,
-      positions: makeSinglesPositions(bracketSize, { byeAt }),
+      positions: makeSinglesPositions(bracketSize, { byeMatchAt }),
       randomSeed: 'test-seed',
       generatedAt: new Date().toISOString()
     },
@@ -159,7 +173,7 @@ describe('closeRegistration()', () => {
 // ===========================================================================
 describe('generateBracket()', () => {
   /** Set up all mocks for a standard 8-player singles tournament */
-  function setupGenerateBracketMocks({ bracketSize = 8, byeAt = [] } = {}) {
+  function setupGenerateBracketMocks({ bracketSize = 8, byeMatchAt = [] } = {}) {
     mockPrisma.tournament.findUnique.mockResolvedValue({
       id: 'tour-1',
       status: 'SCHEDULED',
@@ -191,7 +205,7 @@ describe('generateBracket()', () => {
     mockPrisma.round.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.bracket.deleteMany.mockResolvedValue({ count: 0 });
     mockGenerateSeededBracket.mockResolvedValue(
-      makeSeededBracketResult(bracketSize, byeAt)
+      makeSeededBracketResult(bracketSize, byeMatchAt)
     );
   }
 
@@ -253,18 +267,19 @@ describe('generateBracket()', () => {
   });
 
   it('marks BYE positions as isBye=true with status BYE', async () => {
-    // Position index 1 is a BYE → match (positions[0], positions[1]) becomes BYE
-    setupGenerateBracketMocks({ bracketSize: 8, byeAt: [1] });
+    // Match 0 is a BYE: pos[0]=player-1 (real player), pos[1]=null (BYE slot)
+    setupGenerateBracketMocks({ bracketSize: 8, byeMatchAt: [0] });
 
     await generateBracket('tour-1');
 
     const round1Calls = mockPrisma.match.create.mock.calls.slice(0, 4);
-    // First match spans positions 0 and 1 — position 1 is BYE
+    // First match — BYE: player advances from player1 slot, player2 slot is null
     expect(round1Calls[0][0].data.isBye).toBe(true);
     expect(round1Calls[0][0].data.status).toBe('BYE');
+    expect(round1Calls[0][0].data.player1Id).toBe('player-1');
     expect(round1Calls[0][0].data.player2Id).toBeNull();
 
-    // Second match spans positions 2 and 3 — no BYE
+    // Second match — preliminary: both slots have players
     expect(round1Calls[1][0].data.isBye).toBe(false);
     expect(round1Calls[1][0].data.status).toBe('SCHEDULED');
   });

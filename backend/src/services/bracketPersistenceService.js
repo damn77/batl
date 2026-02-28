@@ -13,6 +13,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import seedrandom from 'seedrandom';
 import { generateSeededBracket } from './seedingPlacementService.js';
 
 const prisma = new PrismaClient();
@@ -123,25 +124,26 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 5: Load registered players or pairs based on category type
+  // Step 5: Load registered players/pairs, retaining entity IDs for placement
   const categoryType = tournament.category?.type;
-  let playerCount;
+  let allEntities; // { entityId } for every registered player/pair
 
   if (categoryType === 'DOUBLES') {
     const pairRegs = await prisma.pairRegistration.findMany({
       where: { tournamentId, status: 'REGISTERED' },
       include: { pair: { select: { id: true } } }
     });
-    playerCount = pairRegs.length;
+    allEntities = pairRegs.map(r => ({ entityId: r.pair.id }));
   } else {
-    // SINGLES (default)
     const registrations = await prisma.tournamentRegistration.findMany({
       where: { tournamentId, status: 'REGISTERED' },
-      include: { player: { select: { id: true, name: true } } },
+      include: { player: { select: { id: true } } },
       orderBy: { registrationTimestamp: 'asc' }
     });
-    playerCount = registrations.length;
+    allEntities = registrations.map(r => ({ entityId: r.player.id }));
   }
+
+  const playerCount = allEntities.length;
 
   // Step 6: Guard — minimum 4 players required
   if (playerCount < 4) {
@@ -151,16 +153,39 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 7: Call seeding placement service to get bracket positions
-  // For AVERAGE_SCORE doubles mode: falls through to PAIR_SCORE for now
-  // (AVERAGE_SCORE is a stub that delegates to PAIR_SCORE per plan note)
+  // Step 7: Call seeding placement service to get seeded positions
   const seedingResult = await generateSeededBracket(
     tournament.categoryId,
     playerCount,
     randomSeed
   );
 
-  const { positions, bracketSize } = seedingResult.bracket;
+  // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
+  // '0' means preliminary match. Length = bracketSize / 2.
+  const { positions, bracketSize, structure: rawStructure, randomSeed: actualSeed } =
+    seedingResult.bracket;
+  const structure = (rawStructure || '').replace(/\s/g, '');
+
+  // Step 7b: Fill unseeded players into empty non-BYE match positions.
+  // generateSeededBracket only places seeds; remaining slots need real players.
+  const seededIds = new Set(positions.filter(p => p.entityId).map(p => p.entityId));
+  const unseeded = allEntities.filter(e => !seededIds.has(e.entityId));
+
+  // Shuffle unseeded players deterministically using the same random seed
+  const rng = seedrandom(actualSeed || randomSeed || 'default');
+  for (let i = unseeded.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
+  }
+
+  let unseededIdx = 0;
+  for (let posIdx = 0; posIdx < positions.length; posIdx++) {
+    const matchIdx = Math.floor(posIdx / 2);
+    const isByeMatch = structure ? structure[matchIdx] === '1' : false;
+    if (!isByeMatch && !positions[posIdx].entityId && unseededIdx < unseeded.length) {
+      positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
+    }
+  }
 
   // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
   let createdBracket;
@@ -204,12 +229,12 @@ export async function generateBracket(tournamentId, options = {}) {
           const pos1 = positions[i * 2];
           const pos2 = positions[i * 2 + 1];
 
-          // Determine if this match is a BYE
-          const isByeMatch = !!(pos1?.isBye || !pos2 || pos2?.isBye);
+          // Use structure (match-indexed) for BYE detection — pos.isBye is
+          // position-indexed and misaligns for bracketSize > structure.length.
+          const isByeMatch = structure ? structure[i] === '1' : false;
 
           let matchData;
           if (categoryType === 'DOUBLES') {
-            // Doubles: use pair IDs, not player IDs
             matchData = {
               tournamentId,
               bracketId: bracket.id,
@@ -218,12 +243,11 @@ export async function generateBracket(tournamentId, options = {}) {
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
               pair1Id: pos1?.entityId || null,
-              pair2Id: isByeMatch ? null : (pos2?.entityId || null),
+              pair2Id: pos2?.entityId || null,
               player1Id: null,
               player2Id: null
             };
           } else {
-            // Singles: use player IDs
             matchData = {
               tournamentId,
               bracketId: bracket.id,
@@ -232,7 +256,7 @@ export async function generateBracket(tournamentId, options = {}) {
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
               player1Id: pos1?.entityId || null,
-              player2Id: isByeMatch ? null : (pos2?.entityId || null)
+              player2Id: pos2?.entityId || null
             };
           }
 
