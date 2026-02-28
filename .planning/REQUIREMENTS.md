@@ -28,10 +28,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tournament Lifecycle
 
-- [ ] **LIFE-01**: Organizer can start a tournament, transitioning it from SCHEDULED to IN_PROGRESS status
-- [ ] **LIFE-02**: Starting a tournament automatically closes player registration
-- [ ] **LIFE-03**: When the final match result of a tournament is confirmed, the tournament status automatically transitions to COMPLETED
-- [ ] **LIFE-04**: When a knockout match result is confirmed, the winner is automatically placed in the correct next-round match slot in the bracket
+- [x] **LIFE-01**: Organizer can start a tournament, transitioning it from SCHEDULED to IN_PROGRESS status
+- [x] **LIFE-02**: Starting a tournament automatically closes player registration
+- [x] **LIFE-03**: When the final match result of a tournament is confirmed, the tournament status automatically transitions to COMPLETED
+- [x] **LIFE-04**: When a knockout match result is confirmed, the winner is automatically placed in the correct next-round match slot in the bracket
 
 ### Player Statistics
 
@@ -99,10 +99,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-06 | Phase 01.1 | Complete |
 | DRAW-07 | Phase 01.1 | Complete |
 | DRAW-08 | Phase 01.1 | Complete |
-| LIFE-01 | Phase 2 | Pending |
-| LIFE-02 | Phase 2 | Pending |
-| LIFE-03 | Phase 2 | Pending |
-| LIFE-04 | Phase 2 | Pending |
+| LIFE-01 | Phase 2 | Complete |
+| LIFE-02 | Phase 2 | Complete |
+| LIFE-03 | Phase 2 | Complete |
+| LIFE-04 | Phase 2 | Complete |
 | STATS-01 | Phase 3 | Pending |
 | STATS-02 | Phase 3 | Pending |
 

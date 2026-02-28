@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-02-27T21:21:35Z"
+last_updated: "2026-02-28T08:58:52Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Phase 1.1 — Bracket Generation and Seeding Persistence
+**Current focus:** Phase 2 — Tournament Lifecycle and Bracket Progression
 
 ## Current Position
 
-Phase: 1.1 of 2 (Bracket Generation and Seeding Persistence)
-Plan: 4 of 6 in current phase (01.1-04 complete)
+Phase: 2 of 2 (Tournament Lifecycle and Bracket Progression)
+Plan: 1 of 2 in current phase (02-01 complete)
 Status: In progress
-Last activity: 2026-02-27 — Completed 01.1-04: bracketPersistenceService (frontend) + BracketGenerationSection component
+Last activity: 2026-02-28 — Completed 02-01: Backend lifecycle engine (startTournament, advanceBracketSlot, checkAndCompleteTournament, PATCH /start endpoint)
 
-Progress: [████████░░] 78%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03, 01.1-04 complete)
+- Total plans completed: 8 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03, 01.1-04 complete; Phase 2: 02-01 complete)
 - Average duration: 4 min
-- Total execution time: 27 min
+- Total execution time: 34 min
 
 **By Phase:**
 
@@ -42,10 +42,11 @@ Progress: [████████░░] 78%
 |-------|-------|-------|----------|
 | 1. Match Result Submission | 3/3 | 15 min | 5 min |
 | 1.1 Bracket Generation and Seeding Persistence | 4/6 | 12 min | 3 min |
+| 2. Tournament Lifecycle and Bracket Progression | 1/2 | 7 min | 7 min |
 
 **Recent Trend:**
-- Last 5 plans: 01.1-01 (2 min), 01.1-02 (4 min), 01.1-03 (3 min), 01.1-04 (3 min)
-- Trend: Stable ~3 min/plan
+- Last 5 plans: 01.1-02 (4 min), 01.1-03 (3 min), 01.1-04 (3 min), 02-01 (7 min)
+- Trend: Stable ~4 min/plan
 
 *Updated after each plan completion*
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [01.1-04]: Slot editor rendered separately below KnockoutBracket (not as editMode prop) — avoids modifying KnockoutBracket internals while providing full edit capability
 - [01.1-04]: registeredPlayers loaded once via useEffect on mount — single fetch reused across all three states (State A count, State B list, State C dropdowns)
 - [01.1-04]: Both mutateFormatStructure() and mutateMatches() called after generate/save to force SWR cache invalidation and prevent stale bracket data
+- [02-01]: advanceBracketSlot + checkAndCompleteTournament run inside the existing Prisma transaction in submitResult() — atomicity guaranteed with match result write
+- [02-01]: checkAndCompleteTournament guards on isOrganizer flag — player submissions never trigger COMPLETED transition
+- [02-01]: PATCH /:id/start route registered before PATCH /:id in Express router to prevent path shadowing
 
 ### Pending Todos
 
@@ -91,10 +95,10 @@ None.
 ### Blockers/Concerns
 
 - [Phase 2]: Verify `TournamentRules` already stores "top N from each group advance" config (needed for Phase 3 combined format, deferred to v2)
-- [Phase 2]: Plans 02-01 and 02-02 depend on Phase 1.1 completing first — bracket Match records must exist before advanceBracketSlot() is callable
+- [02-02]: Frontend lifecycle controls plan ready to execute — backend API endpoint (PATCH /start) now available
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Completed 01.1-04-PLAN.md — bracketPersistenceService (frontend API client) + BracketGenerationSection component (3-state draw workflow).
+Last session: 2026-02-28
+Stopped at: Completed 02-01-PLAN.md — Backend lifecycle engine: startTournament, advanceBracketSlot, checkAndCompleteTournament, PATCH /api/v1/tournaments/:id/start.
 Resume file: None

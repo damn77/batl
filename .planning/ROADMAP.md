@@ -83,5 +83,5 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Match Result Submission | 3/3 | Complete | 2026-02-27 |
 | 01.1. Bracket Generation and Seeding Persistence | 3/5 | In progress | - |
-| 2. Tournament Lifecycle and Bracket Progression | 0/2 | Not started | - |
+| 2. Tournament Lifecycle and Bracket Progression | 1/2 | In Progress|  |
 | 3. Player Statistics | 0/? | Not started | - |
