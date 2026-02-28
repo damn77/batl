@@ -39,10 +39,11 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
   2. When a MATCH_2 tournament draw is executed, a CONSOLATION bracket record is created alongside the MAIN bracket with the correct mirror-draw match structure (loser of Main Match N vs loser of Main Match N+1)
   3. An existing tournament with Match Guarantee = None generates only a MAIN bracket when drawn (backward-compatible behavior unchanged)
   4. The formatConfig matchGuarantee value is read by bracketPersistenceService rather than hardcoded to MATCH_1
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Update KnockoutConfigPanel dropdown (MATCH_2 default, Until Placement disabled option)
+- [ ] 04-02-PLAN.md — bracketPersistenceService reads formatConfig; generates CONSOLATION bracket for MATCH_2 draws
 
 ### Phase 5: Loser Routing and Consolation Progression
 **Goal**: Main bracket losers are automatically placed in their consolation slots when they have not yet played 2 real matches; consolation winners advance through consolation rounds; the tournament does not complete until all brackets are fully played
@@ -98,7 +99,7 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 01.1. Bracket Generation and Seeding Persistence | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
-| 4. Configuration and Consolation Draw | v1.1 | 0/TBD | Not started | - |
+| 4. Configuration and Consolation Draw | v1.1 | 0/2 | Not started | - |
 | 5. Loser Routing and Consolation Progression | v1.1 | 0/TBD | Not started | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
