@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T13:31:25.248Z"
+last_updated: "2026-02-28T13:34:56.840Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -51,6 +51,7 @@ Progress: [█████████░] 89%
 *Updated after each plan completion*
 | Phase 02 P02 | 45 | 3 tasks | 6 files |
 | Phase 03-player-statistics P01 | 2 | 3 tasks | 3 files |
+| Phase 03-player-statistics P03 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,9 @@ Recent decisions affecting current work:
 - [Phase 02-02]: Players blocked from opening result modal when opponent slot is TBD — prevents incomplete match submissions
 - [Phase 03-player-statistics]: Route registered at /api/players (pre-existing prefix), match-history placed before /:id to prevent Express path shadowing
 - [Phase 03-player-statistics]: Score formatting and outcome derivation done server-side in service layer — frontend receives display-ready strings
+- [Phase 03-player-statistics]: Singles-only linking in BracketMatch: doubles pair entities have no public profile page, so only isDoubles=false players get Links
+- [Phase 03-player-statistics]: stopPropagation on bracket Links: prevents score entry modal from opening when clicking a player name link inside the match card
+- [Phase 03-player-statistics]: Individual pair member Links in RankingsTable: each player in a PAIR entry links separately to /players/:id, preserving the p1 / p2 visual format
 
 ### Pending Todos
 
