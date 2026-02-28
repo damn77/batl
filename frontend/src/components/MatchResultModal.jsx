@@ -30,6 +30,26 @@ import BigTiebreakForm from './BigTiebreakForm';
  *   scoringRules  {Object}        — { formatType, winningSets, winningTiebreaks }
  *   mutate        {Function}      — SWR mutate() to re-fetch bracket matches
  */
+/**
+ * Validate each set score against standard tennis rules (SETS format only).
+ * Valid scores: 6-0..6-4, 7-5, 7-6. Returns array of human-readable error strings.
+ */
+function validateSetScores(sets) {
+  const errors = [];
+  for (const set of sets) {
+    const s1 = set.player1Score;
+    const s2 = set.player2Score;
+    if (s1 === s2) {
+      errors.push(`Set ${set.setNumber}: scores cannot be equal (${s1}–${s2})`);
+      continue;
+    }
+    const [hi, lo] = s1 > s2 ? [s1, s2] : [s2, s1];
+    const valid = (hi === 6 && lo <= 4) || (hi === 7 && (lo === 5 || lo === 6));
+    if (!valid) errors.push(`Set ${set.setNumber}: ${s1}–${s2} is not a valid tennis score`);
+  }
+  return errors;
+}
+
 const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringRules, mutate }) => {
   const { t } = useTranslation();
 
@@ -64,6 +84,7 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
           : match.result)
       : null;
     setFormValue(result ? { sets: result.sets || [], winner: result.winner || null } : { sets: [], winner: null });
+    setPendingInvalidSubmit(null);
   }, [match?.id, match?.result]);
 
   // Special outcome state (organizer-only)
@@ -77,8 +98,24 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // When organizer submits invalid scores, holds { resultData, errors } awaiting confirmation
+  const [pendingInvalidSubmit, setPendingInvalidSubmit] = useState(null);
+
+  const buildSanitizedSets = () =>
+    formValue.sets
+      .filter(s => s.player1Score !== '' && s.player2Score !== '')
+      .map(s => ({
+        setNumber: parseInt(s.setNumber, 10),
+        player1Score: parseInt(s.player1Score, 10),
+        player2Score: parseInt(s.player2Score, 10),
+        tiebreakScore: (s.tiebreakScore !== '' && s.tiebreakScore != null)
+          ? parseInt(s.tiebreakScore, 10)
+          : null,
+      }));
+
   const handleSubmit = async () => {
     setError(null);
+    setPendingInvalidSubmit(null);
     setSubmitting(true);
     try {
       let resultData;
@@ -91,16 +128,32 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
           setSubmitting(false);
           return;
         }
-        const sanitizedSets = formValue.sets
-          .filter(s => s.player1Score !== '' && s.player2Score !== '')
-          .map(s => ({
-            setNumber: parseInt(s.setNumber, 10),
-            player1Score: parseInt(s.player1Score, 10),
-            player2Score: parseInt(s.player2Score, 10),
-            tiebreakScore: (s.tiebreakScore !== '' && s.tiebreakScore != null)
-              ? parseInt(s.tiebreakScore, 10)
-              : null,
-          }));
+        const sanitizedSets = buildSanitizedSets();
+
+        // Score validation — only applies to SETS format
+        if (effectiveScoringRules?.formatType !== 'BIG_TIEBREAK') {
+          const scoreErrors = validateSetScores(sanitizedSets);
+          if (scoreErrors.length > 0) {
+            if (!isOrganizer) {
+              // Players: hard block
+              setError(scoreErrors.join('\n'));
+              setSubmitting(false);
+              return;
+            }
+            // Organizers: surface warning and await "Submit Anyway" confirmation
+            setPendingInvalidSubmit({
+              resultData: {
+                formatType: effectiveScoringRules?.formatType || 'SETS',
+                winner: formValue.winner,
+                sets: sanitizedSets,
+              },
+              errors: scoreErrors,
+            });
+            setSubmitting(false);
+            return;
+          }
+        }
+
         resultData = {
           formatType: effectiveScoringRules?.formatType || 'SETS',
           winner: formValue.winner,
@@ -110,6 +163,21 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
 
       await submitMatchResult(match.id, resultData);
       mutate(); // re-fetch bracket matches via SWR
+      onClose();
+    } catch (err) {
+      setError(err.message || t('errors.genericFallback', 'An error occurred'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirmInvalidSubmit = async () => {
+    if (!pendingInvalidSubmit) return;
+    setSubmitting(true);
+    try {
+      await submitMatchResult(match.id, pendingInvalidSubmit.resultData);
+      setPendingInvalidSubmit(null);
+      mutate();
       onClose();
     } catch (err) {
       setError(err.message || t('errors.genericFallback', 'An error occurred'));
@@ -133,7 +201,17 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
       </Modal.Header>
 
       <Modal.Body>
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && <Alert variant="danger" style={{ whiteSpace: 'pre-line' }}>{error}</Alert>}
+
+        {/* Organizer invalid-score confirmation warning */}
+        {pendingInvalidSubmit && (
+          <Alert variant="warning">
+            <Alert.Heading>Invalid score detected</Alert.Heading>
+            <ul className="mb-0">
+              {pendingInvalidSubmit.errors.map((e, i) => <li key={i}>{e}</li>)}
+            </ul>
+          </Alert>
+        )}
 
         {isReadOnly ? (
           /* Mode 1: Read-only (organizer-locked, non-organizer viewer) */
@@ -265,9 +343,20 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringR
           <Button variant="secondary" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
-            {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
-          </Button>
+          {pendingInvalidSubmit ? (
+            <>
+              <Button variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
+                Fix Scores
+              </Button>
+              <Button variant="danger" onClick={handleConfirmInvalidSubmit} disabled={submitting}>
+                {submitting ? 'Saving...' : 'Submit Anyway'}
+              </Button>
+            </>
+          ) : (
+            <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
+            </Button>
+          )}
         </Modal.Footer>
       )}
     </Modal>
