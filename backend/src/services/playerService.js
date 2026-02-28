@@ -338,6 +338,113 @@ export const findMatchingProfile = async ({ name, email }) => {
   return match;
 };
 
+// Format match score from player's perspective
+const formatMatchScore = (result, isPlayer1) => {
+  if (result === null) return '-';
+  let parsed;
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    return '-';
+  }
+  if (parsed.outcome) {
+    const labels = { WALKOVER: 'Walkover', FORFEIT: 'Forfeit', NO_SHOW: 'No-show' };
+    return labels[parsed.outcome] || '-';
+  }
+  if (parsed.sets && parsed.sets.length > 0) {
+    return parsed.sets.map(set => {
+      const scoreStr = isPlayer1
+        ? `${set.player1Score}-${set.player2Score}`
+        : `${set.player2Score}-${set.player1Score}`;
+      return set.tiebreakScore !== undefined && set.tiebreakScore !== null
+        ? `${scoreStr}(${set.tiebreakScore})`
+        : scoreStr;
+    }).join(', ');
+  }
+  return '-';
+};
+
+// Determine match outcome (W/L) from player's perspective
+const determineMatchOutcome = (result, isPlayer1) => {
+  if (result === null) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    return null;
+  }
+  if (!parsed.winner) return null;
+  const won = (parsed.winner === 'PLAYER1') === isPlayer1;
+  return won ? 'W' : 'L';
+};
+
+// Get match history for a player with pagination
+export const getPlayerMatchHistory = async ({ playerId, page = 1, limit = 20, categoryId = null }) => {
+  // Verify player exists
+  const player = await prisma.playerProfile.findUnique({
+    where: { id: playerId },
+    select: { id: true }
+  });
+  if (!player) return null;
+
+  // Build where clause
+  const where = {
+    OR: [{ player1Id: playerId }, { player2Id: playerId }],
+    isBye: false,
+    NOT: { status: 'CANCELLED' }
+  };
+  if (categoryId) {
+    where.tournament = { categoryId };
+  }
+
+  // Count total matches
+  const total = await prisma.match.count({ where });
+
+  // Fetch matches with related data
+  const matches = await prisma.match.findMany({
+    where,
+    include: {
+      player1: { select: { id: true, name: true } },
+      player2: { select: { id: true, name: true } },
+      pair1: { include: { player1: { select: { id: true, name: true } }, player2: { select: { id: true, name: true } } } },
+      pair2: { include: { player1: { select: { id: true, name: true } }, player2: { select: { id: true, name: true } } } },
+      tournament: { select: { id: true, name: true, endDate: true, category: { select: { id: true, name: true } } } }
+    },
+    orderBy: [{ completedAt: 'desc' }, { createdAt: 'desc' }],
+    skip: (page - 1) * limit,
+    take: limit
+  });
+
+  // Map matches to display rows
+  const rows = matches.map(match => {
+    const isPlayer1 = match.player1Id === playerId;
+    const opponent = isPlayer1 ? match.player2 : match.player1;
+    const opponentPair = isPlayer1 ? match.pair2 : match.pair1;
+    const opponentName = opponentPair
+      ? `${opponentPair.player1.name} / ${opponentPair.player2.name}`
+      : (opponent?.name || 'TBD');
+
+    const score = formatMatchScore(match.result, isPlayer1);
+    const outcome = determineMatchOutcome(match.result, isPlayer1);
+
+    return {
+      matchId: match.id,
+      tournamentId: match.tournament.id,
+      tournamentName: match.tournament.name,
+      category: match.tournament.category,
+      opponentName,
+      score,
+      outcome,
+      completedAt: match.completedAt
+    };
+  });
+
+  return {
+    matches: rows,
+    pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+  };
+};
+
 export default {
   findPlayerById,
   createPlayerProfile,
@@ -346,5 +453,6 @@ export default {
   findDuplicates,
   linkProfileToUser,
   findProfileByUserId,
-  findMatchingProfile
+  findMatchingProfile,
+  getPlayerMatchHistory
 };
