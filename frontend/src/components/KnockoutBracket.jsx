@@ -216,6 +216,11 @@ const KnockoutBracket = ({
     if (match?.isBye || match?.status === 'BYE') return; // BYE slots are not clickable
     // Read-only for non-organizers when tournament is completed (LIFE-03)
     if (!isOrganizer && tournamentStatus === 'COMPLETED') return;
+    // Block players from opening modal when opponent is TBD — result can't be submitted yet
+    const bothSlotsFilledSingles = match?.player1Id && match?.player2Id;
+    const bothSlotsFilledDoubles = match?.pair1Id && match?.pair2Id;
+    const bothSlotsFilled = bothSlotsFilledSingles || bothSlotsFilledDoubles;
+    if (!isOrganizer && !bothSlotsFilled) return;
     const participant = isMatchParticipant(match, user.playerId);
     if (!isOrganizer && !participant) return; // non-participant player — no modal
     setSelectedMatch(match);
