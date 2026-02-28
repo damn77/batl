@@ -1,5 +1,6 @@
 import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel } from '@tanstack/react-table';
 import { Table, Badge } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatRank, getRankBadgeVariant } from '../services/rankingService';
 
@@ -25,11 +26,21 @@ const RankingsTable = ({ data, onRowClick }) => {
             cell: info => {
                 const entry = info.row.original;
                 if (entry.entityType === 'PLAYER') {
-                    return entry.player?.name || t('common.unknown');
+                    const name = entry.player?.name || t('common.unknown');
+                    const id = entry.player?.id;
+                    return id ? <Link to={`/players/${id}`}>{name}</Link> : name;
                 } else if (entry.entityType === 'PAIR') {
-                    const p1 = entry.pair?.player1?.name || '?';
-                    const p2 = entry.pair?.player2?.name || '?';
-                    return `${p1} / ${p2}`;
+                    const p1Name = entry.pair?.player1?.name || '?';
+                    const p1Id = entry.pair?.player1?.id;
+                    const p2Name = entry.pair?.player2?.name || '?';
+                    const p2Id = entry.pair?.player2?.id;
+                    return (
+                        <>
+                            {p1Id ? <Link to={`/players/${p1Id}`}>{p1Name}</Link> : p1Name}
+                            {' / '}
+                            {p2Id ? <Link to={`/players/${p2Id}`}>{p2Name}</Link> : p2Name}
+                        </>
+                    );
                 }
                 return t('common.unknown');
             }
