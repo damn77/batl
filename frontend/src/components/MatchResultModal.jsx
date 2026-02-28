@@ -50,7 +50,7 @@ function validateSetScores(sets) {
   return errors;
 }
 
-const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant, scoringRules, mutate }) => {
+const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParticipant, scoringRules, mutate }) => {
   const { t } = useTranslation();
 
   // Parse existing result for pre-population and lock detection

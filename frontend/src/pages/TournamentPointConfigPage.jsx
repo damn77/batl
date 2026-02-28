@@ -44,7 +44,7 @@ const TournamentPointConfigPage = () => {
                 multiplicativeValue: configData.multiplicativeValue,
                 doublePointsEnabled: configData.doublePointsEnabled
             });
-        } catch (err) {
+        } catch (_err) {
             setError(t('errors.failedToLoad', { resource: t('common.configuration') }));
         } finally {
             setLoading(false);

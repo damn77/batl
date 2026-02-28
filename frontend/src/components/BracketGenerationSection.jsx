@@ -344,7 +344,7 @@ const BracketGenerationSection = ({
 
         {pendingSwaps.length > 0 && (
           <Alert variant="info" className="mb-3">
-            You have {pendingSwaps.length} unsaved slot change{pendingSwaps.length !== 1 ? 's' : ''}. Click "Save Draw" to persist them.
+            You have {pendingSwaps.length} unsaved slot change{pendingSwaps.length !== 1 ? 's' : ''}. Click &quot;Save Draw&quot; to persist them.
           </Alert>
         )}
 
@@ -378,7 +378,7 @@ const BracketGenerationSection = ({
                 <h6 className="fw-semibold mb-3">Edit Slot Assignments</h6>
                 <p className="text-muted small mb-3">
                   Use the dropdowns below to reassign players to bracket slots.
-                  BYE slots cannot be reassigned. Click "Save Draw" above when finished.
+                  BYE slots cannot be reassigned. Click &quot;Save Draw&quot; above when finished.
                 </p>
                 {matchesByRound.map(({ round, matches: roundMatches }) => (
                   <div key={round.id} className="mb-4">

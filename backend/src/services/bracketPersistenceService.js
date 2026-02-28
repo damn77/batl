@@ -89,7 +89,7 @@ export async function closeRegistration(tournamentId) {
  * @throws {Error} TOURNAMENT_NOT_FOUND | REGISTRATION_NOT_CLOSED | BRACKET_LOCKED | INSUFFICIENT_PLAYERS
  */
 export async function generateBracket(tournamentId, options = {}) {
-  const { randomSeed, doublesMethod = 'PAIR_SCORE' } = options;
+  const { randomSeed } = options;
 
   // Step 1: Load tournament with category info
   const tournament = await prisma.tournament.findUnique({
@@ -210,8 +210,6 @@ export async function generateBracket(tournamentId, options = {}) {
   }
 
   // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
-  let createdBracket;
-  let roundCount;
   let matchCount = 0;
 
   const result = await prisma.$transaction(async (tx) => {
@@ -236,7 +234,7 @@ export async function generateBracket(tournamentId, options = {}) {
 
     // Collected during Round 1 creation for BYE pre-population in Round 2
     const byeInfo = []; // { posInRound, playerId, pairId }
-    let round2MatchIds = []; // IDs of Round 2 matches in creation order
+    const round2MatchIds = []; // IDs of Round 2 matches in creation order
 
     for (let roundNum = 1; roundNum <= totalRounds; roundNum++) {
       // Create Round record

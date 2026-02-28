@@ -108,7 +108,7 @@ const PlayerRegistrationPage = () => {
       try {
         const result = await checkEligibility(selectedPlayer, category.id);
         results[category.id] = result;
-      } catch (err) {
+      } catch (_err) {
         results[category.id] = { eligible: false, validations: [] };
       }
     }
@@ -121,7 +121,7 @@ const PlayerRegistrationPage = () => {
       try {
         const score = await getSeedingScore('PLAYER', selectedPlayer, category.id);
         scores[category.id] = score;
-      } catch (err) {
+      } catch (_err) {
         scores[category.id] = 0;
       }
     }));
@@ -176,11 +176,6 @@ const PlayerRegistrationPage = () => {
     return currentRegistrations.some(
       reg => reg.categoryId === categoryId && reg.status === 'ACTIVE'
     );
-  };
-
-  const getPlayerName = () => {
-    const player = players.find(p => p.id === selectedPlayer);
-    return player ? player.name : '';
   };
 
   if (loading) {

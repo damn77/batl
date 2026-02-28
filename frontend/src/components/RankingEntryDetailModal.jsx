@@ -23,7 +23,7 @@ const RankingEntryDetailModal = ({ show, onHide, categoryId, entryId }) => {
             setError(null);
             const data = await getRankingEntryBreakdown(categoryId, entryId);
             setEntry(data);
-        } catch (err) {
+        } catch (_err) {
             setError(t('errors.failedToLoad', { resource: t('common.details') }));
         } finally {
             setLoading(false);

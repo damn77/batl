@@ -23,7 +23,7 @@ export const VIEWPORT_CONSTRAINTS = {
  * @param {number} totalRounds - Total number of rounds in bracket
  * @returns {{gridColumn: number, gridRowStart: number, gridRowEnd: number}}
  */
-export function calculateMatchPosition(roundNumber, matchNumber, totalRounds) {
+export function calculateMatchPosition(roundNumber, matchNumber, _totalRounds) {
   // Column is simply the round number
   const gridColumn = roundNumber;
 
@@ -141,7 +141,6 @@ export function hasFirstRoundByes(matches) {
   // Find total number of matches to determine bracket size
   // Bracket size = next power of 2 >= participant count
   // For a complete bracket: Round 1 should have bracketSize/2 matches
-  const allMatches = matches.length;
   const rounds = Math.max(...matches.map(m => m.roundNumber));
 
   // Expected bracket size is 2^rounds

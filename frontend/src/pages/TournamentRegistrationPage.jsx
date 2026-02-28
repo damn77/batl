@@ -95,7 +95,7 @@ const TournamentRegistrationPage = () => {
               try {
                 const score = await getSeedingScore('PLAYER', userProfile.id, t.categoryId);
                 scores[t.id] = score;
-              } catch (e) {
+              } catch (_e) {
                 scores[t.id] = 0;
               }
             }

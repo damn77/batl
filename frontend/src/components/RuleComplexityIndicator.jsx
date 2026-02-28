@@ -12,7 +12,7 @@ import { getRuleComplexityInfo } from '../services/tournamentViewService';
  * @param {string} size - sm, md, or lg (default: md)
  */
 const RuleComplexityIndicator = ({ complexity, showLabel = true, size = 'md' }) => {
-  const { t } = useTranslation(); // Hook triggers re-render on language change
+  useTranslation(); // Hook triggers re-render on language change
 
   if (!complexity) return null;
 
