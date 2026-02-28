@@ -10,6 +10,17 @@ The league is organized by **categories** (gender × age group × tournament typ
 
 A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group.
 
+## Current Milestone: v1.1 Consolation Brackets
+
+**Goal:** Extend knockout tournaments with a consolation bracket that guarantees players a minimum number of real matches (MATCH_2: at least 2 real matches per player).
+
+**Target features:**
+- Match Guarantee configuration (None / MATCH_2) on tournament creation/edit
+- Consolation bracket auto-generated at draw time as a mirror of the main bracket
+- Losers automatically routed to consolation when their real-match count < 2
+- Consolation progression, result entry, and visualization alongside main bracket
+- Consolation points awarded via `isConsolation=true` point tables
+
 ## Requirements
 
 ### Validated
@@ -38,14 +49,24 @@ A complete tournament runs from registration to final standings without the orga
 
 ### Active
 
-<!-- What needs to be built next — v1.1 candidates -->
+<!-- v1.1: Consolation Brackets -->
 
-- [ ] Group stage visualization and result entry (round-robin matches)
-- [ ] Swiss system pairing and result tracking
-- [ ] Combined format: group stage → knockout bracket with automatic advancement
-- [ ] Player statistics: win/loss record per category per season, head-to-head view
-- [ ] Organizer dashboard with active tournaments, pending result confirmations
-- [ ] Result edit history — log of who changed what and when (organizer view)
+- [ ] Match Guarantee (None/MATCH_2) configurable when creating or editing a knockout tournament
+- [ ] Consolation bracket auto-generated at main bracket draw time (mirror draw)
+- [ ] Loser routing: main bracket losers automatically placed in consolation bracket when real-match count < 2
+- [ ] Consolation bracket progression, result entry, and TBD-blocked match visualization
+- [ ] Tournament auto-completes only after all brackets (main + consolation) are fully played
+- [ ] Consolation bracket points awarded based on `isConsolation=true` point tables (pre-seeded from spec)
+
+### Future (v1.2+)
+
+- Group stage visualization and result entry (round-robin matches)
+- Swiss system pairing and result tracking
+- Combined format: group stage → knockout bracket with automatic advancement
+- MATCH_1 / UNTIL_PLACEMENT guarantee levels
+- Player statistics: win/loss record per category per season, head-to-head view
+- Organizer dashboard with active tournaments, pending result confirmations
+- Result edit history — log of who changed what and when (organizer view)
 
 ### Out of Scope
 
@@ -65,7 +86,10 @@ A complete tournament runs from registration to final standings without the orga
 - **15 features delivered** (001–011 + v1.0 milestone phases 1, 01.1, 2, 3); ~38,500 LOC; architecture is stable and well-tested
 - Organizer and player roles are both active users of the app; admin manages configuration
 - Scoring is format-dependent: sets (e.g. 6:4, 7:5), match-level (e.g. 7:5), or tiebreak-only depending on tournament rules
-- Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — primary target for v1.1
+- Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — targeted for v1.2+
+- Consolation bracket DB models already exist: `BracketType` (MAIN/CONSOLATION/PLACEMENT), `MatchGuaranteeType` (MATCH_1/MATCH_2/UNTIL_PLACEMENT), `Bracket.matchGuarantee`, `PointTable.isConsolation` — infrastructure ready
+- `formatConfig` JSON on Tournament already validates `matchGuarantee` field (via `KnockoutFormatConfigSchema`) but frontend UI missing
+- `bracketPersistenceService` currently hardcodes `MATCH_1` — v1.1 will read from `formatConfig`
 
 ## Constraints
 
@@ -88,4 +112,4 @@ A complete tournament runs from registration to final standings without the orga
 | PlayerProfilePage merged into PlayerPublicProfilePage (/players/:id) | Single route for both self and public view; isOwnProfile gates edit | ✓ Good — simpler routing, no duplicate pages |
 
 ---
-*Last updated: 2026-02-28 after v1.0 milestone*
+*Last updated: 2026-02-28 after v1.1 milestone started*
