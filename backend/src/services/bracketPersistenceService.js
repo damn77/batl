@@ -178,11 +178,27 @@ export async function generateBracket(tournamentId, options = {}) {
     [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
   }
 
+  // Pre-compute which position indices are actual BYE slots (stay null forever).
+  // Structure is match-indexed; for each BYE match:
+  //   - Top-half matches (matchIdx < totalMatches/2): BYE slot is the second position (odd index).
+  //   - Bottom-half matches (matchIdx >= totalMatches/2): BYE slot is the first position (even index).
+  // This mirrors the standard seeding convention where seed1 occupies the first slot of the top
+  // BYE match and seed2 occupies the last slot of the bottom BYE match.
+  const totalMatches = bracketSize / 2;
+  const byeSlotIndices = new Set();
+  for (let matchIdx = 0; matchIdx < totalMatches; matchIdx++) {
+    if (!structure || structure[matchIdx] !== '1') continue;
+    const byeSlotIdx = matchIdx < totalMatches / 2
+      ? matchIdx * 2 + 1   // top-half BYE: BYE slot is the second (odd) position
+      : matchIdx * 2;      // bottom-half BYE: BYE slot is the first (even) position
+    byeSlotIndices.add(byeSlotIdx);
+  }
+
   let unseededIdx = 0;
   for (let posIdx = 0; posIdx < positions.length; posIdx++) {
-    const matchIdx = Math.floor(posIdx / 2);
-    const isByeMatch = structure ? structure[matchIdx] === '1' : false;
-    if (!isByeMatch && !positions[posIdx].entityId && unseededIdx < unseeded.length) {
+    if (positions[posIdx].entityId) continue;    // already has a seed
+    if (byeSlotIndices.has(posIdx)) continue;    // actual BYE slot — leave null
+    if (unseededIdx < unseeded.length) {
       positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
     }
   }
