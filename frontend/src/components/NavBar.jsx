@@ -79,6 +79,19 @@ const NavBar = () => {
               </span>
             </li>
 
+            {/* Tournaments link - public path for visitors and players */}
+            {(!user || user.role === 'PLAYER') && (
+              <li className="nav-item">
+                <span
+                  className="nav-link"
+                  onClick={() => navigate('/tournaments')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  Tournaments
+                </span>
+              </li>
+            )}
+
             {/* Organizer/Admin Links */}
             {user && (user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
               <>
