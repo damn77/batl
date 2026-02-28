@@ -72,7 +72,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A player can navigate to a statistics page that lists every match they have played, showing tournament name, category, opponent name, score, and win/loss outcome
   2. Any user (including non-logged-in visitors) can view a player's match history by visiting that player's public profile page
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Backend: GET /api/v1/players/:id/match-history endpoint with server-side result parsing, score formatting, BYE exclusion, and pagination
+- [ ] 03-02-PLAN.md — Frontend: MatchHistoryTab, PlayerPublicProfilePage, TournamentsListPage, App routes, NavBar link + human-verify checkpoint
+- [ ] 03-03-PLAN.md — Frontend: Clickable player name links in BracketMatch and RankingsTable (→ /players/:id)
 
 ## Progress
 
@@ -84,4 +89,4 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3
 | 1. Match Result Submission | 3/3 | Complete | 2026-02-27 |
 | 01.1. Bracket Generation and Seeding Persistence | 3/5 | In progress | - |
 | 2. Tournament Lifecycle and Bracket Progression | 2/2 | Complete   | 2026-02-28 |
-| 3. Player Statistics | 0/? | Not started | - |
+| 3. Player Statistics | 0/3 | Not started | - |
