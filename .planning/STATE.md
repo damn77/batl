@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-02-28T13:34:56.840Z"
+status: in-progress
+last_updated: "2026-02-28T15:05:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Phase 2 — Tournament Lifecycle and Bracket Progression
+**Current focus:** Phase 3 — Player Statistics
 
 ## Current Position
 
-Phase: 2 of 2 (Tournament Lifecycle and Bracket Progression)
-Plan: 1 of 2 in current phase (02-01 complete)
+Phase: 3 of 4 (Player Statistics)
+Plan: 2 of 3 in current phase (03-01 complete, 03-02 complete)
 Status: In progress
-Last activity: 2026-02-28 — Completed 02-01: Backend lifecycle engine (startTournament, advanceBracketSlot, checkAndCompleteTournament, PATCH /start endpoint)
+Last activity: 2026-02-28 — Completed 03-02: Public player profile page (/players/:id), match history table, completed tournaments list (/tournaments), Tournaments navbar link
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03, 01.1-04 complete; Phase 2: 02-01 complete)
-- Average duration: 4 min
-- Total execution time: 34 min
+- Total plans completed: 10 (Phase 1: 01-01, 01-02, 01-03 complete; Phase 1.1: 01.1-01, 01.1-02, 01.1-03, 01.1-04 complete; Phase 2: 02-01, 02-02 complete; Phase 3: 03-01, 03-02 complete)
+- Average duration: ~5 min
+- Total execution time: ~50 min
 
 **By Phase:**
 
@@ -42,15 +42,17 @@ Progress: [█████████░] 89%
 |-------|-------|-------|----------|
 | 1. Match Result Submission | 3/3 | 15 min | 5 min |
 | 1.1 Bracket Generation and Seeding Persistence | 4/6 | 12 min | 3 min |
-| 2. Tournament Lifecycle and Bracket Progression | 1/2 | 7 min | 7 min |
+| 2. Tournament Lifecycle and Bracket Progression | 2/2 | 14 min | 7 min |
+| 3. Player Statistics | 2/3 | ~35 min | ~17 min |
 
 **Recent Trend:**
-- Last 5 plans: 01.1-02 (4 min), 01.1-03 (3 min), 01.1-04 (3 min), 02-01 (7 min)
-- Trend: Stable ~4 min/plan
+- Last 5 plans: 01.1-04 (3 min), 02-01 (7 min), 02-02 (7 min), 03-01 (5 min), 03-02 (30 min)
+- Trend: Phase 3 plans have more frontend scope
 
 *Updated after each plan completion*
 | Phase 02 P02 | 45 | 3 tasks | 6 files |
 | Phase 03-player-statistics P01 | 2 | 3 tasks | 3 files |
+| Phase 03-player-statistics P02 | 30 | 3 tasks | 10 files |
 | Phase 03-player-statistics P03 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
@@ -96,6 +98,10 @@ Recent decisions affecting current work:
 - [Phase 03-player-statistics]: Singles-only linking in BracketMatch: doubles pair entities have no public profile page, so only isDoubles=false players get Links
 - [Phase 03-player-statistics]: stopPropagation on bracket Links: prevents score entry modal from opening when clicking a player name link inside the match card
 - [Phase 03-player-statistics]: Individual pair member Links in RankingsTable: each player in a PAIR entry links separately to /players/:id, preserving the p1 / p2 visual format
+- [03-02]: PlayerProfilePage merged into PlayerPublicProfilePage — /player/profile redirects to /players/:id; isOwnProfile flag gates edit form and private fields
+- [03-02]: Server-side sort by tournament name/date via sortBy/sortOrder query params so pagination stays correct across pages
+- [03-02]: Category deduplication in MatchHistoryTab uses Set updated inside filter callback to block intra-batch duplicates
+- [03-02]: Tournaments breadcrumb in TournamentViewPage routes completed tournaments to /tournaments for non-organizer users
 
 ### Pending Todos
 
@@ -113,5 +119,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 02-01-PLAN.md — Backend lifecycle engine: startTournament, advanceBracketSlot, checkAndCompleteTournament, PATCH /api/v1/tournaments/:id/start.
+Stopped at: Completed 03-02-PLAN.md — Public player profile (/players/:id), match history table with category filter and server-side sort, completed tournaments list (/tournaments), Tournaments navbar link, PlayerProfilePage merged into PlayerPublicProfilePage.
 Resume file: None

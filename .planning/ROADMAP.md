@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Match Result Submission** - Players submit format-aware scores; organizer confirms, overrides, or enters special outcomes; organizer-lock prevents further player edits (completed 2026-02-27)
 - [x] **Phase 01.1: Bracket Generation and Seeding Persistence** (INSERTED) - Organizer closes registration, generates seeded draw, manually edits slots, and saves — persisting Bracket/Round/Match records Phase 2 needs (completed 2026-02-28)
 - [ ] **Phase 2: Tournament Lifecycle and Bracket Progression** - Organizer starts tournaments; confirmed results advance knockout winners automatically; tournament auto-completes when final match is confirmed
-- [ ] **Phase 3: Player Statistics** - Players view full match history and win/loss record; statistics are public on player profile pages
+- [x] **Phase 3: Player Statistics** - Players view full match history and win/loss record; statistics are public on player profile pages (completed 2026-02-28)
 
 ## Phase Details
 
@@ -89,4 +89,4 @@ Phases execute in numeric order: 1 → 01.1 → 2 → 3
 | 1. Match Result Submission | 3/3 | Complete | 2026-02-27 |
 | 01.1. Bracket Generation and Seeding Persistence | 3/5 | In progress | - |
 | 2. Tournament Lifecycle and Bracket Progression | 2/2 | Complete   | 2026-02-28 |
-| 3. Player Statistics | 0/3 | Not started | - |
+| 3. Player Statistics | 3/3 | Complete   | 2026-02-28 |
