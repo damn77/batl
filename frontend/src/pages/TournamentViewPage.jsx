@@ -42,12 +42,13 @@ const TournamentViewPage = () => {
     }
   };
 
-  // Determine tournaments list link based on user role
+  // Determine tournaments list link based on tournament status and user role
   const getTournamentsLink = () => {
-    if (!user) return '/rankings'; // Not logged in - go to public rankings
+    if (tournament?.status === 'COMPLETED') return '/tournaments';
+    if (!user) return '/tournaments';
     if (user.role === 'PLAYER') return '/player/tournaments';
     if (user.role === 'ORGANIZER' || user.role === 'ADMIN') return '/organizer/tournaments';
-    return '/rankings'; // Fallback
+    return '/tournaments';
   };
 
   return (
