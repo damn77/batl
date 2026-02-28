@@ -12,6 +12,8 @@ const MatchHistoryTab = ({ playerId }) => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [categoryId, setCategoryId] = useState(null);
+  const [sortBy, setSortBy] = useState('completedAt');
+  const [sortOrder, setSortOrder] = useState('desc');
   // Accumulated unique categories from all fetches for the dropdown
   const [categories, setCategories] = useState([]);
 
@@ -22,7 +24,7 @@ const MatchHistoryTab = ({ playerId }) => {
       setLoading(true);
       setError(null);
       try {
-        const result = await getPlayerMatchHistory(playerId, { page, limit: 20, categoryId });
+        const result = await getPlayerMatchHistory(playerId, { page, limit: 20, categoryId, sortBy, sortOrder });
         if (cancelled) return;
 
         setMatches(result.matches || []);
@@ -57,7 +59,22 @@ const MatchHistoryTab = ({ playerId }) => {
     return () => {
       cancelled = true;
     };
-  }, [playerId, page, categoryId]);
+  }, [playerId, page, categoryId, sortBy, sortOrder]);
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+    setPage(1);
+  };
+
+  const sortIndicator = (column) => {
+    if (sortBy !== column) return ' ↕';
+    return sortOrder === 'asc' ? ' ↑' : ' ↓';
+  };
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
@@ -166,8 +183,12 @@ const MatchHistoryTab = ({ playerId }) => {
           <Table hover responsive>
             <thead>
               <tr>
-                <th>Tournament</th>
-                <th>Date</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('tournamentName')}>
+                  Tournament{sortIndicator('tournamentName')}
+                </th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('completedAt')}>
+                  Date{sortIndicator('completedAt')}
+                </th>
                 <th>Category</th>
                 <th>Opponent</th>
                 <th>Score</th>

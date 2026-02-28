@@ -169,8 +169,10 @@ export const getMatchHistoryHandler = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = Math.min(parseInt(req.query.limit) || 20, 100); // cap at 100
     const categoryId = req.query.categoryId || null;
+    const sortBy = ['tournamentName', 'completedAt'].includes(req.query.sortBy) ? req.query.sortBy : 'completedAt';
+    const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc';
 
-    const result = await getPlayerMatchHistory({ playerId: id, page, limit, categoryId });
+    const result = await getPlayerMatchHistory({ playerId: id, page, limit, categoryId, sortBy, sortOrder });
 
     if (!result) {
       return res.status(404).json({

@@ -41,11 +41,13 @@ export const checkDuplicates = async (name, email) => {
  * @param {Object} params - { page, limit, categoryId }
  * @returns {Promise<{ matches: Array, pagination: { total, page, limit, totalPages } }>}
  */
-export const getPlayerMatchHistory = async (playerId, { page = 1, limit = 20, categoryId = null } = {}) => {
+export const getPlayerMatchHistory = async (playerId, { page = 1, limit = 20, categoryId = null, sortBy = 'completedAt', sortOrder = 'desc' } = {}) => {
   const params = new URLSearchParams();
   params.append('page', page);
   params.append('limit', limit);
   if (categoryId) params.append('categoryId', categoryId);
+  params.append('sortBy', sortBy);
+  params.append('sortOrder', sortOrder);
 
   // Backend route is at /api/players (not /api/v1/players) — see 03-01-SUMMARY.md
   const response = await apiClient.get(`/players/${playerId}/match-history?${params.toString()}`);

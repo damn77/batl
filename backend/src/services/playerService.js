@@ -379,7 +379,7 @@ const determineMatchOutcome = (result, isPlayer1) => {
 };
 
 // Get match history for a player with pagination
-export const getPlayerMatchHistory = async ({ playerId, page = 1, limit = 20, categoryId = null }) => {
+export const getPlayerMatchHistory = async ({ playerId, page = 1, limit = 20, categoryId = null, sortBy = 'completedAt', sortOrder = 'desc' }) => {
   // Verify player exists
   const player = await prisma.playerProfile.findUnique({
     where: { id: playerId },
@@ -410,7 +410,9 @@ export const getPlayerMatchHistory = async ({ playerId, page = 1, limit = 20, ca
       pair2: { include: { player1: { select: { id: true, name: true } }, player2: { select: { id: true, name: true } } } },
       tournament: { select: { id: true, name: true, endDate: true, category: { select: { id: true, name: true } } } }
     },
-    orderBy: [{ completedAt: 'desc' }, { createdAt: 'desc' }],
+    orderBy: sortBy === 'tournamentName'
+      ? [{ tournament: { name: sortOrder } }, { completedAt: 'desc' }]
+      : [{ completedAt: sortOrder }, { createdAt: 'desc' }],
     skip: (page - 1) * limit,
     take: limit
   });
