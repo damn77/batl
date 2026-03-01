@@ -13,7 +13,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ### Draw Generation
 
-- [ ] **DRAW-01**: When the main bracket is drawn, the system automatically generates the consolation bracket structure (mirror draw: loser of Main Match N vs loser of Main Match N+1)
+- [x] **DRAW-01**: When the main bracket is drawn, the system automatically generates the consolation bracket structure (mirror draw: loser of Main Match N vs loser of Main Match N+1)
 - [ ] **DRAW-02**: Consolation bracket match slots populate with actual players as main bracket matches complete
 
 ### Lifecycle
@@ -71,7 +71,7 @@ Which phases cover which requirements.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CONF-01 | Phase 4 | Complete |
-| DRAW-01 | Phase 4 | Pending |
+| DRAW-01 | Phase 4 | Complete |
 | DRAW-02 | Phase 5 | Pending |
 | LIFE-01 | Phase 5 | Pending |
 | LIFE-02 | Phase 5 | Pending |
