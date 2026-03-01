@@ -90,10 +90,10 @@ Plans:
   1. Submitting a doubles main bracket result advances the correct winner in the consolation slot (winnerId is derived from pair1Id/pair2Id when available)
   2. A doubles pair that opts out post-placement causes their opponent to advance into the correct slot (pair1 or pair2) rather than always pair2
   3. Existing singles behavior is unaffected
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 05.2-01: TBD
+- [ ] 05.2-01-PLAN.md — BREAK 1: winnerId derivation for doubles (pair1Id/pair2Id preference); BREAK 2: advanceBracketSlot slot direction from opponentId position when resultJson is null
 
 ### Phase 6: Visualization and Result Entry
 **Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked; organizers/players can trigger consolation opt-out via a UI button
@@ -137,6 +137,6 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
 | 5. Loser Routing and Consolation Progression | v1.1 | 3/3 | Complete | 2026-03-01 |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 5.2. Doubles Backend Fixes | v1.1 | 0/TBD | Not started | - |
+| 5.2. Doubles Backend Fixes | v1.1 | 0/1 | Not started | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
