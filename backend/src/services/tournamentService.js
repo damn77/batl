@@ -39,7 +39,7 @@ async function validateCategoryExists(categoryId) {
  * @param {string} userId - ID of user creating the tournament (becomes organizer)
  */
 export async function createTournament(data, userId) {
-  const { name, categoryId, description, clubName, address, startDate, endDate, capacity, formatConfig } = data;
+  const { name, categoryId, description, clubName, address, startDate, endDate, capacity } = data;
 
   // T039: Validate category exists
   await validateCategoryExists(categoryId);
@@ -76,12 +76,14 @@ export async function createTournament(data, userId) {
   }
 
   // Resolve formatConfig: accept object or string from caller, default to KNOCKOUT/MATCH_2
-  let resolvedFormatConfig;
-  if (formatConfig) {
-    resolvedFormatConfig = typeof formatConfig === 'string' ? formatConfig : JSON.stringify(formatConfig);
-  } else {
-    resolvedFormatConfig = JSON.stringify({ formatType: 'KNOCKOUT', matchGuarantee: 'MATCH_2' });
-  }
+  const { formatConfig, defaultScoringRules } = data;
+  const resolvedFormatConfig = formatConfig
+    ? (typeof formatConfig === 'string' ? formatConfig : JSON.stringify(formatConfig))
+    : JSON.stringify({ formatType: 'KNOCKOUT', matchGuarantee: 'MATCH_2' });
+
+  const resolvedScoringRules = defaultScoringRules
+    ? (typeof defaultScoringRules === 'string' ? defaultScoringRules : JSON.stringify(defaultScoringRules))
+    : JSON.stringify({ formatType: 'SETS', winningSets: 2, advantageRule: 'ADVANTAGE', tiebreakTrigger: '6-6' });
 
   // Create tournament with SCHEDULED status
   const tournament = await prisma.tournament.create({
@@ -95,7 +97,8 @@ export async function createTournament(data, userId) {
       startDate: start,
       endDate: end,
       status: 'SCHEDULED',
-      formatConfig: resolvedFormatConfig
+      formatConfig: resolvedFormatConfig,
+      defaultScoringRules: resolvedScoringRules
     },
     include: {
       category: {
