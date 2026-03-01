@@ -9,7 +9,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ### Configuration
 
-- [ ] **CONF-01**: Organizer can set Match Guarantee (None / MATCH_2) when creating or editing a knockout tournament
+- [x] **CONF-01**: Organizer can set Match Guarantee (None / MATCH_2) when creating or editing a knockout tournament
 
 ### Draw Generation
 
@@ -70,7 +70,7 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | Phase 4 | Pending |
+| CONF-01 | Phase 4 | Complete |
 | DRAW-01 | Phase 4 | Pending |
 | DRAW-02 | Phase 5 | Pending |
 | LIFE-01 | Phase 5 | Pending |
