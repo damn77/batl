@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Consolation Brackets
 status: unknown
-last_updated: "2026-03-01T11:52:00Z"
+last_updated: "2026-03-01T14:06:33Z"
 progress:
   total_phases: 1
   completed_phases: 1
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 5 of 7 (Loser Routing and Consolation Progression)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In Progress
-Last activity: 2026-03-01 — Completed 05-01-PLAN.md (Schema Foundations for RETIRED and Consolation Opt-Out)
+Last activity: 2026-03-01 — Completed 05-02-PLAN.md (Consolation Bracket Lifecycle — Loser Routing)
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3 (v1.1)
+- Total plans completed: 4 (v1.1)
 - Average duration: 2 min
-- Total execution time: 5 min
+- Total execution time: 7 min
 
 **By Phase:**
 
@@ -43,6 +43,7 @@ Progress: [███░░░░░░░] 30%
 | Phase 04 P01 | 1 | 2 min | 2 min |
 | Phase 04 P02 | 1 | 1 min | 1 min |
 | Phase 05 P01 | 1 | 2 min | 2 min |
+| Phase 05 P02 | 1 | 2 min | 2 min |
 
 **Recent Trend:**
 - Last 5 plans: 2 min
@@ -71,6 +72,9 @@ Carried over from v1.0:
 - [Phase 05-01]: RETIRED match status added to MatchStatus enum; counts as 1 real match played for both players
 - [Phase 05-01]: ConsolationOptOut uses two separate @@unique constraints (tournamentId+playerId and tournamentId+pairId) to support both singles and doubles opt-out
 - [Phase 05-01]: recordedBy field in ConsolationOptOut is a String ('SELF'|'ORGANIZER'|'AUTO') rather than a DB enum — validation at service layer
+- [Phase 05-02]: routeLoserToConsolation is a no-op for non-MAIN brackets and non-R1 matches — no guard needed in matchResultService caller
+- [Phase 05-02]: RETIRED auto-opt-out uses try/catch around consolationOptOut.create for idempotent handling
+- [Phase 05-02]: checkAndCompleteTournament uses notIn ['COMPLETED','CANCELLED'] across ALL brackets — no MAIN-only filter
 
 ### Pending Todos
 
@@ -87,5 +91,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
