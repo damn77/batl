@@ -173,10 +173,10 @@ const TournamentRulesSetupPage = () => {
   };
 
   const handleSaveAll = async () => {
-    await handleSaveFormat();
-    if (!error) {
-      await handleSaveScoringRules();
+    if (!hasMatches) {
+      await handleSaveFormat();
     }
+    await handleSaveScoringRules();
   };
 
   // T102-T103: Modal confirmation handlers
@@ -265,41 +265,16 @@ const TournamentRulesSetupPage = () => {
         </Col>
       </Row>
 
-      <Row className="mt-3">
-        <Col md={6} className="mb-3">
-          <div className="d-grid">
-            <Button
-              variant="primary"
-              onClick={handleSaveFormat}
-              disabled={saving || hasMatches}
-            >
-              {saving ? t('common.saving') : t('buttons.saveFormatConfig')}
-            </Button>
-          </div>
-        </Col>
-        <Col md={6} className="mb-3">
-          <div className="d-grid">
-            <Button
-              variant="primary"
-              onClick={handleSaveScoringRules}
-              disabled={saving}
-            >
-              {saving ? t('common.saving') : t('buttons.saveScoringRules')}
-            </Button>
-          </div>
-        </Col>
-      </Row>
-
       <Row className="mt-4">
         <Col>
           <div className="d-grid">
             <Button
-              variant="success"
+              variant="primary"
               size="lg"
               onClick={handleSaveAll}
-              disabled={saving || hasMatches}
+              disabled={saving}
             >
-              {saving ? 'Saving...' : 'Save All Rules'}
+              {saving ? t('common.saving') : 'Save Rules'}
             </Button>
           </div>
         </Col>
