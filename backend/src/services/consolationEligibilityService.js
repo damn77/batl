@@ -68,7 +68,7 @@ export async function getRealMatchCount(tx, tournamentId, playerId, pairId) {
       tournamentId,
       ...participantFilter,
       // Only terminal matches matter — SCHEDULED/IN_PROGRESS have not been played
-      status: { in: ['COMPLETED', 'CANCELLED', 'BYE', 'RETIRED'] }
+      status: { in: ['COMPLETED', 'CANCELLED', 'BYE'] }
     },
     select: {
       id: true,
@@ -392,10 +392,16 @@ export async function routeLoserToConsolation(tx, completedMatch, winnerId, isOr
     // The paired main match is a BYE — the other consolation slot will never be filled.
     // Mark the consolation match as BYE and advance the lone player.
 
-    // Determine the sole player's ID for advanceBracketSlot
-    const solePlayerId = isPlayer1Slot
-      ? (updatedConsolationMatch.player1Id || null)
-      : (updatedConsolationMatch.player2Id || null);
+    // Determine the sole player's ID for advanceBracketSlot.
+    // For doubles, use the pair ID as the advancement key (advanceBracketSlot accepts pairId).
+    // For singles, use player1Id/player2Id. Fall back to player slot if pair slot is missing.
+    const solePlayerId = loserPairId
+      ? (isPlayer1Slot
+          ? (updatedConsolationMatch.pair1Id || updatedConsolationMatch.player1Id || null)
+          : (updatedConsolationMatch.pair2Id || updatedConsolationMatch.player2Id || null))
+      : (isPlayer1Slot
+          ? (updatedConsolationMatch.player1Id || null)
+          : (updatedConsolationMatch.player2Id || null));
 
     const byeConsolationMatch = await tx.match.update({
       where: { id: updatedConsolationMatch.id },
