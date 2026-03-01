@@ -15,12 +15,6 @@ const TournamentFormatSelector = ({ value, onChange, disabled }) => {
   const [formatTypes, setFormatTypes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Static match guarantee options
-  const MatchGuarantees = [
-    { value: 'MATCH_1', label: t('tournamentFormat.matchGuarantees.MATCH_1.label'), description: t('tournamentFormat.matchGuarantees.MATCH_1.description') },
-    { value: 'MATCH_2', label: t('tournamentFormat.matchGuarantees.MATCH_2.label'), description: t('tournamentFormat.matchGuarantees.MATCH_2.description') },
-    { value: 'UNTIL_PLACEMENT', label: t('tournamentFormat.matchGuarantees.UNTIL_PLACEMENT.label'), description: t('tournamentFormat.matchGuarantees.UNTIL_PLACEMENT.description') }
-  ];
 
   // T110: Load format types from API on mount
   useEffect(() => {
@@ -48,7 +42,7 @@ const TournamentFormatSelector = ({ value, onChange, disabled }) => {
 
     switch (newType) {
       case 'KNOCKOUT':
-        defaultConfig.matchGuarantee = 'MATCH_1';
+        defaultConfig.matchGuarantee = 'MATCH_2';
         break;
       case 'GROUP':
         defaultConfig.groupSize = 4;
@@ -98,27 +92,6 @@ const TournamentFormatSelector = ({ value, onChange, disabled }) => {
             })}
           </Form.Text>
         </Form.Group>
-
-        {/* Knockout-specific config */}
-        {formatType === 'KNOCKOUT' && (
-          <Form.Group className="mb-3">
-            <Form.Label>{t('tournamentFormat.labels.matchGuarantee')}</Form.Label>
-            <Form.Select
-              value={formatConfig.matchGuarantee}
-              onChange={(e) => handleConfigChange('matchGuarantee', e.target.value)}
-              disabled={disabled}
-            >
-              {MatchGuarantees.map((mg) => (
-                <option key={mg.value} value={mg.value}>
-                  {mg.label}
-                </option>
-              ))}
-            </Form.Select>
-            <Form.Text className="text-muted">
-              {MatchGuarantees.find(mg => mg.value === formatConfig.matchGuarantee)?.description}
-            </Form.Text>
-          </Form.Group>
-        )}
 
         {/* Group/Combined-specific config */}
         {(formatType === 'GROUP' || formatType === 'COMBINED') && (
