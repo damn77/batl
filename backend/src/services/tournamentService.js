@@ -823,16 +823,20 @@ export async function getMatches(tournamentId, filters = {}) {
   const matches = await prisma.match.findMany({
     where,
     include: {
-      player1: {
+      player1: { select: { id: true, name: true } },
+      player2: { select: { id: true, name: true } },
+      pair1: {
         select: {
           id: true,
-          name: true
+          player1: { select: { id: true, name: true } },
+          player2: { select: { id: true, name: true } }
         }
       },
-      player2: {
+      pair2: {
         select: {
           id: true,
-          name: true
+          player1: { select: { id: true, name: true } },
+          player2: { select: { id: true, name: true } }
         }
       }
     },
