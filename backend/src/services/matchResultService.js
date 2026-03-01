@@ -184,7 +184,10 @@ export async function submitResult({ matchId, body, isOrganizer, submitterPlayer
 
     // Extract winner ID from the result JSON
     const parsedResult = JSON.parse(updated.result);
-    const winnerId = parsedResult.winner === 'PLAYER1' ? updated.player1Id : updated.player2Id;
+    const winnerIsPlayer1 = parsedResult.winner === 'PLAYER1';
+    const winnerId = winnerIsPlayer1
+      ? (updated.pair1Id ?? updated.player1Id)
+      : (updated.pair2Id ?? updated.player2Id);
 
     // Advance bracket slot: populate next-round match with the winner
     await advanceBracketSlot(tx, updated, winnerId);
