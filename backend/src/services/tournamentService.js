@@ -39,7 +39,7 @@ async function validateCategoryExists(categoryId) {
  * @param {string} userId - ID of user creating the tournament (becomes organizer)
  */
 export async function createTournament(data, userId) {
-  const { name, categoryId, description, clubName, address, startDate, endDate, capacity } = data;
+  const { name, categoryId, description, clubName, address, startDate, endDate, capacity, formatConfig } = data;
 
   // T039: Validate category exists
   await validateCategoryExists(categoryId);
@@ -75,6 +75,14 @@ export async function createTournament(data, userId) {
     organizerId = organizer.id;
   }
 
+  // Resolve formatConfig: accept object or string from caller, default to KNOCKOUT/MATCH_2
+  let resolvedFormatConfig;
+  if (formatConfig) {
+    resolvedFormatConfig = typeof formatConfig === 'string' ? formatConfig : JSON.stringify(formatConfig);
+  } else {
+    resolvedFormatConfig = JSON.stringify({ formatType: 'KNOCKOUT', matchGuarantee: 'MATCH_2' });
+  }
+
   // Create tournament with SCHEDULED status
   const tournament = await prisma.tournament.create({
     data: {
@@ -86,7 +94,8 @@ export async function createTournament(data, userId) {
       organizerId,
       startDate: start,
       endDate: end,
-      status: 'SCHEDULED'
+      status: 'SCHEDULED',
+      formatConfig: resolvedFormatConfig
     },
     include: {
       category: {
