@@ -77,21 +77,23 @@ const TournamentInfoPanel = ({ tournament }) => {
 
   // Registration status calculation
   const getRegistrationStatus = () => {
-    if (!tournament.registrationOpenDate || !tournament.registrationCloseDate) {
-      return { status: t('tournament.registrationStatus.notConfigured'), variant: 'secondary' };
-    }
-
-    const now = new Date();
-    const openDate = new Date(tournament.registrationOpenDate);
-    const closeDate = new Date(tournament.registrationCloseDate);
-
-    if (now < openDate) {
-      return { status: t('tournament.registrationStatus.notYetOpen'), variant: 'info' };
-    } else if (now > closeDate || tournament.registrationClosed) {
+    if (tournament.registrationClosed) {
       return { status: t('tournament.registrationStatus.closed'), variant: 'secondary' };
-    } else {
-      return { status: t('tournament.registrationStatus.open'), variant: 'success' };
     }
+
+    if (tournament.registrationOpenDate && tournament.registrationCloseDate) {
+      const now = new Date();
+      const openDate = new Date(tournament.registrationOpenDate);
+      const closeDate = new Date(tournament.registrationCloseDate);
+
+      if (now < openDate) {
+        return { status: t('tournament.registrationStatus.notYetOpen'), variant: 'info' };
+      } else if (now > closeDate) {
+        return { status: t('tournament.registrationStatus.closed'), variant: 'secondary' };
+      }
+    }
+
+    return { status: t('tournament.registrationStatus.open'), variant: 'success' };
   };
 
   const registrationStatus = getRegistrationStatus();
