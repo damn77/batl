@@ -148,7 +148,19 @@ export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
     resultJson = null;
   }
 
-  const winnerIsPlayer1 = resultJson?.winner === 'PLAYER1';
+  // Determine which side the winner is on.
+  // Primary source: resultJson.winner (set for normal result submissions).
+  // Fallback: compare winnerId against the match's pair/player slots directly.
+  // This fallback is required when advanceBracketSlot is called without a result
+  // (e.g., from consolationOptOutService where the match has no result yet).
+  let winnerIsPlayer1;
+  if (resultJson?.winner === 'PLAYER1' || resultJson?.winner === 'PLAYER2') {
+    winnerIsPlayer1 = resultJson.winner === 'PLAYER1';
+  } else {
+    // Derive from winnerId position in the match slots
+    winnerIsPlayer1 = updatedMatch.pair1Id === winnerId || updatedMatch.player1Id === winnerId;
+  }
+
   const winnerPairId = winnerIsPlayer1 ? updatedMatch.pair1Id : updatedMatch.pair2Id;
 
   // Update the next match — place winner in correct slot
