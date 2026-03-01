@@ -19,10 +19,10 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 ### Lifecycle
 
 - [ ] **LIFE-01**: When a main bracket match completes, the loser is automatically routed to their consolation slot if their real-match count is less than 2
-- [ ] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
+- [x] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
 - [ ] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
 - [ ] **LIFE-04**: Tournament auto-completes only when all brackets (main + consolation) are fully played
-- [ ] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
+- [x] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
 
 ### Visualization
 
@@ -74,10 +74,10 @@ Which phases cover which requirements.
 | DRAW-01 | Phase 4 | Complete |
 | DRAW-02 | Phase 5 | Pending |
 | LIFE-01 | Phase 5 | Pending |
-| LIFE-02 | Phase 5 | Pending |
+| LIFE-02 | Phase 5 | Complete |
 | LIFE-03 | Phase 5 | Pending |
 | LIFE-04 | Phase 5 | Pending |
-| LIFE-05 | Phase 5 | Pending |
+| LIFE-05 | Phase 5 | Complete |
 | VIEW-01 | Phase 6 | Pending |
 | VIEW-02 | Phase 6 | Pending |
 | VIEW-03 | Phase 6 | Pending |
