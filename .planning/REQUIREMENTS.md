@@ -14,15 +14,15 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 ### Draw Generation
 
 - [x] **DRAW-01**: When the main bracket is drawn, the system automatically generates the consolation bracket structure (mirror draw: loser of Main Match N vs loser of Main Match N+1)
-- [x] **DRAW-02**: Consolation bracket match slots populate with actual players as main bracket matches complete
+- [ ] **DRAW-02**: Consolation bracket match slots populate with actual players as main bracket matches complete
 
 ### Lifecycle
 
 - [x] **LIFE-01**: When a main bracket match completes, the loser is automatically routed to their consolation slot if their real-match count is less than 2
 - [x] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
-- [x] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
+- [ ] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
 - [x] **LIFE-04**: Tournament auto-completes only when all brackets (main + consolation) are fully played
-- [x] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
+- [ ] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
 
 ### Visualization
 
@@ -72,12 +72,12 @@ Which phases cover which requirements.
 |-------------|-------|--------|
 | CONF-01 | Phase 4 | Complete |
 | DRAW-01 | Phase 4 | Complete |
-| DRAW-02 | Phase 5 | Complete |
+| DRAW-02 | Phase 5.1 | Pending |
 | LIFE-01 | Phase 5 | Complete |
 | LIFE-02 | Phase 5 | Complete |
-| LIFE-03 | Phase 5 | Complete |
+| LIFE-03 | Phase 5.1 | Pending |
 | LIFE-04 | Phase 5 | Complete |
-| LIFE-05 | Phase 5 | Complete |
+| LIFE-05 | Phase 5.1 | Pending |
 | VIEW-01 | Phase 6 | Pending |
 | VIEW-02 | Phase 6 | Pending |
 | VIEW-03 | Phase 6 | Pending |
@@ -91,4 +91,4 @@ Which phases cover which requirements.
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 — traceability confirmed after roadmap creation*
+*Last updated: 2026-03-01 — DRAW-02, LIFE-03, LIFE-05 reset to Pending (audit gaps), reassigned to Phase 5.1 gap closure*

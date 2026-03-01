@@ -25,6 +25,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 
 - [ ] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time
 - [x] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish (completed 2026-03-01)
+- [ ] **Phase 5.1: Consolation Gap Closure** - Closes gaps from v1.1 milestone audit: post-placement opt-out advancement, doubles BYE hardening, slot editor fix, error pattern fix
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible
 - [ ] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI
 
@@ -63,6 +64,22 @@ Plans:
 - [ ] 05-02-PLAN.md — consolationEligibilityService: real-match counting, loser routing, auto-BYE detection; updated tournament completion check
 - [ ] 05-03-PLAN.md — Consolation opt-out API: POST /:id/consolation-opt-out endpoint with player/organizer authorization
 
+### Phase 5.1: Consolation Gap Closure
+**Goal**: Close the three unsatisfied/partial gaps identified in the v1.1 milestone audit — post-placement opt-out opponent advancement (LIFE-05), doubles auto-BYE consolation progression hardening (DRAW-02/LIFE-03), consolation slot visibility in the draw UI, and error handling in the tournament rules setup page
+**Depends on**: Phase 5
+**Requirements**: LIFE-05, DRAW-02, LIFE-03
+**Gap Closure:** Closes gaps from v1.1 milestone audit (2026-03-01)
+**Success Criteria** (what must be TRUE):
+  1. A player/pair who opts out of consolation AFTER being placed in a consolation slot causes the opponent to advance automatically (BYE/forfeit treatment)
+  2. Doubles auto-BYE consolation advancement works correctly — the waiting opponent advances when their consolation match partner is a pre-draw BYE (solePlayerId derivation hardened)
+  3. The draw UI slot editor shows consolation bracket match slots alongside MAIN bracket slots, allowing organizers to manually assign players
+  4. TournamentRulesSetupPage error handling uses the BATL apiClient pattern (`err.message`/`err.code`); FORMAT_CHANGE_NOT_ALLOWED code check fires correctly
+  5. `'RETIRED'` removed from consolationEligibilityService status IN clause (dead code cleanup); 05-02-SUMMARY.md has correct `requirements-completed` frontmatter
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05.1-01-PLAN.md — All gap closure tasks: post-placement opt-out advancement, doubles BYE solePlayerId hardening, RETIRED dead code removal, slot editor bracket selection, TournamentRulesSetupPage error pattern, 05-02-SUMMARY frontmatter
+
 ### Phase 6: Visualization and Result Entry
 **Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked
 **Depends on**: Phase 5
@@ -93,7 +110,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 6 → 7
+Phases execute in numeric order: 4 → 5 → 5.1 → 6 → 7
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -102,6 +119,7 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
-| 5. Loser Routing and Consolation Progression | 3/3 | Complete   | 2026-03-01 | - |
+| 5. Loser Routing and Consolation Progression | v1.1 | 3/3 | Complete | 2026-03-01 |
+| 5.1. Consolation Gap Closure | v1.1 | 0/1 | Not started | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
