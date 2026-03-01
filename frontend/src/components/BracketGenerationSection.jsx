@@ -56,8 +56,7 @@ const BracketGenerationSection = ({
       .get(`/tournaments/${tournament.id}/registrations`)
       .then(r => {
         const regs = r.data.data?.registrations || [];
-        const players = regs.map(reg => reg.player || reg.pair).filter(Boolean);
-        setRegisteredPlayers(players);
+        setRegisteredPlayers(regs);
       })
       .catch(() => {
         // non-critical — dropdowns degrade gracefully if empty
@@ -229,20 +228,25 @@ const BracketGenerationSection = ({
           {/* Finalized registered player list */}
           <div className="mb-4">
             <h6 className="fw-semibold mb-2">
-              Registered Players ({registeredPlayers.length})
+              {isDoubles ? 'Registered Pairs' : 'Registered Players'} ({registeredPlayers.length})
             </h6>
             {registeredPlayers.length === 0 ? (
               <p className="text-muted fst-italic">No players registered yet.</p>
             ) : (
               <ListGroup variant="flush" className="border rounded">
-                {registeredPlayers.map((player, idx) => (
-                  <ListGroup.Item key={player?.id || idx} className="py-2 px-3">
-                    <span className="text-muted me-2" style={{ minWidth: '2rem', display: 'inline-block' }}>
-                      {idx + 1}.
-                    </span>
-                    {player?.name || 'Unknown player'}
-                  </ListGroup.Item>
-                ))}
+                {registeredPlayers.map((reg, idx) => {
+                  const displayName = isDoubles
+                    ? `${reg.pair?.player1?.name || '?'} & ${reg.pair?.player2?.name || '?'}`
+                    : (reg.player?.name || 'Unknown player');
+                  return (
+                    <ListGroup.Item key={reg?.id || idx} className="py-2 px-3">
+                      <span className="text-muted me-2" style={{ minWidth: '2rem', display: 'inline-block' }}>
+                        {idx + 1}.
+                      </span>
+                      {displayName}
+                    </ListGroup.Item>
+                  );
+                })}
               </ListGroup>
             )}
           </div>
