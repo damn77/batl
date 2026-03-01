@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Consolation Brackets
 status: unknown
-last_updated: "2026-03-01T15:01:04.763Z"
+last_updated: "2026-03-01T15:09:00.000Z"
 progress:
   total_phases: 3
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
@@ -22,17 +22,17 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 5.1 of 7 (Consolation Gap Closure)
+Phase: 5.2 of 7 (Doubles Backend Fixes)
 Plan: 1 of 1 complete
 Status: Phase Complete
-Last activity: 2026-03-01 — Completed 05.1-01-PLAN.md (Consolation Gap Closure)
+Last activity: 2026-03-01 — Completed 05.2-01-PLAN.md (Doubles Backend Fixes)
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v1.1)
+- Total plans completed: 7 (v1.1)
 - Average duration: 2 min
 - Total execution time: 10 min
 
@@ -46,6 +46,7 @@ Progress: [██████░░░░] 60%
 | Phase 05 P02 | 1 | 2 min | 2 min |
 | Phase 05 P03 | 1 | 1 min | 1 min |
 | Phase 05.1 P01 | 1 | 2 min | 2 min |
+| Phase 05.2 P01 | 1 | 2 min | 2 min |
 
 **Recent Trend:**
 - Last 5 plans: 2 min
@@ -83,6 +84,8 @@ Carried over from v1.0:
 - [Phase 05.1-consolation-gap-closure]: consolationOptOutService Step 7 wrapped inside prisma.$transaction — opt-out and opponent advancement are atomic
 - [Phase 05.1-consolation-gap-closure]: RETIRED removed from getRealMatchCount status IN clause — matchResultService always writes COMPLETED, dead code confirmed by audit
 - [Phase 05.1-consolation-gap-closure]: FormatVisualization useMatches drops bracketId filter — empty {} fetches MAIN + CONSOLATION matches for BracketGenerationSection slot editor
+- [Phase 05.2-doubles-backend-fixes]: pair1Id ?? player1Id pattern — nullish coalescing gives correct entity ID for both doubles (pair set, player null) and singles (pair null, player set) without branching
+- [Phase 05.2-doubles-backend-fixes]: advanceBracketSlot position fallback — when resultJson.winner absent (consolationOptOutService call site), derive slot direction by comparing winnerId against pair1Id/player1Id directly
 
 ### Pending Todos
 
@@ -99,5 +102,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05.1-01-PLAN.md
+Stopped at: Completed 05.2-01-PLAN.md
 Resume file: None
