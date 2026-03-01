@@ -4,7 +4,7 @@
  * Manages tournament status transitions and bracket slot advancement:
  *   - startTournament: SCHEDULED → IN_PROGRESS transition
  *   - advanceBracketSlot: Populate next-round match slot with winner
- *   - checkAndCompleteTournament: Detect and set COMPLETED status when all matches done
+ *   - checkAndCompleteTournament: Detect and set COMPLETED when all brackets' matches are done
  *
  * Feature: 02-tournament-lifecycle-and-bracket-progression (Plan 01)
  *
@@ -63,6 +63,7 @@ export async function startTournament(tournamentId) {
     where: { id: tournamentId },
     data: {
       status: 'IN_PROGRESS',
+      registrationClosed: true,
       lastStatusChange: new Date()
     },
     select: { id: true, status: true }
@@ -177,8 +178,12 @@ export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
 }
 
 /**
- * Check if all MAIN-bracket non-BYE matches are COMPLETED.
- * If so, transition the tournament to COMPLETED status.
+ * Check if all non-BYE matches across ALL brackets (MAIN + CONSOLATION) are
+ * in a terminal state. If so, transition the tournament to COMPLETED status.
+ *
+ * Terminal states: COMPLETED, CANCELLED.
+ * BYE matches are excluded by the isBye: false filter (they are never "incomplete").
+ * SCHEDULED and IN_PROGRESS are incomplete — the tournament is not done yet.
  *
  * Only fires when the organizer submits a result — player submissions
  * never trigger tournament completion.
@@ -191,13 +196,14 @@ export async function checkAndCompleteTournament(tx, tournamentId, isOrganizer) 
   // Guard: Only organizer result triggers COMPLETED
   if (!isOrganizer) return;
 
-  // Count MAIN-bracket non-BYE matches that are not yet COMPLETED
+  // Count matches that are not yet in a terminal state across ALL brackets.
+  // Terminal states: COMPLETED, CANCELLED, BYE (BYE already excluded by isBye:false).
+  // A match with status SCHEDULED or IN_PROGRESS is incomplete.
   const incompleteCount = await tx.match.count({
     where: {
       tournamentId,
-      bracket: { bracketType: 'MAIN' },
       isBye: false,
-      status: { not: 'COMPLETED' }
+      status: { notIn: ['COMPLETED', 'CANCELLED'] }
     }
   });
 

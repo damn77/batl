@@ -14,6 +14,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { advanceBracketSlot, checkAndCompleteTournament } from './tournamentLifecycleService.js';
+import { routeLoserToConsolation } from './consolationEligibilityService.js';
 
 const prisma = new PrismaClient();
 
@@ -187,6 +188,9 @@ export async function submitResult({ matchId, body, isOrganizer, submitterPlayer
 
     // Advance bracket slot: populate next-round match with the winner
     await advanceBracketSlot(tx, updated, winnerId);
+
+    // Route main bracket loser to consolation slot (MATCH_2 tournaments only)
+    await routeLoserToConsolation(tx, updated, winnerId, isOrganizer);
 
     // Detect tournament completion (organizer-only)
     await checkAndCompleteTournament(tx, updated.tournamentId, isOrganizer);
