@@ -56,10 +56,12 @@ Plans:
   4. When a consolation match result is submitted, the winner automatically advances to the next consolation round (same auto-advance mechanism as the main bracket)
   5. A tournament in MATCH_2 mode remains IN_PROGRESS until all consolation matches have been played; submitting the main bracket final result alone does not trigger auto-completion
   6. A player/pair can opt out of consolation participation at any time; the opt-out is recorded as an automatic forfeit (opponent advances without playing)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Schema migration: add RETIRED to MatchStatus enum, add ConsolationOptOut model; update matchValidator
+- [ ] 05-02-PLAN.md — consolationEligibilityService: real-match counting, loser routing, auto-BYE detection; updated tournament completion check
+- [ ] 05-03-PLAN.md — Consolation opt-out API: POST /:id/consolation-opt-out endpoint with player/organizer authorization
 
 ### Phase 6: Visualization and Result Entry
 **Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked
@@ -99,7 +101,7 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 01.1. Bracket Generation and Seeding Persistence | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
-| 4. Configuration and Consolation Draw | 1/2 | In Progress|  | - |
-| 5. Loser Routing and Consolation Progression | v1.1 | 0/TBD | Not started | - |
+| 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
+| 5. Loser Routing and Consolation Progression | v1.1 | 0/3 | Not started | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
