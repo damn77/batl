@@ -26,7 +26,8 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 - [ ] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time
 - [x] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish (completed 2026-03-01)
 - [x] **Phase 5.1: Consolation Gap Closure** - Closes gaps from v1.1 milestone audit: post-placement opt-out advancement, doubles BYE hardening, slot editor fix, error pattern fix (completed 2026-03-01)
-- [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible
+- [ ] **Phase 5.2: Doubles Backend Fixes** - Closes 2nd-audit integration breaks: matchResultService winnerId derivation for doubles; consolationOptOutService slot direction fix for doubles opt-out
+- [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
 - [ ] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI
 
 ## Phase Details
@@ -80,14 +81,29 @@ Plans:
 Plans:
 - [ ] 05.1-01-PLAN.md — All gap closure tasks: post-placement opt-out advancement, doubles BYE solePlayerId hardening, RETIRED dead code removal, slot editor bracket selection, TournamentRulesSetupPage error pattern, 05-02-SUMMARY frontmatter
 
+### Phase 5.2: Doubles Backend Fixes
+**Goal**: Close two remaining integration breaks found in the 2nd v1.1 audit: (1) matchResultService derives winnerId from player1Id/player2Id which is null for doubles — fix to prefer pair1Id/pair2Id; (2) consolationOptOutService calls advanceBracketSlot with null resultJson so advancing opponent always lands in pair2 slot — fix to derive slot direction from opponentId's actual position in currentMatch
+**Depends on**: Phase 5.1
+**Requirements**: DRAW-02, LIFE-03, LIFE-05 (partial)
+**Gap Closure:** Closes BREAK 1 and BREAK 2 from v1.1 2nd-audit
+**Success Criteria** (what must be TRUE):
+  1. Submitting a doubles main bracket result advances the correct winner in the consolation slot (winnerId is derived from pair1Id/pair2Id when available)
+  2. A doubles pair that opts out post-placement causes their opponent to advance into the correct slot (pair1 or pair2) rather than always pair2
+  3. Existing singles behavior is unaffected
+**Plans**: TBD
+
+Plans:
+- [ ] 05.2-01: TBD
+
 ### Phase 6: Visualization and Result Entry
-**Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked
-**Depends on**: Phase 5
-**Requirements**: VIEW-01, VIEW-02, VIEW-03
+**Goal**: The tournament page shows the consolation bracket alongside the main bracket; participants can submit and view consolation match results; matches waiting on main bracket outcomes are visually blocked; organizers/players can trigger consolation opt-out via a UI button
+**Depends on**: Phase 5.2
+**Requirements**: VIEW-01, VIEW-02, VIEW-03, LIFE-05 (final close)
 **Success Criteria** (what must be TRUE):
   1. The tournament detail page renders both the main bracket and consolation bracket (using the existing KnockoutBracket component), with a clear tab or section separator between them
   2. A participant can open the result entry modal for a consolation match and submit a score, which is saved and reflected in the bracket view
   3. Consolation matches whose player slots are not yet determined (awaiting main bracket outcomes) display "TBD" for each unresolved player name and disable the result entry action
+  4. An organizer or player can trigger consolation opt-out via a UI button/affordance on the tournament page, which calls the existing POST /api/v1/tournaments/:id/consolation-opt-out endpoint (closes LIFE-05 BREAK 3)
 **Plans**: TBD
 
 Plans:
@@ -110,7 +126,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 5.1 → 6 → 7
+Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -120,6 +136,7 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 6 → 7
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
 | 5. Loser Routing and Consolation Progression | v1.1 | 3/3 | Complete | 2026-03-01 |
-| 5.1. Consolation Gap Closure | 1/1 | Complete   | 2026-03-01 | - |
+| 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
+| 5.2. Doubles Backend Fixes | v1.1 | 0/TBD | Not started | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
