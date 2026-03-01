@@ -64,13 +64,15 @@ const TournamentRulesSetupPage = () => {
           defaultScoringRules: dsr,
           capacity,
           registeredCount,
-          waitlistedCount
+          waitlistedCount,
+          hasBracket
         } = response.data;
 
         setTournamentName(name);
         setFormatType(ft);
         setFormatConfig(fc);
         setScoringRules(dsr);
+        setHasMatches(hasBracket || false);
         setRegistrationStats({
           registered: registeredCount || 0,
           capacity: capacity,
@@ -78,7 +80,7 @@ const TournamentRulesSetupPage = () => {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || t('errors.failedToLoadTournamentRules'));
+      setError(err.message || t('errors.failedToLoadTournamentRules'));
     } finally {
       setLoading(false);
     }
@@ -130,11 +132,11 @@ const TournamentRulesSetupPage = () => {
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || t('errors.failedToSaveTournamentFormat');
+      const errorMsg = err.message || t('errors.failedToSaveTournamentFormat');
       setError(errorMsg);
 
       // If format change not allowed, mark as having matches
-      if (err.response?.data?.error?.code === 'FORMAT_CHANGE_NOT_ALLOWED') {
+      if (err.code === 'FORMAT_CHANGE_NOT_ALLOWED') {
         setHasMatches(true);
       }
     } finally {
@@ -166,7 +168,7 @@ const TournamentRulesSetupPage = () => {
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || t('errors.failedToSaveScoringRules'));
+      setError(err.message || t('errors.failedToSaveScoringRules'));
     } finally {
       setSaving(false);
     }

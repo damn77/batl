@@ -31,6 +31,7 @@ metrics:
   completed_date: "2026-03-01"
   tasks_completed: 2
   files_changed: 3
+requirements-completed: [DRAW-02, LIFE-01, LIFE-02, LIFE-03, LIFE-04]
 ---
 
 # Phase 05 Plan 02: Consolation Bracket Lifecycle — Loser Routing Summary

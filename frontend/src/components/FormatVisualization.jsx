@@ -1,6 +1,6 @@
 // T072, T088-T091: Format Visualization Wrapper - Selects correct visualization with lazy loading
 import { useState } from 'react';
-import { Card, Button, Collapse, Alert, Spinner } from 'react-bootstrap';
+import { Card, Button, Collapse, Alert, Spinner, Tab, Nav } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useFormatStructure, useMatches } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
@@ -35,12 +35,13 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
   // Role check for organizer/admin draw workflow
   const isOrganizerOrAdmin = user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
 
-  // For organizer KNOCKOUT view: fetch matches so BracketGenerationSection can populate slot dropdowns
-  const bracketId = structure?.brackets?.[0]?.id;
+  // For organizer KNOCKOUT view: fetch matches from ALL brackets so BracketGenerationSection
+  // slot dropdowns include both MAIN and CONSOLATION bracket rounds.
+  const hasBrackets = !!(structure?.brackets && structure.brackets.length > 0);
   const { matches, mutate: mutateMatches } = useMatches(
     tournament?.id,
-    bracketId ? { bracketId } : {},
-    isExpanded && !!bracketId
+    {},
+    isExpanded && hasBrackets
   );
 
   if (!tournament) return null;
@@ -60,6 +61,10 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
+
+  const sortedBrackets = structure?.brackets
+    ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
+    : [];
 
   return (
     <Card className="border-0 shadow-sm">
@@ -139,8 +144,8 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
 
                 {formatType === 'KNOCKOUT' && (
                   <div className="d-flex flex-column gap-4">
-                    {isOrganizerOrAdmin && tournament.status === 'SCHEDULED' ? (
-                      /* Organizer/Admin SCHEDULED: full draw workflow with BracketGenerationSection */
+                    {isOrganizerOrAdmin && (tournament.status === 'SCHEDULED' || (tournament.status === 'IN_PROGRESS' && !(structure?.brackets?.length > 0))) ? (
+                      /* Organizer/Admin SCHEDULED or IN_PROGRESS-without-bracket: full draw workflow */
                       <BracketGenerationSection
                         tournament={tournament}
                         mutateTournament={mutateTournament}
@@ -152,7 +157,12 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                     ) : (
                       /* Everyone (incl. organizers for IN_PROGRESS/COMPLETED): bracket view */
                       <>
-                        {structure.brackets?.map(bracket => {
+                        {(!structure.brackets || structure.brackets.length === 0) && (
+                          <Alert variant="info">
+                            {t('components.formatVisualization.emptyStates.noBrackets')}
+                          </Alert>
+                        )}
+                        {structure.brackets?.length === 1 && structure.brackets.map(bracket => {
                           const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
                           return (
                             <KnockoutBracket
@@ -162,14 +172,39 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                               rounds={bracketRounds}
                               currentUserPlayerId={currentUserPlayerId}
                               tournamentStatus={tournament.status}
-                              isDoubles={tournament.categoryType === 'DOUBLES'}
+                              isDoubles={tournament.category?.type === 'DOUBLES'}
                             />
                           );
                         })}
-                        {(!structure.brackets || structure.brackets.length === 0) && (
-                          <Alert variant="info">
-                            {t('components.formatVisualization.emptyStates.noBrackets')}
-                          </Alert>
+                        {sortedBrackets.length > 1 && (
+                          <Tab.Container defaultActiveKey={sortedBrackets[0].id}>
+                            <Nav variant="tabs" className="mb-3">
+                              {sortedBrackets.map(bracket => (
+                                <Nav.Item key={bracket.id}>
+                                  <Nav.Link eventKey={bracket.id}>
+                                    {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
+                                  </Nav.Link>
+                                </Nav.Item>
+                              ))}
+                            </Nav>
+                            <Tab.Content>
+                              {sortedBrackets.map(bracket => {
+                                const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
+                                return (
+                                  <Tab.Pane key={bracket.id} eventKey={bracket.id}>
+                                    <KnockoutBracket
+                                      tournamentId={tournament.id}
+                                      bracket={bracket}
+                                      rounds={bracketRounds}
+                                      currentUserPlayerId={currentUserPlayerId}
+                                      tournamentStatus={tournament.status}
+                                      isDoubles={tournament.category?.type === 'DOUBLES'}
+                                    />
+                                  </Tab.Pane>
+                                );
+                              })}
+                            </Tab.Content>
+                          </Tab.Container>
                         )}
                       </>
                     )}
