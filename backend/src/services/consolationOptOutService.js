@@ -19,6 +19,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { advanceBracketSlot } from './tournamentLifecycleService.js';
 
 const prisma = new PrismaClient();
 
@@ -151,14 +152,66 @@ export async function recordOptOut({ tournamentId, playerId, pairId, isOrganizer
     }
   }
 
-  // Step 6: Create the opt-out record
-  const optOut = await prisma.consolationOptOut.create({
-    data: {
-      tournamentId,
-      playerId: playerId || null,
-      pairId: pairId || null,
-      recordedBy: isOrganizer ? 'ORGANIZER' : 'SELF'
+  // Step 6 + 7: Create the opt-out record and advance the opponent (if placed) — atomically.
+  const optOut = await prisma.$transaction(async (tx) => {
+    // Step 6: Create the opt-out record
+    const created = await tx.consolationOptOut.create({
+      data: {
+        tournamentId,
+        playerId: playerId || null,
+        pairId: pairId || null,
+        recordedBy: isOrganizer ? 'ORGANIZER' : 'SELF'
+      }
+    });
+
+    // Step 7: If the consolation bracket exists, find the opted-out player's current
+    // (non-COMPLETED) consolation slot and advance the opponent if present.
+    if (consolationBracket) {
+      const currentMatch = await tx.match.findFirst({
+        where: {
+          bracketId: consolationBracket.id,
+          ...participantFilter,
+          status: { not: 'COMPLETED' }
+        },
+        select: {
+          id: true,
+          roundId: true,
+          bracketId: true,
+          matchNumber: true,
+          tournamentId: true,
+          isBye: true,
+          result: true,
+          status: true,
+          player1Id: true,
+          player2Id: true,
+          pair1Id: true,
+          pair2Id: true
+        }
+      });
+
+      if (currentMatch) {
+        // Determine which slot the opted-out entity occupies and who the opponent is
+        let opponentId;
+        if (pairId) {
+          opponentId = currentMatch.pair1Id === pairId
+            ? currentMatch.pair2Id
+            : currentMatch.pair1Id;
+        } else {
+          opponentId = currentMatch.player1Id === playerId
+            ? currentMatch.player2Id
+            : currentMatch.player1Id;
+        }
+
+        // If the opponent is already placed, advance them (opted-out player forfeits)
+        if (opponentId) {
+          await advanceBracketSlot(tx, currentMatch, opponentId);
+        }
+        // If opponent is null (not yet placed), the pre-placement opt-out is handled
+        // by routeLoserToConsolation's existing opt-out check when the opponent arrives.
+      }
     }
+
+    return created;
   });
 
   return optOut;
