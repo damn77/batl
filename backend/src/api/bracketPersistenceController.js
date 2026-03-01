@@ -89,6 +89,7 @@ export async function generateTournamentBracket(req, res, next) {
       success: true,
       data: {
         bracketId: result.bracket.id,
+        consolationBracketId: result.consolationBracket?.id || null,
         roundCount: result.roundCount,
         matchCount: result.matchCount
       }

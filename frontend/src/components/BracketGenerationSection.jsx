@@ -41,6 +41,7 @@ const BracketGenerationSection = ({
   const [generating, setGenerating] = useState(false);
   const [closingRegistration, setClosingRegistration] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [doublesMethod, setDoublesMethod] = useState('PAIR_SCORE');
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
@@ -81,11 +82,18 @@ const BracketGenerationSection = ({
   const handleGenerateBracket = useCallback(async () => {
     setGenerating(true);
     setError(null);
+    setSuccessMessage(null);
     setPendingSwaps([]);
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
-      await generateBracket(tournament.id, options);
+      const result = await generateBracket(tournament.id, options);
+      if (result?.consolationBracketId) {
+        setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
+      } else {
+        setSuccessMessage('Draw completed.');
+      }
+      setTimeout(() => setSuccessMessage(null), 5000);
       // Refresh bracket view
       if (mutateFormatStructure) await mutateFormatStructure();
       if (mutateMatches) await mutateMatches();
@@ -100,11 +108,18 @@ const BracketGenerationSection = ({
     setShowRegenerateConfirm(false);
     setGenerating(true);
     setError(null);
+    setSuccessMessage(null);
     setPendingSwaps([]);
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
-      await generateBracket(tournament.id, options);
+      const result = await generateBracket(tournament.id, options);
+      if (result?.consolationBracketId) {
+        setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
+      } else {
+        setSuccessMessage('Draw completed.');
+      }
+      setTimeout(() => setSuccessMessage(null), 5000);
       if (mutateFormatStructure) await mutateFormatStructure();
       if (mutateMatches) await mutateMatches();
     } catch (err) {
@@ -200,6 +215,11 @@ const BracketGenerationSection = ({
           </div>
         </Card.Header>
         <Card.Body>
+          {successMessage && (
+            <Alert variant="success" dismissible onClose={() => setSuccessMessage(null)}>
+              {successMessage}
+            </Alert>
+          )}
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError(null)}>
               {error}
@@ -336,6 +356,11 @@ const BracketGenerationSection = ({
       </Card.Header>
 
       <Card.Body>
+        {successMessage && (
+          <Alert variant="success" dismissible onClose={() => setSuccessMessage(null)}>
+            {successMessage}
+          </Alert>
+        )}
         {error && (
           <Alert variant="danger" dismissible onClose={() => setError(null)}>
             {error}
