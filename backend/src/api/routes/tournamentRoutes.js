@@ -155,15 +155,18 @@ router.get(
       if (!config) {
         // Return default configuration if none exists
         return res.json({
-          tournamentId: id,
-          calculationMethod: 'PLACEMENT',
-          multiplicativeValue: 2,
-          doublePointsEnabled: false,
-          isDefault: true
+          success: true,
+          data: {
+            tournamentId: id,
+            calculationMethod: 'PLACEMENT',
+            multiplicativeValue: 2,
+            doublePointsEnabled: false,
+            isDefault: true
+          }
         });
       }
 
-      res.json(config);
+      res.json({ success: true, data: config });
     } catch (error) {
       next(error);
     }
@@ -197,13 +200,13 @@ router.put(
       });
 
       if (!tournament) {
-        return res.status(404).json({ error: 'Tournament not found' });
+        return res.status(404).json({ success: false, error: { code: 'TOURNAMENT_NOT_FOUND', message: 'Tournament not found' } });
       }
 
       if (tournament.status !== 'SCHEDULED') {
         return res.status(400).json({
-          error: 'Cannot modify point configuration after tournament has started',
-          code: 'TOURNAMENT_ALREADY_STARTED'
+          success: false,
+          error: { code: 'TOURNAMENT_ALREADY_STARTED', message: 'Cannot modify point configuration after tournament has started' }
         });
       }
 
@@ -217,7 +220,7 @@ router.put(
         }
       });
 
-      res.json(config);
+      res.json({ success: true, data: config });
     } catch (error) {
       next(error);
     }

@@ -54,7 +54,8 @@
     "main": "Main",
     "pointDistribution": "Point Distribution",
     "details": "details",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "configuration": "Configuration"
   },
   "nav": {
     "home": "Home",
