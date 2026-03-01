@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Consolation Brackets
 status: unknown
-last_updated: "2026-03-01T14:14:44.164Z"
+last_updated: "2026-03-01T14:57:32.044Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # Project State
@@ -22,19 +22,19 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 5 of 7 (Loser Routing and Consolation Progression)
-Plan: 3 of 3 complete
+Phase: 5.1 of 7 (Consolation Gap Closure)
+Plan: 1 of 1 complete
 Status: Phase Complete
-Last activity: 2026-03-01 — Completed 05-03-PLAN.md (Consolation Opt-Out API)
+Last activity: 2026-03-01 — Completed 05.1-01-PLAN.md (Consolation Gap Closure)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v1.1)
+- Total plans completed: 6 (v1.1)
 - Average duration: 2 min
-- Total execution time: 8 min
+- Total execution time: 10 min
 
 **By Phase:**
 
@@ -45,6 +45,7 @@ Progress: [█████░░░░░] 50%
 | Phase 05 P01 | 1 | 2 min | 2 min |
 | Phase 05 P02 | 1 | 2 min | 2 min |
 | Phase 05 P03 | 1 | 1 min | 1 min |
+| Phase 05.1 P01 | 1 | 2 min | 2 min |
 
 **Recent Trend:**
 - Last 5 plans: 2 min
@@ -79,6 +80,9 @@ Carried over from v1.0:
 - [Phase 05-03]: No authorize('update','Tournament') on consolation-opt-out route — players need self-service access; auth handled in service layer
 - [Phase 05-03]: Pre-draw opt-out valid — consolation bracket existence check gates the played-match guard
 - [Phase 05-03]: Doubles pair authorization fetches DoublesPair and confirms submitter is player1Id or player2Id
+- [Phase 05.1-consolation-gap-closure]: consolationOptOutService Step 7 wrapped inside prisma.$transaction — opt-out and opponent advancement are atomic
+- [Phase 05.1-consolation-gap-closure]: RETIRED removed from getRealMatchCount status IN clause — matchResultService always writes COMPLETED, dead code confirmed by audit
+- [Phase 05.1-consolation-gap-closure]: FormatVisualization useMatches drops bracketId filter — empty {} fetches MAIN + CONSOLATION matches for BracketGenerationSection slot editor
 
 ### Pending Todos
 
@@ -95,5 +99,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-03-PLAN.md
+Stopped at: Completed 05.1-01-PLAN.md
 Resume file: None
