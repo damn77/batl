@@ -23,7 +23,7 @@ const TournamentRulesSetupPage = () => {
   const [formatType, setFormatType] = useState('KNOCKOUT');
   const [formatConfig, setFormatConfig] = useState({
     formatType: 'KNOCKOUT',
-    matchGuarantee: 'MATCH_1'
+    matchGuarantee: 'MATCH_2' // Match Guarantee locked via hasMatches (true once draw generated)
   });
   const [scoringRules, setScoringRules] = useState({
     formatType: 'SETS',
