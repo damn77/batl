@@ -21,6 +21,7 @@ import {
   generateTournamentBracket,
   swapBracketSlots
 } from '../bracketPersistenceController.js';
+import { recordConsolationOptOut } from '../consolationOptOutController.js';
 import {
   generateBracketSchema,
   swapSlotsSchema
@@ -332,6 +333,26 @@ router.patch(
   authorize('update', 'Tournament'),
   validateBody(swapSlotsSchema),
   swapBracketSlots
+);
+
+// ============================================
+// PHASE 05: CONSOLATION BRACKET LIFECYCLE
+// ============================================
+
+/**
+ * POST /api/v1/tournaments/:id/consolation-opt-out
+ * Record a consolation opt-out for a player or pair.
+ * Authorization: PLAYER (self-service) or ORGANIZER/ADMIN
+ * Body: { playerId: string } | { pairId: string }
+ *
+ * Note: Authorization is handled inside the controller/service —
+ * players can opt out themselves; organizers can opt out anyone.
+ * The isAuthenticated middleware ensures the submitter is logged in.
+ */
+router.post(
+  '/:id/consolation-opt-out',
+  isAuthenticated,
+  recordConsolationOptOut
 );
 
 export default router;
