@@ -952,7 +952,8 @@
     "checkingEligibility": "Checking eligibility...",
     "selectCategoriesToRegister": "Select one or more categories to register for",
     "registrationSuccess": "Successfully registered for {{count}} categories!",
-    "pointPreviewDescription": "Based on {{count}} participants (Range: {{range}})"
+    "pointPreviewDescription": "Based on {{count}} participants (Range: {{range}})",
+    "configurationSaved": "Configuration saved successfully"
   },
   "validation": {
     "selectPlayer2": "Please select Player 2 for the new pair",
