@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Consolation Brackets
 status: unknown
-last_updated: "2026-03-01T14:06:33Z"
+last_updated: "2026-03-01T14:10:00Z"
 progress:
   total_phases: 1
   completed_phases: 1
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 5 of 7 (Loser Routing and Consolation Progression)
-Plan: 2 of 3 complete
-Status: In Progress
-Last activity: 2026-03-01 — Completed 05-02-PLAN.md (Consolation Bracket Lifecycle — Loser Routing)
+Plan: 3 of 3 complete
+Status: Phase Complete
+Last activity: 2026-03-01 — Completed 05-03-PLAN.md (Consolation Opt-Out API)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v1.1)
+- Total plans completed: 5 (v1.1)
 - Average duration: 2 min
-- Total execution time: 7 min
+- Total execution time: 8 min
 
 **By Phase:**
 
@@ -44,6 +44,7 @@ Progress: [████░░░░░░] 40%
 | Phase 04 P02 | 1 | 1 min | 1 min |
 | Phase 05 P01 | 1 | 2 min | 2 min |
 | Phase 05 P02 | 1 | 2 min | 2 min |
+| Phase 05 P03 | 1 | 1 min | 1 min |
 
 **Recent Trend:**
 - Last 5 plans: 2 min
@@ -75,6 +76,9 @@ Carried over from v1.0:
 - [Phase 05-02]: routeLoserToConsolation is a no-op for non-MAIN brackets and non-R1 matches — no guard needed in matchResultService caller
 - [Phase 05-02]: RETIRED auto-opt-out uses try/catch around consolationOptOut.create for idempotent handling
 - [Phase 05-02]: checkAndCompleteTournament uses notIn ['COMPLETED','CANCELLED'] across ALL brackets — no MAIN-only filter
+- [Phase 05-03]: No authorize('update','Tournament') on consolation-opt-out route — players need self-service access; auth handled in service layer
+- [Phase 05-03]: Pre-draw opt-out valid — consolation bracket existence check gates the played-match guard
+- [Phase 05-03]: Doubles pair authorization fetches DoublesPair and confirms submitter is player1Id or player2Id
 
 ### Pending Todos
 
@@ -91,5 +95,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-02-PLAN.md
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None

@@ -24,7 +24,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 **Milestone Goal:** Extend knockout tournaments with a consolation bracket that guarantees every player at least 2 real matches (MATCH_2), running the full loop from configuration through point awards.
 
 - [ ] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time
-- [ ] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish
+- [x] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish (completed 2026-03-01)
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible
 - [ ] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI
 
@@ -102,6 +102,6 @@ Phases execute in numeric order: 4 → 5 → 6 → 7
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
-| 5. Loser Routing and Consolation Progression | 2/3 | In Progress|  | - |
+| 5. Loser Routing and Consolation Progression | 3/3 | Complete   | 2026-03-01 | - |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
