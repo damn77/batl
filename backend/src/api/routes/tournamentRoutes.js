@@ -244,7 +244,7 @@ router.post(
       const { results } = req.body;
       const { PrismaClient } = await import('@prisma/client');
       const prisma = new PrismaClient();
-      const { awardPointsSinglesTournament, awardPointsDoublesTournament } = await import('../../services/pointCalculationService.js');
+      const { awardPointsSinglesTournament, awardPointsDoublesTournament, deriveConsolationResults } = await import('../../services/pointCalculationService.js');
 
       if (!results || !Array.isArray(results) || results.length === 0) {
         return res.status(400).json({
@@ -272,13 +272,26 @@ router.post(
         doublePointsEnabled: false
       };
 
+      // For MATCH_2 tournaments using FINAL_ROUND method, automatically derive and
+      // include consolation bracket results (server-side, appended after validation)
+      const formatConfig = typeof tournament.formatConfig === 'string'
+        ? JSON.parse(tournament.formatConfig)
+        : tournament.formatConfig;
+      const isMatch2 = formatConfig?.matchGuarantee === 'MATCH_2';
+
+      let allResults = results;
+      if (isMatch2 && pointConfig.calculationMethod === 'FINAL_ROUND') {
+        const consolationResults = await deriveConsolationResults(id);
+        allResults = [...results, ...consolationResults];
+      }
+
       let awardedResults;
 
       // Award points based on tournament type
       if (tournament.category.type === 'SINGLES') {
-        awardedResults = await awardPointsSinglesTournament(id, results, pointConfig);
+        awardedResults = await awardPointsSinglesTournament(id, allResults, pointConfig);
       } else {
-        awardedResults = await awardPointsDoublesTournament(id, results, pointConfig);
+        awardedResults = await awardPointsDoublesTournament(id, allResults, pointConfig);
       }
 
       res.json({
