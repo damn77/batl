@@ -82,11 +82,13 @@ export async function startTournament(tournamentId) {
  *   - No next round exists (final round)
  *   - No target match found in next round
  *
- * For doubles, also advances the pair slot (pair1Id / pair2Id) alongside player slot.
+ * For doubles, advances only the pair slot (pair1Id/pair2Id) — winnerId is a
+ * DoublesPair UUID and must NOT be written into player1Id/player2Id (PlayerProfile FK).
+ * For singles, advances only the player slot (player1Id/player2Id).
  *
  * @param {Object} tx - Prisma transaction client
  * @param {Object} updatedMatch - Match record (must include roundId, isBye, matchNumber, player1Id, player2Id, pair1Id, pair2Id, result)
- * @param {string} winnerId - PlayerProfile ID of the winner
+ * @param {string} winnerId - DoublesPair UUID (doubles) or PlayerProfile UUID (singles)
  */
 export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
   // Guard 1: Not a bracket match — skip
@@ -163,24 +165,17 @@ export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
 
   const winnerPairId = winnerIsPlayer1 ? updatedMatch.pair1Id : updatedMatch.pair2Id;
 
-  // Update the next match — place winner in correct slot
-  const updateData = isOdd
-    ? { player1Id: winnerId, pair1Id: winnerPairId ?? undefined }
-    : { player2Id: winnerId, pair2Id: winnerPairId ?? undefined };
-
-  // If winnerPairId is null (singles), exclude pair field from update to avoid overwriting
-  if (isOdd) {
-    if (winnerPairId !== null && winnerPairId !== undefined) {
-      updateData.pair1Id = winnerPairId;
-    } else {
-      delete updateData.pair1Id;
-    }
+  // Build update payload — doubles and singles are mutually exclusive:
+  //   Doubles (winnerPairId set): write only pair slot; player slot stays null
+  //   Singles (winnerPairId null): write only player slot; pair slot stays null
+  // Writing winnerId (a pairId) into player1Id/player2Id would violate the PlayerProfile FK.
+  let updateData;
+  if (winnerPairId) {
+    // Doubles: advance the pair slot only
+    updateData = isOdd ? { pair1Id: winnerPairId } : { pair2Id: winnerPairId };
   } else {
-    if (winnerPairId !== null && winnerPairId !== undefined) {
-      updateData.pair2Id = winnerPairId;
-    } else {
-      delete updateData.pair2Id;
-    }
+    // Singles: advance the player slot only
+    updateData = isOdd ? { player1Id: winnerId } : { player2Id: winnerId };
   }
 
   await tx.match.update({
