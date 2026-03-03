@@ -27,7 +27,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 - [x] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish (completed 2026-03-01)
 - [x] **Phase 5.1: Consolation Gap Closure** - Closes gaps from v1.1 milestone audit: post-placement opt-out advancement, doubles BYE hardening, slot editor fix, error pattern fix (completed 2026-03-01)
 - [x] **Phase 5.2: Doubles Backend Fixes** - Closes 2nd-audit integration breaks: matchResultService winnerId derivation for doubles; consolationOptOutService slot direction fix for doubles opt-out (completed 2026-03-01)
-- [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
+- [x] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance (completed 2026-03-03)
 - [x] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages (completed 2026-03-03)
 - [x] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI (completed 2026-03-03)
 - [x] **Phase 8: Consolation Bug Fixes** - Fix PTS-01 case mismatch in consolation point calculation and LIFE-05 doubles player self-service opt-out entity key (completed 2026-03-03)
@@ -175,7 +175,7 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7 →
 | 5. Loser Routing and Consolation Progression | v1.1 | 6/6 | Complete | 2026-03-01 |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
+| 6. Visualization and Result Entry | 1/1 | Complete   | 2026-03-03 | - |
 | 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |

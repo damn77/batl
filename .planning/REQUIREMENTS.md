@@ -26,9 +26,9 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ### Visualization
 
-- [ ] **VIEW-01**: Tournament page displays the consolation bracket alongside the main bracket
-- [ ] **VIEW-02**: Participants can enter and view results for consolation bracket matches using the existing result modal
-- [ ] **VIEW-03**: Consolation matches waiting for main bracket outcomes show TBD players and are blocked from result entry
+- [x] **VIEW-01**: Tournament page displays the consolation bracket alongside the main bracket
+- [x] **VIEW-02**: Participants can enter and view results for consolation bracket matches using the existing result modal
+- [x] **VIEW-03**: Consolation matches waiting for main bracket outcomes show TBD players and are blocked from result entry
 
 ### Points
 
@@ -78,9 +78,9 @@ Which phases cover which requirements.
 | LIFE-03 | Phase 5.2 | Complete |
 | LIFE-04 | Phase 5 | Complete |
 | LIFE-05 | Phase 8 | Complete |
-| VIEW-01 | Phase 6 | Pending |
-| VIEW-02 | Phase 6 | Pending |
-| VIEW-03 | Phase 6 | Pending |
+| VIEW-01 | Phase 6 | Complete |
+| VIEW-02 | Phase 6 | Complete |
+| VIEW-03 | Phase 6 | Complete |
 | PTS-01 | Phase 8 | Complete |
 | PTS-02 | Phase 7 | Complete |
 
