@@ -139,10 +139,10 @@ Plans:
   2. An organizer running point calculation for a completed MATCH_2 tournament sees consolation points awarded to players who won at least one consolation match
   3. A player who lost all consolation matches (zero consolation wins) receives no consolation points
   4. An admin can view and edit consolation point table values in the existing Point Tables admin UI without any code change
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md — deriveConsolationResults service + calculate-points endpoint auto-includes consolation results for MATCH_2 tournaments
 
 ## Progress
 
@@ -161,4 +161,4 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
 | 6.1. Match Result Resubmission and Bracket Recalculation | 1/2 | In Progress|  | - |
-| 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
+| 7. Consolation Points | v1.1 | 0/1 | Not started | - |
