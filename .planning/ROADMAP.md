@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
-- 🚧 **v1.1 Consolation Brackets** — Phases 4–7 (in progress)
+- 🚧 **v1.1 Consolation Brackets** — Phases 4–6.1, 7 (in progress)
 
 ## Phases
 
@@ -28,6 +28,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 - [x] **Phase 5.1: Consolation Gap Closure** - Closes gaps from v1.1 milestone audit: post-placement opt-out advancement, doubles BYE hardening, slot editor fix, error pattern fix (completed 2026-03-01)
 - [x] **Phase 5.2: Doubles Backend Fixes** - Closes 2nd-audit integration breaks: matchResultService winnerId derivation for doubles; consolationOptOutService slot direction fix for doubles opt-out (completed 2026-03-01)
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
+- [ ] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages
 - [ ] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI
 
 ## Phase Details
@@ -112,9 +113,26 @@ Plans:
 Plans:
 - [ ] 06-01-PLAN.md — TBD styling for unresolved match slots; organizer opt-out accordion collapse; ConsolationOptOutPanel repositioned below bracket section
 
+### Phase 6.1: Match Result Resubmission and Bracket Recalculation
+**Goal**: When a match result is resubmitted, correctly handle bracket state across both main and consolation brackets — block non-organizer winner changes, cascade-clear downstream matches when the winner changes, and prompt organizer verification when later stages have already been played
+**Depends on**: Phase 6
+**Requirements**: Acceptance criteria from notes/bracket-behaviour.md
+**Success Criteria** (what must be TRUE):
+  1. A non-organizer attempting to resubmit a match result with a different winner is blocked with a warning message informing them only an organizer can make such a change
+  2. When same winner is resubmitted (score correction only), only the score is updated — no bracket recalculation occurs
+  3. When an organizer changes the winner of a main bracket match and impacted players have NOT finished playing later stages, both brackets are recalculated: old winner is cleared from downstream main bracket slots, new winner is advanced, and consolation routing is corrected
+  4. When an organizer changes the winner of a main bracket match and impacted players HAVE finished playing later stages, a verification/confirmation popup appears before proceeding; upon confirmation, later stages of both brackets are cleared and recalculated
+  5. When a consolation bracket match result is resubmitted with a different winner, impacted downstream consolation matches (1 per round) are identified and cascade-cleared before advancing the new winner
+  6. When a player enters the consolation bracket and the paired opponent is not eligible (forfeit, opt-out, or BYE origin), the match is updated with a BYE result and the eligible player advances — player positions (P1/P2) correspond to correct bracket positions
+**Plans**: 2 plans
+
+Plans:
+- [ ] 06.1-01-PLAN.md — Backend: non-organizer winner-change block, main+consolation cascade-clear, dry-run impact detection, score-only passthrough
+- [ ] 06.1-02-PLAN.md — Frontend: MatchResultModal pre-fill, winner-lock for non-organizers, dry-run call + confirmation popup for organizer winner changes
+
 ### Phase 7: Consolation Points
 **Goal**: Consolation bracket point tables are seeded with the correct values and wired into point calculation so players who win at least one consolation match receive consolation points based on their final consolation round
-**Depends on**: Phase 6
+**Depends on**: Phase 6.1
 **Requirements**: PTS-01, PTS-02
 **Success Criteria** (what must be TRUE):
   1. The database contains pre-seeded PointTable rows with isConsolation=true matching values from the spec (notes/013-bracket-points-rules.md)
@@ -129,7 +147,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
+Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -142,4 +160,5 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
+| 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 0/2 | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
