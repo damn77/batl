@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { mutate as globalMutate } from 'swr';
-import { submitMatchResult } from '../services/matchService';
+import { submitMatchResult, submitMatchResultDryRun } from '../services/matchService';
 import SetsScoreForm from './SetsScoreForm';
 import BigTiebreakForm from './BigTiebreakForm';
 
@@ -72,6 +72,9 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
   const isOrganizerLocked = matchResult?.submittedBy === 'ORGANIZER';
   const isReadOnly = isOrganizerLocked && !isOrganizer;
 
+  // Track existing winner for change detection (null = first-time submission)
+  const existingWinner = matchResult?.winner || null;
+
   // Form state — pre-populate with existing result if available
   const [formValue, setFormValue] = useState(
     matchResult ? { sets: matchResult.sets || [], winner: matchResult.winner || null } : { sets: [], winner: null }
@@ -86,6 +89,7 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
       : null;
     setFormValue(result ? { sets: result.sets || [], winner: result.winner || null } : { sets: [], winner: null });
     setPendingInvalidSubmit(null);
+    setPendingWinnerChange(null);
     setPartialScore({ player1Games: '', player2Games: '' });
   }, [match?.id, match?.result]);
 
@@ -104,6 +108,12 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
   // When organizer submits invalid scores, holds { resultData, errors } awaiting confirmation
   const [pendingInvalidSubmit, setPendingInvalidSubmit] = useState(null);
 
+  // When organizer changes winner on a match with downstream results, holds { resultData, impact } awaiting confirmation
+  const [pendingWinnerChange, setPendingWinnerChange] = useState(null);
+
+  // Computed: is the current form winner different from the existing (stored) winner?
+  const isWinnerChanging = !!(existingWinner && formValue.winner && formValue.winner !== existingWinner);
+
   const buildSanitizedSets = () =>
     formValue.sets
       .filter(s => s.player1Score !== '' && s.player2Score !== '')
@@ -115,6 +125,21 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
           ? parseInt(s.tiebreakScore, 10)
           : null,
       }));
+
+  /**
+   * Shared helper: run dry-run if winner is changing, show confirmation if needed.
+   * Returns true if execution should be halted (pending confirmation), false to proceed.
+   */
+  const runDryRunIfNeeded = async (matchId, resultData, winnerChanging) => {
+    if (!winnerChanging) return false;
+
+    const dryRunResult = await submitMatchResultDryRun(matchId, resultData);
+    if (dryRunResult.requiresConfirmation) {
+      setPendingWinnerChange({ resultData, impact: dryRunResult });
+      return true; // halt — awaiting confirmation
+    }
+    return false; // proceed directly (0 impacted matches)
+  };
 
   const handleSubmit = async () => {
     setError(null);
@@ -135,6 +160,14 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
             player1Games: parseInt(partialScore.player1Games, 10),
             player2Games: parseInt(partialScore.player2Games, 10)
           };
+        }
+
+        // Special outcome: check if winner is changing (uses specialWinner, not formValue.winner)
+        const isSpecialWinnerChanging = !!(existingWinner && specialWinner !== existingWinner);
+        const halted = await runDryRunIfNeeded(match.id, resultData, isSpecialWinnerChanging);
+        if (halted) {
+          setSubmitting(false);
+          return;
         }
       } else {
         if (!formValue.winner) {
@@ -173,6 +206,20 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
           winner: formValue.winner,
           sets: sanitizedSets,
         };
+
+        // Score-only correction: same winner — skip dry-run entirely
+        if (existingWinner && resultData.winner === existingWinner) {
+          // Fall through to submitMatchResult below — no dry-run needed
+        } else {
+          // Organizer winner change: run dry-run
+          if (isOrganizer) {
+            const halted = await runDryRunIfNeeded(match.id, resultData, isWinnerChanging);
+            if (halted) {
+              setSubmitting(false);
+              return;
+            }
+          }
+        }
       }
 
       await submitMatchResult(match.id, resultData);
@@ -208,11 +255,32 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
     }
   };
 
+  const handleConfirmWinnerChange = async () => {
+    if (!pendingWinnerChange) return;
+    setSubmitting(true);
+    try {
+      await submitMatchResult(match.id, pendingWinnerChange.resultData);
+      setPendingWinnerChange(null);
+      mutate();
+      if (match?.tournamentId) {
+        globalMutate(key => typeof key === 'string' && key.includes(`/tournaments/${match.tournamentId}/matches`));
+      }
+      onClose();
+    } catch (err) {
+      setError(err.message || t('errors.genericFallback', 'An error occurred'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Guard: don't render if no match selected
   if (!match) return null;
 
   const player1Name = match.player1?.name || match.pair1?.name || 'Player 1';
   const player2Name = match.player2?.name || match.pair2?.name || 'Player 2';
+
+  // Non-organizer winner lock: submit is blocked when winner would change
+  const isSubmitBlockedByWinnerLock = !isOrganizer && isWinnerChanging;
 
   return (
     <Modal show={!!match} onHide={onClose} centered size="lg">
@@ -232,6 +300,23 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
             <ul className="mb-0">
               {pendingInvalidSubmit.errors.map((e, i) => <li key={i}>{e}</li>)}
             </ul>
+          </Alert>
+        )}
+
+        {/* Organizer winner-change confirmation warning */}
+        {pendingWinnerChange && (
+          <Alert variant="warning">
+            <Alert.Heading>Changing the winner will affect later matches</Alert.Heading>
+            <p>
+              This will clear {pendingWinnerChange.impact.impactedMainMatches} main bracket match(es)
+              {pendingWinnerChange.impact.impactedConsolationMatches > 0
+                ? ` and ${pendingWinnerChange.impact.impactedConsolationMatches} consolation match(es)`
+                : ''}.
+            </p>
+            {pendingWinnerChange.impact.affectedPlayers.length > 0 && (
+              <p>Affected players: {pendingWinnerChange.impact.affectedPlayers.join(', ')}</p>
+            )}
+            <p className="mb-0">Do you want to proceed?</p>
           </Alert>
         )}
 
@@ -369,23 +454,31 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
           </>
         ) : (
           /* Mode 2: Player editable */
-          effectiveScoringRules?.formatType === 'BIG_TIEBREAK' ? (
-            <BigTiebreakForm
-              scoringRules={effectiveScoringRules}
-              value={formValue}
-              onChange={setFormValue}
-              player1Name={player1Name}
-              player2Name={player2Name}
-            />
-          ) : (
-            <SetsScoreForm
-              scoringRules={effectiveScoringRules}
-              value={formValue}
-              onChange={setFormValue}
-              player1Name={player1Name}
-              player2Name={player2Name}
-            />
-          )
+          <>
+            {effectiveScoringRules?.formatType === 'BIG_TIEBREAK' ? (
+              <BigTiebreakForm
+                scoringRules={effectiveScoringRules}
+                value={formValue}
+                onChange={setFormValue}
+                player1Name={player1Name}
+                player2Name={player2Name}
+              />
+            ) : (
+              <SetsScoreForm
+                scoringRules={effectiveScoringRules}
+                value={formValue}
+                onChange={setFormValue}
+                player1Name={player1Name}
+                player2Name={player2Name}
+              />
+            )}
+            {/* Non-organizer winner-lock warning */}
+            {isSubmitBlockedByWinnerLock && (
+              <Alert variant="info" className="mt-3">
+                Only a tournament organizer can change the winner of a completed match. You can update the score without changing the winner.
+              </Alert>
+            )}
+          </>
         )}
       </Modal.Body>
 
@@ -394,7 +487,16 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
           <Button variant="secondary" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
-          {pendingInvalidSubmit ? (
+          {pendingWinnerChange ? (
+            <>
+              <Button variant="outline-secondary" onClick={() => setPendingWinnerChange(null)} disabled={submitting}>
+                Go Back
+              </Button>
+              <Button variant="danger" onClick={handleConfirmWinnerChange} disabled={submitting}>
+                {submitting ? 'Saving...' : 'Confirm Change'}
+              </Button>
+            </>
+          ) : pendingInvalidSubmit ? (
             <>
               <Button variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
                 Fix Scores
@@ -404,7 +506,11 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
               </Button>
             </>
           ) : (
-            <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={submitting || isSubmitBlockedByWinnerLock}
+            >
               {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
             </Button>
           )}
