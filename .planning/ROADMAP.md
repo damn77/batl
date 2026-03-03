@@ -175,7 +175,7 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7 →
 | 5. Loser Routing and Consolation Progression | v1.1 | 6/6 | Complete | 2026-03-01 |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 6. Visualization and Result Entry | 1/1 | Complete   | 2026-03-03 | - |
+| 6. Visualization and Result Entry | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
