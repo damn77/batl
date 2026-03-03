@@ -47,14 +47,15 @@ Progress: [██████████] 100%
 | Phase 05 P03 | 1 | 1 min | 1 min |
 | Phase 05.1 P01 | 1 | 2 min | 2 min |
 | Phase 05.2 P01 | 1 | 2 min | 2 min |
+| Phase 05 P04 | 1 | 1 min | 1 min |
+| Phase 05 P05 | 1 | 1 min | 1 min |
+| Phase 05 P06 | 1 | 2 min | 2 min |
 
 **Recent Trend:**
 - Last 5 plans: 2 min
 - Trend: —
 
 *Updated after each plan completion*
-| Phase 05 P05 | 1 | 1 tasks | 1 files |
-| Phase 05 P06 | 1 | 2 min | 2 min |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Carried over from v1.0:
 - [Phase 05.1-consolation-gap-closure]: FormatVisualization useMatches drops bracketId filter — empty {} fetches MAIN + CONSOLATION matches for BracketGenerationSection slot editor
 - [Phase 05.2-doubles-backend-fixes]: pair1Id ?? player1Id pattern — nullish coalescing gives correct entity ID for both doubles (pair set, player null) and singles (pair null, player set) without branching
 - [Phase 05.2-doubles-backend-fixes]: advanceBracketSlot position fallback — when resultJson.winner absent (consolationOptOutService call site), derive slot direction by comparing winnerId against pair1Id/player1Id directly
+- [Phase 05-04]: winnerPairId truthiness branch in advanceBracketSlot — doubles writes only pair1Id/pair2Id, singles writes only player1Id/player2Id; mutually exclusive to prevent DoublesPair UUID landing in PlayerProfile FK column (eliminates P2003)
 - [Phase 05-05]: partialScore fields are optional — both must be filled to include in resultData; either empty means partialScore is omitted entirely
 - [Phase 05-05]: partialScore reset in the match-change useEffect alongside setPendingInvalidSubmit to keep form clean between matches
 - [Phase 05-06]: ConsolationOptOutPanel uses two distinct rendering modes (player vs organizer) within a single component controlled by user.role
