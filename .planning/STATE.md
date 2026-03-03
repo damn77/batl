@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Consolation Brackets
 status: unknown
-last_updated: "2026-03-01T22:12:53.177Z"
+last_updated: "2026-03-03T10:07:30Z"
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 ## Current Position
 
-Phase: 5.2 of 7 (Doubles Backend Fixes)
-Plan: 1 of 1 complete
+Phase: 5 UAT gap closure
+Plan: 05-06 complete (all gap closure plans complete)
 Status: Phase Complete
-Last activity: 2026-03-01 — Completed 05.2-01-PLAN.md (Doubles Backend Fixes)
+Last activity: 2026-03-03 — Completed 05-06-PLAN.md (Consolation Opt-Out Frontend UI)
 
-Progress: [███████░░░] 70%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -53,6 +53,8 @@ Progress: [███████░░░] 70%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 05 P05 | 1 | 1 tasks | 1 files |
+| Phase 05 P06 | 1 | 2 min | 2 min |
 
 ## Accumulated Context
 
@@ -86,6 +88,11 @@ Carried over from v1.0:
 - [Phase 05.1-consolation-gap-closure]: FormatVisualization useMatches drops bracketId filter — empty {} fetches MAIN + CONSOLATION matches for BracketGenerationSection slot editor
 - [Phase 05.2-doubles-backend-fixes]: pair1Id ?? player1Id pattern — nullish coalescing gives correct entity ID for both doubles (pair set, player null) and singles (pair null, player set) without branching
 - [Phase 05.2-doubles-backend-fixes]: advanceBracketSlot position fallback — when resultJson.winner absent (consolationOptOutService call site), derive slot direction by comparing winnerId against pair1Id/player1Id directly
+- [Phase 05-05]: partialScore fields are optional — both must be filled to include in resultData; either empty means partialScore is omitted entirely
+- [Phase 05-05]: partialScore reset in the match-change useEffect alongside setPendingInvalidSubmit to keep form clean between matches
+- [Phase 05-06]: ConsolationOptOutPanel uses two distinct rendering modes (player vs organizer) within a single component controlled by user.role
+- [Phase 05-06]: Organizer mode fetches only REGISTERED participants (status filter) to keep the opt-out list relevant
+- [Phase 05-06]: Player mode disables button after success or ALREADY_OPTED_OUT (both are terminal states)
 
 ### Pending Todos
 
