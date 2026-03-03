@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { mutate as globalMutate } from 'swr';
 import { submitMatchResult } from '../services/matchService';
 import SetsScoreForm from './SetsScoreForm';
 import BigTiebreakForm from './BigTiebreakForm';
@@ -175,7 +176,12 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
       }
 
       await submitMatchResult(match.id, resultData);
-      mutate(); // re-fetch bracket matches via SWR
+      mutate(); // re-fetch this bracket's matches via SWR
+      // Also revalidate all other bracket match caches for this tournament
+      // so consolation bracket refreshes when a main bracket result is submitted
+      if (match?.tournamentId) {
+        globalMutate(key => typeof key === 'string' && key.includes(`/tournaments/${match.tournamentId}/matches`));
+      }
       onClose();
     } catch (err) {
       setError(err.message || t('errors.genericFallback', 'An error occurred'));
@@ -191,6 +197,9 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
       await submitMatchResult(match.id, pendingInvalidSubmit.resultData);
       setPendingInvalidSubmit(null);
       mutate();
+      if (match?.tournamentId) {
+        globalMutate(key => typeof key === 'string' && key.includes(`/tournaments/${match.tournamentId}/matches`));
+      }
       onClose();
     } catch (err) {
       setError(err.message || t('errors.genericFallback', 'An error occurred'));
