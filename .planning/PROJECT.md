@@ -54,7 +54,16 @@ A complete tournament runs from registration to final standings without the orga
 
 ### Active
 
-(None — start next milestone to define)
+## Current Milestone: v1.2 Data Seeding Update
+
+**Goal:** Replace prototype placeholder data in all seed scripts with realistic data matching the actual league membership and current feature set.
+
+**Target features:**
+- Import 34 real players (18 men, 16 women) from mixed doubles data file
+- Add real user accounts (Erich Siebenstich ml. as ADMIN, Rene Parak as ORGANIZER)
+- Create 18 mixed doubles pairs from league data
+- Standardize locations to "ProSet"
+- Review and clean up all 4 seed scripts for random/placeholder values
 
 ### Future (v1.2+)
 
