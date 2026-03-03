@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Data Seeding Update
 status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-03-03T21:52:22.368Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-03T22:12:53.338Z"
 last_activity: 2026-03-03 — Roadmap created
 progress:
   total_phases: 2
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -49,6 +49,9 @@ All v1.1 decisions archived to PROJECT.md Key Decisions table.
 
 **v1.2 decisions:**
 - 2 phases chosen over 1: Phase 9 (real data) and Phase 10 (script quality) have a natural delivery boundary — Phase 9 produces a usable DB, Phase 10 cleans up the tooling. Phase 10 depends on Phase 9 (references real players in test seeds).
+- [Phase 09-01]: Player data extracted to backend/prisma/data/players.js as separate ES module — data vs logic separation
+- [Phase 09-01]: Mixed doubles pairs created with seedingScore: 0 — rankings start at zero, no tournaments played yet
+- [Phase 09-01]: ProSet replaces all 4 generic locations — all tournaments show ProSet as location
 
 ### Pending Todos
 
@@ -64,6 +67,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T21:52:22.366Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-real-player-and-league-data/09-CONTEXT.md
+Last session: 2026-03-03T22:12:53.336Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None
