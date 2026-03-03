@@ -107,10 +107,10 @@ Plans:
   2. A participant can open the result entry modal for a consolation match and submit a score, which is saved and reflected in the bracket view
   3. Consolation matches whose player slots are not yet determined (awaiting main bracket outcomes) display "TBD" for each unresolved player name and disable the result entry action
   4. An organizer or player can trigger consolation opt-out via a UI button/affordance on the tournament page, which calls the existing POST /api/v1/tournaments/:id/consolation-opt-out endpoint (closes LIFE-05 BREAK 3)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — TBD styling for unresolved match slots; organizer opt-out accordion collapse; ConsolationOptOutPanel repositioned below bracket section
 
 ### Phase 7: Consolation Points
 **Goal**: Consolation bracket point tables are seeded with the correct values and wired into point calculation so players who win at least one consolation match receive consolation points based on their final consolation round
@@ -141,5 +141,5 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
 | 5. Loser Routing and Consolation Progression | 6/6 | Complete   | 2026-03-03 | - |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
+| 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
