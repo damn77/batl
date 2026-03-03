@@ -40,10 +40,10 @@ async function main() {
     throw new Error('No men\'s singles category found. Run main seed first.');
   }
 
-  // Find location
-  const location = await prisma.location.findFirst();
+  // Find ProSet location
+  const location = await prisma.location.findFirst({ where: { clubName: 'ProSet' } });
   if (!location) {
-    throw new Error('No location found. Run main seed first.');
+    throw new Error('No ProSet location found. Run main seed first: npx prisma db seed');
   }
 
   // Find 11 male players
