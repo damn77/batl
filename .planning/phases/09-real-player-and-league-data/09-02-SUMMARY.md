@@ -4,6 +4,7 @@ plan: 02
 subsystem: data-seeding
 tags: [seed, tournaments, rankings, doubles-pairs, proset]
 requirements: [TOURN-02, TOURN-03, TOURN-04, PAIR-02]
+requirements_completed: [TOURN-02, TOURN-03, TOURN-04, PAIR-02]
 
 dependency_graph:
   requires: ["09-01"]

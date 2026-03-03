@@ -3,6 +3,7 @@ phase: 10-data-quality-and-script-cleanup
 plan: "02"
 subsystem: backend/seeding
 tags: [seeding, data-quality, script-cleanup, real-players]
+requirements_completed: [SCRP-01, SCRP-02, SCRP-03]
 dependency_graph:
   requires:
     - 09-01 (player data file at backend/prisma/data/players.js)
