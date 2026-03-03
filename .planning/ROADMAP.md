@@ -104,4 +104,4 @@ Plans:
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
+| 10. Data Quality and Script Cleanup | v1.2 | Complete    | 2026-03-03 | 2026-03-03 |
