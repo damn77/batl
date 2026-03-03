@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
-- 🚧 **v1.1 Consolation Brackets** — Phases 4–6.1, 7 (in progress)
+- 🚧 **v1.1 Consolation Brackets** — Phases 4–6.1, 7, 8 (in progress)
 
 ## Phases
 
@@ -30,6 +30,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
 - [ ] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages
 - [x] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI (completed 2026-03-03)
+- [ ] **Phase 8: Consolation Bug Fixes** - Fix PTS-01 case mismatch in consolation point calculation and LIFE-05 doubles player self-service opt-out entity key
 
 ## Phase Details
 
@@ -144,10 +145,25 @@ Plans:
 Plans:
 - [ ] 07-01-PLAN.md — deriveConsolationResults service + calculate-points endpoint auto-includes consolation results for MATCH_2 tournaments
 
+### Phase 8: Consolation Bug Fixes
+**Goal**: Fix two runtime bugs that break E2E flows: consolation point calculation case mismatch (PTS-01) and doubles player self-service opt-out sending wrong entity key (LIFE-05)
+**Depends on**: Phase 7
+**Requirements**: PTS-01, LIFE-05
+**Gap Closure:** Closes gaps from v1.1 milestone audit (2026-03-03)
+**Success Criteria** (what must be TRUE):
+  1. `deriveConsolationResults()` correctly identifies consolation match winners by comparing against uppercase `'PLAYER1'`/`'PLAYER2'` values stored in `resultJson.winner`
+  2. Point calculation for a completed MATCH_2 tournament awards consolation points to players who won consolation matches (no longer returns empty array)
+  3. `ConsolationOptOutPanel` in player self-service mode sends `{ pairId: <uuid> }` for doubles tournaments instead of `{ playerId: <uuid> }`
+  4. Doubles players can successfully self-opt-out of consolation and the opt-out is recognized by loser-routing logic
+**Plans**: 1 plan
+
+Plans:
+- [ ] 08-01-PLAN.md — Fix deriveConsolationResults case mismatch (PTS-01) + ConsolationOptOutPanel doubles entity key (LIFE-05)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7
+Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7 → 8
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -162,3 +178,4 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
 | 6.1. Match Result Resubmission and Bracket Recalculation | 1/2 | In Progress|  | - |
 | 7. Consolation Points | 1/1 | Complete   | 2026-03-03 | - |
+| 8. Consolation Bug Fixes | v1.1 | 0/1 | Not started | - |
