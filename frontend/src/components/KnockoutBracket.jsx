@@ -118,7 +118,6 @@ const KnockoutBracket = ({
   className = ''
 }) => {
   // State
-  const [showBracket, setShowBracket] = useState(false);
   const [showFirstRoundByes, setShowFirstRoundByes] = useState(initialShowByes);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [selectedMatchIsParticipant, setSelectedMatchIsParticipant] = useState(false);
@@ -144,7 +143,7 @@ const KnockoutBracket = ({
   const { matches, isLoading, isError, mutate } = useMatches(
     tournamentId,
     { bracketId: bracket.id },
-    showBracket
+    true
   );
 
   // Check if tournament has first-round BYEs
@@ -254,21 +253,7 @@ const KnockoutBracket = ({
 
   return (
     <div className={wrapperClasses}>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5>{bracket.name || bracket.bracketType || 'Main Bracket'}</h5>
-        <div className="d-flex gap-2">
-          {/* Expand/Collapse button */}
-          <button
-            className="btn btn-outline-primary btn-sm"
-            onClick={() => setShowBracket(!showBracket)}
-          >
-            {showBracket ? '\u25BC Collapse' : '\u25B6 Expand'} Bracket
-          </button>
-        </div>
-      </div>
-
-      {showBracket && (
-        <>
+      <>
           {isLoading && (
             <div className="text-center py-4">
               <Spinner animation="border" />
@@ -380,8 +365,7 @@ const KnockoutBracket = ({
               No matches scheduled yet for this bracket.
             </Alert>
           )}
-        </>
-      )}
+      </>
 
       {/* Match result modal — opens on click for participants and organizers */}
       <MatchResultModal

@@ -11,7 +11,7 @@
  * Receives structure/matches/mutate* from the parent's SWR hooks.
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col } from 'react-bootstrap';
+import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col, Tab, Nav } from 'react-bootstrap';
 import KnockoutBracket from './KnockoutBracket';
 import { closeRegistration, generateBracket, swapSlots } from '../services/bracketPersistenceService';
 import apiClient from '../services/apiClient';
@@ -159,10 +159,9 @@ const BracketGenerationSection = ({
   // ----- Render guards -----
   if (!tournament) return null;
   if (tournament.formatType !== 'KNOCKOUT') return null;
-  // Only show for SCHEDULED status (before IN_PROGRESS)
-  if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') {
-    return null;
-  }
+  if (tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') return null;
+  // For IN_PROGRESS: only allow if no bracket exists yet (recovery path for tournaments started without a draw)
+  if (tournament.status === 'IN_PROGRESS' && hasBracket) return null;
 
   // ----- STATE A: Registration still open -----
   if (!tournament.registrationClosed) {
@@ -308,7 +307,9 @@ const BracketGenerationSection = ({
 
   // Build a flat list of all matches across all rounds for the slot editor
   const allMatches = matches || [];
-  const brackets = structure?.brackets || [];
+  const brackets = structure?.brackets
+    ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
+    : [];
   const rounds = structure?.rounds || [];
 
   // Group matches by round for the slot editor display
@@ -347,14 +348,16 @@ const BracketGenerationSection = ({
                 `Save Draw${pendingSwaps.length > 0 ? ` (${pendingSwaps.length} change${pendingSwaps.length !== 1 ? 's' : ''})` : ''}`
               )}
             </Button>
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => setShowRegenerateConfirm(true)}
-              disabled={generating || saving}
-            >
-              Regenerate Draw
-            </Button>
+            {tournament.status === 'SCHEDULED' && (
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => setShowRegenerateConfirm(true)}
+                disabled={generating || saving}
+              >
+                Regenerate Draw
+              </Button>
+            )}
           </div>
         </div>
       </Card.Header>
@@ -387,19 +390,48 @@ const BracketGenerationSection = ({
         {!generating && (
           <>
             {/* KnockoutBracket visualization */}
-            {brackets.map(bracket => {
-              const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
-              return (
-                <KnockoutBracket
-                  key={bracket.id}
-                  tournamentId={tournament.id}
-                  bracket={bracket}
-                  rounds={bracketRounds}
-                  isDoubles={isDoubles}
-                  className="mb-4"
-                />
-              );
-            })}
+            {brackets.length > 1 ? (
+              <Tab.Container defaultActiveKey={brackets[0].id}>
+                <Nav variant="tabs" className="mb-3">
+                  {brackets.map(bracket => (
+                    <Nav.Item key={bracket.id}>
+                      <Nav.Link eventKey={bracket.id}>
+                        {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
+                      </Nav.Link>
+                    </Nav.Item>
+                  ))}
+                </Nav>
+                <Tab.Content>
+                  {brackets.map(bracket => {
+                    const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
+                    return (
+                      <Tab.Pane key={bracket.id} eventKey={bracket.id}>
+                        <KnockoutBracket
+                          tournamentId={tournament.id}
+                          bracket={bracket}
+                          rounds={bracketRounds}
+                          isDoubles={isDoubles}
+                        />
+                      </Tab.Pane>
+                    );
+                  })}
+                </Tab.Content>
+              </Tab.Container>
+            ) : (
+              brackets.map(bracket => {
+                const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
+                return (
+                  <KnockoutBracket
+                    key={bracket.id}
+                    tournamentId={tournament.id}
+                    bracket={bracket}
+                    rounds={bracketRounds}
+                    isDoubles={isDoubles}
+                    className="mb-4"
+                  />
+                );
+              })
+            )}
 
             {/* Slot editor — per-slot dropdowns for swapping players */}
             {allMatches.length > 0 && (

@@ -125,18 +125,12 @@ export async function recordOptOut({ tournamentId, playerId, pairId, isOrganizer
     select: { id: true }
   });
 
+  // Build participant filter (used in Step 5 and Step 7)
+  const participantFilter = pairId
+    ? { OR: [{ pair1Id: pairId }, { pair2Id: pairId }] }
+    : { OR: [{ player1Id: playerId }, { player2Id: playerId }] };
+
   if (consolationBracket) {
-    // Build participant filter for the consolation matches
-    let participantFilter;
-    if (pairId) {
-      participantFilter = {
-        OR: [{ pair1Id: pairId }, { pair2Id: pairId }]
-      };
-    } else {
-      participantFilter = {
-        OR: [{ player1Id: playerId }, { player2Id: playerId }]
-      };
-    }
 
     const playedConsolationMatches = await prisma.match.findMany({
       where: {

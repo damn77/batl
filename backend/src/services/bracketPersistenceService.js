@@ -117,12 +117,16 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 4: Guard — bracket is locked if tournament is in progress or completed (DRAW-05)
+  // Step 4: Guard — bracket is locked if tournament is in progress/completed AND a bracket exists (DRAW-05)
+  // Allow initial draw generation for IN_PROGRESS when no bracket has been created yet (recovery path)
   if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
-    throw makeError(
-      'BRACKET_LOCKED',
-      `Cannot modify bracket when tournament status is ${tournament.status}`
-    );
+    const existingBracketCount = await prisma.bracket.count({ where: { tournamentId } });
+    if (existingBracketCount > 0) {
+      throw makeError(
+        'BRACKET_LOCKED',
+        `Cannot modify bracket when tournament status is ${tournament.status}`
+      );
+    }
   }
 
   // Step 4b: Parse matchGuarantee from formatConfig JSON string

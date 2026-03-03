@@ -710,55 +710,54 @@ async function main() {
   // ============================================
   console.log('\n📊 Creating default point tables for ranking system...\n');
 
+  // Clear stale point table data before inserting corrected values
+  await prisma.pointTable.deleteMany({});
+
+  // Consolation rounds use the same roundName keys as main rounds (e.g. FINAL, SEMIFINAL).
+  // The isConsolation flag distinguishes them. This keeps the lookup symmetric in the UI.
   const pointTables = [
     // Range: 2-4 participants
-    { participantRange: '2-4', roundName: 'FINAL', points: 20, isConsolation: false },
-    { participantRange: '2-4', roundName: 'SEMIFINAL', points: 10, isConsolation: false },
+    { participantRange: '2-4', roundName: 'FINAL',      points: 10, isConsolation: false },
+    { participantRange: '2-4', roundName: 'SEMIFINAL',  points:  7, isConsolation: false },
+    { participantRange: '2-4', roundName: 'FINAL',      points:  5, isConsolation: true  },
 
     // Range: 5-8 participants
-    { participantRange: '5-8', roundName: 'FINAL', points: 25, isConsolation: false },
-    { participantRange: '5-8', roundName: 'SEMIFINAL', points: 15, isConsolation: false },
-    { participantRange: '5-8', roundName: 'QUARTERFINAL', points: 8, isConsolation: false },
-    { participantRange: '5-8', roundName: 'CONSOLATION_FINAL', points: 12, isConsolation: true },
+    { participantRange: '5-8', roundName: 'FINAL',        points: 13, isConsolation: false },
+    { participantRange: '5-8', roundName: 'SEMIFINAL',    points: 10, isConsolation: false },
+    { participantRange: '5-8', roundName: 'QUARTERFINAL', points:  7, isConsolation: false },
+    { participantRange: '5-8', roundName: 'FINAL',        points:  5, isConsolation: true  },
+    { participantRange: '5-8', roundName: 'SEMIFINAL',    points:  4, isConsolation: true  },
 
     // Range: 9-16 participants
-    { participantRange: '9-16', roundName: 'FINAL', points: 30, isConsolation: false },
-    { participantRange: '9-16', roundName: 'SEMIFINAL', points: 20, isConsolation: false },
+    { participantRange: '9-16', roundName: 'FINAL',        points: 16, isConsolation: false },
+    { participantRange: '9-16', roundName: 'SEMIFINAL',    points: 13, isConsolation: false },
     { participantRange: '9-16', roundName: 'QUARTERFINAL', points: 10, isConsolation: false },
-    { participantRange: '9-16', roundName: 'ROUND_16', points: 5, isConsolation: false },
-    { participantRange: '9-16', roundName: 'CONSOLATION_FINAL', points: 15, isConsolation: true },
-    { participantRange: '9-16', roundName: 'CONSOLATION_SEMIFINAL', points: 8, isConsolation: true },
+    { participantRange: '9-16', roundName: 'FIRST_ROUND',  points:  7, isConsolation: false },
+    { participantRange: '9-16', roundName: 'FINAL',        points:  6, isConsolation: true  },
+    { participantRange: '9-16', roundName: 'SEMIFINAL',    points:  5, isConsolation: true  },
+    { participantRange: '9-16', roundName: 'QUARTERFINAL', points:  4, isConsolation: true  },
 
     // Range: 17-32 participants
-    { participantRange: '17-32', roundName: 'FINAL', points: 40, isConsolation: false },
-    { participantRange: '17-32', roundName: 'SEMIFINAL', points: 28, isConsolation: false },
-    { participantRange: '17-32', roundName: 'QUARTERFINAL', points: 18, isConsolation: false },
-    { participantRange: '17-32', roundName: 'ROUND_16', points: 10, isConsolation: false },
-    { participantRange: '17-32', roundName: 'ROUND_32', points: 5, isConsolation: false },
-    { participantRange: '17-32', roundName: 'CONSOLATION_FINAL', points: 20, isConsolation: true },
-    { participantRange: '17-32', roundName: 'CONSOLATION_SEMIFINAL', points: 12, isConsolation: true },
-    { participantRange: '17-32', roundName: 'CONSOLATION_QUARTERFINAL', points: 6, isConsolation: true },
+    { participantRange: '17-32', roundName: 'FINAL',         points: 19, isConsolation: false },
+    { participantRange: '17-32', roundName: 'SEMIFINAL',     points: 16, isConsolation: false },
+    { participantRange: '17-32', roundName: 'QUARTERFINAL',  points: 13, isConsolation: false },
+    { participantRange: '17-32', roundName: 'SECOND_ROUND',  points: 10, isConsolation: false },
+    { participantRange: '17-32', roundName: 'FIRST_ROUND',   points:  7, isConsolation: false },
+    { participantRange: '17-32', roundName: 'FINAL',         points:  6, isConsolation: true  },
+    { participantRange: '17-32', roundName: 'SEMIFINAL',     points:  5, isConsolation: true  },
+    { participantRange: '17-32', roundName: 'QUARTERFINAL',  points:  4, isConsolation: true  },
+    { participantRange: '17-32', roundName: 'FIRST_ROUND',   points:  3, isConsolation: true  },
   ];
 
   for (const tableData of pointTables) {
-    await prisma.pointTable.upsert({
-      where: {
-        participantRange_roundName_isConsolation: {
-          participantRange: tableData.participantRange,
-          roundName: tableData.roundName,
-          isConsolation: tableData.isConsolation
-        }
-      },
-      update: { points: tableData.points },
-      create: tableData
-    });
+    await prisma.pointTable.create({ data: tableData });
   }
 
   console.log(`✅ Created ${pointTables.length} point table entries across 4 participant ranges`);
-  console.log('   - 2-4 participants: 2 rounds');
-  console.log('   - 5-8 participants: 4 rounds (3 main + 1 consolation)');
-  console.log('   - 9-16 participants: 6 rounds (4 main + 2 consolation)');
-  console.log('   - 17-32 participants: 8 rounds (5 main + 3 consolation)');
+  console.log('   - 2-4 participants:  3 entries (2 main + 1 consolation)');
+  console.log('   - 5-8 participants:  5 entries (3 main + 2 consolation)');
+  console.log('   - 9-16 participants: 7 entries (4 main + 3 consolation)');
+  console.log('   - 17-32 participants: 9 entries (5 main + 4 consolation)');
 
   // ============================================
   // SUMMARY
