@@ -585,6 +585,28 @@ async function main() {
     return age >= 35;
   });
 
+  // Realistic ranking data profiles — pre-sorted descending by totalPoints
+  // Points vary irregularly (not a ladder), tournament counts differ (3-8 range),
+  // seedingScore < totalPoints (best N of M results)
+  const RANKING_PROFILES = [
+    { totalPoints: 1450, tournamentCount: 7, seedingScore: 1280 },
+    { totalPoints: 1380, tournamentCount: 6, seedingScore: 1220 },
+    { totalPoints: 1210, tournamentCount: 8, seedingScore: 1050 },
+    { totalPoints: 1190, tournamentCount: 5, seedingScore: 1040 },
+    { totalPoints: 980,  tournamentCount: 4, seedingScore: 900 },
+    { totalPoints: 920,  tournamentCount: 7, seedingScore: 780 },
+    { totalPoints: 870,  tournamentCount: 6, seedingScore: 740 },
+    { totalPoints: 810,  tournamentCount: 3, seedingScore: 690 },
+    { totalPoints: 750,  tournamentCount: 5, seedingScore: 620 },
+    { totalPoints: 680,  tournamentCount: 8, seedingScore: 550 },
+    { totalPoints: 620,  tournamentCount: 4, seedingScore: 520 },
+    { totalPoints: 540,  tournamentCount: 6, seedingScore: 430 },
+    { totalPoints: 490,  tournamentCount: 3, seedingScore: 410 },
+    { totalPoints: 430,  tournamentCount: 7, seedingScore: 350 },
+    { totalPoints: 380,  tournamentCount: 5, seedingScore: 300 },
+    { totalPoints: 310,  tournamentCount: 4, seedingScore: 250 },
+  ];
+
   // Helper to create ranking and entries
   async function seedRanking(category, type, entities, entityType) {
     // Create Ranking
@@ -607,15 +629,15 @@ async function main() {
     // Create Entries
     for (let i = 0; i < entities.length; i++) {
       const entity = entities[i];
-      const points = 1000 - i * 100;
+      const profile = RANKING_PROFILES[i % RANKING_PROFILES.length];
 
       const entryData = {
         rankingId: ranking.id,
         entityType: entityType,
         rank: i + 1,
-        totalPoints: points,
-        tournamentCount: 5, // Mock data
-        seedingScore: points // Mock data
+        totalPoints: profile.totalPoints,
+        tournamentCount: profile.tournamentCount,
+        seedingScore: profile.seedingScore
       };
 
       if (entityType === 'PLAYER') {
