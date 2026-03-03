@@ -43,9 +43,9 @@ Requirements for seed data update. Each maps to roadmap phases.
 
 ### Script Cleanup
 
-- [ ] **SCRP-01**: Two seed-active-tournament scripts merged into one
-- [ ] **SCRP-02**: Knockout test seed updated to use ProSet location and reference real players
-- [ ] **SCRP-03**: Merged active tournament seed updated to use ProSet location and reference real players
+- [x] **SCRP-01**: Two seed-active-tournament scripts merged into one
+- [x] **SCRP-02**: Knockout test seed updated to use ProSet location and reference real players
+- [x] **SCRP-03**: Merged active tournament seed updated to use ProSet location and reference real players
 
 ## Future Requirements
 
@@ -80,9 +80,9 @@ None — this is a self-contained data quality milestone.
 | LOC-02 | Phase 9 | Complete |
 | DATA-01 | Phase 10 | Pending |
 | DATA-02 | Phase 10 | Pending |
-| SCRP-01 | Phase 10 | Pending |
-| SCRP-02 | Phase 10 | Pending |
-| SCRP-03 | Phase 10 | Pending |
+| SCRP-01 | Phase 10 | Complete |
+| SCRP-02 | Phase 10 | Complete |
+| SCRP-03 | Phase 10 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 19 total

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Data Seeding Update
 status: planning
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-03T22:25:38.204Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-03-03T22:45:30.594Z"
 last_activity: 2026-03-03 — Roadmap created
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 0
 ---
 
@@ -54,6 +54,8 @@ All v1.1 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 09-01]: ProSet replaces all 4 generic locations — all tournaments show ProSet as location
 - [Phase 09]: Mixed Doubles Open PAIR/MEN/WOMEN rankings created with explicit zero-ranked entries for all 18 pairs and 34 players — not an empty table
 - [Phase 09]: Men's/women's doubles pairs now reference real players: Zaprazny+Siebenstich, Stevko+Pomsar, Macho+Uhliar, Kardos+Sramko for men; Nestarcova+Siebenstichova, Zaprazna+Strakova for women
+- [Phase 10]: merged active-tournament seed into single file using email-based player lookup for deterministic references
+- [Phase 10]: knockout seed now uses explicit malePlayers email slice instead of alphabetical findMany to guarantee real named players
 
 ### Pending Todos
 
@@ -69,6 +71,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:21:17.353Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-03-03T22:45:30.592Z
+Stopped at: Completed 10-02-PLAN.md
 Resume file: None
