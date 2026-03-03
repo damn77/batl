@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
-- ✅ **v1.2 Data Seeding Update** — Phases 9, 10 (shipped 2026-03-03)
+- **v1.2 Data Seeding Update** — Phases 9, 10, 11
 
 ## Phases
 
@@ -40,6 +40,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 
 - [x] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations (completed 2026-03-03)
 - [x] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds (completed 2026-03-03)
+- [ ] **Phase 11: Seed Script Cleanup** - Fix seed-active-tournament.js schema bugs, update SUMMARY frontmatter gaps (gap closure)
 
 ## Phase Details
 
@@ -87,6 +88,28 @@ Plans:
 
 ---
 
+### Phase 11: Seed Script Cleanup
+
+**Goal**: All seed scripts run without errors against any database state, and all SUMMARY frontmatter accurately reflects completed requirements — no schema mismatches, no stale field references, no documentation gaps
+
+**Depends on**: Phase 10
+
+**Requirements**: None (gap closure — fixes tech debt, no new requirements)
+
+**Gap Closure**: Closes gaps from v1.2 milestone audit
+
+**Success Criteria** (what must be TRUE):
+  1. Running `node backend/seed-active-tournament.js` against a fresh database (after `prisma db push` but WITHOUT running main seed first) does not crash — the organizer create fallback uses correct Prisma schema fields
+  2. `09-02-SUMMARY.md` frontmatter lists TOURN-02, TOURN-03, TOURN-04 in `requirements_completed`
+  3. `10-02-SUMMARY.md` frontmatter lists SCRP-01, SCRP-02, SCRP-03 in `requirements_completed`
+
+**Plans:** 0/1 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Fix seed-active-tournament.js schema bugs and update SUMMARY frontmatter
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -105,3 +128,4 @@ Plans:
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | Complete    | 2026-03-03 | 2026-03-03 |
+| 11. Seed Script Cleanup | v1.2 | Planned | 0/1 | — |
