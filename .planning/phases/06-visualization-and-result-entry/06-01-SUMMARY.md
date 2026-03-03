@@ -54,8 +54,8 @@ completed: 2026-03-03
 - **Duration:** 1 min
 - **Started:** 2026-03-03T12:27:00Z
 - **Completed:** 2026-03-03T12:28:45Z
-- **Tasks:** 3/3 automated tasks complete (Task 4 is human visual verification checkpoint)
-- **Files modified:** 3
+- **Tasks:** 4/4 complete (3 automated + 1 human verification approved)
+- **Files modified:** 3 (+ 1 bugfix during verification)
 
 ## Accomplishments
 - BracketMatch.jsx derives `isBlocked` from null player/pair slots and renders muted gray appearance (`tbd-pending` class, opacity 0.65, `#f8f9fa` background) for consolation matches awaiting main bracket outcomes
@@ -69,6 +69,8 @@ Each task was committed atomically:
 1. **Task 1: Add TBD muted styling to BracketMatch for unresolved slots** - `4a5f5a6` (feat)
 2. **Task 2: Collapse organizer opt-out list by default in ConsolationOptOutPanel** - `d209bcc` (feat)
 3. **Task 3: Reorder ConsolationOptOutPanel below FormatVisualization in TournamentViewPage** - `3ba5b0b` (feat)
+4. **Task 4: Visual verification** - Human approved after consolation BYE bugfix
+5. **Bugfix: Consolation BYE player name display** - `f78c95d` (fix) — BYE rendering assumed player always in player1 slot; consolation BYEs can have the player in player2
 
 ## Files Created/Modified
 - `frontend/src/components/BracketMatch.jsx` - Added `bothFilled`/`isBlocked` derivation; added `tbd-pending` to matchClasses array; added conditional inline style for muted appearance
@@ -82,7 +84,7 @@ Each task was committed atomically:
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+- **Consolation BYE player name fix** (commit `f78c95d`): During human verification, discovered that consolation BYE matches displayed "TBD" when the real player was in the player2 slot. BracketMatch.jsx BYE rendering assumed the real player was always in player1. Fixed by detecting which slot is filled and displaying that player's name. Also fixed pre-existing `user.playerProfileId` → `user.playerId` bug in FormatVisualization.jsx (commit `3832936`).
 
 ## Issues Encountered
 None.
@@ -92,8 +94,8 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 - Tasks 1-3 complete and committed; Vite build passes
-- Task 4 is a `checkpoint:human-verify` requiring human visual verification on a live MATCH_2 IN_PROGRESS tournament
-- Requirements VIEW-01, VIEW-02, VIEW-03, LIFE-05 fully closed once human verification is approved
+- Task 4 human verification: **APPROVED**
+- Requirements VIEW-01, VIEW-02, VIEW-03, LIFE-05 fully closed
 
 ---
 *Phase: 06-visualization-and-result-entry*
