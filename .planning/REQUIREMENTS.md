@@ -78,11 +78,11 @@ None — this is a self-contained data quality milestone.
 | TOURN-04 | Phase 9 | Pending |
 | LOC-01 | Phase 9 | Pending |
 | LOC-02 | Phase 9 | Pending |
-| DATA-01 | Phase 9 | Pending |
-| DATA-02 | Phase 9 | Pending |
-| SCRP-01 | Phase 9 | Pending |
-| SCRP-02 | Phase 9 | Pending |
-| SCRP-03 | Phase 9 | Pending |
+| DATA-01 | Phase 10 | Pending |
+| DATA-02 | Phase 10 | Pending |
+| SCRP-01 | Phase 10 | Pending |
+| SCRP-02 | Phase 10 | Pending |
+| SCRP-03 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 19 total
@@ -91,4 +91,4 @@ None — this is a self-contained data quality milestone.
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 — Phase assignments finalized (Phase 9: 14 reqs, Phase 10: 5 reqs)*
