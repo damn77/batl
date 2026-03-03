@@ -30,7 +30,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
 - [ ] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages
 - [x] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI (completed 2026-03-03)
-- [ ] **Phase 8: Consolation Bug Fixes** - Fix PTS-01 case mismatch in consolation point calculation and LIFE-05 doubles player self-service opt-out entity key
+- [x] **Phase 8: Consolation Bug Fixes** - Fix PTS-01 case mismatch in consolation point calculation and LIFE-05 doubles player self-service opt-out entity key (completed 2026-03-03)
 
 ## Phase Details
 
@@ -178,4 +178,4 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7 →
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
 | 6.1. Match Result Resubmission and Bracket Recalculation | 1/2 | In Progress|  | - |
 | 7. Consolation Points | 1/1 | Complete   | 2026-03-03 | - |
-| 8. Consolation Bug Fixes | v1.1 | 0/1 | Not started | - |
+| 8. Consolation Bug Fixes | 1/1 | Complete   | 2026-03-03 | - |

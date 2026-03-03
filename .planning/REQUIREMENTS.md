@@ -22,7 +22,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 - [x] **LIFE-02**: BYE matches and walkovers (no-shows/`CANCELLED` outcome matches) are excluded from the "real matches played" count for consolation eligibility
 - [x] **LIFE-03**: Consolation bracket winners automatically advance through consolation rounds (same mechanism as main bracket)
 - [x] **LIFE-04**: Tournament auto-completes only when all brackets (main + consolation) are fully played
-- [ ] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
+- [x] **LIFE-05**: Player/pair can opt out of consolation participation at any time; opt-out is treated as an automatic forfeit (opponent advances without playing)
 
 ### Visualization
 
@@ -32,7 +32,7 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ### Points
 
-- [ ] **PTS-01**: Point calculation awards consolation bracket points based on the last consolation round the player won (player must win at least 1 consolation match to receive consolation points)
+- [x] **PTS-01**: Point calculation awards consolation bracket points based on the last consolation round the player won (player must win at least 1 consolation match to receive consolation points)
 - [x] **PTS-02**: Consolation point tables (`isConsolation=true`) are pre-seeded with values from `notes/013-bracket-points-rules.md` and are admin-editable via the existing Point Tables admin UI
 
 ## Future Requirements (v1.2+)
@@ -77,11 +77,11 @@ Which phases cover which requirements.
 | LIFE-02 | Phase 5 | Complete |
 | LIFE-03 | Phase 5.2 | Complete |
 | LIFE-04 | Phase 5 | Complete |
-| LIFE-05 | Phase 8 | Pending |
+| LIFE-05 | Phase 8 | Complete |
 | VIEW-01 | Phase 6 | Pending |
 | VIEW-02 | Phase 6 | Pending |
 | VIEW-03 | Phase 6 | Pending |
-| PTS-01 | Phase 8 | Pending |
+| PTS-01 | Phase 8 | Complete |
 | PTS-02 | Phase 7 | Complete |
 
 **Coverage:**
