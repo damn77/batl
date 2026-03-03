@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 05-loser-routing-and-consolation-progression
 source: 05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md
 started: 2026-03-03T00:00:00Z
-updated: 2026-03-03T00:00:00Z
+updated: 2026-03-03T12:00:00Z
 ---
 
 ## Current Test
@@ -66,42 +66,28 @@ skipped: 5
 ## Gaps
 
 - truth: "Submitting a match result for a R1 main bracket match places the loser in the consolation bracket without error"
-  status: failed
+  status: resolved
   reason: "User reported: Error on match result submission: P2003 Foreign key constraint violated on the constraint: Match_player2Id_fkey — thrown inside advanceBracketSlot at tournamentLifecycleService.js:186 called from matchResultService.js:193"
   severity: blocker
   test: 1
   root_cause: "Phase 5.2 BREAK 1 fix correctly sets winnerId=pairId for doubles, but advanceBracketSlot unconditionally writes winnerId into player1Id/player2Id (PlayerProfile FKs). For doubles the fix must branch on winnerPairId: if set, write only to pair1Id/pair2Id; if null, write winnerId to player1Id/player2Id (singles path)."
-  artifacts:
-    - path: "backend/src/services/tournamentLifecycleService.js"
-      issue: "Lines 166-169: updateData always sets player1Id/player2Id = winnerId, even when winnerId is a pairId"
-  missing:
-    - "Branch updateData construction on winnerPairId truthiness so pair slots and player slots are mutually exclusive"
+  resolved_by: "05-04-PLAN.md — replaced unconditional updateData construction with winnerPairId branch; all 166 backend tests pass"
   debug_session: ""
 
 - truth: "RETIRED is available as an option when submitting a special match outcome"
-  status: failed
+  status: resolved
   reason: "User reported: Retired option is not available when submitting special results"
   severity: major
   test: 4
   root_cause: "MatchResultModal.jsx special outcome <Form.Select> only lists WALKOVER, FORFEIT, NO_SHOW — RETIRED was added to the backend validator (matchValidator.js line 64) but never added to the frontend dropdown options."
-  artifacts:
-    - path: "frontend/src/components/MatchResultModal.jsx"
-      issue: "Lines 299-303: <option> elements do not include RETIRED"
-  missing:
-    - "Add <option value='RETIRED'>Retired (RET)</option> to the special outcome select"
-    - "Add optional partialScore fields (player1Games, player2Games) shown when RETIRED is selected"
+  resolved_by: "05-05-PLAN.md — added RETIRED option, partialScore state and conditional fields, resultData inclusion; Vite build passes"
   debug_session: ""
 
 - truth: "Players can opt out of consolation from the tournament page"
-  status: failed
+  status: resolved
   reason: "User reported: As player I don't see option to Opt-Out on tournament page"
   severity: major
   test: 3
   root_cause: "POST /api/v1/tournaments/:id/consolation-opt-out is fully implemented (consolationOptOutController + tournamentRoutes) but no frontend component calls it. TournamentViewPage has no ConsolationOptOut UI for players or organizers."
-  artifacts:
-    - path: "frontend/src/pages/TournamentViewPage.jsx"
-      issue: "No ConsolationOptOutPanel rendered for MATCH_2 tournaments"
-  missing:
-    - "Create frontend/src/components/ConsolationOptOutPanel.jsx — player self-opt-out button + organizer per-player opt-out list"
-    - "Mount ConsolationOptOutPanel in TournamentViewPage when formatConfig.matchGuarantee === 'MATCH_2'"
+  resolved_by: "05-06-PLAN.md — created ConsolationOptOutPanel.jsx with player and organizer modes; mounted in TournamentViewPage for MATCH_2 KNOCKOUT IN_PROGRESS tournaments; Vite build passes"
   debug_session: ""
