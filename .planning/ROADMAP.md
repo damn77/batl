@@ -58,12 +58,15 @@ Plans:
   4. When a consolation match result is submitted, the winner automatically advances to the next consolation round (same auto-advance mechanism as the main bracket)
   5. A tournament in MATCH_2 mode remains IN_PROGRESS until all consolation matches have been played; submitting the main bracket final result alone does not trigger auto-completion
   6. A player/pair can opt out of consolation participation at any time; the opt-out is recorded as an automatic forfeit (opponent advances without playing)
-**Plans**: 3 plans
+**Plans**: 6 plans
 
 Plans:
 - [ ] 05-01-PLAN.md — Schema migration: add RETIRED to MatchStatus enum, add ConsolationOptOut model; update matchValidator
 - [ ] 05-02-PLAN.md — consolationEligibilityService: real-match counting, loser routing, auto-BYE detection; updated tournament completion check
 - [ ] 05-03-PLAN.md — Consolation opt-out API: POST /:id/consolation-opt-out endpoint with player/organizer authorization
+- [ ] 05-04-PLAN.md — GAP: Fix advanceBracketSlot updateData doubles/singles branch (P2003 FK blocker)
+- [ ] 05-05-PLAN.md — GAP: Add RETIRED option + partial score fields to MatchResultModal
+- [ ] 05-06-PLAN.md — GAP: Create ConsolationOptOutPanel and mount in TournamentViewPage for MATCH_2
 
 ### Phase 5.1: Consolation Gap Closure
 **Goal**: Close the three unsatisfied/partial gaps identified in the v1.1 milestone audit — post-placement opt-out opponent advancement (LIFE-05), doubles auto-BYE consolation progression hardening (DRAW-02/LIFE-03), consolation slot visibility in the draw UI, and error handling in the tournament rules setup page
@@ -135,8 +138,8 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 7
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
-| 5. Loser Routing and Consolation Progression | v1.1 | 3/3 | Complete | 2026-03-01 |
+| 5. Loser Routing and Consolation Progression | v1.1 | 3/6 | Gap closure in progress | - |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 5.2. Doubles Backend Fixes | 1/1 | Complete   | 2026-03-01 | - |
+| 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 6. Visualization and Result Entry | v1.1 | 0/TBD | Not started | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |
