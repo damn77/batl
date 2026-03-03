@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Consolation Brackets
 status: completed
-stopped_at: Completed 06.1-01-PLAN.md (Match Result Resubmission Backend)
-last_updated: "2026-03-03T16:39:38.007Z"
+stopped_at: Completed 06.1-02-PLAN.md (Match Result Resubmission Frontend)
+last_updated: "2026-03-03T16:44:32.193Z"
 last_activity: 2026-03-03 — Completed 05-06-PLAN.md (Consolation Opt-Out Frontend UI)
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 100
 ---
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 
 *Updated after each plan completion*
 | Phase 06.1-match-result-resubmission-and-bracket-recalculation P01 | 25 | 3 tasks | 5 files |
+| Phase 06.1-match-result-resubmission-and-bracket-recalculation P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Carried over from v1.0:
 - [Phase 06.1]: DRY_RUN_RESULT throw pattern: service throws custom error inside $transaction to auto-rollback, controller catches and returns 200 with impact data
 - [Phase 06.1]: Score-only passthrough: submitResult returns immediately after tx.match.update when winner unchanged, skipping all cascade and consolation routing
 - [Phase 06.1]: cascadeClearMainBracket exported from consolationEligibilityService mirrors private cascadeClearWinnerFromNextRounds but operates on MAIN bracket
+- [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: runDryRunIfNeeded shared helper used for both score-mode and special-outcome winner-change paths to avoid duplicated logic
+- [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: isWinnerChanging (formValue.winner) and isSpecialWinnerChanging (specialWinner) are separate computed booleans — special outcome uses its own state variable, not formValue
+- [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: Score-only correction (same winner) skips dry-run entirely via early short-circuit before the dry-run block
 
 ### Pending Todos
 
@@ -117,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T16:39:38.004Z
-Stopped at: Completed 06.1-01-PLAN.md (Match Result Resubmission Backend)
+Last session: 2026-03-03T16:44:32.190Z
+Stopped at: Completed 06.1-02-PLAN.md (Match Result Resubmission Frontend)
 Resume file: None
