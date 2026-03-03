@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { malePlayers, femalePlayers, mixedPairs, accountUsers } from './data/players.js';
 
 // Load environment variables
 dotenv.config();
@@ -16,6 +17,7 @@ async function main() {
   // ============================================
   console.log('👥 Creating users with different roles...\n');
 
+  // --- 1a. Generic test users (keep exactly as-is for ACCT-03) ---
   const testUsers = [
     {
       email: process.env.ADMIN_EMAIL || 'admin@batl.example.com',
@@ -74,12 +76,44 @@ async function main() {
 
   const [admin, organizer, organizer2, playerUser, player2User] = createdUsers;
 
+  // --- 1b. Real user accounts (Erich ADMIN, Rene ORGANIZER) ---
+  console.log('\n👥 Creating real user accounts...\n');
+
+  // Map email -> user for later profile linking
+  const usersByEmail = {};
+  for (const u of createdUsers) {
+    usersByEmail[u.email] = u;
+  }
+
+  for (const accountData of accountUsers) {
+    const passwordHash = await bcrypt.hash(accountData.password, SALT_ROUNDS);
+    const user = await prisma.user.upsert({
+      where: { email: accountData.email },
+      update: {
+        passwordHash: passwordHash,
+        role: accountData.role,
+        isActive: true,
+        emailVerified: true
+      },
+      create: {
+        email: accountData.email,
+        passwordHash: passwordHash,
+        role: accountData.role,
+        isActive: true,
+        emailVerified: true
+      }
+    });
+    usersByEmail[user.email] = user;
+    console.log(`✅ Real account: ${user.email} (${user.role})`);
+  }
+
   // ============================================
   // 2. PLAYER PROFILES - Feature 001
   // ============================================
   console.log('\n🎾 Creating player profiles...\n');
 
-  const playerProfiles = [
+  // --- 2a. Generic player profiles (keep exactly as-is for test coverage) ---
+  const genericPlayerProfiles = [
     // Linked to user account
     { userId: playerUser.id, name: 'Alex Player', email: playerUser.email, phone: '+11234567890', birthDate: new Date('1990-05-15'), gender: 'MEN' },
 
@@ -99,7 +133,7 @@ async function main() {
   ];
 
   const createdProfiles = [];
-  for (const profileData of playerProfiles) {
+  for (const profileData of genericPlayerProfiles) {
     const profile = await prisma.playerProfile.upsert({
       where: { email: profileData.email },
       update: {
@@ -121,6 +155,45 @@ async function main() {
     createdProfiles.push(profile);
     console.log(`✅ ${profile.name} (${profile.gender}, born ${profile.birthDate.getFullYear()})`);
   }
+
+  // --- 2b. Real player profiles (34 players from league data) ---
+  console.log('\n🎾 Creating real league player profiles...\n');
+
+  // Map email -> profile for pair creation
+  const profilesByEmail = {};
+
+  const allRealPlayers = [...malePlayers, ...femalePlayers];
+  let phoneCounter = 1;
+
+  for (const playerData of allRealPlayers) {
+    // Determine userId: Erich and Rene have accounts
+    const linkedUser = usersByEmail[playerData.email] || null;
+
+    const profile = await prisma.playerProfile.upsert({
+      where: { email: playerData.email },
+      update: {
+        name: playerData.name,
+        birthDate: playerData.birthDate,
+        gender: playerData.gender,
+        // Update userId if account now exists
+        userId: linkedUser ? linkedUser.id : undefined
+      },
+      create: {
+        userId: linkedUser ? linkedUser.id : null,
+        name: playerData.name,
+        email: playerData.email,
+        phone: `+421900${String(phoneCounter).padStart(6, '0')}`,
+        birthDate: playerData.birthDate,
+        gender: playerData.gender,
+        createdBy: organizer.id
+      }
+    });
+    profilesByEmail[playerData.email] = profile;
+    phoneCounter++;
+    console.log(`✅ ${profile.name} (${profile.gender}, born ${profile.birthDate.getFullYear()})`);
+  }
+
+  console.log(`\n✅ Total player profiles: ${createdProfiles.length} generic + ${allRealPlayers.length} real = ${createdProfiles.length + allRealPlayers.length}`);
 
   // ============================================
   // 3. CATEGORIES - Feature 002 (Category System)
@@ -158,31 +231,34 @@ async function main() {
   }
 
   // ============================================
-  // 4. LOCATIONS - Feature 002/004
+  // 4. LOCATIONS — Replace all with ProSet only
   // ============================================
-  console.log('\n📍 Creating tournament locations...\n');
+  console.log('\n📍 Creating tournament location...\n');
 
-  const locations = [
-    { clubName: 'Central Tennis Club', address: '123 Main St, Downtown, City' },
-    { clubName: 'Riverside Sports Complex', address: '456 River Rd, Riverside, City' },
-    { clubName: 'Northside Tennis Center', address: '789 North Ave, Northside, City' },
-    { clubName: 'Westside Indoor Courts', address: '321 West Blvd, Westside, City' },
-  ];
-
-  const createdLocations = [];
-  for (const locationData of locations) {
-    let location = await prisma.location.findFirst({
-      where: { clubName: locationData.clubName }
-    });
-
-    if (!location) {
-      location = await prisma.location.create({
-        data: locationData
-      });
+  // Remove any old generic locations that may exist from previous seeds
+  await prisma.location.deleteMany({
+    where: {
+      clubName: {
+        in: [
+          'Central Tennis Club',
+          'Riverside Sports Complex',
+          'Northside Tennis Center',
+          'Westside Indoor Courts'
+        ]
+      }
     }
-    createdLocations.push(location);
-    console.log(`✅ ${location.clubName}`);
+  });
+
+  // Create single real location: ProSet
+  let prosetLocation = await prisma.location.findFirst({
+    where: { clubName: 'ProSet' }
+  });
+  if (!prosetLocation) {
+    prosetLocation = await prisma.location.create({
+      data: { clubName: 'ProSet', address: 'Bratislava, Slovakia' }
+    });
   }
+  console.log(`✅ ${prosetLocation.clubName} (${prosetLocation.address})`);
 
   // ============================================
   // 5. ORGANIZER PROFILES
@@ -202,6 +278,23 @@ async function main() {
     create: { userId: organizer2.id, name: 'Assistant Director', email: organizer2.email, phone: '+15557654321' }
   });
   console.log(`✅ ${organizerProfile2.name}`);
+
+  // Organizer profiles for Erich and Rene
+  const erichUser = usersByEmail['erich@batl'];
+  const erichOrganizerProfile = await prisma.organizer.upsert({
+    where: { userId: erichUser.id },
+    update: { name: 'Erich Siebenstich ml.', email: erichUser.email, phone: '+421900000003' },
+    create: { userId: erichUser.id, name: 'Erich Siebenstich ml.', email: erichUser.email, phone: '+421900000003' }
+  });
+  console.log(`✅ ${erichOrganizerProfile.name} (real admin organizer)`);
+
+  const reneUser = usersByEmail['rene@batl'];
+  const reneOrganizerProfile = await prisma.organizer.upsert({
+    where: { userId: reneUser.id },
+    update: { name: 'Rene Parak', email: reneUser.email, phone: '+421900000016' },
+    create: { userId: reneUser.id, name: 'Rene Parak', email: reneUser.email, phone: '+421900000016' }
+  });
+  console.log(`✅ ${reneOrganizerProfile.name} (real organizer)`);
 
   // ============================================
   // 6. TOURNAMENTS - Features 002/003/004/005
@@ -224,8 +317,8 @@ async function main() {
       name: "Spring Singles Championship - Knockout",
       categoryId: createdCategories.find(c => c.name === "Men's Singles Open").id,
       description: "Single elimination tournament for men's open singles",
-      locationId: createdLocations[0].id,
-      backupLocationId: createdLocations[1].id,
+      locationId: prosetLocation.id,
+      backupLocationId: null,
       organizerId: organizerProfile.id,
       deputyOrganizerId: organizerProfile2.id,
       capacity: 16,
@@ -258,7 +351,7 @@ async function main() {
       name: "Women's Summer League - Group Stage",
       categoryId: createdCategories.find(c => c.name === "Women's Singles Open").id,
       description: "Round-robin group stage tournament",
-      locationId: createdLocations[1].id,
+      locationId: prosetLocation.id,
       organizerId: organizerProfile.id,
       capacity: 12,
       entryFee: 40,
@@ -290,7 +383,7 @@ async function main() {
       name: "Masters 35+ Swiss Tournament",
       categoryId: createdCategories.find(c => c.name === "Men's Singles 35+").id,
       description: "5-round Swiss system for 35+ players",
-      locationId: createdLocations[2].id,
+      locationId: prosetLocation.id,
       organizerId: organizerProfile2.id,
       capacity: 20,
       entryFee: 60,
@@ -321,8 +414,8 @@ async function main() {
       name: "City Championship - Combined Format",
       categoryId: createdCategories.find(c => c.name === "Men's Singles Open").id,
       description: "Group stage followed by knockout bracket - Active tournament starting today!",
-      locationId: createdLocations[0].id,
-      backupLocationId: createdLocations[3].id,
+      locationId: prosetLocation.id,
+      backupLocationId: null,
       organizerId: organizerProfile.id,
       capacity: 8,
       entryFee: 75,
@@ -355,7 +448,7 @@ async function main() {
       name: "Summer Doubles Classic",
       categoryId: createdCategories.find(c => c.name === "Men's Doubles Open").id,
       description: "Open doubles tournament with round-robin",
-      locationId: createdLocations[1].id,
+      locationId: prosetLocation.id,
       organizerId: organizerProfile.id,
       capacity: 16,
       entryFee: 100,
@@ -386,7 +479,7 @@ async function main() {
   // ============================================
   console.log('\n📝 Creating tournament registrations...\n');
 
-  // Register 8 players for combined tournament
+  // Register 8 players for combined tournament (use generic players for test coverage)
   const eligiblePlayers = createdProfiles.filter(p => p.gender === 'MEN');
   for (let i = 0; i < Math.min(8, eligiblePlayers.length); i++) {
     await prisma.tournamentRegistration.create({
@@ -486,10 +579,10 @@ async function main() {
   const womensDoublesCategory = createdCategories.find(c => c.name === "Women's Doubles Open");
   const mixedDoublesCategory = createdCategories.find(c => c.name === "Mixed Doubles Open");
 
-  // Define player groups
-  const menPlayers = createdProfiles.filter(p => p.gender === 'MEN');
-  // womenPlayers is already defined above
-  const men35Plus = menPlayers.filter(p => {
+  // Define player groups (using generic profiles for ranking test data)
+  const menGenericPlayers = createdProfiles.filter(p => p.gender === 'MEN');
+  const womenGenericPlayers = createdProfiles.filter(p => p.gender === 'WOMEN');
+  const men35Plus = menGenericPlayers.filter(p => {
     const age = new Date().getFullYear() - p.birthDate.getFullYear();
     return age >= 35;
   });
@@ -546,10 +639,10 @@ async function main() {
   }
 
   // Men's Open (SINGLES)
-  await seedRanking(mensOpenCategory, 'SINGLES', menPlayers.slice(0, 8), 'PLAYER');
+  await seedRanking(mensOpenCategory, 'SINGLES', menGenericPlayers.slice(0, 8), 'PLAYER');
 
   // Women's Open (SINGLES)
-  await seedRanking(womensOpenCategory, 'SINGLES', womenPlayers.slice(0, 6), 'PLAYER');
+  await seedRanking(womensOpenCategory, 'SINGLES', womenGenericPlayers.slice(0, 6), 'PLAYER');
 
   // Men's 35+ (SINGLES)
   await seedRanking(mens35Category, 'SINGLES', men35Plus.slice(0, 5), 'PLAYER');
@@ -559,10 +652,8 @@ async function main() {
   // ============================================
   console.log('\n👯 Creating doubles pairs...\n');
 
-
-
-  // Create Men's Doubles pairs (using men players with rankings)
-  const menWithRankings = menPlayers.slice(0, 8);
+  // --- 10a. Generic men's doubles pairs (keep for test coverage) ---
+  const menWithRankings = menGenericPlayers.slice(0, 8);
   const mensPairs = [];
 
   // Pair 1: Top ranked players (Alex + John)
@@ -621,64 +712,84 @@ async function main() {
     console.log(`✅ Men's Pair 4: ${menWithRankings[6].name} & ${menWithRankings[7].name} (Seeding: 700)`);
   }
 
-  // Create Women's Doubles pairs
+  // --- 10b. Generic women's doubles pairs (keep for test coverage) ---
   const womensPairs = [];
-  if (womenPlayers.length >= 4) {
+  if (womenGenericPlayers.length >= 4) {
     const wPair1 = await prisma.doublesPair.create({
       data: {
-        player1Id: womenPlayers[0].id,
-        player2Id: womenPlayers[1].id,
+        player1Id: womenGenericPlayers[0].id,
+        player2Id: womenGenericPlayers[1].id,
         categoryId: womensDoublesCategory.id,
         seedingScore: 1720 // 900 + 820
       }
     });
     womensPairs.push(wPair1);
-    console.log(`✅ Women's Pair 1: ${womenPlayers[0].name} & ${womenPlayers[1].name} (Seeding: 1720)`);
+    console.log(`✅ Women's Pair 1: ${womenGenericPlayers[0].name} & ${womenGenericPlayers[1].name} (Seeding: 1720)`);
 
     const wPair2 = await prisma.doublesPair.create({
       data: {
-        player1Id: womenPlayers[2].id,
-        player2Id: womenPlayers[3].id,
+        player1Id: womenGenericPlayers[2].id,
+        player2Id: womenGenericPlayers[3].id,
         categoryId: womensDoublesCategory.id,
         seedingScore: 1400 // 740 + 660
       }
     });
     womensPairs.push(wPair2);
-    console.log(`✅ Women's Pair 2: ${womenPlayers[2].name} & ${womenPlayers[3].name} (Seeding: 1400)`);
+    console.log(`✅ Women's Pair 2: ${womenGenericPlayers[2].name} & ${womenGenericPlayers[3].name} (Seeding: 1400)`);
   }
 
-  // Create Mixed Doubles pairs
-  const mixedPairs = [];
-  if (menPlayers.length >= 2 && womenPlayers.length >= 2) {
-    const mxPair1 = await prisma.doublesPair.create({
-      data: {
-        player1Id: menPlayers[0].id,
-        player2Id: womenPlayers[0].id,
-        categoryId: mixedDoublesCategory.id,
-        seedingScore: 1900 // 1000 + 900
-      }
-    });
-    mixedPairs.push(mxPair1);
-    console.log(`✅ Mixed Pair 1: ${menPlayers[0].name} & ${womenPlayers[0].name} (Seeding: 1900)`);
+  // --- 10c. Real mixed doubles pairs (18 pairs from league data) ---
+  console.log('\n👯 Creating real mixed doubles pairs...\n');
 
-    const mxPair2 = await prisma.doublesPair.create({
-      data: {
-        player1Id: menPlayers[1].id,
-        player2Id: womenPlayers[1].id,
-        categoryId: mixedDoublesCategory.id,
-        seedingScore: 1720 // 900 + 820
+  const realMixedPairs = [];
+  for (let i = 0; i < mixedPairs.length; i++) {
+    const pairDef = mixedPairs[i];
+    const maleProfile = profilesByEmail[pairDef.maleKey];
+    const femaleProfile = profilesByEmail[pairDef.femaleKey];
+
+    if (!maleProfile) {
+      console.error(`ERROR: Male player not found for key: ${pairDef.maleKey}`);
+      continue;
+    }
+    if (!femaleProfile) {
+      console.error(`ERROR: Female player not found for key: ${pairDef.femaleKey}`);
+      continue;
+    }
+
+    // DoublesPair has unique constraint on (player1Id, player2Id, categoryId)
+    // Check if this exact pair already exists to maintain idempotency
+    const existing = await prisma.doublesPair.findFirst({
+      where: {
+        player1Id: maleProfile.id,
+        player2Id: femaleProfile.id,
+        categoryId: mixedDoublesCategory.id
       }
     });
-    mixedPairs.push(mxPair2);
-    console.log(`✅ Mixed Pair 2: ${menPlayers[1].name} & ${womenPlayers[1].name} (Seeding: 1720)`);
+
+    let pair;
+    if (existing) {
+      pair = existing;
+    } else {
+      pair = await prisma.doublesPair.create({
+        data: {
+          player1Id: maleProfile.id,
+          player2Id: femaleProfile.id,
+          categoryId: mixedDoublesCategory.id,
+          seedingScore: 0 // No tournaments played yet (TOURN-02)
+        }
+      });
+    }
+    realMixedPairs.push(pair);
+    console.log(`✅ Mixed Pair ${i + 1}: ${maleProfile.name} & ${femaleProfile.name}`);
   }
+  console.log(`✅ Total real mixed pairs created: ${realMixedPairs.length}`);
 
   // ============================================
   // 11. PAIR REGISTRATIONS - Feature 006
   // ============================================
   console.log('\n📝 Creating pair registrations for doubles tournament...\n');
 
-  // Register pairs for Summer Doubles Classic tournament
+  // Register generic men's pairs for Summer Doubles Classic tournament
   for (let i = 0; i < mensPairs.length; i++) {
     await prisma.pairRegistration.create({
       data: {
@@ -696,14 +807,14 @@ async function main() {
   // ============================================
   console.log('\n🏅 Creating pair rankings (New System)...\n');
 
-  // Men's Doubles (PAIR)
+  // Men's Doubles (PAIR) — using generic pairs
   await seedRanking(mensDoublesCategory, 'PAIR', mensPairs, 'PAIR');
 
-  // Women's Doubles (PAIR)
+  // Women's Doubles (PAIR) — using generic pairs
   await seedRanking(womensDoublesCategory, 'PAIR', womensPairs, 'PAIR');
 
-  // Mixed Doubles (PAIR)
-  await seedRanking(mixedDoublesCategory, 'PAIR', mixedPairs, 'PAIR');
+  // NOTE: No Mixed Doubles pair ranking created — no tournaments played yet (TOURN-02)
+  // Mixed Doubles starts with zero ranking data
 
   // ============================================
   // 13. POINT TABLES - Feature 008 (Tournament Rankings)
@@ -760,32 +871,68 @@ async function main() {
   console.log('   - 17-32 participants: 9 entries (5 main + 4 consolation)');
 
   // ============================================
+  // REAL PLAYER CATEGORY REGISTRATIONS - TOURN-01
+  // Register all 34 real players in Mixed Doubles Open
+  // ============================================
+  console.log('\n📋 Registering all real players in Mixed Doubles Open category...\n');
+
+  let categoryRegCount = 0;
+  for (const playerData of allRealPlayers) {
+    const profile = profilesByEmail[playerData.email];
+    if (!profile) continue;
+
+    await prisma.categoryRegistration.upsert({
+      where: {
+        playerId_categoryId: {
+          playerId: profile.id,
+          categoryId: mixedDoublesCategory.id
+        }
+      },
+      update: { status: 'ACTIVE' },
+      create: {
+        playerId: profile.id,
+        categoryId: mixedDoublesCategory.id,
+        status: 'ACTIVE'
+      }
+    });
+    categoryRegCount++;
+  }
+  console.log(`✅ Registered ${categoryRegCount} real players in Mixed Doubles Open`);
+
+  // ============================================
   // SUMMARY
   // ============================================
+  const allProfilesCount = createdProfiles.length + allRealPlayers.length;
+  const allUsersCount = createdUsers.length + accountUsers.length;
+
   console.log('\n========================================');
   console.log('✅ DATABASE SEED COMPLETED SUCCESSFULLY');
   console.log('========================================\n');
 
   console.log('📊 Summary of seeded data:\n');
-  console.log(`👥 Users: ${createdUsers.length}`);
-  console.log('   - 1 Admin: admin@batl.example.com (ChangeMe123!)');
-  console.log('   - 2 Organizers: organizer@batl.example.com, organizer2@batl.example.com (Organizer123!)');
-  console.log('   - 1 Player: player@batl.example.com / Player123! → Alex Player');
-  console.log('   - 1 Player: player2@batl.example.com / Player123! → David Brown');
+  console.log(`👥 Users: ${allUsersCount}`);
+  console.log('   - Generic accounts (5):');
+  console.log('     admin@batl.example.com (ChangeMe123!)');
+  console.log('     organizer@batl.example.com (Organizer123!)');
+  console.log('     organizer2@batl.example.com (Organizer123!)');
+  console.log('     player@batl.example.com (Player123!) → Alex Player');
+  console.log('     player2@batl.example.com (Player123!) → David Brown');
+  console.log('   - Real accounts (2):');
+  console.log('     erich@batl (Erich123!) → Erich Siebenstich ml. [ADMIN]');
+  console.log('     rene@batl (Rene123!) → Rene Parak [ORGANIZER]');
 
-  console.log(`\n🎾 Player Profiles: ${createdProfiles.length}`);
-  console.log(`   - ${createdProfiles.filter(p => p.gender === 'MEN').length} Men`);
-  console.log(`   - ${createdProfiles.filter(p => p.gender === 'WOMEN').length} Women`);
-  console.log(`   - 1 with linked account, ${createdProfiles.length - 1} unlinked`);
+  console.log(`\n🎾 Player Profiles: ${allProfilesCount} total`);
+  console.log(`   - ${createdProfiles.length} generic (test coverage)`);
+  console.log(`   - ${allRealPlayers.length} real league players (${malePlayers.length} men, ${femalePlayers.length} women)`);
 
   console.log(`\n🏆 Categories: ${createdCategories.length}`);
   console.log('   - Singles: Open, 35+, 40+, 50+ (Men & Women)');
   console.log('   - Doubles: Open (Men, Women, Mixed), 40+ (Men)');
 
-  console.log(`\n📍 Locations: ${createdLocations.length}`);
-  console.log('   - Central Tennis Club, Riverside Sports Complex, etc.');
+  console.log('\n📍 Locations: 1');
+  console.log('   - ProSet (Bratislava, Slovakia)');
 
-  console.log('\n🎾 Tournaments: 5');
+  console.log('\n🎾 Tournaments: 5 (all at ProSet)');
   console.log('   1. Spring Singles Championship (KNOCKOUT, 16 capacity)');
   console.log("   2. Women's Summer League (GROUP, 12 capacity)");
   console.log('   3. Masters 35+ Swiss (SWISS, 20 capacity)');
@@ -806,10 +953,13 @@ async function main() {
   console.log("   - Men's 35+: 5 players ranked");
 
   console.log('\n👯 Doubles Pairs:');
-  console.log(`   - Men's Doubles: ${mensPairs.length} pairs`);
-  console.log(`   - Women's Doubles: ${womensPairs.length} pairs`);
-  console.log(`   - Mixed Doubles: ${mixedPairs.length} pairs`);
+  console.log(`   - Men's Doubles: ${mensPairs.length} pairs (generic)`);
+  console.log(`   - Women's Doubles: ${womensPairs.length} pairs (generic)`);
+  console.log(`   - Mixed Doubles Open: ${realMixedPairs.length} real pairs (seedingScore: 0)`);
   console.log(`   - Pair registrations: ${mensPairs.length} for Summer Doubles Classic`);
+
+  console.log(`\n📋 Category Registrations:`);
+  console.log(`   - Mixed Doubles Open: ${categoryRegCount} real players registered`);
 
   console.log('\n⚠️  IMPORTANT:');
   console.log('   - Change default passwords after first login!');
@@ -832,7 +982,7 @@ async function main() {
       name: "Winter Open 2024",
       categoryId: mensOpenCategory.id,
       description: "Completed tournament from last year",
-      locationId: createdLocations[0].id,
+      locationId: prosetLocation.id,
       organizerId: organizerProfile.id,
       capacity: 16,
       entryFee: 50,
@@ -869,7 +1019,7 @@ async function main() {
       type: 'SINGLES',
       isArchived: true,
       entries: {
-        create: menPlayers.slice(0, 5).map((p, i) => ({
+        create: menGenericPlayers.slice(0, 5).map((p, i) => ({
           entityType: 'PLAYER',
           playerId: p.id,
           rank: i + 1,
@@ -883,12 +1033,12 @@ async function main() {
   console.log(`✅ Created archived ranking for 2024`);
 
   // T081: Multiple rankings per doubles category
-  await seedRanking(mensDoublesCategory, 'MEN', menPlayers.slice(0, 8), 'PLAYER');
+  await seedRanking(mensDoublesCategory, 'MEN', menGenericPlayers.slice(0, 8), 'PLAYER');
   console.log(`✅ Created individual MEN ranking for Men's Doubles`);
 
   // T079: Tiebreaker test scenarios
   // Update two players to have same points
-  if (menPlayers.length >= 2) {
+  if (menGenericPlayers.length >= 2) {
     const ranking = await prisma.ranking.findUnique({
       where: { categoryId_year_type: { categoryId: mensOpenCategory.id, year: currentYear, type: 'SINGLES' } }
     });
@@ -896,13 +1046,13 @@ async function main() {
     if (ranking) {
       // Player 1: 1000 pts, 5 tournaments
       await prisma.rankingEntry.update({
-        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menPlayers[0].id } },
+        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menGenericPlayers[0].id } },
         data: { totalPoints: 1000, tournamentCount: 5 }
       });
 
       // Player 2: 1000 pts, 3 tournaments (should be ranked higher due to fewer tournaments)
       await prisma.rankingEntry.update({
-        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menPlayers[1].id } },
+        where: { rankingId_playerId: { rankingId: ranking.id, playerId: menGenericPlayers[1].id } },
         data: { totalPoints: 1000, tournamentCount: 3 }
       });
       console.log(`✅ Created tiebreaker scenario: Player 1 (1000pts, 5 tourneys) vs Player 2 (1000pts, 3 tourneys)`);
