@@ -74,7 +74,8 @@ async function main() {
     organizerProfile = await prisma.organizer.create({
       data: {
         userId: organizer.id,
-        organizationName: 'Test Organization'
+        name: organizer.username || 'Tournament Organizer',
+        email: organizer.email
       }
     });
     console.log('✓ Created organizer profile');
