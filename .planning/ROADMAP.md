@@ -58,7 +58,11 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
   4. All tournaments displayed in the app show "ProSet" as their location — no "Central Tennis Club", "Riverside", or other generic location names appear anywhere
   5. The tournaments list shows a mix of SCHEDULED, IN_PROGRESS, and COMPLETED statuses across age-specific categories (35+, 40+, 50+, etc.)
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Create data file and rewrite seed.js foundation (players, accounts, pairs, locations)
+- [ ] 09-02-PLAN.md — Rewrite tournaments, rankings, and update seed-knockout-test.js
 
 ---
 
@@ -95,5 +99,5 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 | 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 9. Real Player and League Data | v1.2 | 0/? | Not started | - |
+| 9. Real Player and League Data | v1.2 | 0/2 | Not started | - |
 | 10. Data Quality and Script Cleanup | v1.2 | 0/? | Not started | - |
