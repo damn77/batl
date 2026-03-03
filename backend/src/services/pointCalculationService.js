@@ -494,6 +494,125 @@ async function updateRankingEntry(rankingEntryId) {
 }
 
 /**
+ * Maps a consolation bracket round number to a standard round name.
+ * The last round is always FINAL, counting back from there:
+ *   totalRounds → FINAL
+ *   totalRounds - 1 → SEMIFINAL
+ *   totalRounds - 2 → QUARTERFINAL
+ *   totalRounds - 3 → SECOND_ROUND
+ *   totalRounds - 4 or earlier → FIRST_ROUND
+ *
+ * @param {number} roundNumber - 1-based round number within the consolation bracket
+ * @param {number} totalRounds - Total number of rounds in the consolation bracket
+ * @returns {string} Standard round name
+ */
+export function roundNumberToName(roundNumber, totalRounds) {
+    const fromEnd = totalRounds - roundNumber; // 0 = last round (FINAL)
+    if (fromEnd === 0) return 'FINAL';
+    if (fromEnd === 1) return 'SEMIFINAL';
+    if (fromEnd === 2) return 'QUARTERFINAL';
+    if (fromEnd === 3) return 'FIRST_ROUND';
+    return 'FIRST_ROUND';
+}
+
+/**
+ * Derive consolation bracket results for a tournament.
+ * Returns one entry per player/pair who won at least one consolation match,
+ * with their highest round reached (the highest round number they won in).
+ *
+ * Players/pairs with zero consolation wins are not included.
+ *
+ * @param {string} tournamentId - Tournament ID
+ * @returns {Promise<Array<{playerId?: string, pairId?: string, finalRoundReached: string, isConsolation: true}>>}
+ */
+export async function deriveConsolationResults(tournamentId) {
+    // Find the CONSOLATION bracket for this tournament
+    const consolationBracket = await prisma.bracket.findFirst({
+        where: { tournamentId, bracketType: 'CONSOLATION' }
+    });
+
+    if (!consolationBracket) {
+        return [];
+    }
+
+    // Get all rounds in the consolation bracket, ordered by round number
+    const rounds = await prisma.round.findMany({
+        where: { bracketId: consolationBracket.id },
+        orderBy: { roundNumber: 'asc' }
+    });
+
+    if (rounds.length === 0) {
+        return [];
+    }
+
+    const totalRounds = rounds.length;
+
+    // Build a map of roundId → roundNumber for fast lookup
+    const roundIdToNumber = {};
+    for (const round of rounds) {
+        roundIdToNumber[round.id] = round.roundNumber;
+    }
+
+    // Get all completed (non-bye) matches in this consolation bracket
+    const matches = await prisma.match.findMany({
+        where: {
+            bracketId: consolationBracket.id,
+            status: 'COMPLETED',
+            isBye: false
+        }
+    });
+
+    // Determine tournament type (singles vs doubles)
+    const tournament = await prisma.tournament.findUnique({
+        where: { id: tournamentId },
+        select: { category: { select: { type: true } } }
+    });
+
+    const isDoubles = tournament?.category?.type && tournament.category.type !== 'SINGLES';
+
+    // Track each winner's highest round number won
+    // key: playerId or pairId, value: highest round number
+    const winnerHighestRound = {};
+
+    for (const match of matches) {
+        const resultJson = typeof match.result === 'string'
+            ? JSON.parse(match.result)
+            : match.result;
+
+        if (!resultJson?.winner) continue;
+
+        const roundNumber = roundIdToNumber[match.roundId];
+        if (roundNumber === undefined) continue;
+
+        let winnerId;
+        if (isDoubles) {
+            winnerId = resultJson.winner === 'player1' ? match.pair1Id : match.pair2Id;
+        } else {
+            winnerId = resultJson.winner === 'player1' ? match.player1Id : match.player2Id;
+        }
+
+        if (!winnerId) continue;
+
+        // Record highest round number won by this player/pair
+        if (winnerHighestRound[winnerId] === undefined || roundNumber > winnerHighestRound[winnerId]) {
+            winnerHighestRound[winnerId] = roundNumber;
+        }
+    }
+
+    // Build result entries
+    const results = [];
+    for (const [id, highestRound] of Object.entries(winnerHighestRound)) {
+        const finalRoundReached = roundNumberToName(highestRound, totalRounds);
+        const entry = isDoubles
+            ? { pairId: id, finalRoundReached, isConsolation: true }
+            : { playerId: id, finalRoundReached, isConsolation: true };
+        results.push(entry);
+    }
+
+    return results;
+}
+
+/**
  * Recalculate ranks for all entries in a ranking
  * @param {string} rankingId - Ranking ID
  * @returns {Promise<void>}
