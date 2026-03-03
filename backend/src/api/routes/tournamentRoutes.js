@@ -21,6 +21,7 @@ import {
   generateTournamentBracket,
   swapBracketSlots
 } from '../bracketPersistenceController.js';
+import { recordConsolationOptOut } from '../consolationOptOutController.js';
 import {
   generateBracketSchema,
   swapSlotsSchema
@@ -155,15 +156,18 @@ router.get(
       if (!config) {
         // Return default configuration if none exists
         return res.json({
-          tournamentId: id,
-          calculationMethod: 'PLACEMENT',
-          multiplicativeValue: 2,
-          doublePointsEnabled: false,
-          isDefault: true
+          success: true,
+          data: {
+            tournamentId: id,
+            calculationMethod: 'PLACEMENT',
+            multiplicativeValue: 2,
+            doublePointsEnabled: false,
+            isDefault: true
+          }
         });
       }
 
-      res.json(config);
+      res.json({ success: true, data: config });
     } catch (error) {
       next(error);
     }
@@ -197,13 +201,13 @@ router.put(
       });
 
       if (!tournament) {
-        return res.status(404).json({ error: 'Tournament not found' });
+        return res.status(404).json({ success: false, error: { code: 'TOURNAMENT_NOT_FOUND', message: 'Tournament not found' } });
       }
 
       if (tournament.status !== 'SCHEDULED') {
         return res.status(400).json({
-          error: 'Cannot modify point configuration after tournament has started',
-          code: 'TOURNAMENT_ALREADY_STARTED'
+          success: false,
+          error: { code: 'TOURNAMENT_ALREADY_STARTED', message: 'Cannot modify point configuration after tournament has started' }
         });
       }
 
@@ -217,7 +221,7 @@ router.put(
         }
       });
 
-      res.json(config);
+      res.json({ success: true, data: config });
     } catch (error) {
       next(error);
     }
@@ -240,7 +244,7 @@ router.post(
       const { results } = req.body;
       const { PrismaClient } = await import('@prisma/client');
       const prisma = new PrismaClient();
-      const { awardPointsSinglesTournament, awardPointsDoublesTournament } = await import('../../services/pointCalculationService.js');
+      const { awardPointsSinglesTournament, awardPointsDoublesTournament, deriveConsolationResults } = await import('../../services/pointCalculationService.js');
 
       if (!results || !Array.isArray(results) || results.length === 0) {
         return res.status(400).json({
@@ -268,13 +272,26 @@ router.post(
         doublePointsEnabled: false
       };
 
+      // For MATCH_2 tournaments using FINAL_ROUND method, automatically derive and
+      // include consolation bracket results (server-side, appended after validation)
+      const formatConfig = typeof tournament.formatConfig === 'string'
+        ? JSON.parse(tournament.formatConfig)
+        : tournament.formatConfig;
+      const isMatch2 = formatConfig?.matchGuarantee === 'MATCH_2';
+
+      let allResults = results;
+      if (isMatch2 && pointConfig.calculationMethod === 'FINAL_ROUND') {
+        const consolationResults = await deriveConsolationResults(id);
+        allResults = [...results, ...consolationResults];
+      }
+
       let awardedResults;
 
       // Award points based on tournament type
       if (tournament.category.type === 'SINGLES') {
-        awardedResults = await awardPointsSinglesTournament(id, results, pointConfig);
+        awardedResults = await awardPointsSinglesTournament(id, allResults, pointConfig);
       } else {
-        awardedResults = await awardPointsDoublesTournament(id, results, pointConfig);
+        awardedResults = await awardPointsDoublesTournament(id, allResults, pointConfig);
       }
 
       res.json({
@@ -329,6 +346,26 @@ router.patch(
   authorize('update', 'Tournament'),
   validateBody(swapSlotsSchema),
   swapBracketSlots
+);
+
+// ============================================
+// PHASE 05: CONSOLATION BRACKET LIFECYCLE
+// ============================================
+
+/**
+ * POST /api/v1/tournaments/:id/consolation-opt-out
+ * Record a consolation opt-out for a player or pair.
+ * Authorization: PLAYER (self-service) or ORGANIZER/ADMIN
+ * Body: { playerId: string } | { pairId: string }
+ *
+ * Note: Authorization is handled inside the controller/service —
+ * players can opt out themselves; organizers can opt out anyone.
+ * The isAuthenticated middleware ensures the submitter is logged in.
+ */
+router.post(
+  '/:id/consolation-opt-out',
+  isAuthenticated,
+  recordConsolationOptOut
 );
 
 export default router;

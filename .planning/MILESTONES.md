@@ -1,5 +1,27 @@
 # Milestones
 
+## v1.1 Consolation Brackets (Shipped: 2026-03-03)
+
+**Phases completed:** 8 phases, 15 plans
+**Timeline:** 4 days (2026-02-28 → 2026-03-03)
+**Files changed:** 81 files, ~11,750 lines added
+**Commits:** 99
+
+**Delivered:** Consolation bracket system — MATCH_2 tournaments guarantee every player at least 2 real matches via auto-generated consolation brackets, loser routing, bracket progression, result entry with cascade recalculation, and consolation point awards.
+
+**Key accomplishments:**
+- Match Guarantee configuration (MATCH_2) with consolation bracket auto-generation at draw time (mirror draw)
+- Automatic loser routing to consolation with real-match counting (BYE/walkover exclusion)
+- Consolation bracket progression, opt-out (self-service + organizer), and tournament completion gating
+- Consolation bracket visualization with TBD styling, result entry, and organizer opt-out UI
+- Match result resubmission with cascade-clear, dry-run verification, and winner-lock for non-organizers
+- Consolation point tables and automated point calculation for MATCH_2 tournaments
+
+**Requirements:** 13/13 v1.1 requirements complete (CONF-01, DRAW-01–02, LIFE-01–05, VIEW-01–03, PTS-01–02)
+**Audit:** 5 audits drove iterative gap closures (Phases 5.1, 5.2, 6, 6.1, 7, 8)
+
+---
+
 ## v1.0 Tournament Core (Shipped: 2026-02-28)
 
 **Phases completed:** 4 phases, 13 plans

@@ -11,7 +11,7 @@
  * Receives structure/matches/mutate* from the parent's SWR hooks.
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col } from 'react-bootstrap';
+import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col, Tab, Nav } from 'react-bootstrap';
 import KnockoutBracket from './KnockoutBracket';
 import { closeRegistration, generateBracket, swapSlots } from '../services/bracketPersistenceService';
 import apiClient from '../services/apiClient';
@@ -41,6 +41,7 @@ const BracketGenerationSection = ({
   const [generating, setGenerating] = useState(false);
   const [closingRegistration, setClosingRegistration] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [doublesMethod, setDoublesMethod] = useState('PAIR_SCORE');
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
@@ -55,8 +56,7 @@ const BracketGenerationSection = ({
       .get(`/tournaments/${tournament.id}/registrations`)
       .then(r => {
         const regs = r.data.data?.registrations || [];
-        const players = regs.map(reg => reg.player || reg.pair).filter(Boolean);
-        setRegisteredPlayers(players);
+        setRegisteredPlayers(regs);
       })
       .catch(() => {
         // non-critical — dropdowns degrade gracefully if empty
@@ -81,11 +81,18 @@ const BracketGenerationSection = ({
   const handleGenerateBracket = useCallback(async () => {
     setGenerating(true);
     setError(null);
+    setSuccessMessage(null);
     setPendingSwaps([]);
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
-      await generateBracket(tournament.id, options);
+      const result = await generateBracket(tournament.id, options);
+      if (result?.consolationBracketId) {
+        setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
+      } else {
+        setSuccessMessage('Draw completed.');
+      }
+      setTimeout(() => setSuccessMessage(null), 5000);
       // Refresh bracket view
       if (mutateFormatStructure) await mutateFormatStructure();
       if (mutateMatches) await mutateMatches();
@@ -100,11 +107,18 @@ const BracketGenerationSection = ({
     setShowRegenerateConfirm(false);
     setGenerating(true);
     setError(null);
+    setSuccessMessage(null);
     setPendingSwaps([]);
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
-      await generateBracket(tournament.id, options);
+      const result = await generateBracket(tournament.id, options);
+      if (result?.consolationBracketId) {
+        setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
+      } else {
+        setSuccessMessage('Draw completed.');
+      }
+      setTimeout(() => setSuccessMessage(null), 5000);
       if (mutateFormatStructure) await mutateFormatStructure();
       if (mutateMatches) await mutateMatches();
     } catch (err) {
@@ -145,10 +159,9 @@ const BracketGenerationSection = ({
   // ----- Render guards -----
   if (!tournament) return null;
   if (tournament.formatType !== 'KNOCKOUT') return null;
-  // Only show for SCHEDULED status (before IN_PROGRESS)
-  if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') {
-    return null;
-  }
+  if (tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') return null;
+  // For IN_PROGRESS: only allow if no bracket exists yet (recovery path for tournaments started without a draw)
+  if (tournament.status === 'IN_PROGRESS' && hasBracket) return null;
 
   // ----- STATE A: Registration still open -----
   if (!tournament.registrationClosed) {
@@ -200,6 +213,11 @@ const BracketGenerationSection = ({
           </div>
         </Card.Header>
         <Card.Body>
+          {successMessage && (
+            <Alert variant="success" dismissible onClose={() => setSuccessMessage(null)}>
+              {successMessage}
+            </Alert>
+          )}
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError(null)}>
               {error}
@@ -209,20 +227,25 @@ const BracketGenerationSection = ({
           {/* Finalized registered player list */}
           <div className="mb-4">
             <h6 className="fw-semibold mb-2">
-              Registered Players ({registeredPlayers.length})
+              {isDoubles ? 'Registered Pairs' : 'Registered Players'} ({registeredPlayers.length})
             </h6>
             {registeredPlayers.length === 0 ? (
               <p className="text-muted fst-italic">No players registered yet.</p>
             ) : (
               <ListGroup variant="flush" className="border rounded">
-                {registeredPlayers.map((player, idx) => (
-                  <ListGroup.Item key={player?.id || idx} className="py-2 px-3">
-                    <span className="text-muted me-2" style={{ minWidth: '2rem', display: 'inline-block' }}>
-                      {idx + 1}.
-                    </span>
-                    {player?.name || 'Unknown player'}
-                  </ListGroup.Item>
-                ))}
+                {registeredPlayers.map((reg, idx) => {
+                  const displayName = isDoubles
+                    ? `${reg.pair?.player1?.name || '?'} & ${reg.pair?.player2?.name || '?'}`
+                    : (reg.player?.name || 'Unknown player');
+                  return (
+                    <ListGroup.Item key={reg?.id || idx} className="py-2 px-3">
+                      <span className="text-muted me-2" style={{ minWidth: '2rem', display: 'inline-block' }}>
+                        {idx + 1}.
+                      </span>
+                      {displayName}
+                    </ListGroup.Item>
+                  );
+                })}
               </ListGroup>
             )}
           </div>
@@ -284,7 +307,9 @@ const BracketGenerationSection = ({
 
   // Build a flat list of all matches across all rounds for the slot editor
   const allMatches = matches || [];
-  const brackets = structure?.brackets || [];
+  const brackets = structure?.brackets
+    ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
+    : [];
   const rounds = structure?.rounds || [];
 
   // Group matches by round for the slot editor display
@@ -323,19 +348,26 @@ const BracketGenerationSection = ({
                 `Save Draw${pendingSwaps.length > 0 ? ` (${pendingSwaps.length} change${pendingSwaps.length !== 1 ? 's' : ''})` : ''}`
               )}
             </Button>
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => setShowRegenerateConfirm(true)}
-              disabled={generating || saving}
-            >
-              Regenerate Draw
-            </Button>
+            {tournament.status === 'SCHEDULED' && (
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => setShowRegenerateConfirm(true)}
+                disabled={generating || saving}
+              >
+                Regenerate Draw
+              </Button>
+            )}
           </div>
         </div>
       </Card.Header>
 
       <Card.Body>
+        {successMessage && (
+          <Alert variant="success" dismissible onClose={() => setSuccessMessage(null)}>
+            {successMessage}
+          </Alert>
+        )}
         {error && (
           <Alert variant="danger" dismissible onClose={() => setError(null)}>
             {error}
@@ -358,19 +390,48 @@ const BracketGenerationSection = ({
         {!generating && (
           <>
             {/* KnockoutBracket visualization */}
-            {brackets.map(bracket => {
-              const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
-              return (
-                <KnockoutBracket
-                  key={bracket.id}
-                  tournamentId={tournament.id}
-                  bracket={bracket}
-                  rounds={bracketRounds}
-                  isDoubles={isDoubles}
-                  className="mb-4"
-                />
-              );
-            })}
+            {brackets.length > 1 ? (
+              <Tab.Container defaultActiveKey={brackets[0].id}>
+                <Nav variant="tabs" className="mb-3">
+                  {brackets.map(bracket => (
+                    <Nav.Item key={bracket.id}>
+                      <Nav.Link eventKey={bracket.id}>
+                        {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
+                      </Nav.Link>
+                    </Nav.Item>
+                  ))}
+                </Nav>
+                <Tab.Content>
+                  {brackets.map(bracket => {
+                    const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
+                    return (
+                      <Tab.Pane key={bracket.id} eventKey={bracket.id}>
+                        <KnockoutBracket
+                          tournamentId={tournament.id}
+                          bracket={bracket}
+                          rounds={bracketRounds}
+                          isDoubles={isDoubles}
+                        />
+                      </Tab.Pane>
+                    );
+                  })}
+                </Tab.Content>
+              </Tab.Container>
+            ) : (
+              brackets.map(bracket => {
+                const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
+                return (
+                  <KnockoutBracket
+                    key={bracket.id}
+                    tournamentId={tournament.id}
+                    bracket={bracket}
+                    rounds={bracketRounds}
+                    isDoubles={isDoubles}
+                    className="mb-4"
+                  />
+                );
+              })
+            )}
 
             {/* Slot editor — per-slot dropdowns for swapping players */}
             {allMatches.length > 0 && (

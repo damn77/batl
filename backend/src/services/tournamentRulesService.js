@@ -110,13 +110,16 @@ export async function getTournamentFormatAndRules(tournamentId) {
     });
   }
 
-  // Get registration statistics
-  const [registeredCount, waitlistedCount] = await Promise.all([
+  // Get registration statistics and bracket existence
+  const [registeredCount, waitlistedCount, bracketCount] = await Promise.all([
     prisma.tournamentRegistration.count({
       where: { tournamentId, status: 'REGISTERED' }
     }),
     prisma.tournamentRegistration.count({
       where: { tournamentId, status: 'WAITLISTED' }
+    }),
+    prisma.bracket.count({
+      where: { tournamentId }
     })
   ]);
 
@@ -128,7 +131,8 @@ export async function getTournamentFormatAndRules(tournamentId) {
     defaultScoringRules: JSON.parse(tournament.defaultScoringRules),
     capacity: tournament.capacity,
     registeredCount,
-    waitlistedCount
+    waitlistedCount,
+    hasBracket: bracketCount > 0
   };
 }
 

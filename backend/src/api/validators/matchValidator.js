@@ -53,8 +53,19 @@ export const submitResultSchema = Joi.object({
 /**
  * Schema for recording a special outcome (organizer only).
  * No sets are required — just the outcome type and winner designation.
+ *
+ * RETIRED outcome: match started but one player retired mid-match.
+ *   - Counts as 1 real match played for both players
+ *   - The retiring player is the loser and is automatically opted out of consolation
+ *   - winner field indicates the non-retiring player
+ *   - partialScore is optional (games completed before retirement)
  */
 export const submitSpecialOutcomeSchema = Joi.object({
-  outcome: Joi.string().valid('WALKOVER', 'FORFEIT', 'NO_SHOW').required(),
-  winner: Joi.string().valid('PLAYER1', 'PLAYER2').required()
+  outcome: Joi.string().valid('WALKOVER', 'FORFEIT', 'NO_SHOW', 'RETIRED').required(),
+  winner: Joi.string().valid('PLAYER1', 'PLAYER2').required(),
+  // Optional partial score for RETIRED matches (match started but player retired mid-match)
+  partialScore: Joi.object({
+    player1Games: Joi.number().integer().min(0).required(),
+    player2Games: Joi.number().integer().min(0).required()
+  }).optional()
 });

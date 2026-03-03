@@ -132,7 +132,9 @@ export async function getTournamentById(req, res, next) {
         waitlistDisplayOrder: tournament.waitlistDisplayOrder,
         formatType: tournament.formatType,
         formatConfig: tournament.formatConfig,
-        defaultScoringRules: tournament.defaultScoringRules,
+        defaultScoringRules: tournament.defaultScoringRules
+          ? (typeof tournament.defaultScoringRules === 'string' ? JSON.parse(tournament.defaultScoringRules) : tournament.defaultScoringRules)
+          : null,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
         status: tournament.status,

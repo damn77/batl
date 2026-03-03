@@ -99,7 +99,8 @@ export async function generateBracket(tournamentId, options = {}) {
       status: true,
       registrationClosed: true,
       categoryId: true,
-      category: { select: { type: true } }
+      category: { select: { type: true } },
+      formatConfig: true
     }
   });
 
@@ -116,13 +117,28 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 4: Guard — bracket is locked if tournament is in progress or completed (DRAW-05)
+  // Step 4: Guard — bracket is locked if tournament is in progress/completed AND a bracket exists (DRAW-05)
+  // Allow initial draw generation for IN_PROGRESS when no bracket has been created yet (recovery path)
   if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
-    throw makeError(
-      'BRACKET_LOCKED',
-      `Cannot modify bracket when tournament status is ${tournament.status}`
-    );
+    const existingBracketCount = await prisma.bracket.count({ where: { tournamentId } });
+    if (existingBracketCount > 0) {
+      throw makeError(
+        'BRACKET_LOCKED',
+        `Cannot modify bracket when tournament status is ${tournament.status}`
+      );
+    }
   }
+
+  // Step 4b: Parse matchGuarantee from formatConfig JSON string
+  let parsedFormatConfig = {};
+  if (tournament.formatConfig) {
+    try {
+      parsedFormatConfig = JSON.parse(tournament.formatConfig);
+    } catch (_) {
+      // malformed JSON — treat as default MATCH_1
+    }
+  }
+  const matchGuarantee = parsedFormatConfig.matchGuarantee || 'MATCH_1';
 
   // Step 5: Load registered players/pairs, retaining entity IDs for placement
   const categoryType = tournament.category?.type;
@@ -224,7 +240,7 @@ export async function generateBracket(tournamentId, options = {}) {
       data: {
         tournamentId,
         bracketType: 'MAIN',
-        matchGuarantee: 'MATCH_1'
+        matchGuarantee
       }
     });
 
@@ -338,14 +354,73 @@ export async function generateBracket(tournamentId, options = {}) {
       await tx.match.update({ where: { id: targetMatchId }, data: updateData });
     }
 
-    return { bracket, totalRounds, matchCount };
+    // Step 8e: Generate CONSOLATION bracket when matchGuarantee === 'MATCH_2'
+    let consolationBracket = null;
+    if (matchGuarantee === 'MATCH_2') {
+      consolationBracket = await generateConsolationBracket(
+        tx, tournamentId, bracket.id, bracketSize, categoryType, matchGuarantee
+      );
+    }
+
+    return { bracket, consolationBracket, totalRounds, matchCount };
   });
 
   return {
     bracket: result.bracket,
+    consolationBracket: result.consolationBracket || null,
     roundCount: result.totalRounds,
     matchCount: result.matchCount
   };
+}
+
+/**
+ * Generate the consolation bracket structure for a MATCH_2 tournament.
+ *
+ * Mirror-draw rule: loser of Main Match N vs loser of Main Match N+1 (1-indexed).
+ * The consolation bracket covers all rounds needed to produce a consolation winner.
+ *
+ * @param {Object} tx - Prisma transaction client
+ * @param {string} tournamentId - Tournament primary key
+ * @param {string} mainBracketId - ID of the MAIN bracket (for reference only)
+ * @param {number} bracketSize - Main bracket size (next power of 2 >= playerCount)
+ * @param {string} categoryType - 'SINGLES', 'DOUBLES', etc.
+ * @param {string} matchGuarantee - 'MATCH_2' (passed through to Bracket record)
+ * @returns {Promise<Object>} Created consolation Bracket record
+ */
+async function generateConsolationBracket(tx, tournamentId, mainBracketId, bracketSize, categoryType, matchGuarantee) {
+  // Create consolation Bracket record
+  const consolationBracket = await tx.bracket.create({
+    data: { tournamentId, bracketType: 'CONSOLATION', matchGuarantee }
+  });
+
+  // Consolation bracket covers bracketSize/2 players (all Round 1 losers from main bracket)
+  const consolationSize = bracketSize / 2;
+  const totalConsolationRounds = Math.log2(consolationSize);
+  let matchNumber = 1000; // offset to avoid collision with main bracket match numbers (1..N)
+
+  for (let roundNum = 1; roundNum <= totalConsolationRounds; roundNum++) {
+    const round = await tx.round.create({
+      data: { tournamentId, bracketId: consolationBracket.id, roundNumber: roundNum }
+    });
+
+    const matchesInRound = consolationSize / Math.pow(2, roundNum);
+    for (let i = 0; i < matchesInRound; i++) {
+      await tx.match.create({
+        data: {
+          tournamentId,
+          bracketId: consolationBracket.id,
+          roundId: round.id,
+          matchNumber: matchNumber++,
+          isBye: false,
+          status: 'SCHEDULED',
+          player1Id: null,
+          player2Id: null
+        }
+      });
+    }
+  }
+
+  return consolationBracket;
 }
 
 /**

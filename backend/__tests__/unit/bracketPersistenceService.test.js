@@ -31,7 +31,8 @@ const mockPrisma = {
   },
   bracket: {
     deleteMany: jest.fn(),
-    create: jest.fn()
+    create: jest.fn(),
+    count: jest.fn()
   },
   tournamentRegistration: {
     findMany: jest.fn()
@@ -383,6 +384,7 @@ describe('bracket lock', () => {
       categoryId: 'cat-1',
       category: { type: 'SINGLES' }
     });
+    mockPrisma.bracket.count.mockResolvedValue(1); // Bracket exists → locked
 
     await expect(generateBracket('tour-1')).rejects.toMatchObject({
       code: 'BRACKET_LOCKED'
@@ -397,6 +399,7 @@ describe('bracket lock', () => {
       categoryId: 'cat-1',
       category: { type: 'SINGLES' }
     });
+    mockPrisma.bracket.count.mockResolvedValue(1); // Bracket exists → locked
 
     await expect(generateBracket('tour-1')).rejects.toMatchObject({
       code: 'BRACKET_LOCKED'

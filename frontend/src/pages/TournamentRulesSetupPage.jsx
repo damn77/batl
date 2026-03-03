@@ -23,7 +23,7 @@ const TournamentRulesSetupPage = () => {
   const [formatType, setFormatType] = useState('KNOCKOUT');
   const [formatConfig, setFormatConfig] = useState({
     formatType: 'KNOCKOUT',
-    matchGuarantee: 'MATCH_1'
+    matchGuarantee: 'MATCH_2' // Match Guarantee locked via hasMatches (true once draw generated)
   });
   const [scoringRules, setScoringRules] = useState({
     formatType: 'SETS',
@@ -64,13 +64,15 @@ const TournamentRulesSetupPage = () => {
           defaultScoringRules: dsr,
           capacity,
           registeredCount,
-          waitlistedCount
+          waitlistedCount,
+          hasBracket
         } = response.data;
 
         setTournamentName(name);
         setFormatType(ft);
         setFormatConfig(fc);
         setScoringRules(dsr);
+        setHasMatches(hasBracket || false);
         setRegistrationStats({
           registered: registeredCount || 0,
           capacity: capacity,
@@ -78,7 +80,7 @@ const TournamentRulesSetupPage = () => {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || t('errors.failedToLoadTournamentRules'));
+      setError(err.message || t('errors.failedToLoadTournamentRules'));
     } finally {
       setLoading(false);
     }
@@ -130,11 +132,11 @@ const TournamentRulesSetupPage = () => {
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || t('errors.failedToSaveTournamentFormat');
+      const errorMsg = err.message || t('errors.failedToSaveTournamentFormat');
       setError(errorMsg);
 
       // If format change not allowed, mark as having matches
-      if (err.response?.data?.error?.code === 'FORMAT_CHANGE_NOT_ALLOWED') {
+      if (err.code === 'FORMAT_CHANGE_NOT_ALLOWED') {
         setHasMatches(true);
       }
     } finally {
@@ -166,17 +168,17 @@ const TournamentRulesSetupPage = () => {
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || t('errors.failedToSaveScoringRules'));
+      setError(err.message || t('errors.failedToSaveScoringRules'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleSaveAll = async () => {
-    await handleSaveFormat();
-    if (!error) {
-      await handleSaveScoringRules();
+    if (!hasMatches) {
+      await handleSaveFormat();
     }
+    await handleSaveScoringRules();
   };
 
   // T102-T103: Modal confirmation handlers
@@ -265,41 +267,16 @@ const TournamentRulesSetupPage = () => {
         </Col>
       </Row>
 
-      <Row className="mt-3">
-        <Col md={6} className="mb-3">
-          <div className="d-grid">
-            <Button
-              variant="primary"
-              onClick={handleSaveFormat}
-              disabled={saving || hasMatches}
-            >
-              {saving ? t('common.saving') : t('buttons.saveFormatConfig')}
-            </Button>
-          </div>
-        </Col>
-        <Col md={6} className="mb-3">
-          <div className="d-grid">
-            <Button
-              variant="primary"
-              onClick={handleSaveScoringRules}
-              disabled={saving}
-            >
-              {saving ? t('common.saving') : t('buttons.saveScoringRules')}
-            </Button>
-          </div>
-        </Col>
-      </Row>
-
       <Row className="mt-4">
         <Col>
           <div className="d-grid">
             <Button
-              variant="success"
+              variant="primary"
               size="lg"
               onClick={handleSaveAll}
-              disabled={saving || hasMatches}
+              disabled={saving}
             >
-              {saving ? 'Saving...' : 'Save All Rules'}
+              {saving ? t('common.saving') : 'Save Rules'}
             </Button>
           </div>
         </Col>

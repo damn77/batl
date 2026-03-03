@@ -176,6 +176,17 @@ const BracketMatch = ({
 
   const status = match.status || 'SCHEDULED';
   const isBye = match.isBye || status === 'BYE';
+
+  // For BYE matches, the real player can be in either slot (especially consolation BYEs
+  // where the loser is placed in player1 or player2 depending on bracket pairing).
+  // Detect which slot holds the real player so we always display their name.
+  const byeActivePlayer = isBye ? (match.player1 || match.player2) : null;
+  const byeActivePair = isBye ? (match.pair1 || match.pair2) : null;
+
+  const bothFilled = isDoubles
+    ? (match.pair1 != null && match.pair2 != null)
+    : (match.player1 != null && match.player2 != null);
+  const isBlocked = !isBye && !bothFilled;
   const topPlayerState = getPlayerState(match, 'top', matchResult);
   const bottomPlayerState = getPlayerState(match, 'bottom', matchResult);
   const score = formatScore(match, matchResult);
@@ -190,6 +201,7 @@ const BracketMatch = ({
     `status-${status.toLowerCase().replace('_', '-')}`,
     isHighlighted && 'highlighted',
     isBye && 'status-bye',
+    isBlocked && 'tbd-pending',
     compact && 'compact',
     className
   ].filter(Boolean).join(' ');
@@ -206,21 +218,35 @@ const BracketMatch = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
+      style={isBlocked ? { opacity: 0.65, backgroundColor: '#f8f9fa' } : undefined}
     >
       {/* Top player/pair (FR-005: light grey background) */}
+      {/* For BYE matches, display whichever slot has the real player (consolation BYEs can have the player in either slot) */}
       <div
         className={`bracket-player top-player ${topPlayerState === 'winner' && !isSpecialOutcome ? 'winner' : ''}`}
         style={topPlayerState === 'winner' && isSpecialOutcome ? { backgroundColor: specialOutcomeColor } : {}}
       >
         <span className="player-name">
-          {!isDoubles && match.player1?.id ? (
-            <Link to={`/players/${match.player1.id}`} onClick={e => e.stopPropagation()}>
-              {getPlayerName(match.player1, match.pair1, isDoubles)}
-            </Link>
+          {isBye ? (
+            // BYE match: show whichever player/pair is present
+            !isDoubles && byeActivePlayer?.id ? (
+              <Link to={`/players/${byeActivePlayer.id}`} onClick={e => e.stopPropagation()}>
+                {getPlayerName(byeActivePlayer, byeActivePair, isDoubles)}
+              </Link>
+            ) : (
+              getPlayerName(byeActivePlayer, byeActivePair, isDoubles)
+            )
           ) : (
-            getPlayerName(match.player1, match.pair1, isDoubles)
+            // Normal match: always show player1/pair1 in top slot
+            !isDoubles && match.player1?.id ? (
+              <Link to={`/players/${match.player1.id}`} onClick={e => e.stopPropagation()}>
+                {getPlayerName(match.player1, match.pair1, isDoubles)}
+              </Link>
+            ) : (
+              getPlayerName(match.player1, match.pair1, isDoubles)
+            )
           )}
-          {match.player1?.seed && <span className="seed-badge">[{match.player1.seed}]</span>}
+          {(isBye ? byeActivePlayer : match.player1)?.seed && <span className="seed-badge">[{(isBye ? byeActivePlayer : match.player1).seed}]</span>}
         </span>
         {topPlayerState === 'winner' && <span className="winner-icon" aria-label="Winner">&#127942;</span>}
       </div>

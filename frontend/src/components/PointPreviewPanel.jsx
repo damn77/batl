@@ -3,6 +3,18 @@ import { Card, Table, Spinner, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { getTournamentPointPreview } from '../services/pointTableService';
 
+const ROUND_LABELS = {
+    FINAL:        'Final',
+    SEMIFINAL:    'Semifinal',
+    QUARTERFINAL: 'Quarterfinal',
+    SECOND_ROUND: '2nd Round',
+    FIRST_ROUND:  '1st Round',
+};
+
+const ROUND_ORDER = ['FINAL', 'SEMIFINAL', 'QUARTERFINAL', 'SECOND_ROUND', 'FIRST_ROUND'];
+
+const formatRound = (key) => ROUND_LABELS[key] || key;
+
 const PointPreviewPanel = ({ tournamentId }) => {
     const { t } = useTranslation();
     const [data, setData] = useState(null);
@@ -33,6 +45,15 @@ const PointPreviewPanel = ({ tournamentId }) => {
 
     const { pointTable, effectiveRange, participantCount } = data;
 
+    const mainRounds = Object.keys(pointTable.main || {});
+    const hasConsolation = Object.keys(pointTable.consolation || {}).length > 0;
+
+    const sortedRounds = [...mainRounds].sort((a, b) => {
+        const ai = ROUND_ORDER.indexOf(a);
+        const bi = ROUND_ORDER.indexOf(b);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
     return (
         <Card className="mb-4 shadow-sm">
             <Card.Header className="bg-light">
@@ -49,15 +70,15 @@ const PointPreviewPanel = ({ tournamentId }) => {
                             <tr>
                                 <th>{t('common.round') || 'Round'}</th>
                                 <th>{t('common.main') || 'Main'}</th>
-                                <th>{t('common.consolation') || 'Consolation'}</th>
+                                {hasConsolation && <th>{t('common.consolation') || 'Consolation'}</th>}
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.keys(pointTable.main || {}).map(round => (
+                            {sortedRounds.map(round => (
                                 <tr key={round}>
-                                    <td>{round}</td>
-                                    <td>{pointTable.main[round] || '-'}</td>
-                                    <td>{pointTable.consolation[round] || '-'}</td>
+                                    <td>{formatRound(round)}</td>
+                                    <td>{pointTable.main[round] ?? '-'}</td>
+                                    {hasConsolation && <td>{pointTable.consolation[round] ?? '-'}</td>}
                                 </tr>
                             ))}
                         </tbody>

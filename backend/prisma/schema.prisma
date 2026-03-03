@@ -85,6 +85,7 @@ enum MatchStatus {
   COMPLETED
   CANCELLED
   BYE
+  RETIRED
 }
 
 enum BracketType {
@@ -210,6 +211,9 @@ model PlayerProfile {
   // Ranking System Relationships (008-tournament-rankings)
   rankingEntries    RankingEntry[]
   tournamentResults TournamentResult[]
+
+  // Phase 5 Relationships (05-loser-routing-and-consolation-progression)
+  consolationOptOuts ConsolationOptOut[]
 
   @@index([userId])
   @@index([createdBy])
@@ -346,6 +350,9 @@ model Tournament {
   // Ranking System Relationships (008-tournament-rankings)
   pointConfig       TournamentPointConfig?
   tournamentResults TournamentResult[]
+
+  // Phase 5 Relationships (05-loser-routing-and-consolation-progression)
+  consolationOptOuts ConsolationOptOut[]
 
   // Constraints (T015)
   @@index([categoryId])
@@ -570,6 +577,9 @@ model DoublesPair {
   rankingEntries    RankingEntry[]
   tournamentResults TournamentResult[]
 
+  // Phase 5 Relationships (05-loser-routing-and-consolation-progression)
+  consolationOptOuts ConsolationOptOut[]
+
   // Constraints
   @@unique([player1Id, player2Id, categoryId]) // Prevents duplicate pairs in same category
   @@index([player1Id, deletedAt]) // Fast lookup of pairs containing player1
@@ -709,4 +719,27 @@ model TournamentPointConfig {
 
   // Constraints
   @@index([tournamentId])
+}
+
+// Phase 5 Models (05-loser-routing-and-consolation-progression)
+
+model ConsolationOptOut {
+  id           String   @id @default(uuid())
+  tournamentId String
+  playerId     String?  // For singles — PlayerProfile ID; null for doubles
+  pairId       String?  // For doubles — DoublesPair ID; null for singles
+  recordedBy   String   // 'SELF' | 'ORGANIZER' | 'AUTO' (RETIRED auto-opts out)
+  createdAt    DateTime @default(now())
+
+  // Relationships
+  tournament Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  player     PlayerProfile? @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  pair       DoublesPair?   @relation(fields: [pairId], references: [id], onDelete: Cascade)
+
+  // A player/pair can only opt out once per tournament
+  @@unique([tournamentId, playerId])
+  @@unique([tournamentId, pairId])
+  @@index([tournamentId])
+  @@index([playerId])
+  @@index([pairId])
 }

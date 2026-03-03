@@ -20,3 +20,16 @@ export async function submitMatchResult(matchId, resultData) {
   const response = await apiClient.patch(`/v1/matches/${matchId}/result`, resultData);
   return response.data.data;
 }
+
+/**
+ * Dry-run a match result submission to detect downstream impact.
+ * Returns impact data without modifying any match records.
+ *
+ * @param {string} matchId - Match UUID
+ * @param {Object} resultData - Result payload (same as submitMatchResult)
+ * @returns {Promise<Object>} Impact summary: { dryRun, impactedMainMatches, impactedConsolationMatches, totalImpactedMatches, affectedPlayers, requiresConfirmation }
+ */
+export async function submitMatchResultDryRun(matchId, resultData) {
+  const response = await apiClient.patch(`/v1/matches/${matchId}/result?dryRun=true`, resultData);
+  return response.data.data;
+}

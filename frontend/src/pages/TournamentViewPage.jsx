@@ -10,6 +10,7 @@ import PlayerListPanel from '../components/PlayerListPanel';
 import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel';
 import FormatVisualization from '../components/FormatVisualization';
 import PointPreviewPanel from '../components/PointPreviewPanel';
+import ConsolationOptOutPanel from '../components/ConsolationOptOutPanel';
 import { useTournament } from '../services/tournamentViewService';
 import { startTournament } from '../services/tournamentService';
 import { useAuth } from '../utils/AuthContext';
@@ -30,6 +31,14 @@ const TournamentViewPage = () => {
   const { tournament, isLoading, isError, mutate: mutateTournament } = useTournament(id);
 
   const [startError, setStartError] = useState(null);
+
+  // formatConfig arrives as a JSON string from the API — parse it once here
+  const parsedFormatConfig = (() => {
+    const raw = tournament?.formatConfig;
+    if (!raw) return {};
+    if (typeof raw === 'object') return raw;
+    try { return JSON.parse(raw); } catch { return {}; }
+  })();
 
   const handleStartTournament = async () => {
     if (!window.confirm('Start this tournament? Registration will close immediately and players will no longer be able to register.')) return;
@@ -132,6 +141,21 @@ const TournamentViewPage = () => {
                 <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
               </Col>
             </Row>
+
+            {/* Consolation Opt-Out Panel — directly below bracket section, MATCH_2 IN_PROGRESS only */}
+            {user &&
+              tournament.formatType === 'KNOCKOUT' &&
+              parsedFormatConfig.matchGuarantee === 'MATCH_2' &&
+              tournament.status === 'IN_PROGRESS' && (
+              <>
+                <hr className="mt-4 mb-0" />
+                <Row className="mt-3">
+                  <Col>
+                    <ConsolationOptOutPanel tournament={tournament} user={user} />
+                  </Col>
+                </Row>
+              </>
+            )}
 
             {/* Organizer Registration Panel */}
             {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (

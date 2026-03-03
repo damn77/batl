@@ -75,6 +75,16 @@ export async function createTournament(data, userId) {
     organizerId = organizer.id;
   }
 
+  // Resolve formatConfig: accept object or string from caller, default to KNOCKOUT/MATCH_2
+  const { formatConfig, defaultScoringRules } = data;
+  const resolvedFormatConfig = formatConfig
+    ? (typeof formatConfig === 'string' ? formatConfig : JSON.stringify(formatConfig))
+    : JSON.stringify({ formatType: 'KNOCKOUT', matchGuarantee: 'MATCH_2' });
+
+  const resolvedScoringRules = defaultScoringRules
+    ? (typeof defaultScoringRules === 'string' ? defaultScoringRules : JSON.stringify(defaultScoringRules))
+    : JSON.stringify({ formatType: 'SETS', winningSets: 2, advantageRule: 'ADVANTAGE', tiebreakTrigger: '6-6' });
+
   // Create tournament with SCHEDULED status
   const tournament = await prisma.tournament.create({
     data: {
@@ -86,7 +96,9 @@ export async function createTournament(data, userId) {
       organizerId,
       startDate: start,
       endDate: end,
-      status: 'SCHEDULED'
+      status: 'SCHEDULED',
+      formatConfig: resolvedFormatConfig,
+      defaultScoringRules: resolvedScoringRules
     },
     include: {
       category: {
@@ -811,16 +823,20 @@ export async function getMatches(tournamentId, filters = {}) {
   const matches = await prisma.match.findMany({
     where,
     include: {
-      player1: {
+      player1: { select: { id: true, name: true } },
+      player2: { select: { id: true, name: true } },
+      pair1: {
         select: {
           id: true,
-          name: true
+          player1: { select: { id: true, name: true } },
+          player2: { select: { id: true, name: true } }
         }
       },
-      player2: {
+      pair2: {
         select: {
           id: true,
-          name: true
+          player1: { select: { id: true, name: true } },
+          player2: { select: { id: true, name: true } }
         }
       }
     },
