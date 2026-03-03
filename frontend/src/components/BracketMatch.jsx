@@ -176,6 +176,10 @@ const BracketMatch = ({
 
   const status = match.status || 'SCHEDULED';
   const isBye = match.isBye || status === 'BYE';
+  const bothFilled = isDoubles
+    ? (match.pair1 != null && match.pair2 != null)
+    : (match.player1 != null && match.player2 != null);
+  const isBlocked = !isBye && !bothFilled;
   const topPlayerState = getPlayerState(match, 'top', matchResult);
   const bottomPlayerState = getPlayerState(match, 'bottom', matchResult);
   const score = formatScore(match, matchResult);
@@ -190,6 +194,7 @@ const BracketMatch = ({
     `status-${status.toLowerCase().replace('_', '-')}`,
     isHighlighted && 'highlighted',
     isBye && 'status-bye',
+    isBlocked && 'tbd-pending',
     compact && 'compact',
     className
   ].filter(Boolean).join(' ');
@@ -206,6 +211,7 @@ const BracketMatch = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
+      style={isBlocked ? { opacity: 0.65, backgroundColor: '#f8f9fa' } : undefined}
     >
       {/* Top player/pair (FR-005: light grey background) */}
       <div
