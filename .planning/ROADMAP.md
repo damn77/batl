@@ -128,4 +128,4 @@ Plans:
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Seed Script Cleanup | 1/1 | Complete   | 2026-03-03 | -- |
+| 11. Seed Script Cleanup | 1/1 | Complete    | 2026-03-03 | -- |
