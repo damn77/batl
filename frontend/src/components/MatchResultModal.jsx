@@ -85,11 +85,13 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
       : null;
     setFormValue(result ? { sets: result.sets || [], winner: result.winner || null } : { sets: [], winner: null });
     setPendingInvalidSubmit(null);
+    setPartialScore({ player1Games: '', player2Games: '' });
   }, [match?.id, match?.result]);
 
   // Special outcome state (organizer-only)
   const [specialOutcome, setSpecialOutcome] = useState('WALKOVER');
   const [specialWinner, setSpecialWinner] = useState('PLAYER1');
+  const [partialScore, setPartialScore] = useState({ player1Games: '', player2Games: '' });
 
   // 'score' | 'special' — organizer mode toggle
   const [mode, setMode] = useState('score');
@@ -122,6 +124,17 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
 
       if (isOrganizer && mode === 'special') {
         resultData = { outcome: specialOutcome, winner: specialWinner };
+        // Include partialScore for RETIRED if both fields are filled
+        if (
+          specialOutcome === 'RETIRED' &&
+          partialScore.player1Games !== '' &&
+          partialScore.player2Games !== ''
+        ) {
+          resultData.partialScore = {
+            player1Games: parseInt(partialScore.player1Games, 10),
+            player2Games: parseInt(partialScore.player2Games, 10)
+          };
+        }
       } else {
         if (!formValue.winner) {
           setError(t('match.errors.noWinner', 'Please complete all scores so a winner can be determined'));
@@ -300,6 +313,7 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                     <option value="WALKOVER">Walkover (W/O)</option>
                     <option value="FORFEIT">Forfeit (FF)</option>
                     <option value="NO_SHOW">No-show (N/S)</option>
+                    <option value="RETIRED">Retired (RET)</option>
                   </Form.Select>
                 </Form.Group>
 
@@ -313,6 +327,34 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                     <option value="PLAYER2">{player2Name}</option>
                   </Form.Select>
                 </Form.Group>
+
+                {specialOutcome === 'RETIRED' && (
+                  <Form.Group className="mb-3">
+                    <Form.Label>Partial score (games played before retirement — optional)</Form.Label>
+                    <div className="d-flex gap-2 align-items-center">
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        placeholder={player1Name + ' games'}
+                        value={partialScore.player1Games}
+                        onChange={(e) => setPartialScore(prev => ({ ...prev, player1Games: e.target.value }))}
+                        style={{ maxWidth: '160px' }}
+                      />
+                      <span className="text-muted">-</span>
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        placeholder={player2Name + ' games'}
+                        value={partialScore.player2Games}
+                        onChange={(e) => setPartialScore(prev => ({ ...prev, player2Games: e.target.value }))}
+                        style={{ maxWidth: '160px' }}
+                      />
+                    </div>
+                    <Form.Text className="text-muted">
+                      The retiring player is automatically opted out of consolation.
+                    </Form.Text>
+                  </Form.Group>
+                )}
               </Form>
             )}
           </>
