@@ -30,7 +30,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
   );
 
   // T050: Get current user's player profile ID for My Match feature
-  const currentUserPlayerId = user?.playerProfileId || null;
+  const currentUserPlayerId = user?.playerId || null;
 
   // Role check for organizer/admin draw workflow
   const isOrganizerOrAdmin = user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
@@ -173,6 +173,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                               currentUserPlayerId={currentUserPlayerId}
                               tournamentStatus={tournament.status}
                               isDoubles={tournament.category?.type === 'DOUBLES'}
+                              scoringRules={tournament.defaultScoringRules}
                             />
                           );
                         })}
@@ -199,6 +200,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                                       currentUserPlayerId={currentUserPlayerId}
                                       tournamentStatus={tournament.status}
                                       isDoubles={tournament.category?.type === 'DOUBLES'}
+                                      scoringRules={tournament.defaultScoringRules}
                                     />
                                   </Tab.Pane>
                                 );

@@ -23,12 +23,12 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 
 **Milestone Goal:** Extend knockout tournaments with a consolation bracket that guarantees every player at least 2 real matches (MATCH_2), running the full loop from configuration through point awards.
 
-- [ ] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time
+- [x] **Phase 4: Configuration and Consolation Draw** - Organizer selects Match Guarantee; consolation bracket structure generated automatically at draw time (completed 2026-03-01)
 - [x] **Phase 5: Loser Routing and Consolation Progression** - Losers feed into consolation slots; winners advance; tournament completes only when all brackets finish (completed 2026-03-01)
 - [x] **Phase 5.1: Consolation Gap Closure** - Closes gaps from v1.1 milestone audit: post-placement opt-out advancement, doubles BYE hardening, slot editor fix, error pattern fix (completed 2026-03-01)
 - [x] **Phase 5.2: Doubles Backend Fixes** - Closes 2nd-audit integration breaks: matchResultService winnerId derivation for doubles; consolationOptOutService slot direction fix for doubles opt-out (completed 2026-03-01)
 - [ ] **Phase 6: Visualization and Result Entry** - Consolation bracket displayed on tournament page; results enterable; TBD-blocked slots visible; consolation opt-out UI affordance
-- [ ] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages
+- [x] **Phase 6.1: Match Result Resubmission and Bracket Recalculation** - Correct bracket behavior when match results are resubmitted: block non-organizer winner changes, cascade-clear downstream matches, verification popup for impacted later stages (completed 2026-03-03)
 - [x] **Phase 7: Consolation Points** - Consolation point tables seeded and wired into point calculation; admin-editable via existing UI (completed 2026-03-03)
 - [x] **Phase 8: Consolation Bug Fixes** - Fix PTS-01 case mismatch in consolation point calculation and LIFE-05 doubles player self-service opt-out entity key (completed 2026-03-03)
 
@@ -172,10 +172,10 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7 →
 | 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
-| 5. Loser Routing and Consolation Progression | 6/6 | Complete   | 2026-03-03 | - |
+| 5. Loser Routing and Consolation Progression | v1.1 | 6/6 | Complete | 2026-03-01 |
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
-| 6.1. Match Result Resubmission and Bracket Recalculation | 1/2 | In Progress|  | - |
-| 7. Consolation Points | 1/1 | Complete   | 2026-03-03 | - |
-| 8. Consolation Bug Fixes | 1/1 | Complete   | 2026-03-03 | - |
+| 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
+| 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
+| 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
