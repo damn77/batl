@@ -15,10 +15,14 @@ import { getTournamentRegistrations } from '../services/tournamentRegistrationSe
 const ConsolationOptOutPanel = ({ tournament, user }) => {
   const isOrganizer = user?.role === 'ORGANIZER' || user?.role === 'ADMIN';
 
+  const isDoubles = tournament.category?.type !== 'SINGLES';
+
   // --- Player mode state ---
   const [playerStatus, setPlayerStatus] = useState(null); // null | 'success' | 'already_opted_out' | 'match_played' | 'error'
   const [playerError, setPlayerError] = useState(null);
   const [playerSubmitting, setPlayerSubmitting] = useState(false);
+  const [playerPairId, setPlayerPairId] = useState(null);
+  const [loadingPairId, setLoadingPairId] = useState(false);
 
   // --- Organizer mode state ---
   const [registrations, setRegistrations] = useState([]);
@@ -42,15 +46,36 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
       });
   }, [isOrganizer, tournament.id]);
 
+  // Fetch pairId for player self-service mode in doubles tournaments
+  useEffect(() => {
+    if (isOrganizer || !isDoubles) return;
+    setLoadingPairId(true);
+    getTournamentRegistrations(tournament.id, 'REGISTERED')
+      .then((data) => {
+        const regs = data?.registrations || [];
+        const myReg = regs.find(
+          (reg) =>
+            reg.pair?.player1?.id === user.playerId ||
+            reg.pair?.player2?.id === user.playerId
+        );
+        setPlayerPairId(myReg?.pair?.id || null);
+        setLoadingPairId(false);
+      })
+      .catch(() => {
+        setLoadingPairId(false);
+      });
+  }, [isOrganizer, isDoubles, tournament.id, user.playerId]);
+
   // --- Player mode handler ---
   const handlePlayerOptOut = async () => {
     setPlayerSubmitting(true);
     setPlayerError(null);
     setPlayerStatus(null);
     try {
-      await apiClient.post(`/v1/tournaments/${tournament.id}/consolation-opt-out`, {
-        playerId: user.playerId,
-      });
+      const body = isDoubles
+        ? { pairId: playerPairId }
+        : { playerId: user.playerId };
+      await apiClient.post(`/v1/tournaments/${tournament.id}/consolation-opt-out`, body);
       setPlayerStatus('success');
     } catch (err) {
       if (err.code === 'ALREADY_OPTED_OUT') {
@@ -150,12 +175,17 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
           <Button
             variant="outline-warning"
             onClick={handlePlayerOptOut}
-            disabled={playerSubmitting || optedOut}
+            disabled={playerSubmitting || optedOut || (isDoubles && (loadingPairId || !playerPairId))}
           >
             {playerSubmitting ? (
               <>
                 <Spinner as="span" animation="border" size="sm" className="me-2" />
                 Submitting...
+              </>
+            ) : loadingPairId ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" className="me-2" />
+                Loading...
               </>
             ) : (
               'Opt Out of Consolation'
