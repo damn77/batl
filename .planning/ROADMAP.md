@@ -61,8 +61,8 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 09-01-PLAN.md — Create data file and rewrite seed.js foundation (players, accounts, pairs, locations)
-- [ ] 09-02-PLAN.md — Rewrite tournaments, rankings, and update seed-knockout-test.js
+- [x] 09-01-PLAN.md — Create data file and rewrite seed.js foundation (players, accounts, pairs, locations)
+- [x] 09-02-PLAN.md — Rewrite tournaments, rankings, and update seed-knockout-test.js
 
 ---
 
@@ -79,7 +79,11 @@ Plans:
   2. There is exactly one active-tournament seed script (not two separate files doing similar work); running it produces a seeded tournament at "ProSet" referencing real player names
   3. The knockout test seed script produces a tournament at "ProSet" with real player names in the bracket positions
 
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Realistic mock ranking data (varied points and tournament counts)
+- [ ] 10-02-PLAN.md — Merge active-tournament scripts, update knockout test to use real players
 
 ---
 
@@ -99,5 +103,5 @@ Plans:
 | 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 9. Real Player and League Data | 2/2 | Complete   | 2026-03-03 | - |
-| 10. Data Quality and Script Cleanup | v1.2 | 0/? | Not started | - |
+| 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
+| 10. Data Quality and Script Cleanup | v1.2 | 0/2 | Not started | - |
