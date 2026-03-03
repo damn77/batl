@@ -38,7 +38,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 
 ### v1.2 Data Seeding Update
 
-- [ ] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations
+- [x] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations (completed 2026-03-03)
 - [ ] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds
 
 ## Phase Details
@@ -58,7 +58,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
   4. All tournaments displayed in the app show "ProSet" as their location — no "Central Tennis Club", "Riverside", or other generic location names appear anywhere
   5. The tournaments list shows a mix of SCHEDULED, IN_PROGRESS, and COMPLETED statuses across age-specific categories (35+, 40+, 50+, etc.)
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 09-01-PLAN.md — Create data file and rewrite seed.js foundation (players, accounts, pairs, locations)
@@ -99,5 +99,5 @@ Plans:
 | 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 9. Real Player and League Data | 1/2 | In Progress|  | - |
+| 9. Real Player and League Data | 2/2 | Complete   | 2026-03-03 | - |
 | 10. Data Quality and Script Cleanup | v1.2 | 0/? | Not started | - |

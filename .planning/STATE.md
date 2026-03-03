@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Data Seeding Update
 status: planning
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-03-03T22:12:53.338Z"
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-03-03T22:21:29.423Z"
 last_activity: 2026-03-03 — Roadmap created
 progress:
   total_phases: 2
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -52,6 +52,8 @@ All v1.1 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 09-01]: Player data extracted to backend/prisma/data/players.js as separate ES module — data vs logic separation
 - [Phase 09-01]: Mixed doubles pairs created with seedingScore: 0 — rankings start at zero, no tournaments played yet
 - [Phase 09-01]: ProSet replaces all 4 generic locations — all tournaments show ProSet as location
+- [Phase 09]: Mixed Doubles Open PAIR/MEN/WOMEN rankings created with explicit zero-ranked entries for all 18 pairs and 34 players — not an empty table
+- [Phase 09]: Men's/women's doubles pairs now reference real players: Zaprazny+Siebenstich, Stevko+Pomsar, Macho+Uhliar, Kardos+Sramko for men; Nestarcova+Siebenstichova, Zaprazna+Strakova for women
 
 ### Pending Todos
 
@@ -67,6 +69,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T22:12:53.336Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-03-03T22:21:17.353Z
+Stopped at: Completed 09-02-PLAN.md
 Resume file: None

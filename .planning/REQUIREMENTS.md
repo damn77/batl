@@ -27,9 +27,9 @@ Requirements for seed data update. Each maps to roadmap phases.
 ### Categories & Tournaments
 
 - [x] **TOURN-01**: All players registered in "Mixed Doubles Open" (no age limit) category
-- [ ] **TOURN-02**: No tournament exists in Mixed Doubles Open — rankings start at 0
-- [ ] **TOURN-03**: Pre-generated tournaments placed in age-specific categories (35+, 40+, 50+, etc.)
-- [ ] **TOURN-04**: Tournament statuses are a mix of SCHEDULED, IN_PROGRESS, and COMPLETED
+- [x] **TOURN-02**: No tournament exists in Mixed Doubles Open — rankings start at 0
+- [x] **TOURN-03**: Pre-generated tournaments placed in age-specific categories (35+, 40+, 50+, etc.)
+- [x] **TOURN-04**: Tournament statuses are a mix of SCHEDULED, IN_PROGRESS, and COMPLETED
 
 ### Locations
 
@@ -73,9 +73,9 @@ None — this is a self-contained data quality milestone.
 | PAIR-01 | Phase 9 | Complete |
 | PAIR-02 | Phase 9 | Complete |
 | TOURN-01 | Phase 9 | Complete |
-| TOURN-02 | Phase 9 | Pending |
-| TOURN-03 | Phase 9 | Pending |
-| TOURN-04 | Phase 9 | Pending |
+| TOURN-02 | Phase 9 | Complete |
+| TOURN-03 | Phase 9 | Complete |
+| TOURN-04 | Phase 9 | Complete |
 | LOC-01 | Phase 9 | Complete |
 | LOC-02 | Phase 9 | Complete |
 | DATA-01 | Phase 10 | Pending |
