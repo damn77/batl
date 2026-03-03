@@ -38,8 +38,8 @@ Requirements for seed data update. Each maps to roadmap phases.
 
 ### Data Quality
 
-- [ ] **DATA-01**: Mock ranking data uses varied/realistic point values instead of linear 1000/900/800
-- [ ] **DATA-02**: Tournament count per player varied instead of hardcoded 5
+- [x] **DATA-01**: Mock ranking data uses varied/realistic point values instead of linear 1000/900/800
+- [x] **DATA-02**: Tournament count per player varied instead of hardcoded 5
 
 ### Script Cleanup
 
@@ -78,8 +78,8 @@ None — this is a self-contained data quality milestone.
 | TOURN-04 | Phase 9 | Complete |
 | LOC-01 | Phase 9 | Complete |
 | LOC-02 | Phase 9 | Complete |
-| DATA-01 | Phase 10 | Pending |
-| DATA-02 | Phase 10 | Pending |
+| DATA-01 | Phase 10 | Complete |
+| DATA-02 | Phase 10 | Complete |
 | SCRP-01 | Phase 10 | Complete |
 | SCRP-02 | Phase 10 | Complete |
 | SCRP-03 | Phase 10 | Complete |
@@ -91,4 +91,4 @@ None — this is a self-contained data quality milestone.
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 — Phase assignments finalized (Phase 9: 14 reqs, Phase 10: 5 reqs)*
+*Last updated: 2026-03-03 — All 19 requirements complete (DATA-01, DATA-02 completed in Phase 10-01)*

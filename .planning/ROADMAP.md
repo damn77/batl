@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
-- 🔄 **v1.2 Data Seeding Update** — Phases 9, 10 (active)
+- ✅ **v1.2 Data Seeding Update** — Phases 9, 10 (shipped 2026-03-03)
 
 ## Phases
 
@@ -39,7 +39,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 ### v1.2 Data Seeding Update
 
 - [x] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations (completed 2026-03-03)
-- [ ] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds
+- [x] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds (completed 2026-03-03)
 
 ## Phase Details
 
@@ -79,11 +79,11 @@ Plans:
   2. There is exactly one active-tournament seed script (not two separate files doing similar work); running it produces a seeded tournament at "ProSet" referencing real player names
   3. The knockout test seed script produces a tournament at "ProSet" with real player names in the bracket positions
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 10-01-PLAN.md — Realistic mock ranking data (varied points and tournament counts)
-- [ ] 10-02-PLAN.md — Merge active-tournament scripts, update knockout test to use real players
+- [x] 10-01-PLAN.md — Realistic mock ranking data (varied points and tournament counts)
+- [x] 10-02-PLAN.md — Merge active-tournament scripts, update knockout test to use real players
 
 ---
 
@@ -104,4 +104,4 @@ Plans:
 | 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 10. Data Quality and Script Cleanup | 1/2 | In Progress|  | - |
+| 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
