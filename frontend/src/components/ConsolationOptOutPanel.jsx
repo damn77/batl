@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Alert, Button, Spinner, Badge } from 'react-bootstrap';
+import { Accordion, Card, Alert, Button, Spinner, Badge } from 'react-bootstrap';
 import apiClient from '../services/apiClient';
 import { getTournamentRegistrations } from '../services/tournamentRegistrationService';
 
@@ -33,7 +33,7 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
     setLoadingRegs(true);
     getTournamentRegistrations(tournament.id, 'REGISTERED')
       .then((data) => {
-        setRegistrations(data || []);
+        setRegistrations(data?.registrations || []);
         setLoadingRegs(false);
       })
       .catch((err) => {
@@ -69,7 +69,7 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
   // --- Organizer mode handler ---
   const handleOrganizerOptOut = async (reg) => {
     const regId = reg.id;
-    const body = reg.type === 'DOUBLES'
+    const body = reg.pair
       ? { pairId: reg.pair.id }
       : { playerId: reg.player.id };
 
@@ -98,7 +98,7 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
 
   // --- Helper: display name for a registration ---
   const getDisplayName = (reg) => {
-    if (reg.type === 'DOUBLES' && reg.pair) {
+    if (reg.pair) {
       const p1 = reg.pair.player1?.name || '?';
       const p2 = reg.pair.player2?.name || '?';
       return `${p1} / ${p2}`;
@@ -174,62 +174,69 @@ const ConsolationOptOutPanel = ({ tournament, user }) => {
       <Card.Header>
         <strong>Consolation Opt-Outs (Organizer)</strong>
       </Card.Header>
-      <Card.Body>
-        <p className="text-muted mb-3">
-          Record consolation opt-out on behalf of a player or pair.
-        </p>
+      <Card.Body className="p-0">
+        <Accordion defaultActiveKey={null} flush>
+          <Accordion.Item eventKey="opt-out-list">
+            <Accordion.Header>Consolation Opt-Out Management</Accordion.Header>
+            <Accordion.Body>
+              <p className="text-muted mb-3">
+                Record consolation opt-out on behalf of a player or pair.
+              </p>
 
-        {loadingRegs && (
-          <div className="text-center py-3">
-            <Spinner animation="border" size="sm" />
-            <span className="ms-2 text-muted">Loading registrations...</span>
-          </div>
-        )}
+              {loadingRegs && (
+                <div className="text-center py-3">
+                  <Spinner animation="border" size="sm" />
+                  <span className="ms-2 text-muted">Loading registrations...</span>
+                </div>
+              )}
 
-        {regsError && (
-          <Alert variant="danger">{regsError}</Alert>
-        )}
+              {regsError && (
+                <Alert variant="danger">{regsError}</Alert>
+              )}
 
-        {!loadingRegs && !regsError && registrations.length === 0 && (
-          <p className="text-muted">No registered participants found.</p>
-        )}
+              {!loadingRegs && !regsError && registrations.length === 0 && (
+                <p className="text-muted">No registered participants found.</p>
+              )}
 
-        {!loadingRegs && !regsError && registrations.length > 0 && (
-          <ul className="list-group list-group-flush">
-            {registrations.map((reg) => {
-              const rs = rowState[reg.id] || {};
-              return (
-                <li key={reg.id} className="list-group-item px-0">
-                  <div className="d-flex align-items-center justify-content-between">
-                    <span>{getDisplayName(reg)}</span>
-                    {rs.done ? (
-                      <Badge bg="secondary">Opted Out</Badge>
-                    ) : (
-                      <Button
-                        variant="outline-warning"
-                        size="sm"
-                        disabled={!!rs.submitting}
-                        onClick={() => handleOrganizerOptOut(reg)}
-                      >
-                        {rs.submitting ? (
-                          <>
-                            <Spinner as="span" animation="border" size="sm" className="me-1" />
-                            Saving...
-                          </>
-                        ) : (
-                          'Opt Out'
+              {!loadingRegs && !regsError && registrations.length > 0 && (
+                <ul className="list-group list-group-flush">
+                  {registrations.map((reg) => {
+                    const rs = rowState[reg.id] || {};
+                    return (
+                      <li key={reg.id} className="list-group-item px-0">
+                        <div className="d-flex align-items-center justify-content-between">
+                          <span>{getDisplayName(reg)}</span>
+                          {rs.done ? (
+                            <Badge bg="secondary">Opted Out</Badge>
+                          ) : (
+                            <Button
+                              variant="outline-warning"
+                              size="sm"
+                              disabled={!!rs.submitting}
+                              onClick={() => handleOrganizerOptOut(reg)}
+                            >
+                              {rs.submitting ? (
+                                <>
+                                  <Spinner as="span" animation="border" size="sm" className="me-1" />
+                                  Saving...
+                                </>
+                              ) : (
+                                'Opt Out'
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        {rs.error && (
+                          <small className="text-danger d-block mt-1">{rs.error}</small>
                         )}
-                      </Button>
-                    )}
-                  </div>
-                  {rs.error && (
-                    <small className="text-danger d-block mt-1">{rs.error}</small>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </Card.Body>
     </Card>
   );
