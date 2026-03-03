@@ -40,7 +40,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 
 - [x] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations (completed 2026-03-03)
 - [x] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds (completed 2026-03-03)
-- [ ] **Phase 11: Seed Script Cleanup** - Fix seed-active-tournament.js schema bugs, update SUMMARY frontmatter gaps (gap closure)
+- [x] **Phase 11: Seed Script Cleanup** - Fix seed-active-tournament.js schema bugs, update SUMMARY frontmatter gaps (gap closure) (completed 2026-03-03)
 
 ## Phase Details
 
@@ -103,7 +103,7 @@ Plans:
   2. `09-02-SUMMARY.md` frontmatter lists TOURN-02, TOURN-03, TOURN-04 in `requirements_completed`
   3. `10-02-SUMMARY.md` frontmatter lists SCRP-01, SCRP-02, SCRP-03 in `requirements_completed`
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — Fix seed-active-tournament.js schema bugs and update SUMMARY frontmatter
@@ -128,4 +128,4 @@ Plans:
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Seed Script Cleanup | v1.2 | 0/1 | Planned | -- |
+| 11. Seed Script Cleanup | 1/1 | Complete   | 2026-03-03 | -- |
