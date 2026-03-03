@@ -124,7 +124,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: 'player-B',
         pair1Id: null,
         pair2Id: null,
-        result: JSON.stringify({ winner: 'player1' })
+        result: JSON.stringify({ winner: 'PLAYER1' })
       }
     ]);
     // Tournament is SINGLES
@@ -174,7 +174,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: 'player-B',
         pair1Id: null,
         pair2Id: null,
-        result: JSON.stringify({ winner: 'player2' })
+        result: JSON.stringify({ winner: 'PLAYER2' })
       },
       {
         id: 'match-1002',
@@ -183,7 +183,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: 'player-D',
         pair1Id: null,
         pair2Id: null,
-        result: JSON.stringify({ winner: 'player1' })
+        result: JSON.stringify({ winner: 'PLAYER1' })
       }
     ]);
     mockPrisma.tournament.findUnique.mockResolvedValue({
@@ -209,7 +209,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: null,
         pair1Id: 'pair-A',
         pair2Id: 'pair-B',
-        result: JSON.stringify({ winner: 'player2' })
+        result: JSON.stringify({ winner: 'PLAYER2' })
       }
     ]);
     mockPrisma.tournament.findUnique.mockResolvedValue({
@@ -241,7 +241,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: 'player-B',
         pair1Id: null,
         pair2Id: null,
-        result: JSON.stringify({ winner: 'player1' })
+        result: JSON.stringify({ winner: 'PLAYER1' })
       },
       {
         id: 'match-1002',
@@ -250,7 +250,7 @@ describe('deriveConsolationResults(tournamentId)', () => {
         player2Id: 'player-C',
         pair1Id: null,
         pair2Id: null,
-        result: JSON.stringify({ winner: 'player1' })
+        result: JSON.stringify({ winner: 'PLAYER1' })
       }
     ]);
     mockPrisma.tournament.findUnique.mockResolvedValue({

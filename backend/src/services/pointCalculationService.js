@@ -586,9 +586,9 @@ export async function deriveConsolationResults(tournamentId) {
 
         let winnerId;
         if (isDoubles) {
-            winnerId = resultJson.winner === 'player1' ? match.pair1Id : match.pair2Id;
+            winnerId = resultJson.winner === 'PLAYER1' ? match.pair1Id : match.pair2Id;
         } else {
-            winnerId = resultJson.winner === 'player1' ? match.player1Id : match.player2Id;
+            winnerId = resultJson.winner === 'PLAYER1' ? match.player1Id : match.player2Id;
         }
 
         if (!winnerId) continue;
