@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Consolation Brackets
 status: completed
-stopped_at: Completed 06.1-02-PLAN.md (Match Result Resubmission Frontend)
-last_updated: "2026-03-03T16:49:31.209Z"
+stopped_at: Completed 07-01-PLAN.md (Consolation Points Calculation)
+last_updated: "2026-03-03T17:13:56.558Z"
 last_activity: 2026-03-03 — Completed 05-06-PLAN.md (Consolation Opt-Out Frontend UI)
 progress:
   total_phases: 7
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 12
+  completed_phases: 6
+  total_plans: 14
+  completed_plans: 13
   percent: 100
 ---
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 *Updated after each plan completion*
 | Phase 06.1-match-result-resubmission-and-bracket-recalculation P01 | 25 | 3 tasks | 5 files |
 | Phase 06.1-match-result-resubmission-and-bracket-recalculation P02 | 5 | 2 tasks | 2 files |
+| Phase 07-consolation-points P01 | 10 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ Carried over from v1.0:
 - [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: runDryRunIfNeeded shared helper used for both score-mode and special-outcome winner-change paths to avoid duplicated logic
 - [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: isWinnerChanging (formValue.winner) and isSpecialWinnerChanging (specialWinner) are separate computed booleans — special outcome uses its own state variable, not formValue
 - [Phase 06.1-match-result-resubmission-and-bracket-recalculation]: Score-only correction (same winner) skips dry-run entirely via early short-circuit before the dry-run block
+- [Phase 07-01]: fromEnd=3 maps to FIRST_ROUND (not SECOND_ROUND) — consolation brackets max 4 rounds; behavior tests are authoritative over prose spec
+- [Phase 07-01]: Server-side consolation derivation: results appended after body validation, caller never enumerates consolation entries
+- [Phase 07-01]: PLACEMENT method excluded from consolation derivation — only FINAL_ROUND uses round name lookups
 
 ### Pending Todos
 
@@ -121,6 +125,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T16:44:32.190Z
-Stopped at: Completed 06.1-02-PLAN.md (Match Result Resubmission Frontend)
+Last session: 2026-03-03T17:13:56.555Z
+Stopped at: Completed 07-01-PLAN.md (Consolation Points Calculation)
 Resume file: None

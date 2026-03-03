@@ -32,8 +32,8 @@ Requirements for consolation bracket support (MATCH_2 guarantee level). Each map
 
 ### Points
 
-- [ ] **PTS-01**: Point calculation awards consolation bracket points based on the last consolation round the player won (player must win at least 1 consolation match to receive consolation points)
-- [ ] **PTS-02**: Consolation point tables (`isConsolation=true`) are pre-seeded with values from `notes/013-bracket-points-rules.md` and are admin-editable via the existing Point Tables admin UI
+- [x] **PTS-01**: Point calculation awards consolation bracket points based on the last consolation round the player won (player must win at least 1 consolation match to receive consolation points)
+- [x] **PTS-02**: Consolation point tables (`isConsolation=true`) are pre-seeded with values from `notes/013-bracket-points-rules.md` and are admin-editable via the existing Point Tables admin UI
 
 ## Future Requirements (v1.2+)
 
@@ -81,8 +81,8 @@ Which phases cover which requirements.
 | VIEW-01 | Phase 6 | Pending |
 | VIEW-02 | Phase 6 | Pending |
 | VIEW-03 | Phase 6 | Pending |
-| PTS-01 | Phase 7 | Pending |
-| PTS-02 | Phase 7 | Pending |
+| PTS-01 | Phase 7 | Complete |
+| PTS-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 13 total
