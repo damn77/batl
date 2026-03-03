@@ -10,6 +10,7 @@ import PlayerListPanel from '../components/PlayerListPanel';
 import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel';
 import FormatVisualization from '../components/FormatVisualization';
 import PointPreviewPanel from '../components/PointPreviewPanel';
+import ConsolationOptOutPanel from '../components/ConsolationOptOutPanel';
 import { useTournament } from '../services/tournamentViewService';
 import { startTournament } from '../services/tournamentService';
 import { useAuth } from '../utils/AuthContext';
@@ -158,6 +159,18 @@ const TournamentViewPage = () => {
                 <PointPreviewPanel tournamentId={tournament.id} />
               </Col>
             </Row>
+
+            {/* Consolation Opt-Out Panel — MATCH_2 knockout tournaments only */}
+            {user &&
+              tournament.formatType === 'KNOCKOUT' &&
+              tournament.formatConfig?.matchGuarantee === 'MATCH_2' &&
+              tournament.status === 'IN_PROGRESS' && (
+              <Row className="mt-4">
+                <Col>
+                  <ConsolationOptOutPanel tournament={tournament} user={user} />
+                </Col>
+              </Row>
+            )}
           </>
         )}
       </Container>
