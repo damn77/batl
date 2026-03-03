@@ -5,6 +5,7 @@
  * Delegates business logic to matchResultService.
  *
  * Feature: 01-match-result-submission (Plan 01)
+ * Feature: 06.1-match-result-resubmission (Plan 01)
  *
  * Exports:
  *   - submitMatchResult: Handler for PATCH /api/v1/matches/:id/result
@@ -47,15 +48,27 @@ export async function submitMatchResult(req, res, next) {
       });
     }
 
+    // BB-04: Parse dry-run query parameter — passed through to matchResultService
+    const dryRun = req.query.dryRun === 'true';
+
     const result = await matchResultService.submitResult({
       matchId,
       body: req.body,
       isOrganizer,
-      submitterPlayerId
+      submitterPlayerId,
+      dryRun
     });
 
     return res.status(200).json({ success: true, data: result });
   } catch (err) {
+    // BB-04: Dry-run result — transaction was rolled back, return impact data
+    if (err.code === 'DRY_RUN_RESULT') {
+      return res.status(200).json({
+        success: true,
+        data: err.data
+      });
+    }
+
     // Structured errors from matchResultService carry statusCode and code
     if (err.statusCode) {
       return res.status(err.statusCode).json({
