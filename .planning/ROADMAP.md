@@ -160,5 +160,5 @@ Phases execute in numeric order: 4 → 5 → 5.1 → 5.2 → 6 → 6.1 → 7
 | 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
 | 6. Visualization and Result Entry | v1.1 | 0/1 | Not started | - |
-| 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 0/2 | Not started | - |
+| 6.1. Match Result Resubmission and Bracket Recalculation | 1/2 | In Progress|  | - |
 | 7. Consolation Points | v1.1 | 0/TBD | Not started | - |

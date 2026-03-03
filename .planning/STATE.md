@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Consolation Brackets
 status: completed
-stopped_at: Phase 6.1 context gathered
-last_updated: "2026-03-03T16:13:24.663Z"
+stopped_at: Completed 06.1-01-PLAN.md (Match Result Resubmission Backend)
+last_updated: "2026-03-03T16:39:38.007Z"
 last_activity: 2026-03-03 — Completed 05-06-PLAN.md (Consolation Opt-Out Frontend UI)
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
   percent: 100
 ---
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 06.1-match-result-resubmission-and-bracket-recalculation P01 | 25 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Carried over from v1.0:
 - [Phase 05-06]: ConsolationOptOutPanel uses two distinct rendering modes (player vs organizer) within a single component controlled by user.role
 - [Phase 05-06]: Organizer mode fetches only REGISTERED participants (status filter) to keep the opt-out list relevant
 - [Phase 05-06]: Player mode disables button after success or ALREADY_OPTED_OUT (both are terminal states)
+- [Phase 06.1]: DRY_RUN_RESULT throw pattern: service throws custom error inside $transaction to auto-rollback, controller catches and returns 200 with impact data
+- [Phase 06.1]: Score-only passthrough: submitResult returns immediately after tx.match.update when winner unchanged, skipping all cascade and consolation routing
+- [Phase 06.1]: cascadeClearMainBracket exported from consolationEligibilityService mirrors private cascadeClearWinnerFromNextRounds but operates on MAIN bracket
 
 ### Pending Todos
 
@@ -113,6 +117,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-03T16:13:24.660Z
-Stopped at: Phase 6.1 context gathered
-Resume file: .planning/phases/06.1-match-result-resubmission-and-bracket-recalculation/06.1-CONTEXT.md
+Last session: 2026-03-03T16:39:38.004Z
+Stopped at: Completed 06.1-01-PLAN.md (Match Result Resubmission Backend)
+Resume file: None
