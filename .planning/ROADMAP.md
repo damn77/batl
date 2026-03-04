@@ -96,7 +96,10 @@ Plans:
   2. The new tournament carries over category, rules, format, location, and capacity from the source tournament
   3. The new tournament has no name, no dates, no registrations, and no draw (organizer must fill these in)
   4. Organizer can edit every field of the copied tournament after creation, including all settings copied from the source
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 14-01-PLAN.md — Copy tournament backend API endpoint with validation, service logic, and integration tests
+- [ ] 14-02-PLAN.md — Action dropdown on tournament list with Copy flow pre-filling creation form
 
 ### Phase 15: Tournament Deletion and Revert
 **Goal**: Organizers can fully delete a tournament or revert it to SCHEDULED, with appropriate data cleanup and ranking correction
@@ -152,7 +155,7 @@ Plans:
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
 | 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
 | 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
-| 14. Tournament Copy | v1.3 | 0/? | Not started | - |
+| 14. Tournament Copy | v1.3 | 0/2 | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
