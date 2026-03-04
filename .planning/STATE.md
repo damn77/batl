@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
+milestone: v1.3
+milestone_name: Manual Draw & QoL
+status: defining_requirements
 stopped_at: null
-last_updated: "2026-03-04T01:07:00.000Z"
-last_activity: 2026-03-04 - Completed quick task 2: Fix FK constraint error on Match pair1Id for doubles draw generation
+last_updated: "2026-03-04"
+last_activity: 2026-03-04 - Milestone v1.3 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -25,8 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Status: Between milestones — v1.2 shipped, next milestone not started
-Last activity: 2026-03-04 - Completed quick task 2: Fix FK constraint error on Match pair1Id for doubles draw generation
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-04 — Milestone v1.3 started
 
 ## Accumulated Context
 

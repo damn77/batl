@@ -62,7 +62,13 @@ A complete tournament runs from registration to final standings without the orga
 
 ### Active
 
-(No active requirements — planning next milestone)
+<!-- v1.3: Manual Draw & QoL -->
+
+- [ ] Manual bracket draw — organizer manually assigns players to bracket positions
+- [ ] Copy tournament — duplicate config/rules from existing tournament
+- [ ] Delete tournament — cascading deletion with ranking recalculation
+- [ ] Admin access parity — verify admin can do everything organizer can
+- [ ] Revert tournament to scheduled — reset state, unlock registration, delete draw
 
 ### Future (v1.3+)
 
@@ -128,5 +134,16 @@ A complete tournament runs from registration to final standings without the orga
 | Email-based player lookup in test seeds | Deterministic references instead of alphabetical findMany | ✓ Good — guaranteed real named players in all seeds |
 | RANKING_PROFILES lookup array for mock data | Replaces linear formula with realistic varied values | ✓ Good — rankings page looks realistic |
 
+## Current Milestone: v1.3 Manual Draw & QoL
+
+**Goal:** Add manual bracket draw for flexible tournament management and quality-of-life improvements for organizers.
+
+**Target features:**
+- Manual bracket draw (organizer assigns players to positions)
+- Copy tournament (prefill config/rules from existing)
+- Delete tournament (cascading delete with ranking recalculation)
+- Admin access parity (verify admin = organizer access)
+- Revert tournament to scheduled (reset state, unlock registration, delete draw)
+
 ---
-*Last updated: 2026-03-04 after v1.2 milestone*
+*Last updated: 2026-03-04 after v1.3 milestone start*
