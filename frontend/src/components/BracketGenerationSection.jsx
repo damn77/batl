@@ -44,10 +44,13 @@ const BracketGenerationSection = ({
   const [successMessage, setSuccessMessage] = useState(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [doublesMethod, setDoublesMethod] = useState('PAIR_SCORE');
+  const [drawMode, setDrawMode] = useState('seeded');
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
 
   const isDoubles = tournament?.category?.type === 'DOUBLES';
   const hasBracket = structure?.brackets && structure.brackets.length > 0;
+  const bracketDrawMode = structure?.brackets?.[0]?.drawMode || 'SEEDED';
+  const isManualDraw = bracketDrawMode === 'MANUAL';
 
   // ----- Load registered players once on mount -----
   useEffect(() => {
@@ -86,6 +89,7 @@ const BracketGenerationSection = ({
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
+      options.mode = drawMode;
       const result = await generateBracket(tournament.id, options);
       if (result?.consolationBracketId) {
         setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
@@ -101,7 +105,7 @@ const BracketGenerationSection = ({
     } finally {
       setGenerating(false);
     }
-  }, [tournament?.id, isDoubles, doublesMethod, mutateFormatStructure, mutateMatches]);
+  }, [tournament?.id, isDoubles, doublesMethod, drawMode, mutateFormatStructure, mutateMatches]);
 
   const handleConfirmRegenerate = useCallback(async () => {
     setShowRegenerateConfirm(false);
@@ -112,6 +116,7 @@ const BracketGenerationSection = ({
     try {
       const options = {};
       if (isDoubles) options.doublesMethod = doublesMethod;
+      options.mode = drawMode;
       const result = await generateBracket(tournament.id, options);
       if (result?.consolationBracketId) {
         setSuccessMessage('Draw completed. Main bracket and Consolation Bracket generated.');
@@ -126,7 +131,7 @@ const BracketGenerationSection = ({
     } finally {
       setGenerating(false);
     }
-  }, [tournament?.id, isDoubles, doublesMethod, mutateFormatStructure, mutateMatches]);
+  }, [tournament?.id, isDoubles, doublesMethod, drawMode, mutateFormatStructure, mutateMatches]);
 
   const handleSaveDraw = useCallback(async () => {
     if (pendingSwaps.length === 0) return;
@@ -250,8 +255,34 @@ const BracketGenerationSection = ({
             )}
           </div>
 
-          {/* Doubles seeding method selector */}
-          {isDoubles && (
+          {/* Draw mode selector */}
+          <Form.Group className="mb-4">
+            <Form.Label className="fw-semibold">Draw Mode</Form.Label>
+            <div>
+              <Form.Check
+                type="radio"
+                id="drawMode-seeded"
+                name="drawMode"
+                label="Seeded (players placed automatically by ranking)"
+                value="seeded"
+                checked={drawMode === 'seeded'}
+                onChange={() => setDrawMode('seeded')}
+                className="mb-1"
+              />
+              <Form.Check
+                type="radio"
+                id="drawMode-manual"
+                name="drawMode"
+                label="Manual (assign players to positions yourself)"
+                value="manual"
+                checked={drawMode === 'manual'}
+                onChange={() => setDrawMode('manual')}
+              />
+            </div>
+          </Form.Group>
+
+          {/* Doubles seeding method selector (hidden in manual mode) */}
+          {isDoubles && drawMode === 'seeded' && (
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold">Seeding Method</Form.Label>
               <div>
@@ -290,7 +321,7 @@ const BracketGenerationSection = ({
                 Generating Draw...
               </>
             ) : (
-              'Generate Draw'
+              drawMode === 'manual' ? 'Generate Empty Bracket' : 'Generate Draw'
             )}
           </Button>
           {registeredPlayers.length < 2 && (
