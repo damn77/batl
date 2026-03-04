@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: executing
-stopped_at: "Completed 15-02-PLAN.md (checkpoint:human-verify Task 3 pending)"
-last_updated: "2026-03-04T17:45:37.955Z"
+stopped_at: Completed 15-02-PLAN.md — Phase 15 tournament deletion and revert UI complete
+last_updated: "2026-03-04T18:15:07.916Z"
 last_activity: "2026-03-04 — Phase 15 Plan 01 completed: tournament deletion (any status) + revert endpoint"
 progress:
   total_phases: 6
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 14-tournament-copy P02 | 8m | 1 tasks | 4 files |
 | Phase 15 P01 | 12m | 2 tasks | 4 files |
 | Phase 15 P02 | 2m | 2 tasks | 4 files |
+| Phase 15 P02 | 5min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Key architectural context for v1.3:
 - [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
 - [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
 - [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
+- [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
+- [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
+- [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
 
 ### Pending Todos
 
@@ -106,6 +110,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T17:45:37.953Z
-Stopped at: Completed 15-02-PLAN.md (checkpoint:human-verify Task 3 pending)
+Last session: 2026-03-04T18:15:07.914Z
+Stopped at: Completed 15-02-PLAN.md — Phase 15 tournament deletion and revert UI complete
 Resume file: None
