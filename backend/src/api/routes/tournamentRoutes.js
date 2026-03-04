@@ -8,6 +8,7 @@ import {
   createTournament,
   updateTournament,
   deleteTournament,
+  revertTournament,
   getFormatStructure,
   getMatches,
   getTournamentPointPreview,
@@ -127,6 +128,19 @@ router.patch(
 );
 
 /**
+ * POST /api/v1/tournaments/:id/revert
+ * Revert tournament to SCHEDULED — deletes draw data, reopens registration
+ * Authorization: ADMIN or ORGANIZER roles required (REVERT-01)
+ * Note: Registered BEFORE the generic /:id route to avoid path shadowing
+ */
+router.post(
+  '/:id/revert',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  revertTournament
+);
+
+/**
  * PATCH /api/v1/tournaments/:id
  * Update tournament details (categoryId is immutable per FR-006)
  * Authorization: ADMIN or ORGANIZER roles required (T047)
@@ -141,8 +155,8 @@ router.patch(
 
 /**
  * DELETE /api/v1/tournaments/:id
- * Delete tournament (only if status is SCHEDULED)
- * Authorization: ADMIN role required (T047)
+ * Delete tournament (any status; COMPLETED triggers ranking recalculation)
+ * Authorization: ADMIN or ORGANIZER roles required (DEL-01, DEL-05)
  */
 router.delete(
   '/:id',

@@ -341,8 +341,8 @@ export async function updateTournament(req, res, next) {
 
 /**
  * T045: DELETE /api/v1/tournaments/:id - Delete tournament
- * Authorization: ADMIN role required
- * T050: Can only delete if status is SCHEDULED
+ * Authorization: ADMIN or ORGANIZER role required (DEL-01, DEL-05)
+ * Accepts any tournament status; COMPLETED triggers ranking recalculation
  */
 export async function deleteTournament(req, res, next) {
   try {
@@ -364,17 +364,24 @@ export async function deleteTournament(req, res, next) {
         }
       });
     }
-    // T050: Handle tournament status conflicts
-    if (err.statusCode === 409) {
-      return res.status(409).json({
-        success: false,
-        error: {
-          code: err.code || 'TOURNAMENT_STARTED',
-          message: err.message,
-          currentStatus: err.currentStatus
-        }
-      });
-    }
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/tournaments/:id/revert - Revert tournament to SCHEDULED
+ * Authorization: ADMIN or ORGANIZER role required (REVERT-01)
+ * Deletes draw data and reopens registration
+ */
+export async function revertTournament(req, res, next) {
+  try {
+    const { id } = req.params;
+    const result = await tournamentService.revertTournament(id);
+    return res.status(200).json({
+      success: true,
+      data: { tournament: result, message: 'Tournament reverted to SCHEDULED' }
+    });
+  } catch (err) {
     next(err);
   }
 }
