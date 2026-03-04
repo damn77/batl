@@ -115,6 +115,7 @@ const KnockoutBracket = ({
   showByes: initialShowByes = false,
   colors: customColors,
   isDoubles = false,
+  refreshKey = 0,
   className = ''
 }) => {
   // State
@@ -143,7 +144,8 @@ const KnockoutBracket = ({
   const { matches, isLoading, isError, mutate } = useMatches(
     tournamentId,
     { bracketId: bracket.id },
-    true
+    true,
+    refreshKey
   );
 
   // Check if tournament has first-round BYEs
@@ -301,7 +303,6 @@ const KnockoutBracket = ({
               <div
                 ref={viewportRef}
                 className={viewportClasses}
-                onWheel={navigation.handleWheel}
                 onMouseDown={navigation.handleMouseDown}
                 onMouseMove={navigation.handleMouseMove}
                 onMouseUp={navigation.handleMouseUp}
@@ -333,7 +334,7 @@ const KnockoutBracket = ({
 
                 {/* Navigation hint */}
                 <div className="bracket-nav-hint">
-                  Scroll to zoom, drag to pan
+                  Drag to pan, use +/&#8722; to zoom
                 </div>
               </div>
 
