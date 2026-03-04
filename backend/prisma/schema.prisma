@@ -453,6 +453,7 @@ model Bracket {
   tournamentId   String // Foreign key to Tournament
   bracketType    BracketType // MAIN, CONSOLATION, PLACEMENT
   matchGuarantee MatchGuaranteeType // 1_MATCH, 2_MATCH, UNTIL_PLACEMENT
+  drawMode       String             @default("SEEDED") // Phase 12: SEEDED or MANUAL draw mode
   ruleOverrides  String? // JSON: Bracket-specific rule overrides
   placementRange String? // For PLACEMENT brackets: "4-8", "9-16", etc.
 

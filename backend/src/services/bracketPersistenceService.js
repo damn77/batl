@@ -15,6 +15,7 @@
 import { PrismaClient } from '@prisma/client';
 import seedrandom from 'seedrandom';
 import { generateSeededBracket } from './seedingPlacementService.js';
+import { getBracketByPlayerCount } from './bracketService.js';
 
 const prisma = new PrismaClient();
 
@@ -85,11 +86,12 @@ export async function closeRegistration(tournamentId) {
  * @param {Object} [options={}] - Generation options
  * @param {string} [options.randomSeed] - Optional deterministic seed for reproducibility
  * @param {string} [options.doublesMethod='PAIR_SCORE'] - 'PAIR_SCORE' | 'AVERAGE_SCORE'
+ * @param {string} [options.mode='seeded'] - 'seeded' | 'manual'. Manual mode creates empty bracket (no auto-placement)
  * @returns {Promise<{bracket: Object, roundCount: number, matchCount: number}>}
  * @throws {Error} TOURNAMENT_NOT_FOUND | REGISTRATION_NOT_CLOSED | BRACKET_LOCKED | INSUFFICIENT_PLAYERS
  */
 export async function generateBracket(tournamentId, options = {}) {
-  const { randomSeed } = options;
+  const { randomSeed, mode = 'seeded' } = options;
 
   // Step 1: Load tournament with category info
   const tournament = await prisma.tournament.findUnique({
@@ -169,85 +171,100 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 7: Call seeding placement service to get seeded positions
-  const seedingResult = await generateSeededBracket(
-    tournament.categoryId,
-    playerCount,
-    randomSeed
-  );
+  // --- MANUAL MODE: skip seeding, create empty bracket ---
+  // Step 7 (manual): Load bracket template to determine BYE positions from structure string
+  let positions, bracketSize, structure, actualSeed;
 
-  // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
-  // '0' means preliminary match. Length = bracketSize / 2.
-  const { positions, bracketSize, structure: rawStructure, randomSeed: actualSeed } =
-    seedingResult.bracket;
-  const structure = (rawStructure || '').replace(/\s/g, '');
+  if (mode === 'manual') {
+    const templateResult = await getBracketByPlayerCount(playerCount);
+    bracketSize = templateResult.bracketSize;
+    structure = (templateResult.structure || '').replace(/\s/g, '');
 
-  // Step 7b: Fill unseeded players into empty non-BYE match positions.
-  // generateSeededBracket only places seeds; remaining slots need real players.
-  const seededIds = new Set(positions.filter(p => p.entityId).map(p => p.entityId));
-  const unseeded = allEntities.filter(e => !seededIds.has(e.entityId));
+    // Build positions array: bracketSize slots, all null (no players placed yet)
+    positions = Array.from({ length: bracketSize }, () => ({ entityId: null }));
+    actualSeed = null;
+  } else {
+    // Step 7 (seeded): Call seeding placement service to get seeded positions
+    const seedingResult = await generateSeededBracket(
+      tournament.categoryId,
+      playerCount,
+      randomSeed
+    );
 
-  // Shuffle unseeded players deterministically using the same random seed
-  const rng = seedrandom(actualSeed || randomSeed || 'default');
-  for (let i = unseeded.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
-  }
+    // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
+    // '0' means preliminary match. Length = bracketSize / 2.
+    ({ positions, bracketSize, randomSeed: actualSeed } = seedingResult.bracket);
+    const rawStructure = seedingResult.bracket.structure;
+    structure = (rawStructure || '').replace(/\s/g, '');
 
-  // Normalize BYE matches: player always in the first (even) slot, BYE in the second (odd) slot.
-  // placeTwoSeeds places seed2 at the very last position (odd slot of the bottom BYE match),
-  // but the UI convention is player-first in every match. Move any entity sitting in an odd BYE
-  // slot to the even slot of the same match.
-  const totalMatches = bracketSize / 2;
-  for (let matchIdx = 0; matchIdx < totalMatches; matchIdx++) {
-    if (!structure || structure[matchIdx] !== '1') continue;
-    const evenIdx = matchIdx * 2;
-    const oddIdx = matchIdx * 2 + 1;
-    if (!positions[evenIdx].entityId && positions[oddIdx].entityId) {
-      positions[evenIdx].entityId = positions[oddIdx].entityId;
-      positions[oddIdx].entityId = null;
+    // Step 7b: Fill unseeded players into empty non-BYE match positions.
+    // generateSeededBracket only places seeds; remaining slots need real players.
+    const seededIds = new Set(positions.filter(p => p.entityId).map(p => p.entityId));
+    const unseeded = allEntities.filter(e => !seededIds.has(e.entityId));
+
+    // Shuffle unseeded players deterministically using the same random seed
+    const rng = seedrandom(actualSeed || randomSeed || 'default');
+    for (let i = unseeded.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
     }
-  }
 
-  // BYE slot is always the second (odd) position in each BYE match.
-  const byeSlotIndices = new Set();
-  for (let matchIdx = 0; matchIdx < totalMatches; matchIdx++) {
-    if (!structure || structure[matchIdx] !== '1') continue;
-    byeSlotIndices.add(matchIdx * 2 + 1);
-  }
-
-  let unseededIdx = 0;
-  for (let posIdx = 0; posIdx < positions.length; posIdx++) {
-    if (positions[posIdx].entityId) continue;    // already has a seed or normalized seed
-    if (byeSlotIndices.has(posIdx)) continue;    // actual BYE slot — leave null
-    if (unseededIdx < unseeded.length) {
-      positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
+    // Normalize BYE matches: player always in the first (even) slot, BYE in the second (odd) slot.
+    // placeTwoSeeds places seed2 at the very last position (odd slot of the bottom BYE match),
+    // but the UI convention is player-first in every match. Move any entity sitting in an odd BYE
+    // slot to the even slot of the same match.
+    const totalMatchesSeeded = bracketSize / 2;
+    for (let matchIdx = 0; matchIdx < totalMatchesSeeded; matchIdx++) {
+      if (!structure || structure[matchIdx] !== '1') continue;
+      const evenIdx = matchIdx * 2;
+      const oddIdx = matchIdx * 2 + 1;
+      if (!positions[evenIdx].entityId && positions[oddIdx].entityId) {
+        positions[evenIdx].entityId = positions[oddIdx].entityId;
+        positions[oddIdx].entityId = null;
+      }
     }
-  }
 
-  // Step 7c: Defensive guard — validate entity IDs match expected table.
-  // For DOUBLES, all entityIds must be valid DoublesPair IDs.
-  // This prevents a raw FK constraint violation from reaching Prisma and provides
-  // a clear, actionable error message if the wrong ranking type was used for seeding.
-  if (categoryType === 'DOUBLES') {
-    const entityIds = positions
-      .map(p => p.entityId)
-      .filter(id => id != null);
-    if (entityIds.length > 0) {
-      const pairCount = await prisma.doublesPair.count({
-        where: { id: { in: entityIds } }
-      });
-      if (pairCount !== entityIds.length) {
-        throw makeError(
-          'INVALID_ENTITY_IDS',
-          `Seeding returned ${entityIds.length - pairCount} entity IDs that are not valid DoublesPair records. This typically means ranking entries of the wrong type (MEN/WOMEN instead of PAIR) were used for seeding.`
-        );
+    // BYE slot is always the second (odd) position in each BYE match.
+    const byeSlotIndices = new Set();
+    for (let matchIdx = 0; matchIdx < totalMatchesSeeded; matchIdx++) {
+      if (!structure || structure[matchIdx] !== '1') continue;
+      byeSlotIndices.add(matchIdx * 2 + 1);
+    }
+
+    let unseededIdx = 0;
+    for (let posIdx = 0; posIdx < positions.length; posIdx++) {
+      if (positions[posIdx].entityId) continue;    // already has a seed or normalized seed
+      if (byeSlotIndices.has(posIdx)) continue;    // actual BYE slot — leave null
+      if (unseededIdx < unseeded.length) {
+        positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
+      }
+    }
+
+    // Step 7c: Defensive guard — validate entity IDs match expected table.
+    // For DOUBLES, all entityIds must be valid DoublesPair IDs.
+    // This prevents a raw FK constraint violation from reaching Prisma and provides
+    // a clear, actionable error message if the wrong ranking type was used for seeding.
+    if (categoryType === 'DOUBLES') {
+      const entityIds = positions
+        .map(p => p.entityId)
+        .filter(id => id != null);
+      if (entityIds.length > 0) {
+        const pairCount = await prisma.doublesPair.count({
+          where: { id: { in: entityIds } }
+        });
+        if (pairCount !== entityIds.length) {
+          throw makeError(
+            'INVALID_ENTITY_IDS',
+            `Seeding returned ${entityIds.length - pairCount} entity IDs that are not valid DoublesPair records. This typically means ranking entries of the wrong type (MEN/WOMEN instead of PAIR) were used for seeding.`
+          );
+        }
       }
     }
   }
 
   // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
   let matchCount = 0;
+  const isManual = mode === 'manual';
 
   const result = await prisma.$transaction(async (tx) => {
     // Step 8a: Delete existing records in cascade order (DRAW-04)
@@ -261,7 +278,8 @@ export async function generateBracket(tournamentId, options = {}) {
       data: {
         tournamentId,
         bracketType: 'MAIN',
-        matchGuarantee
+        matchGuarantee,
+        drawMode: isManual ? 'MANUAL' : 'SEEDED'
       }
     });
 
@@ -269,7 +287,7 @@ export async function generateBracket(tournamentId, options = {}) {
     const totalRounds = Math.log2(bracketSize);
     let matchNumber = 1;
 
-    // Collected during Round 1 creation for BYE pre-population in Round 2
+    // Collected during Round 1 creation for BYE pre-population in Round 2 (seeded mode only)
     const byeInfo = []; // { posInRound, playerId, pairId }
     const round2MatchIds = []; // IDs of Round 2 matches in creation order
 
@@ -303,8 +321,10 @@ export async function generateBracket(tournamentId, options = {}) {
               matchNumber: matchNumber++,
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
-              pair1Id: pos1?.entityId || null,
-              pair2Id: pos2?.entityId || null,
+              // Manual mode: all player/pair slots null (organizer places manually)
+              // Seeded mode: BYE matches set isBye=true with player in slot 1, BYE slot null
+              pair1Id: isManual ? null : (pos1?.entityId || null),
+              pair2Id: isManual ? null : (pos2?.entityId || null),
               player1Id: null,
               player2Id: null
             };
@@ -316,16 +336,18 @@ export async function generateBracket(tournamentId, options = {}) {
               matchNumber: matchNumber++,
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
-              player1Id: pos1?.entityId || null,
-              player2Id: pos2?.entityId || null
+              // Manual mode: all player slots null (organizer places manually)
+              // Seeded mode: BYE matches have player in slot 1, BYE slot null
+              player1Id: isManual ? null : (pos1?.entityId || null),
+              player2Id: isManual ? null : (pos2?.entityId || null)
             };
           }
 
           await tx.match.create({ data: matchData });
           matchCount++;
 
-          // Track BYE matches so we can pre-populate their Round 2 slot below
-          if (isByeMatch) {
+          // Track BYE matches for Round 2 pre-population (seeded mode only — no players to advance in manual)
+          if (isByeMatch && !isManual) {
             byeInfo.push({
               posInRound: i,
               playerId: categoryType !== 'DOUBLES' ? (pos1?.entityId || null) : null,
@@ -334,7 +356,7 @@ export async function generateBracket(tournamentId, options = {}) {
           }
         }
       } else {
-        // Rounds 2+: placeholder matches — player IDs start null (BYEs pre-populated below)
+        // Rounds 2+: placeholder matches — player IDs start null (BYEs pre-populated below in seeded mode)
         const matchesInRound = bracketSize / Math.pow(2, roundNum);
         for (let i = 0; i < matchesInRound; i++) {
           const created = await tx.match.create({
@@ -355,9 +377,10 @@ export async function generateBracket(tournamentId, options = {}) {
       }
     }
 
-    // Step 8d: Pre-populate Round 2 slots for BYE players.
+    // Step 8d: Pre-populate Round 2 slots for BYE players (seeded mode only).
     // BYE matches auto-advance their player — no result is ever submitted for them,
     // so advanceBracketSlot never runs. We seed Round 2 here at bracket creation time.
+    // In manual mode, players haven't been placed yet, so we skip this step.
     for (const bye of byeInfo) {
       const round2Idx = Math.floor(bye.posInRound / 2);
       const isPlayer1Slot = bye.posInRound % 2 === 0;
@@ -376,6 +399,7 @@ export async function generateBracket(tournamentId, options = {}) {
     }
 
     // Step 8e: Generate CONSOLATION bracket when matchGuarantee === 'MATCH_2'
+    // Consolation bracket is always empty at generation time — applies to both modes
     let consolationBracket = null;
     if (matchGuarantee === 'MATCH_2') {
       consolationBracket = await generateConsolationBracket(

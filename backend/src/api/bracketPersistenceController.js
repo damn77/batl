@@ -83,12 +83,13 @@ export async function closeTournamentRegistration(req, res, next) {
 export async function generateTournamentBracket(req, res, next) {
   try {
     const { id } = req.params;
-    const { randomSeed, doublesMethod } = req.body;
-    const result = await generateBracket(id, { randomSeed, doublesMethod });
+    const { randomSeed, doublesMethod, mode } = req.body;
+    const result = await generateBracket(id, { randomSeed, doublesMethod, mode });
     res.status(201).json({
       success: true,
       data: {
         bracketId: result.bracket.id,
+        drawMode: result.bracket.drawMode,
         consolationBracketId: result.consolationBracket?.id || null,
         roundCount: result.roundCount,
         matchCount: result.matchCount
