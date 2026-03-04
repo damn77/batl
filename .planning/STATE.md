@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-03-04T12:20:32.008Z"
+stopped_at: Completed 13-02-PLAN.md tasks 1-2; Task 3 is human-verify checkpoint
+last_updated: "2026-03-04T12:24:37.598Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 12 P01 | 3m | 2 tasks | 7 files |
 | Phase 12 P02 | 2m | 2 tasks | 5 files |
 | Phase 13 P01 | 2m | 2 tasks | 3 files |
+| Phase 13 P02 | 2m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Key architectural context for v1.3:
 - [Phase 12]: assignPositionSchema uses default(null) for playerId/pairId instead of .oxor() — cleaner UX for null-to-clear pattern
 - [Phase 13]: drawMode defaults to 'seeded' in UI state to preserve existing seeded workflow
 - [Phase 13]: [Phase 13-01]: bracketDrawMode/isManualDraw derived from structure.brackets[0].drawMode for Plan 02 manual editor
+- [Phase 13]: ManualDrawEditor uses immediate-save pattern: each dropdown selection calls assignPosition API directly, consistent with single-position assignment API design
+- [Phase 13]: Save Draw button hidden for manual draws (not disabled): manual mode has no pending swaps to batch-save
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T12:20:32.006Z
-Stopped at: Completed 13-01-PLAN.md
+Last session: 2026-03-04T12:24:37.596Z
+Stopped at: Completed 13-02-PLAN.md tasks 1-2; Task 3 is human-verify checkpoint
 Resume file: None
