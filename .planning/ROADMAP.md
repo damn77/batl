@@ -127,7 +127,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Middle mouse wheel on bracket view scrolls the bracket up/down instead of changing zoom level
   2. Submit match modal for doubles/pairs displays both pair names at the top of the modal
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 17-01-PLAN.md — Remove wheel-zoom, update nav hint, fix pair name display in modal
 
 ## Progress
 
@@ -153,4 +155,4 @@ Plans:
 | 14. Tournament Copy | v1.3 | 0/? | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
-| 17. Bracket View UX Fixes | v1.3 | 0/? | Not started | - |
+| 17. Bracket View UX Fixes | v1.3 | 0/1 | Not started | - |
