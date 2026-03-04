@@ -11,7 +11,7 @@ import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel
 import FormatVisualization from '../components/FormatVisualization';
 import PointPreviewPanel from '../components/PointPreviewPanel';
 import ConsolationOptOutPanel from '../components/ConsolationOptOutPanel';
-import { useTournament } from '../services/tournamentViewService';
+import { useTournament, useFormatStructure } from '../services/tournamentViewService';
 import { startTournament } from '../services/tournamentService';
 import { useAuth } from '../utils/AuthContext';
 
@@ -29,6 +29,14 @@ const TournamentViewPage = () => {
 
   // T021: Use SWR hook for data fetching with automatic revalidation
   const { tournament, isLoading, isError, mutate: mutateTournament } = useTournament(id);
+
+  // Load format structure for manual draw detection (Start button needs this)
+  const { structure: formatStructure } = useFormatStructure(id, tournament?.status === 'SCHEDULED');
+
+  // Derive manual draw state for Start button UI
+  const mainBracket = formatStructure?.brackets?.find(b => b.bracketType === 'MAIN');
+  const isManualDraw = mainBracket?.drawMode === 'MANUAL';
+  const hasBracket = !!(formatStructure?.brackets?.length > 0);
 
   const [startError, setStartError] = useState(null);
 
@@ -119,9 +127,15 @@ const TournamentViewPage = () => {
             {/* Start Tournament — ORGANIZER/ADMIN only, SCHEDULED tournaments only (LIFE-01, LIFE-02) */}
             {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && tournament.status === 'SCHEDULED' && (
               <Row className="mt-3">
-                <Col className="d-flex justify-content-end">
+                <Col className="d-flex justify-content-end align-items-center gap-2">
                   {startError && <Alert variant="danger" className="me-3 mb-0 py-2">{startError}</Alert>}
-                  <Button variant="success" onClick={handleStartTournament}>
+                  {isManualDraw && hasBracket && (
+                    <span className="text-muted small">All positions must be filled before starting</span>
+                  )}
+                  <Button
+                    variant={isManualDraw ? 'outline-success' : 'success'}
+                    onClick={handleStartTournament}
+                  >
                     Start Tournament
                   </Button>
                 </Col>

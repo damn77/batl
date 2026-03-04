@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col, Tab, Nav } from 'react-bootstrap';
 import KnockoutBracket from './KnockoutBracket';
+import ManualDrawEditor from './ManualDrawEditor';
 import { closeRegistration, generateBracket, swapSlots } from '../services/bracketPersistenceService';
 import apiClient from '../services/apiClient';
 
@@ -364,21 +365,23 @@ const BracketGenerationSection = ({
             <Badge bg="success">Generated</Badge>
           </div>
           <div className="d-flex gap-2">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleSaveDraw}
-              disabled={saving || pendingSwaps.length === 0}
-            >
-              {saving ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" className="me-1" />
-                  Saving...
-                </>
-              ) : (
-                `Save Draw${pendingSwaps.length > 0 ? ` (${pendingSwaps.length} change${pendingSwaps.length !== 1 ? 's' : ''})` : ''}`
-              )}
-            </Button>
+            {!isManualDraw && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveDraw}
+                disabled={saving || pendingSwaps.length === 0}
+              >
+                {saving ? (
+                  <>
+                    <Spinner as="span" animation="border" size="sm" className="me-1" />
+                    Saving...
+                  </>
+                ) : (
+                  `Save Draw${pendingSwaps.length > 0 ? ` (${pendingSwaps.length} change${pendingSwaps.length !== 1 ? 's' : ''})` : ''}`
+                )}
+              </Button>
+            )}
             {tournament.status === 'SCHEDULED' && (
               <Button
                 variant="outline-danger"
@@ -464,97 +467,113 @@ const BracketGenerationSection = ({
               })
             )}
 
-            {/* Slot editor — per-slot dropdowns for swapping players */}
+            {/* Slot editor — conditional based on draw mode */}
             {allMatches.length > 0 && (
               <div className="mt-3">
-                <h6 className="fw-semibold mb-3">Edit Slot Assignments</h6>
-                <p className="text-muted small mb-3">
-                  Use the dropdowns below to reassign players to bracket slots.
-                  BYE slots cannot be reassigned. Click &quot;Save Draw&quot; above when finished.
-                </p>
-                {matchesByRound.map(({ round, matches: roundMatches }) => (
-                  <div key={round.id} className="mb-4">
-                    <h6 className="text-secondary mb-2">
-                      {round.name || `Round ${round.roundNumber}`}
-                    </h6>
-                    <Row xs={1} md={2} lg={3} className="g-2">
-                      {roundMatches.map(match => {
-                        const isBye = match.isBye || match.status === 'BYE';
+                {isManualDraw ? (
+                  <ManualDrawEditor
+                    tournament={tournament}
+                    matches={allMatches}
+                    rounds={rounds}
+                    registeredPlayers={registeredPlayers}
+                    isDoubles={isDoubles}
+                    onAssignmentChange={async () => {
+                      if (mutateMatches) await mutateMatches();
+                      if (mutateFormatStructure) await mutateFormatStructure();
+                    }}
+                  />
+                ) : (
+                  <>
+                    <h6 className="fw-semibold mb-3">Edit Slot Assignments</h6>
+                    <p className="text-muted small mb-3">
+                      Use the dropdowns below to reassign players to bracket slots.
+                      BYE slots cannot be reassigned. Click &quot;Save Draw&quot; above when finished.
+                    </p>
+                    {matchesByRound.map(({ round, matches: roundMatches }) => (
+                      <div key={round.id} className="mb-4">
+                        <h6 className="text-secondary mb-2">
+                          {round.name || `Round ${round.roundNumber}`}
+                        </h6>
+                        <Row xs={1} md={2} lg={3} className="g-2">
+                          {roundMatches.map(match => {
+                            const isBye = match.isBye || match.status === 'BYE';
 
-                        // Find any pending swaps for this match
-                        const pendingP1 = pendingSwaps.find(
-                          s => s.matchId === match.id && s.field === 'player1Id'
-                        );
-                        const pendingP2 = pendingSwaps.find(
-                          s => s.matchId === match.id && s.field === 'player2Id'
-                        );
+                            // Find any pending swaps for this match
+                            const pendingP1 = pendingSwaps.find(
+                              s => s.matchId === match.id && s.field === 'player1Id'
+                            );
+                            const pendingP2 = pendingSwaps.find(
+                              s => s.matchId === match.id && s.field === 'player2Id'
+                            );
 
-                        const p1Value = pendingP1 ? pendingP1.newPlayerId : (match.player1?.id || '');
-                        const p2Value = pendingP2 ? pendingP2.newPlayerId : (match.player2?.id || '');
+                            const p1Value = pendingP1 ? pendingP1.newPlayerId : (match.player1?.id || '');
+                            const p2Value = pendingP2 ? pendingP2.newPlayerId : (match.player2?.id || '');
 
-                        return (
-                          <Col key={match.id}>
-                            <Card className="border h-100">
-                              <Card.Body className="p-2">
-                                <div className="text-muted small mb-2">
-                                  Match {match.matchNumber || '?'}
-                                  {isBye && (
-                                    <Badge bg="warning" text="dark" className="ms-1" style={{ fontSize: '0.7em' }}>
-                                      BYE
-                                    </Badge>
-                                  )}
-                                </div>
+                            return (
+                              <Col key={match.id}>
+                                <Card className="border h-100">
+                                  <Card.Body className="p-2">
+                                    <div className="text-muted small mb-2">
+                                      Match {match.matchNumber || '?'}
+                                      {isBye && (
+                                        <Badge bg="warning" text="dark" className="ms-1" style={{ fontSize: '0.7em' }}>
+                                          BYE
+                                        </Badge>
+                                      )}
+                                    </div>
 
-                                {/* Player 1 slot */}
-                                <div className="mb-2">
-                                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Top slot</div>
-                                  {isBye && match.player1 ? (
-                                    <div className="fw-medium">{match.player1.name}</div>
-                                  ) : (
-                                    <Form.Select
-                                      size="sm"
-                                      value={p1Value}
-                                      onChange={e => handleSlotChange(match.id, 'player1Id', e.target.value)}
-                                      disabled={isBye}
-                                    >
-                                      <option value="">— Empty slot —</option>
-                                      {registeredPlayers.map(player => (
-                                        <option key={player.id} value={player.id}>
-                                          {player.name}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                  )}
-                                </div>
+                                    {/* Player 1 slot */}
+                                    <div className="mb-2">
+                                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Top slot</div>
+                                      {isBye && match.player1 ? (
+                                        <div className="fw-medium">{match.player1.name}</div>
+                                      ) : (
+                                        <Form.Select
+                                          size="sm"
+                                          value={p1Value}
+                                          onChange={e => handleSlotChange(match.id, 'player1Id', e.target.value)}
+                                          disabled={isBye}
+                                        >
+                                          <option value="">— Empty slot —</option>
+                                          {registeredPlayers.map(player => (
+                                            <option key={player.id} value={player.id}>
+                                              {player.name}
+                                            </option>
+                                          ))}
+                                        </Form.Select>
+                                      )}
+                                    </div>
 
-                                {/* Player 2 slot */}
-                                <div>
-                                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Bottom slot</div>
-                                  {isBye ? (
-                                    <div className="text-muted fst-italic">BYE (auto-advance)</div>
-                                  ) : (
-                                    <Form.Select
-                                      size="sm"
-                                      value={p2Value}
-                                      onChange={e => handleSlotChange(match.id, 'player2Id', e.target.value)}
-                                    >
-                                      <option value="">— Empty slot —</option>
-                                      {registeredPlayers.map(player => (
-                                        <option key={player.id} value={player.id}>
-                                          {player.name}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                  )}
-                                </div>
-                              </Card.Body>
-                            </Card>
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                  </div>
-                ))}
+                                    {/* Player 2 slot */}
+                                    <div>
+                                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Bottom slot</div>
+                                      {isBye ? (
+                                        <div className="text-muted fst-italic">BYE (auto-advance)</div>
+                                      ) : (
+                                        <Form.Select
+                                          size="sm"
+                                          value={p2Value}
+                                          onChange={e => handleSlotChange(match.id, 'player2Id', e.target.value)}
+                                        >
+                                          <option value="">— Empty slot —</option>
+                                          {registeredPlayers.map(player => (
+                                            <option key={player.id} value={player.id}>
+                                              {player.name}
+                                            </option>
+                                          ))}
+                                        </Form.Select>
+                                      )}
+                                    </div>
+                                  </Card.Body>
+                                </Card>
+                              </Col>
+                            );
+                          })}
+                        </Row>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </>
