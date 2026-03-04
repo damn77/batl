@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-03-04T10:53:39.713Z"
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-03-04T10:58:55.118Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 12 P01 | 3m | 2 tasks | 7 files |
+| Phase 12 P02 | 2m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Key architectural context for v1.3:
 - [Phase 12]: drawMode stored as String in schema to avoid enum migration for two values
 - [Phase 12]: Manual mode uses getBracketByPlayerCount for BYE structure, skips BYE Round 2 pre-population
 - [Phase 12]: Bracket integrity check in startTournament covers both seeded and manual modes as safety net
+- [Phase 12]: assignPosition uses inner async helper getByeAdjacentRound2Update() inside transaction closure for reuse across assign/clear/reassign steps
+- [Phase 12]: assignPositionSchema uses default(null) for playerId/pairId instead of .oxor() — cleaner UX for null-to-clear pattern
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T10:53:39.711Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-03-04T10:58:55.116Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None

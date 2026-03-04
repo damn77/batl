@@ -52,7 +52,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 **Milestone Goal:** Organizers can manually control bracket draw positions, copy existing tournament configurations, delete or revert tournaments, and admin users have full parity with organizer capabilities.
 
-- [ ] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation
+- [x] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation (completed 2026-03-04)
 - [ ] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display
 - [ ] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament
 - [ ] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable
@@ -136,7 +136,7 @@ Plans:
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
-| 12. Manual Draw API | 1/2 | In Progress|  | - |
+| 12. Manual Draw API | 2/2 | Complete   | 2026-03-04 | - |
 | 13. Manual Draw UI | v1.3 | 0/? | Not started | - |
 | 14. Tournament Copy | v1.3 | 0/? | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
