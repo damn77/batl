@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-03-04T16:09:37.468Z"
+stopped_at: Phase 15 context gathered
+last_updated: "2026-03-04T17:09:54.250Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 6
@@ -98,6 +98,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T16:05:40.939Z
-Stopped at: Completed 14-02-PLAN.md
-Resume file: None
+Last session: 2026-03-04T17:09:54.248Z
+Stopped at: Phase 15 context gathered
+Resume file: .planning/phases/15-tournament-deletion-and-revert/15-CONTEXT.md
