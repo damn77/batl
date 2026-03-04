@@ -11,8 +11,8 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 - [x] **DRAW-01**: Organizer can choose "Draw manually" when generating a tournament draw
 - [x] **DRAW-02**: Manual draw generates bracket structure with all positions empty (no player auto-placement)
-- [ ] **DRAW-03**: Organizer can assign a registered player/pair to any empty bracket position from a dropdown
-- [ ] **DRAW-04**: Position assignment dropdown shows only players/pairs not yet placed in the bracket
+- [x] **DRAW-03**: Organizer can assign a registered player/pair to any empty bracket position from a dropdown
+- [x] **DRAW-04**: Position assignment dropdown shows only players/pairs not yet placed in the bracket
 - [ ] **DRAW-05**: Organizer can clear a filled bracket position back to empty for error correction
 - [x] **DRAW-06**: Tournament cannot be started until all registered players/pairs are placed in the bracket
 
@@ -76,8 +76,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-01 | Phase 12 | Complete |
 | DRAW-02 | Phase 12 | Complete |
 | DRAW-06 | Phase 12 | Complete |
-| DRAW-03 | Phase 13 | Pending |
-| DRAW-04 | Phase 13 | Pending |
+| DRAW-03 | Phase 13 | Complete |
+| DRAW-04 | Phase 13 | Complete |
 | DRAW-05 | Phase 13 | Pending |
 | COPY-01 | Phase 14 | Pending |
 | COPY-02 | Phase 14 | Pending |
