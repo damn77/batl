@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './utils/AuthContext';
 import { ModalProvider, useModal } from './utils/ModalContext';
+import { ToastProvider } from './utils/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -215,7 +216,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ModalProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </ModalProvider>
       </AuthProvider>
     </BrowserRouter>
