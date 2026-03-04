@@ -133,6 +133,17 @@ export const startTournament = async (id) => {
   return response.data.data;
 };
 
+/**
+ * Copy a tournament — creates a new tournament from an existing one (COPY-01)
+ * @param {string} sourceId - Source tournament UUID
+ * @param {Object} overrides - Fields to override (name, description, startDate, endDate, capacity, clubName, address)
+ * @returns {Promise<{tournament: Object, copiedFrom: {id: string, name: string}}>}
+ */
+export const copyTournament = async (sourceId, overrides = {}) => {
+  const response = await apiClient.post(`/v1/tournaments/${sourceId}/copy`, overrides);
+  return response.data.data;
+};
+
 // Point calculation methods
 export const POINT_CALCULATION_METHODS = {
   PLACEMENT: 'PLACEMENT',

@@ -86,7 +86,8 @@
     "configurePoints": "Configure Points",
     "recalcSeeding": "Recalc Seeding",
     "saveConfiguration": "Save Configuration",
-    "backToTournaments": "Back to Tournaments"
+    "backToTournaments": "Back to Tournaments",
+    "copyTournament": "Copy Tournament"
   },
   "filters": {
     "allCategories": "All Categories",
@@ -419,6 +420,9 @@
     "createTournament": {
       "title": "Create Tournament"
     },
+    "copyTournament": {
+      "title": "Copy Tournament"
+    },
     "editTournament": {
       "title": "Edit Tournament"
     },
@@ -529,6 +533,7 @@
     "roundRulesUpdated": "Round rules updated successfully!",
     "seedingRecalculated": "Seeding recalculated for {{categoryName}}: {{pairsUpdated}} pairs updated",
     "failedToRecalculateSeeding": "Failed to recalculate seeding",
+    "copyingFrom": "Copying from: {{name}}",
     "pointConfigReadOnly": "Configuration is read-only because tournament status is {{status}}"
   },
   "badges": {

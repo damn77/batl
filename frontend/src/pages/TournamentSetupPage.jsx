@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table, Dropdown } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import {
   listTournaments,
   createTournament,
   updateTournament,
+  copyTournament,
   TOURNAMENT_STATUS,
   STATUS_VARIANTS
 } from '../services/tournamentService';
@@ -51,6 +52,9 @@ const TournamentSetupPage = () => {
   // T064: Seeding recalculation state
   const [recalculatingCategory, setRecalculatingCategory] = useState(null);
   const [seedingSuccess, setSeedingSuccess] = useState(null);
+
+  // Copy mode: track source tournament when copying
+  const [copySource, setCopySource] = useState(null);
 
   // Load data
   useEffect(() => {
@@ -104,6 +108,25 @@ const TournamentSetupPage = () => {
     setShowCreateModal(true);
   };
 
+  const handleCopyClick = (tournament) => {
+    const today = new Date();
+
+    setCopySource({ id: tournament.id, name: tournament.name });
+    setFormData({
+      name: '',
+      categoryId: tournament.categoryId,
+      description: tournament.description || '',
+      clubName: tournament.clubName || '',
+      address: tournament.address || '',
+      capacity: tournament.capacity || '',
+      startDate: today,
+      endDate: today
+    });
+    setIsSingleDay(true);
+    setFormError(null);
+    setShowCreateModal(true);
+  };
+
   const handleSubmitCreate = async (e) => {
     e.preventDefault();
 
@@ -124,13 +147,20 @@ const TournamentSetupPage = () => {
       // Use startDate for endDate if single day tournament
       const endDate = isSingleDay ? formData.startDate : formData.endDate;
 
-      await createTournament({
+      const payload = {
         ...formData,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
         startDate: formData.startDate.toISOString(),
         endDate: endDate.toISOString()
-      });
+      };
 
+      if (copySource) {
+        await copyTournament(copySource.id, payload);
+      } else {
+        await createTournament(payload);
+      }
+
+      setCopySource(null);
       setShowCreateModal(false);
       loadTournaments();
     } catch (err) {
@@ -346,42 +376,34 @@ const TournamentSetupPage = () => {
                         </Badge>
                       </td>
                       <td>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleEditClick(tournament)}
-                          className="me-2"
-                        >
-                          {t('buttons.edit')}
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
-                          className="me-2"
-                        >
-                          {t('buttons.configureRules')}
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}
-                          className="me-2"
-                        >
-                          {t('buttons.configurePoints')}
-                        </Button>
-                        {/* T064: Recalculate seeding button for DOUBLES categories */}
-                        {tournament.category?.type === 'DOUBLES' && (
-                          <Button
-                            variant="outline-info"
-                            size="sm"
-                            onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
-                            disabled={recalculatingCategory === tournament.categoryId}
-                            title={t('help.recalculateSeeding')}
-                          >
-                            {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
-                          </Button>
-                        )}
+                        <Dropdown align="end">
+                          <Dropdown.Toggle variant="link" className="text-dark p-0 border-0" bsPrefix="p-0">
+                            &#8942;
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item onClick={() => handleEditClick(tournament)}>
+                              {t('buttons.edit')}
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}>
+                              {t('buttons.configureRules')}
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}>
+                              {t('buttons.configurePoints')}
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item onClick={() => handleCopyClick(tournament)}>
+                              {t('buttons.copyTournament')}
+                            </Dropdown.Item>
+                            {tournament.category?.type === 'DOUBLES' && (
+                              <Dropdown.Item
+                                onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
+                                disabled={recalculatingCategory === tournament.categoryId}
+                              >
+                                {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
+                              </Dropdown.Item>
+                            )}
+                          </Dropdown.Menu>
+                        </Dropdown>
                       </td>
                     </tr>
                   ))}
@@ -392,12 +414,17 @@ const TournamentSetupPage = () => {
         )}
 
         {/* Create Modal */}
-        <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
+        <Modal show={showCreateModal} onHide={() => { setShowCreateModal(false); setCopySource(null); }} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>{t('modals.createTournament.title')}</Modal.Title>
+            <Modal.Title>{copySource ? t('modals.copyTournament.title') : t('modals.createTournament.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitCreate}>
             <Modal.Body>
+              {copySource && (
+                <Alert variant="info" className="mb-3">
+                  {t('alerts.copyingFrom', { name: copySource.name })}
+                </Alert>
+              )}
               {formError && <Alert variant="danger">{formError}</Alert>}
 
               <Form.Group className="mb-3">
