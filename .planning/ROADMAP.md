@@ -111,7 +111,10 @@ Plans:
   3. Confirming deletion removes the tournament and all associated registrations, draw data, and match results
   4. Deleting a completed tournament triggers ranking recalculation for affected categories and removes those tournament results from rankings
   5. Organizer can revert an IN_PROGRESS or COMPLETED tournament to SCHEDULED, which deletes the draw, unlocks player registration, and triggers ranking recalculation if the tournament was completed
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 15-01-PLAN.md — Expand delete endpoint for all statuses with cascade + ranking recalc, add revert endpoint
+- [ ] 15-02-PLAN.md — Delete/revert confirmation modals in tournament list dropdown + revert button on detail page
 
 ### Phase 16: Admin Access Parity
 **Goal**: Admin users have full access to all organizer functionality and mixed-role users see combined capabilities
@@ -156,6 +159,6 @@ Plans:
 | 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
 | 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
 | 14. Tournament Copy | 2/2 | Complete    | 2026-03-04 | - |
-| 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
+| 15. Tournament Deletion and Revert | v1.3 | 0/2 | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
