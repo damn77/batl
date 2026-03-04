@@ -225,6 +225,27 @@ export async function generateBracket(tournamentId, options = {}) {
     }
   }
 
+  // Step 7c: Defensive guard — validate entity IDs match expected table.
+  // For DOUBLES, all entityIds must be valid DoublesPair IDs.
+  // This prevents a raw FK constraint violation from reaching Prisma and provides
+  // a clear, actionable error message if the wrong ranking type was used for seeding.
+  if (categoryType === 'DOUBLES') {
+    const entityIds = positions
+      .map(p => p.entityId)
+      .filter(id => id != null);
+    if (entityIds.length > 0) {
+      const pairCount = await prisma.doublesPair.count({
+        where: { id: { in: entityIds } }
+      });
+      if (pairCount !== entityIds.length) {
+        throw makeError(
+          'INVALID_ENTITY_IDS',
+          `Seeding returned ${entityIds.length - pairCount} entity IDs that are not valid DoublesPair records. This typically means ranking entries of the wrong type (MEN/WOMEN instead of PAIR) were used for seeding.`
+        );
+      }
+    }
+  }
+
   // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
   let matchCount = 0;
 
