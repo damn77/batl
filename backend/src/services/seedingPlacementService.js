@@ -365,8 +365,9 @@ export function placeSixteenSeeds(bracketSize, seeds, randomSeed, structure) {
  * ranked players or pairs based on current year rankings. Rankings are sorted
  * by rank and the top seedCount entries are selected.
  *
- * For doubles categories, rankings may include both PAIR and individual
- * (MEN/WOMEN) rankings. This function aggregates all ranking types.
+ * For doubles categories, only PAIR ranking entries are used (not MEN/WOMEN
+ * individual entries) to ensure DoublesPair IDs flow into match pair fields.
+ * For singles categories, only SINGLES ranking entries are used.
  *
  * @param {string} categoryId - Category identifier
  * @param {number} seedCount - Number of seeds to retrieve (2, 4, 8, or 16)
@@ -395,11 +396,27 @@ export async function getSeededPlayers(categoryId, seedCount) {
     throw new Error(`No rankings found for category ${categoryId}`);
   }
 
-  // Rankings is an array with one ranking per type (SINGLES, PAIR, MEN, WOMEN)
-  // Get all entries across all ranking types for this category
-  const allEntries = rankings.flatMap(ranking => ranking.entries || []);
+  // Determine category type from the rankings data.
+  // Each ranking object includes category info from getRankingsForCategory.
+  const categoryType = rankings[0]?.category?.type;
+
+  // Filter to the appropriate ranking type before flatMapping entries.
+  // SINGLES categories: only SINGLES rankings (entries have playerId / PlayerProfile IDs)
+  // DOUBLES categories: only PAIR rankings (entries have pairId / DoublesPair IDs)
+  // This prevents PlayerProfile IDs from being used as pair1Id/pair2Id in Match records,
+  // which would violate the Match_pair1Id_fkey FK constraint to the DoublesPair table.
+  const relevantRankings = rankings.filter(ranking => {
+    if (categoryType === 'DOUBLES') return ranking.type === 'PAIR';
+    return ranking.type === 'SINGLES';
+  });
+
+  // Get all entries from the filtered ranking types
+  const allEntries = relevantRankings.flatMap(ranking => ranking.entries || []);
 
   if (allEntries.length === 0) {
+    if (categoryType === 'DOUBLES') {
+      throw new Error(`No PAIR rankings found for doubles category ${categoryId}`);
+    }
     throw new Error(`No ranking entries found for category ${categoryId}`);
   }
 
