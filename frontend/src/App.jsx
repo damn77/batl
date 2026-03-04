@@ -98,7 +98,7 @@ function AppContent() {
         <Route
           path="/organizer/players"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <OrganizerPlayersPage />
             </ProtectedRoute>
           }
@@ -106,7 +106,7 @@ function AppContent() {
         <Route
           path="/organizer/players/:id"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <PlayerDetailPage />
             </ProtectedRoute>
           }
@@ -114,7 +114,7 @@ function AppContent() {
         <Route
           path="/organizer/categories"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <CategoryManagementPage />
             </ProtectedRoute>
           }
@@ -122,7 +122,7 @@ function AppContent() {
         <Route
           path="/organizer/tournaments"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentSetupPage />
             </ProtectedRoute>
           }
@@ -130,7 +130,7 @@ function AppContent() {
         <Route
           path="/organizer/tournament/:id/rules"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentRulesSetupPage />
             </ProtectedRoute>
           }
@@ -138,7 +138,7 @@ function AppContent() {
         <Route
           path="/organizer/tournament/:id/points"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentPointConfigPage />
             </ProtectedRoute>
           }
