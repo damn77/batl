@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
 stopped_at: Completed 17-bracket-view-ux-fixes/17-01-PLAN.md
-last_updated: "2026-03-04T14:39:32.592Z"
+last_updated: "2026-03-04T14:43:17.414Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 6
