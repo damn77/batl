@@ -484,6 +484,234 @@ export async function regenerateBracket(tournamentId, options = {}) {
 }
 
 /**
+ * Assign or clear a player/pair in a specific Round 1 bracket slot.
+ *
+ * Business rules (DRAW-01, DRAW-02, DRAW-06):
+ *   - Tournament must exist → TOURNAMENT_NOT_FOUND
+ *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED
+ *   - Target match must exist in this tournament and be Round 1 → MATCH_NOT_FOUND / NOT_ROUND_1
+ *   - Target match must not be a BYE match → BYE_SLOT_NOT_ASSIGNABLE
+ *   - If assigning (entityId not null):
+ *       - Player/pair must be registered → NOT_REGISTERED
+ *       - Player/pair must not already be placed in a different slot → ALREADY_PLACED
+ *   - Assigning next to a BYE match auto-advances the player to Round 2
+ *   - Clearing a BYE-adjacent slot also removes the player from Round 2
+ *   - Reassignment atomically clears old occupant (with Round 2 undo) and places new entity
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @param {Object} assignment - Assignment details
+ * @param {string} assignment.matchId - Target Round 1 match ID
+ * @param {'player1'|'player2'} assignment.slot - Which slot in the match
+ * @param {string|null} assignment.playerId - Player profile ID for singles (null to clear)
+ * @param {string|null} assignment.pairId - Doubles pair ID for doubles (null to clear)
+ * @returns {Promise<{matchId: string, slot: string, entityId: string|null, action: string}>}
+ * @throws {Error} TOURNAMENT_NOT_FOUND | BRACKET_LOCKED | MATCH_NOT_FOUND | NOT_ROUND_1 | BYE_SLOT_NOT_ASSIGNABLE | NOT_REGISTERED | ALREADY_PLACED
+ */
+export async function assignPosition(tournamentId, assignment) {
+  const { matchId, slot, playerId, pairId } = assignment;
+
+  return prisma.$transaction(async (tx) => {
+    // Step 1: Load and validate tournament
+    const tournament = await tx.tournament.findUnique({
+      where: { id: tournamentId },
+      select: {
+        id: true,
+        status: true,
+        categoryId: true,
+        category: { select: { type: true } }
+      }
+    });
+
+    if (!tournament) {
+      throw makeError('TOURNAMENT_NOT_FOUND', `Tournament ${tournamentId} not found`);
+    }
+
+    if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
+      throw makeError(
+        'BRACKET_LOCKED',
+        'Cannot modify bracket when tournament is in progress or completed'
+      );
+    }
+
+    // Step 2: Load and validate target match
+    const targetMatch = await tx.match.findUnique({
+      where: { id: matchId },
+      include: { round: { select: { roundNumber: true, bracketId: true } } }
+    });
+
+    if (!targetMatch || targetMatch.tournamentId !== tournamentId) {
+      throw makeError('MATCH_NOT_FOUND', `Match ${matchId} not found in tournament ${tournamentId}`);
+    }
+
+    if (targetMatch.round?.roundNumber !== 1) {
+      throw makeError('NOT_ROUND_1', 'Can only assign positions in Round 1');
+    }
+
+    if (targetMatch.isBye) {
+      throw makeError('BYE_SLOT_NOT_ASSIGNABLE', 'Cannot assign players to BYE match slots');
+    }
+
+    // Step 3: Determine entity field names based on category type
+    const isDoubles = tournament.category?.type === 'DOUBLES';
+    const entityId = isDoubles ? pairId : playerId;
+    const entityField1 = isDoubles ? 'pair1Id' : 'player1Id';
+    const entityField2 = isDoubles ? 'pair2Id' : 'player2Id';
+    const slotField = slot === 'player1' ? entityField1 : entityField2;
+
+    // Step 4: If assigning (not clearing), validate registration and uniqueness
+    if (entityId !== null && entityId !== undefined) {
+      // Registration check
+      if (isDoubles) {
+        const pairReg = await tx.pairRegistration.findFirst({
+          where: { tournamentId, pairId: entityId, status: 'REGISTERED' }
+        });
+        if (!pairReg) {
+          throw makeError('NOT_REGISTERED', 'Pair is not registered for this tournament');
+        }
+      } else {
+        const playerReg = await tx.tournamentRegistration.findFirst({
+          where: { tournamentId, playerId: entityId, status: 'REGISTERED' }
+        });
+        if (!playerReg) {
+          throw makeError('NOT_REGISTERED', 'Player is not registered for this tournament');
+        }
+      }
+
+      // Already-placed check: load all Round 1 matches in the MAIN bracket
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      for (const m of round1Matches) {
+        const inSlot1 = m[entityField1] === entityId;
+        const inSlot2 = m[entityField2] === entityId;
+        if (inSlot1 || inSlot2) {
+          // Check if same match + same slot (no-op: already assigned here)
+          const sameMatch = m.id === matchId;
+          const sameSlot = (inSlot1 && slot === 'player1') || (inSlot2 && slot === 'player2');
+          if (sameMatch && sameSlot) {
+            // Already assigned to this exact slot — no-op
+            return {
+              matchId,
+              slot,
+              entityId,
+              action: 'assigned'
+            };
+          }
+          throw makeError(
+            'ALREADY_PLACED',
+            'Player/pair is already placed at a different bracket position'
+          );
+        }
+      }
+    }
+
+    // Helper to compute BYE-adjacent Round 2 update data
+    // Returns { round2MatchId, round2UpdateData } or null if not BYE-adjacent
+    async function getByeAdjacentRound2Update(matchIdToCheck, entityToPlace) {
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      const posInRound = round1Matches.findIndex(m => m.id === matchIdToCheck);
+      if (posInRound === -1) return null;
+
+      // Partner match index: even pairs with odd (posInRound+1), odd pairs with even (posInRound-1)
+      const partnerIdx = posInRound % 2 === 0 ? posInRound + 1 : posInRound - 1;
+      const partnerMatch = round1Matches[partnerIdx];
+      if (!partnerMatch || !partnerMatch.isBye) return null;
+
+      // This match is BYE-adjacent — get the Round 2 match
+      const round2MatchIdx = Math.floor(posInRound / 2);
+      const isPlayer1Slot = posInRound % 2 === 0;
+
+      const round2Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      const round2Match = round2Matches[round2MatchIdx];
+      if (!round2Match) return null;
+
+      const round2Field = isPlayer1Slot ? entityField1 : entityField2;
+      return {
+        round2MatchId: round2Match.id,
+        round2Field,
+        round2UpdateData: { [round2Field]: entityToPlace }
+      };
+    }
+
+    // Step 5: Handle current occupant of the target slot (reassignment)
+    const currentOccupant = targetMatch[slotField];
+
+    if (currentOccupant !== null && currentOccupant !== undefined && currentOccupant !== entityId) {
+      // Undo Round 2 pre-population for the old occupant if BYE-adjacent
+      const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, null);
+      if (byeAdjacentInfo) {
+        await tx.match.update({
+          where: { id: byeAdjacentInfo.round2MatchId },
+          data: byeAdjacentInfo.round2UpdateData
+        });
+      }
+
+      // Clear the target slot
+      await tx.match.update({
+        where: { id: matchId },
+        data: { [slotField]: null }
+      });
+    }
+
+    // Step 6 & 7: If clearing (entityId is null/undefined), also undo Round 2 pre-population
+    if (entityId === null || entityId === undefined) {
+      if (currentOccupant !== null && currentOccupant !== undefined) {
+        // Was occupied — undo Round 2 advancement if BYE-adjacent
+        const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, null);
+        if (byeAdjacentInfo) {
+          await tx.match.update({
+            where: { id: byeAdjacentInfo.round2MatchId },
+            data: byeAdjacentInfo.round2UpdateData
+          });
+        }
+        // Clear the slot
+        await tx.match.update({
+          where: { id: matchId },
+          data: { [slotField]: null }
+        });
+      }
+
+      return { matchId, slot, entityId: null, action: 'cleared' };
+    }
+
+    // Step 8: Assign the new entity
+    await tx.match.update({
+      where: { id: matchId },
+      data: { [slotField]: entityId }
+    });
+
+    // BYE auto-advance: if this match is BYE-adjacent, pre-populate Round 2
+    const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, entityId);
+    if (byeAdjacentInfo) {
+      await tx.match.update({
+        where: { id: byeAdjacentInfo.round2MatchId },
+        data: byeAdjacentInfo.round2UpdateData
+      });
+    }
+
+    // Step 9: Return result
+    return {
+      matchId,
+      slot,
+      entityId,
+      action: 'assigned'
+    };
+  });
+}
+
+/**
  * Atomically swap player slots across multiple matches.
  *
  * Business rules (DRAW-06, DRAW-07):
