@@ -547,8 +547,8 @@ export async function assignPosition(tournamentId, assignment) {
       throw makeError('NOT_ROUND_1', 'Can only assign positions in Round 1');
     }
 
-    if (targetMatch.isBye) {
-      throw makeError('BYE_SLOT_NOT_ASSIGNABLE', 'Cannot assign players to BYE match slots');
+    if (targetMatch.isBye && slot === 'player2') {
+      throw makeError('BYE_SLOT_NOT_ASSIGNABLE', 'Cannot assign players to the BYE slot');
     }
 
     // Step 3: Determine entity field names based on category type
@@ -676,6 +676,31 @@ export async function assignPosition(tournamentId, assignment) {
             data: byeAdjacentInfo.round2UpdateData
           });
         }
+        // Undo Round 2 advancement if match itself is a BYE
+        if (targetMatch.isBye && slot === 'player1') {
+          const bracketId = targetMatch.round?.bracketId;
+          const round1Matches = await tx.match.findMany({
+            where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+            orderBy: { matchNumber: 'asc' }
+          });
+          const posInRound = round1Matches.findIndex(m => m.id === matchId);
+          if (posInRound !== -1) {
+            const round2MatchIdx = Math.floor(posInRound / 2);
+            const isPlayer1InR2 = posInRound % 2 === 0;
+            const round2Matches = await tx.match.findMany({
+              where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+              orderBy: { matchNumber: 'asc' }
+            });
+            const round2Match = round2Matches[round2MatchIdx];
+            if (round2Match) {
+              const r2Field = isPlayer1InR2 ? entityField1 : entityField2;
+              await tx.match.update({
+                where: { id: round2Match.id },
+                data: { [r2Field]: null }
+              });
+            }
+          }
+        }
         // Clear the slot
         await tx.match.update({
           where: { id: matchId },
@@ -699,6 +724,32 @@ export async function assignPosition(tournamentId, assignment) {
         where: { id: byeAdjacentInfo.round2MatchId },
         data: byeAdjacentInfo.round2UpdateData
       });
+    }
+
+    // BYE match auto-advance: if the match itself is a BYE, the player1 auto-advances to Round 2
+    if (targetMatch.isBye && slot === 'player1') {
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+      const posInRound = round1Matches.findIndex(m => m.id === matchId);
+      if (posInRound !== -1) {
+        const round2MatchIdx = Math.floor(posInRound / 2);
+        const isPlayer1InR2 = posInRound % 2 === 0;
+        const round2Matches = await tx.match.findMany({
+          where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+          orderBy: { matchNumber: 'asc' }
+        });
+        const round2Match = round2Matches[round2MatchIdx];
+        if (round2Match) {
+          const r2Field = isPlayer1InR2 ? entityField1 : entityField2;
+          await tx.match.update({
+            where: { id: round2Match.id },
+            data: { [r2Field]: entityId }
+          });
+        }
+      }
     }
 
     // Step 9: Return result

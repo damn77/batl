@@ -46,15 +46,25 @@ const ManualDrawEditor = ({
   let filledSlots = 0;
 
   for (const match of round1Matches) {
-    if (match.isBye || match.status === 'BYE') continue;
-    // Two slots per non-BYE match
-    totalSlots += 2;
-    if (isDoubles) {
-      if (match.pair1Id) { placedIds.add(match.pair1Id); filledSlots++; }
-      if (match.pair2Id) { placedIds.add(match.pair2Id); filledSlots++; }
+    const isBye = match.isBye || match.status === 'BYE';
+    if (isBye) {
+      // BYE matches have 1 assignable slot (player1 — the player who auto-advances)
+      totalSlots += 1;
+      if (isDoubles) {
+        if (match.pair1Id) { placedIds.add(match.pair1Id); filledSlots++; }
+      } else {
+        if (match.player1Id) { placedIds.add(match.player1Id); filledSlots++; }
+      }
     } else {
-      if (match.player1Id) { placedIds.add(match.player1Id); filledSlots++; }
-      if (match.player2Id) { placedIds.add(match.player2Id); filledSlots++; }
+      // Two slots per non-BYE match
+      totalSlots += 2;
+      if (isDoubles) {
+        if (match.pair1Id) { placedIds.add(match.pair1Id); filledSlots++; }
+        if (match.pair2Id) { placedIds.add(match.pair2Id); filledSlots++; }
+      } else {
+        if (match.player1Id) { placedIds.add(match.player1Id); filledSlots++; }
+        if (match.player2Id) { placedIds.add(match.player2Id); filledSlots++; }
+      }
     }
   }
 
@@ -175,11 +185,10 @@ const ManualDrawEditor = ({
             const isBye = match.isBye || match.status === 'BYE';
 
             if (isBye) {
-              // BYE match — disabled/greyed read-only card
-              const byeName1 = getPlacedEntityName(match, 'player1');
+              // BYE match — player1 slot is editable, player2 slot is disabled BYE
               return (
                 <Col key={match.id}>
-                  <Card className="border h-100 bg-light opacity-75">
+                  <Card className="border h-100">
                     <Card.Body className="p-2">
                       <div className="text-muted small mb-2">
                         Match {match.matchNumber || '?'}{' '}
@@ -187,16 +196,42 @@ const ManualDrawEditor = ({
                           BYE
                         </Badge>
                       </div>
-                      {/* Slot 1 */}
+                      {/* Slot 1 — editable (player who auto-advances) */}
                       <div className="mb-2">
-                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Top slot</div>
-                        {byeName1 ? (
-                          <div className="text-muted">{byeName1}</div>
+                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Top slot (auto-advances)</div>
+                        {getSlotEntityId(match, 'player1') ? (
+                          <div className="d-flex align-items-center justify-content-between">
+                            <span className="fw-medium" style={{ fontSize: '0.875rem' }}>
+                              {getPlacedEntityName(match, 'player1')}
+                            </span>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              className="py-0 px-1 ms-1"
+                              onClick={() => handleClearSlot(match.id, 'player1')}
+                              disabled={assigning}
+                              title="Clear position"
+                            >
+                              &times;
+                            </Button>
+                          </div>
                         ) : (
-                          <div className="text-muted fst-italic" style={{ fontSize: '0.875rem' }}>Empty</div>
+                          <Form.Select
+                            size="sm"
+                            value=""
+                            onChange={e => handleAssignSlot(match.id, 'player1', e.target.value)}
+                            disabled={assigning}
+                          >
+                            <option value="" disabled>Select player...</option>
+                            {unplacedEntities.map(entity => (
+                              <option key={entity.id} value={entity.id}>
+                                {entity.displayName}
+                              </option>
+                            ))}
+                          </Form.Select>
                         )}
                       </div>
-                      {/* Slot 2 */}
+                      {/* Slot 2 — disabled BYE */}
                       <div>
                         <div className="text-muted" style={{ fontSize: '0.75rem' }}>Bottom slot</div>
                         <div className="text-muted fst-italic" style={{ fontSize: '0.875rem' }}>BYE (auto-advance)</div>
