@@ -124,7 +124,10 @@ Plans:
   1. Admin user can perform every organizer action (tournament CRUD, draw generation and management, result entry, registration management) without receiving permission errors
   2. A user with both Player and Organizer roles can access both player-facing and organizer-facing pages and actions
   3. A user with Player, Organizer, and Admin roles can access all functionality across all three roles simultaneously
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 16-01-PLAN.md — ProtectedRoute ADMIN superuser bypass, App.jsx route simplification, seeding endpoint auth
+- [ ] 16-02-PLAN.md — NavBar admin/player sections with separators, admin warning banners, /player/profile null guard
 
 ### Phase 17: Bracket View UX Fixes
 **Goal**: Fix bracket view scroll behavior and pair name display in match submission modal
@@ -160,5 +163,5 @@ Plans:
 | 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
 | 14. Tournament Copy | 2/2 | Complete    | 2026-03-04 | - |
 | 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
-| 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
+| 16. Admin Access Parity | v1.3 | 0/2 | Not started | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
