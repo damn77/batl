@@ -47,13 +47,6 @@ export async function createTournament(data, userId) {
   // Validate dates
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const now = new Date();
-
-  if (start < now) {
-    throw createHttpError(400, 'Start date must be in the future', {
-      code: 'INVALID_START_DATE'
-    });
-  }
 
   if (end < start) {
     throw createHttpError(400, 'End date must be after start date', {

@@ -937,5 +937,8 @@
     "seed": "Nasadenie: {{seed}}",
     "processing": "Spracováva sa...",
     "confirmAndRegister": "Potvrdiť a registrovať"
+  },
+  "warnings": {
+    "pastStartDate": "Datum zaciatku je v minulosti. Turnaj bude vytvoreny ako spatne datovana udalost."
   }
 }
