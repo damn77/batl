@@ -136,7 +136,7 @@ Plans:
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
-| 12. Manual Draw API | v1.3 | 0/2 | Not started | - |
+| 12. Manual Draw API | 1/2 | In Progress|  | - |
 | 13. Manual Draw UI | v1.3 | 0/? | Not started | - |
 | 14. Tournament Copy | v1.3 | 0/? | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |

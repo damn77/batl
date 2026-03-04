@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Phase 12 context gathered
-last_updated: "2026-03-04T10:24:45.545Z"
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-03-04T10:53:39.713Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -46,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+| Phase 12 P01 | 3m | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -57,6 +58,9 @@ Key architectural context for v1.3:
 - Manual draw extends existing Bracket/Round/Match persistence from v1.0 Phase 01.1
 - Ranking recalculation (used by DEL and REVERT) already exists from Feature 008
 - Admin parity fix may touch CASL permission definitions
+- [Phase 12]: drawMode stored as String in schema to avoid enum migration for two values
+- [Phase 12]: Manual mode uses getBracketByPlayerCount for BYE structure, skips BYE Round 2 pre-population
+- [Phase 12]: Bracket integrity check in startTournament covers both seeded and manual modes as safety net
 
 ### Pending Todos
 
@@ -75,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T10:24:45.543Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-manual-draw-api/12-CONTEXT.md
+Last session: 2026-03-04T10:53:39.711Z
+Stopped at: Completed 12-01-PLAN.md
+Resume file: None
