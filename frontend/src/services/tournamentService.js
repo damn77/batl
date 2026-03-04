@@ -144,6 +144,16 @@ export const copyTournament = async (sourceId, overrides = {}) => {
   return response.data.data;
 };
 
+/**
+ * Revert a tournament to SCHEDULED — deletes draw and reopens registration (DEL-03)
+ * @param {string} id - Tournament UUID
+ * @returns {Promise} Updated tournament
+ */
+export const revertTournament = async (id) => {
+  const response = await apiClient.post(`/v1/tournaments/${id}/revert`);
+  return response.data;
+};
+
 // Point calculation methods
 export const POINT_CALCULATION_METHODS = {
   PLACEMENT: 'PLACEMENT',

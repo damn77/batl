@@ -10,15 +10,19 @@ import {
   createTournament,
   updateTournament,
   copyTournament,
+  deleteTournament,
+  revertTournament,
   TOURNAMENT_STATUS,
   STATUS_VARIANTS
 } from '../services/tournamentService';
 import { listCategories } from '../services/categoryService';
 import { recalculateCategorySeeding } from '../services/pairService';
+import { useToast } from '../utils/ToastContext';
 
 const TournamentSetupPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const [tournaments, setTournaments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +59,16 @@ const TournamentSetupPage = () => {
 
   // Copy mode: track source tournament when copying
   const [copySource, setCopySource] = useState(null);
+
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteTournament, setPendingDeleteTournament] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Revert confirmation state
+  const [showRevertConfirm, setShowRevertConfirm] = useState(false);
+  const [pendingRevertTournament, setPendingRevertTournament] = useState(null);
+  const [reverting, setReverting] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -263,6 +277,46 @@ const TournamentSetupPage = () => {
     return check < today;
   };
 
+  const handleDeleteClick = (tournament) => {
+    setPendingDeleteTournament(tournament);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteTournament(pendingDeleteTournament.id);
+      showSuccess(`Tournament "${pendingDeleteTournament.name}" deleted successfully.`);
+      setShowDeleteConfirm(false);
+      setPendingDeleteTournament(null);
+      loadTournaments();
+    } catch (err) {
+      showError(err.message || 'Failed to delete tournament');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleRevertClick = (tournament) => {
+    setPendingRevertTournament(tournament);
+    setShowRevertConfirm(true);
+  };
+
+  const handleConfirmRevert = async () => {
+    setReverting(true);
+    try {
+      await revertTournament(pendingRevertTournament.id);
+      showSuccess(`Tournament "${pendingRevertTournament.name}" reverted to SCHEDULED.`);
+      setShowRevertConfirm(false);
+      setPendingRevertTournament(null);
+      loadTournaments();
+    } catch (err) {
+      showError(err.message || 'Failed to revert tournament');
+    } finally {
+      setReverting(false);
+    }
+  };
+
   return (
     <>
       <NavBar />
@@ -402,6 +456,17 @@ const TournamentSetupPage = () => {
                                 {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
                               </Dropdown.Item>
                             )}
+                            {/* Revert — only when tournament has draw or is IN_PROGRESS */}
+                            {(tournament.status === 'IN_PROGRESS' ||
+                              (tournament.status === 'SCHEDULED' && tournament.registrationClosed)) && (
+                              <Dropdown.Item onClick={() => handleRevertClick(tournament)}>
+                                Revert to Scheduled
+                              </Dropdown.Item>
+                            )}
+                            <Dropdown.Divider />
+                            <Dropdown.Item className="text-danger" onClick={() => handleDeleteClick(tournament)}>
+                              Delete Tournament
+                            </Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
                       </td>
@@ -701,6 +766,63 @@ const TournamentSetupPage = () => {
             </Modal.Footer>
           </Form>
         </Modal>
+        {/* Delete Confirmation Modal */}
+        <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Tournament</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to delete <strong>{pendingDeleteTournament?.name}</strong>?</p>
+            <p className="text-muted mb-2">
+              Status: <Badge bg={STATUS_VARIANTS[pendingDeleteTournament?.status]}>
+                {pendingDeleteTournament?.status}
+              </Badge>
+              {' '}&middot; {pendingDeleteTournament?.registeredCount || 0} registered player(s)
+            </p>
+            {(pendingDeleteTournament?.status === 'IN_PROGRESS' ||
+              pendingDeleteTournament?.status === 'COMPLETED') && (
+              <Alert variant="danger" className="mb-0">
+                <Alert.Heading as="h6">Warning</Alert.Heading>
+                {pendingDeleteTournament?.status === 'IN_PROGRESS'
+                  ? 'This tournament has matches in progress. All match data will be permanently deleted.'
+                  : 'This tournament is completed. All results and ranking points will be permanently removed and rankings will be recalculated.'}
+              </Alert>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Revert Confirmation Modal */}
+        <Modal show={showRevertConfirm} onHide={() => setShowRevertConfirm(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Revert to Scheduled</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to revert <strong>{pendingRevertTournament?.name}</strong> to SCHEDULED?</p>
+            <p>This will:</p>
+            <ul>
+              <li>Delete the tournament draw (bracket, rounds, matches)</li>
+              <li>Reopen player registration</li>
+            </ul>
+            <p className="text-muted">Registrations will be preserved.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowRevertConfirm(false)} disabled={reverting}>
+              Cancel
+            </Button>
+            <Button variant="warning" onClick={handleConfirmRevert} disabled={reverting}>
+              {reverting ? 'Reverting...' : 'Revert to Scheduled'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
       </Container>
     </>
   );
