@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
-- **v1.2 Data Seeding Update** — Phases 9, 10, 11
+- ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
 
 ## Phases
 
@@ -36,79 +36,16 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 
 </details>
 
-### v1.2 Data Seeding Update
+<details>
+<summary>✅ v1.2 Data Seeding Update (Phases 9–11) — SHIPPED 2026-03-04</summary>
 
-- [x] **Phase 9: Real Player and League Data** - Seed 34 real players, linked accounts, 18 mixed doubles pairs, registrations, and ProSet locations (completed 2026-03-03)
-- [x] **Phase 10: Data Quality and Script Cleanup** - Realistic mock ranking values, merged active-tournament scripts, updated test seeds (completed 2026-03-03)
-- [x] **Phase 11: Seed Script Cleanup** - Fix seed-active-tournament.js schema bugs, update SUMMARY frontmatter gaps (gap closure) (completed 2026-03-03)
+- [x] Phase 9: Real Player and League Data (2/2 plans) — completed 2026-03-03
+- [x] Phase 10: Data Quality and Script Cleanup (2/2 plans) — completed 2026-03-03
+- [x] Phase 11: Seed Script Cleanup (1/1 plan) — completed 2026-03-03
 
-## Phase Details
+See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
-### Phase 9: Real Player and League Data
-
-**Goal**: The seed database reflects the actual league membership — 34 real named players are present with their accounts, all mixed doubles pairs exist, all players are registered in the Mixed Doubles Open category, and all locations read "ProSet"
-
-**Depends on**: Nothing (first phase of v1.2)
-
-**Requirements**: PLAY-01, PLAY-02, PLAY-03, ACCT-01, ACCT-02, ACCT-03, PAIR-01, PAIR-02, TOURN-01, TOURN-02, TOURN-03, TOURN-04, LOC-01, LOC-02
-
-**Success Criteria** (what must be TRUE):
-  1. Running `prisma db seed` populates 34 named real players (18 male, 16 female) alongside existing generic test players — no placeholder "Player A / Player B" names for real members
-  2. Logging in as `erich@batl` (ADMIN) and `rene@batl` (ORGANIZER) works; existing `admin@batl`, `organizer@batl`, `player@batl` credentials continue to work unchanged
-  3. The Mixed Doubles Open category contains all 18 pairs visible in the pairs list, and the category rankings page shows 0 tournament points (no tournament has been played there yet)
-  4. All tournaments displayed in the app show "ProSet" as their location — no "Central Tennis Club", "Riverside", or other generic location names appear anywhere
-  5. The tournaments list shows a mix of SCHEDULED, IN_PROGRESS, and COMPLETED statuses across age-specific categories (35+, 40+, 50+, etc.)
-
-**Plans:** 2/2 plans complete
-
-Plans:
-- [x] 09-01-PLAN.md — Create data file and rewrite seed.js foundation (players, accounts, pairs, locations)
-- [x] 09-02-PLAN.md — Rewrite tournaments, rankings, and update seed-knockout-test.js
-
----
-
-### Phase 10: Data Quality and Script Cleanup
-
-**Goal**: All seed scripts are consolidated, realistic, and reference real players and ProSet — the developer running any seed script gets a coherent dataset with no leftover placeholder values
-
-**Depends on**: Phase 9
-
-**Requirements**: DATA-01, DATA-02, SCRP-01, SCRP-02, SCRP-03
-
-**Success Criteria** (what must be TRUE):
-  1. The category rankings page shows varied point totals across players (not a linear 1000/900/800 ladder), and player tournament counts differ from each other (not all showing 5 tournaments)
-  2. There is exactly one active-tournament seed script (not two separate files doing similar work); running it produces a seeded tournament at "ProSet" referencing real player names
-  3. The knockout test seed script produces a tournament at "ProSet" with real player names in the bracket positions
-
-**Plans:** 2/2 plans complete
-
-Plans:
-- [x] 10-01-PLAN.md — Realistic mock ranking data (varied points and tournament counts)
-- [x] 10-02-PLAN.md — Merge active-tournament scripts, update knockout test to use real players
-
----
-
-### Phase 11: Seed Script Cleanup
-
-**Goal**: All seed scripts run without errors against any database state, and all SUMMARY frontmatter accurately reflects completed requirements — no schema mismatches, no stale field references, no documentation gaps
-
-**Depends on**: Phase 10
-
-**Requirements**: None (gap closure — fixes tech debt, no new requirements)
-
-**Gap Closure**: Closes gaps from v1.2 milestone audit
-
-**Success Criteria** (what must be TRUE):
-  1. Running `node backend/seed-active-tournament.js` against a fresh database (after `prisma db push` but WITHOUT running main seed first) does not crash — the organizer create fallback uses correct Prisma schema fields
-  2. `09-02-SUMMARY.md` frontmatter lists TOURN-02, TOURN-03, TOURN-04 in `requirements_completed`
-  3. `10-02-SUMMARY.md` frontmatter lists SCRP-01, SCRP-02, SCRP-03 in `requirements_completed`
-
-**Plans:** 1/1 plans complete
-
-Plans:
-- [ ] 11-01-PLAN.md — Fix seed-active-tournament.js schema bugs and update SUMMARY frontmatter
-
----
+</details>
 
 ## Progress
 
@@ -128,4 +65,4 @@ Plans:
 | 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Seed Script Cleanup | 1/1 | Complete    | 2026-03-03 | -- |
+| 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
