@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Completed 14-01-PLAN.md
-last_updated: "2026-03-04T16:01:54.838Z"
+stopped_at: Completed 14-02-PLAN.md
+last_updated: "2026-03-04T16:05:40.942Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13 P02 | 2m | 2 tasks | 3 files |
 | Phase 17-bracket-view-ux-fixes P01 | 1m | 2 tasks | 3 files |
 | Phase 14-tournament-copy P01 | 4m | 1 tasks | 5 files |
+| Phase 14-tournament-copy P02 | 8m | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Key architectural context for v1.3:
 - [Phase 14-01]: Validator accepts all override fields as optional; service enforces name+startDate+endDate (required by DB schema)
 - [Phase 14-01]: Deputy organizer is NOT copied; copying user becomes primary organizer, deputy assigned later
 - [Phase 14-01]: Registration open/close dates not copied — must be set fresh for new tournament
+- [Phase 14-tournament-copy]: Reuse creation modal for copy flow (copySource state distinguishes modes) rather than separate modal
+- [Phase 14-tournament-copy]: Three-dot dropdown (vertical ellipsis) replaces multiple inline buttons per tournament row
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T16:01:54.836Z
-Stopped at: Completed 14-01-PLAN.md
+Last session: 2026-03-04T16:05:40.939Z
+Stopped at: Completed 14-02-PLAN.md
 Resume file: None

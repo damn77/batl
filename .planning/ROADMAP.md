@@ -54,7 +54,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 - [x] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation (completed 2026-03-04)
 - [x] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display (completed 2026-03-04)
-- [ ] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament
+- [x] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament (completed 2026-03-04)
 - [ ] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable
 - [ ] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities
 
@@ -155,7 +155,7 @@ Plans:
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
 | 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
 | 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
-| 14. Tournament Copy | 1/2 | In Progress|  | - |
+| 14. Tournament Copy | 2/2 | Complete   | 2026-03-04 | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
