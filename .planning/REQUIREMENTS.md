@@ -13,7 +13,7 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 - [x] **DRAW-02**: Manual draw generates bracket structure with all positions empty (no player auto-placement)
 - [x] **DRAW-03**: Organizer can assign a registered player/pair to any empty bracket position from a dropdown
 - [x] **DRAW-04**: Position assignment dropdown shows only players/pairs not yet placed in the bracket
-- [ ] **DRAW-05**: Organizer can clear a filled bracket position back to empty for error correction
+- [x] **DRAW-05**: Organizer can clear a filled bracket position back to empty for error correction
 - [x] **DRAW-06**: Tournament cannot be started until all registered players/pairs are placed in the bracket
 
 ### Tournament Copy
@@ -36,6 +36,11 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 - [ ] **ADMIN-01**: Admin user can access all organizer functionality (tournament CRUD, draw, results, registration management)
 - [ ] **ADMIN-02**: Mixed-role users (Player+Organizer, Player+Admin, Player+Organizer+Admin) can access all functionalities of their combined roles
+
+### Bracket View UX Fixes
+
+- [ ] **UX-01**: Middle mouse wheel on bracket view scrolls up/down instead of zooming in/out
+- [ ] **UX-02**: Submit match modal for pairs shows both pair names at the top of the modal
 
 ### Revert to Scheduled
 
@@ -78,7 +83,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-06 | Phase 12 | Complete |
 | DRAW-03 | Phase 13 | Complete |
 | DRAW-04 | Phase 13 | Complete |
-| DRAW-05 | Phase 13 | Pending |
+| DRAW-05 | Phase 13 | Complete |
 | COPY-01 | Phase 14 | Pending |
 | COPY-02 | Phase 14 | Pending |
 | COPY-03 | Phase 14 | Pending |
@@ -95,10 +100,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVERT-04 | Phase 15 | Pending |
 | ADMIN-01 | Phase 16 | Pending |
 | ADMIN-02 | Phase 16 | Pending |
+| UX-01 | Phase 17 | Pending |
+| UX-02 | Phase 17 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 22 total
-- Mapped to phases: 22
+- v1.3 requirements: 24 total
+- Mapped to phases: 24
 - Unmapped: 0
 
 ---

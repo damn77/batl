@@ -5,7 +5,7 @@
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
 - ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
-- 🚧 **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16 (in progress)
+- 🚧 **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16, 17 (in progress)
 
 ## Phases
 
@@ -50,7 +50,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 ### 🚧 v1.3 Manual Draw & QoL (In Progress)
 
-**Milestone Goal:** Organizers can manually control bracket draw positions, copy existing tournament configurations, delete or revert tournaments, and admin users have full parity with organizer capabilities.
+**Milestone Goal:** Organizers can manually control bracket draw positions, copy existing tournament configurations, delete or revert tournaments, admin users have full parity with organizer capabilities, and bracket view UX issues are resolved.
 
 - [x] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation (completed 2026-03-04)
 - [x] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display (completed 2026-03-04)
@@ -120,6 +120,15 @@ Plans:
   3. A user with Player, Organizer, and Admin roles can access all functionality across all three roles simultaneously
 **Plans**: TBD
 
+### Phase 17: Bracket View UX Fixes
+**Goal**: Fix bracket view scroll behavior and pair name display in match submission modal
+**Depends on**: None (independent bug fixes)
+**Requirements**: UX-01, UX-02
+**Success Criteria** (what must be TRUE):
+  1. Middle mouse wheel on bracket view scrolls the bracket up/down instead of changing zoom level
+  2. Submit match modal for doubles/pairs displays both pair names at the top of the modal
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -144,3 +153,4 @@ Plans:
 | 14. Tournament Copy | v1.3 | 0/? | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
+| 17. Bracket View UX Fixes | v1.3 | 0/? | Not started | - |
