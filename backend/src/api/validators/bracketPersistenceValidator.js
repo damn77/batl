@@ -20,6 +20,19 @@ export const generateBracketSchema = Joi.object({
 });
 
 /**
+ * Schema for PUT /api/v1/tournaments/:id/bracket/positions
+ * Validates position assignment: matchId, slot, and optional playerId/pairId.
+ * Passing playerId: null (or pairId: null) clears the position.
+ * Phase 12: Manual Draw API
+ */
+export const assignPositionSchema = Joi.object({
+  matchId: Joi.string().uuid().required(),
+  slot: Joi.string().valid('player1', 'player2').required(),
+  playerId: Joi.string().uuid().allow(null).default(null),
+  pairId: Joi.string().uuid().allow(null).default(null)
+});
+
+/**
  * Schema for PATCH /api/v1/tournaments/:id/bracket/slots
  * Validates the swaps array — each swap must target a specific match field.
  */

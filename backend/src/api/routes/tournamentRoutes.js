@@ -19,12 +19,14 @@ import { validateBody, validateQuery, schemas } from '../../middleware/validate.
 import {
   closeTournamentRegistration,
   generateTournamentBracket,
-  swapBracketSlots
+  swapBracketSlots,
+  assignBracketPosition
 } from '../bracketPersistenceController.js';
 import { recordConsolationOptOut } from '../consolationOptOutController.js';
 import {
   generateBracketSchema,
-  swapSlotsSchema
+  swapSlotsSchema,
+  assignPositionSchema
 } from '../validators/bracketPersistenceValidator.js';
 
 const router = express.Router();
@@ -346,6 +348,20 @@ router.patch(
   authorize('update', 'Tournament'),
   validateBody(swapSlotsSchema),
   swapBracketSlots
+);
+
+/**
+ * PUT /api/v1/tournaments/:id/bracket/positions
+ * Assign or clear a player/pair position in the bracket
+ * Authorization: ORGANIZER or ADMIN
+ * Phase 12: Manual Draw API
+ */
+router.put(
+  '/:id/bracket/positions',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  validateBody(assignPositionSchema),
+  assignBracketPosition
 );
 
 // ============================================

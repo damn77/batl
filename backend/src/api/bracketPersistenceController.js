@@ -13,7 +13,8 @@
 import {
   closeRegistration,
   generateBracket,
-  swapSlots
+  swapSlots,
+  assignPosition
 } from '../services/bracketPersistenceService.js';
 
 /**
@@ -26,7 +27,13 @@ const ERROR_STATUS = {
   ALREADY_CLOSED: 409,
   BRACKET_LOCKED: 409,
   BYE_SLOT_NOT_SWAPPABLE: 422,
-  INSUFFICIENT_PLAYERS: 422
+  INSUFFICIENT_PLAYERS: 422,
+  // Phase 12: Manual Draw position assignment error codes
+  NOT_REGISTERED: 422,
+  ALREADY_PLACED: 409,
+  BYE_SLOT_NOT_ASSIGNABLE: 422,
+  MATCH_NOT_FOUND: 404,
+  NOT_ROUND_1: 422
 };
 
 /**
@@ -117,6 +124,32 @@ export async function swapBracketSlots(req, res, next) {
     const { swaps } = req.body;
     const result = await swapSlots(id, swaps);
     res.json({ success: true, data: { swapped: result.swapped } });
+  } catch (error) {
+    handleServiceError(error, res, next);
+  }
+}
+
+/**
+ * PUT /api/v1/tournaments/:id/bracket/positions
+ *
+ * Assign or clear a player/pair position in a Round 1 bracket slot.
+ * Body: { matchId, slot: 'player1'|'player2', playerId?, pairId? }
+ * Passing playerId: null (or pairId: null) clears the position.
+ * Assigning next to a BYE match auto-advances the player to Round 2.
+ *
+ * Response 200: { success: true, data: { matchId, slot, entityId, action } }
+ * Response 404: TOURNAMENT_NOT_FOUND | MATCH_NOT_FOUND
+ * Response 409: BRACKET_LOCKED | ALREADY_PLACED
+ * Response 422: NOT_REGISTERED | BYE_SLOT_NOT_ASSIGNABLE | NOT_ROUND_1
+ *
+ * Phase 12: Manual Draw API
+ */
+export async function assignBracketPosition(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { matchId, slot, playerId, pairId } = req.body;
+    const result = await assignPosition(id, { matchId, slot, playerId, pairId });
+    res.json({ success: true, data: result });
   } catch (error) {
     handleServiceError(error, res, next);
   }
