@@ -82,7 +82,10 @@ Plans:
   2. Selecting a player from the dropdown assigns them to that position immediately
   3. Organizer can click a clear button on any filled position to return it to empty, making that player available again in other dropdowns
   4. A placement progress indicator shows how many positions are filled vs. total required before start is enabled
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 13-01-PLAN.md — Expose drawMode in API, add assignPosition service, draw mode radios
+- [ ] 13-02-PLAN.md — ManualDrawEditor component, BracketGenerationSection wiring, Start button integration
 
 ### Phase 14: Tournament Copy
 **Goal**: Organizers can create a new SCHEDULED tournament pre-populated with an existing tournament's configuration
@@ -136,8 +139,8 @@ Plans:
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
-| 12. Manual Draw API | 2/2 | Complete    | 2026-03-04 | - |
-| 13. Manual Draw UI | v1.3 | 0/? | Not started | - |
+| 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 13. Manual Draw UI | v1.3 | 0/2 | Not started | - |
 | 14. Tournament Copy | v1.3 | 0/? | Not started | - |
 | 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
 | 16. Admin Access Parity | v1.3 | 0/? | Not started | - |
