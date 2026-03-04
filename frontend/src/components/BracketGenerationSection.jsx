@@ -15,6 +15,8 @@ import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col, 
 import KnockoutBracket from './KnockoutBracket';
 import ManualDrawEditor from './ManualDrawEditor';
 import { closeRegistration, generateBracket, swapSlots } from '../services/bracketPersistenceService';
+import { revertTournament } from '../services/tournamentViewService';
+import { useToast } from '../utils/ToastContext';
 import apiClient from '../services/apiClient';
 
 /**
@@ -36,14 +38,20 @@ const BracketGenerationSection = ({
   structure,
   matches
 }) => {
+  // ----- Hooks -----
+  const { showSuccess, showError } = useToast();
+
   // ----- State -----
   const [pendingSwaps, setPendingSwaps] = useState([]);
+  const [bracketRefreshKey, setBracketRefreshKey] = useState(0);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [closingRegistration, setClosingRegistration] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [showRevertConfirm, setShowRevertConfirm] = useState(false);
+  const [reverting, setReverting] = useState(false);
   const [doublesMethod, setDoublesMethod] = useState('PAIR_SCORE');
   const [drawMode, setDrawMode] = useState('seeded');
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
@@ -141,6 +149,8 @@ const BracketGenerationSection = ({
     try {
       await swapSlots(tournament.id, pendingSwaps);
       setPendingSwaps([]);
+      // Force KnockoutBracket to remount and re-fetch matches
+      setBracketRefreshKey(k => k + 1);
       if (mutateMatches) await mutateMatches();
     } catch (err) {
       setError(err.message || 'Failed to save draw. Please try again.');
@@ -148,6 +158,23 @@ const BracketGenerationSection = ({
       setSaving(false);
     }
   }, [tournament?.id, pendingSwaps, mutateMatches]);
+
+  const handleConfirmRevert = async () => {
+    setReverting(true);
+    setError(null);
+    try {
+      await revertTournament(tournament.id);
+      showSuccess('Tournament reverted to SCHEDULED');
+      setShowRevertConfirm(false);
+      if (mutateTournament) await mutateTournament();
+      if (mutateFormatStructure) await mutateFormatStructure();
+      if (mutateMatches) await mutateMatches();
+    } catch (err) {
+      showError(err.message || 'Failed to revert tournament');
+    } finally {
+      setReverting(false);
+    }
+  };
 
   const handleSlotChange = useCallback((matchId, field, newPlayerId) => {
     setPendingSwaps(prev => {
@@ -166,8 +193,60 @@ const BracketGenerationSection = ({
   if (!tournament) return null;
   if (tournament.formatType !== 'KNOCKOUT') return null;
   if (tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') return null;
-  // For IN_PROGRESS: only allow if no bracket exists yet (recovery path for tournaments started without a draw)
-  if (tournament.status === 'IN_PROGRESS' && hasBracket) return null;
+  // For IN_PROGRESS with bracket: show only the revert button (no draw editing)
+  const showRevertOnly = tournament.status === 'IN_PROGRESS' && hasBracket;
+
+  // ----- REVERT ONLY: IN_PROGRESS tournament with existing bracket -----
+  if (showRevertOnly) {
+    return (
+      <>
+        <Card className="border-0 shadow-sm mb-4">
+          <Card.Header className="bg-light">
+            <div className="d-flex align-items-center justify-content-between">
+              <h5 className="mb-0">Draw</h5>
+              <Button
+                variant="outline-warning"
+                size="sm"
+                onClick={() => setShowRevertConfirm(true)}
+                disabled={reverting}
+              >
+                Revert to Scheduled
+              </Button>
+            </div>
+          </Card.Header>
+          <Card.Body>
+            <p className="text-muted mb-0">
+              This tournament is in progress. To edit the draw or registration, revert it to SCHEDULED status.
+            </p>
+          </Card.Body>
+        </Card>
+
+        {/* Revert Confirmation Modal */}
+        <Modal show={showRevertConfirm} onHide={() => setShowRevertConfirm(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Revert to Scheduled</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to revert <strong>{tournament?.name}</strong> to SCHEDULED?</p>
+            <p>This will:</p>
+            <ul>
+              <li>Delete the tournament draw (bracket, rounds, matches)</li>
+              <li>Reopen player registration</li>
+            </ul>
+            <p className="text-muted">Registrations will be preserved.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowRevertConfirm(false)} disabled={reverting}>
+              Cancel
+            </Button>
+            <Button variant="warning" onClick={handleConfirmRevert} disabled={reverting}>
+              {reverting ? 'Reverting...' : 'Revert to Scheduled'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+  }
 
   // ----- STATE A: Registration still open -----
   if (!tournament.registrationClosed) {
@@ -344,10 +423,10 @@ const BracketGenerationSection = ({
     : [];
   const rounds = structure?.rounds || [];
 
-  // Group matches by round for the slot editor display
-  const matchesByRound = rounds
-    .slice()
-    .sort((a, b) => (a.roundNumber || 0) - (b.roundNumber || 0))
+  // Group matches by round for the slot editor display (MAIN bracket, Round 1 only)
+  const mainBracket = brackets.find(b => b.bracketType === 'MAIN');
+  const mainRound1Matches = rounds
+    .filter(r => r.bracketId === mainBracket?.id && r.roundNumber === 1)
     .map(round => ({
       round,
       matches: allMatches
@@ -355,6 +434,17 @@ const BracketGenerationSection = ({
         .sort((a, b) => (a.matchNumber || 0) - (b.matchNumber || 0))
     }))
     .filter(({ matches: ms }) => ms.length > 0);
+
+  // Build dropdown options: for doubles use pair info, for singles use player info
+  const slotEditorOptions = isDoubles
+    ? registeredPlayers.map(reg => ({
+        id: reg.pair?.id,
+        name: `${reg.pair?.player1?.name || '?'} & ${reg.pair?.player2?.name || '?'}`,
+      })).filter(o => o.id)
+    : registeredPlayers.map(reg => ({
+        id: reg.player?.id || reg.id,
+        name: reg.player?.name || reg.name || 'Unknown',
+      })).filter(o => o.id);
 
   return (
     <Card className="border-0 shadow-sm mb-4">
@@ -392,6 +482,17 @@ const BracketGenerationSection = ({
                 Regenerate Draw
               </Button>
             )}
+            {/* Revert button — show when bracket exists and tournament is SCHEDULED (not IN_PROGRESS which is handled by showRevertOnly above) */}
+            {tournament.status === 'SCHEDULED' && hasBracket && (
+              <Button
+                variant="outline-warning"
+                size="sm"
+                onClick={() => setShowRevertConfirm(true)}
+                disabled={generating || saving || reverting}
+              >
+                Revert to Scheduled
+              </Button>
+            )}
           </div>
         </div>
       </Card.Header>
@@ -426,10 +527,13 @@ const BracketGenerationSection = ({
             {/* KnockoutBracket visualization */}
             {brackets.length > 1 ? (
               <Tab.Container defaultActiveKey={brackets[0].id}>
-                <Nav variant="tabs" className="mb-3">
+                <Nav variant="tabs">
                   {brackets.map(bracket => (
                     <Nav.Item key={bracket.id}>
-                      <Nav.Link eventKey={bracket.id}>
+                      <Nav.Link
+                        eventKey={bracket.id}
+                        style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0' } : undefined}
+                      >
                         {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
                       </Nav.Link>
                     </Nav.Item>
@@ -439,12 +543,18 @@ const BracketGenerationSection = ({
                   {brackets.map(bracket => {
                     const bracketRounds = rounds.filter(r => r.bracketId === bracket.id);
                     return (
-                      <Tab.Pane key={bracket.id} eventKey={bracket.id}>
+                      <Tab.Pane
+                        key={bracket.id}
+                        eventKey={bracket.id}
+                        style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0', margin: '-1rem', marginTop: 0, padding: '1rem', paddingTop: '1rem' } : { paddingTop: '1rem' }}
+                      >
                         <KnockoutBracket
                           tournamentId={tournament.id}
                           bracket={bracket}
                           rounds={bracketRounds}
                           isDoubles={isDoubles}
+                          refreshKey={bracketRefreshKey}
+                          scoringRules={tournament.defaultScoringRules}
                         />
                       </Tab.Pane>
                     );
@@ -461,7 +571,9 @@ const BracketGenerationSection = ({
                     bracket={bracket}
                     rounds={bracketRounds}
                     isDoubles={isDoubles}
+                    refreshKey={bracketRefreshKey}
                     className="mb-4"
+                    scoringRules={tournament.defaultScoringRules}
                   />
                 );
               })
@@ -489,7 +601,7 @@ const BracketGenerationSection = ({
                       Use the dropdowns below to reassign players to bracket slots.
                       BYE slots cannot be reassigned. Click &quot;Save Draw&quot; above when finished.
                     </p>
-                    {matchesByRound.map(({ round, matches: roundMatches }) => (
+                    {mainRound1Matches.map(({ round, matches: roundMatches }) => (
                       <div key={round.id} className="mb-4">
                         <h6 className="text-secondary mb-2">
                           {round.name || `Round ${round.roundNumber}`}
@@ -499,15 +611,19 @@ const BracketGenerationSection = ({
                             const isBye = match.isBye || match.status === 'BYE';
 
                             // Find any pending swaps for this match
+                            const p1Field = isDoubles ? 'pair1Id' : 'player1Id';
+                            const p2Field = isDoubles ? 'pair2Id' : 'player2Id';
                             const pendingP1 = pendingSwaps.find(
-                              s => s.matchId === match.id && s.field === 'player1Id'
+                              s => s.matchId === match.id && s.field === p1Field
                             );
                             const pendingP2 = pendingSwaps.find(
-                              s => s.matchId === match.id && s.field === 'player2Id'
+                              s => s.matchId === match.id && s.field === p2Field
                             );
 
-                            const p1Value = pendingP1 ? pendingP1.newPlayerId : (match.player1?.id || '');
-                            const p2Value = pendingP2 ? pendingP2.newPlayerId : (match.player2?.id || '');
+                            const currentP1 = isDoubles ? (match.pair1?.id || '') : (match.player1?.id || '');
+                            const currentP2 = isDoubles ? (match.pair2?.id || '') : (match.player2?.id || '');
+                            const p1Value = pendingP1 ? pendingP1.newPlayerId : currentP1;
+                            const p2Value = pendingP2 ? pendingP2.newPlayerId : currentP2;
 
                             return (
                               <Col key={match.id}>
@@ -522,26 +638,23 @@ const BracketGenerationSection = ({
                                       )}
                                     </div>
 
-                                    {/* Player 1 slot */}
+                                    {/* Player 1 slot — always editable (even for BYE) */}
                                     <div className="mb-2">
-                                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Top slot</div>
-                                      {isBye && match.player1 ? (
-                                        <div className="fw-medium">{match.player1.name}</div>
-                                      ) : (
-                                        <Form.Select
-                                          size="sm"
-                                          value={p1Value}
-                                          onChange={e => handleSlotChange(match.id, 'player1Id', e.target.value)}
-                                          disabled={isBye}
-                                        >
-                                          <option value="">— Empty slot —</option>
-                                          {registeredPlayers.map(player => (
-                                            <option key={player.id} value={player.id}>
-                                              {player.name}
-                                            </option>
-                                          ))}
-                                        </Form.Select>
-                                      )}
+                                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                        {isBye ? 'Top slot (auto-advances)' : 'Top slot'}
+                                      </div>
+                                      <Form.Select
+                                        size="sm"
+                                        value={p1Value}
+                                        onChange={e => handleSlotChange(match.id, isDoubles ? 'pair1Id' : 'player1Id', e.target.value)}
+                                      >
+                                        <option value="">— Empty slot —</option>
+                                        {slotEditorOptions.map(opt => (
+                                          <option key={opt.id} value={opt.id}>
+                                            {opt.name}
+                                          </option>
+                                        ))}
+                                      </Form.Select>
                                     </div>
 
                                     {/* Player 2 slot */}
@@ -553,12 +666,12 @@ const BracketGenerationSection = ({
                                         <Form.Select
                                           size="sm"
                                           value={p2Value}
-                                          onChange={e => handleSlotChange(match.id, 'player2Id', e.target.value)}
+                                          onChange={e => handleSlotChange(match.id, isDoubles ? 'pair2Id' : 'player2Id', e.target.value)}
                                         >
                                           <option value="">— Empty slot —</option>
-                                          {registeredPlayers.map(player => (
-                                            <option key={player.id} value={player.id}>
-                                              {player.name}
+                                          {slotEditorOptions.map(opt => (
+                                            <option key={opt.id} value={opt.id}>
+                                              {opt.name}
                                             </option>
                                           ))}
                                         </Form.Select>
@@ -599,6 +712,30 @@ const BracketGenerationSection = ({
           </Button>
           <Button variant="danger" onClick={handleConfirmRegenerate}>
             Regenerate
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Revert to Scheduled confirmation modal */}
+      <Modal show={showRevertConfirm} onHide={() => setShowRevertConfirm(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Revert to Scheduled</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to revert <strong>{tournament?.name}</strong> to SCHEDULED?</p>
+          <p>This will:</p>
+          <ul>
+            <li>Delete the tournament draw (bracket, rounds, matches)</li>
+            <li>Reopen player registration</li>
+          </ul>
+          <p className="text-muted">Registrations will be preserved.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRevertConfirm(false)} disabled={reverting}>
+            Cancel
+          </Button>
+          <Button variant="warning" onClick={handleConfirmRevert} disabled={reverting}>
+            {reverting ? 'Reverting...' : 'Revert to Scheduled'}
           </Button>
         </Modal.Footer>
       </Modal>
