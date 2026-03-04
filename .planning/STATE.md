@@ -4,8 +4,8 @@ milestone: null
 milestone_name: null
 status: between_milestones
 stopped_at: null
-last_updated: "2026-03-04T01:30:00.000Z"
-last_activity: 2026-03-04 - Completed quick task 1: Allow backdated tournament start dates with past-date warning banner
+last_updated: "2026-03-04T01:07:00.000Z"
+last_activity: 2026-03-04 - Completed quick task 2: Fix FK constraint error on Match pair1Id for doubles draw generation
 progress:
   total_phases: 0
   completed_phases: 0
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Status: Between milestones — v1.2 shipped, next milestone not started
-Last activity: 2026-03-04 - Completed quick task 1: Allow backdated tournament start dates with past-date warning banner
+Last activity: 2026-03-04 - Completed quick task 2: Fix FK constraint error on Match pair1Id for doubles draw generation
 
 ## Accumulated Context
 
@@ -47,9 +47,10 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Allow backdated tournament start dates with past-date warning banner | 2026-03-04 | 93ad06d | [1-allow-backdated-tournament-start-dates-w](./quick/1-allow-backdated-tournament-start-dates-w/) |
+| 2 | Fix FK constraint error on Match pair1Id for doubles draw generation | 2026-03-04 | dca5d38 | [2-fix-fk-constraint-error-on-match-pair1id](./quick/2-fix-fk-constraint-error-on-match-pair1id/) |
 
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Milestone v1.2 complete
+Stopped at: Completed quick task 2: Fix FK constraint error on Match pair1Id
 Resume file: None
