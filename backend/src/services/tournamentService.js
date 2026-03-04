@@ -581,6 +581,7 @@ export async function getFormatStructure(id) {
           matchGuarantee: true,
           ruleOverrides: true,
           placementRange: true,
+          drawMode: true,
           _count: {
             select: { rounds: true }
           }

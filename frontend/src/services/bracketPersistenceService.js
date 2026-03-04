@@ -41,3 +41,19 @@ export const swapSlots = async (tournamentId, swaps) => {
   const response = await apiClient.patch(`/v1/tournaments/${tournamentId}/bracket/slots`, { swaps });
   return response.data.data;
 };
+
+/**
+ * Assign or clear a player/pair in a bracket position
+ * @param {string} tournamentId
+ * @param {Object} assignment
+ * @param {string} assignment.matchId - Target match UUID
+ * @param {'player1'|'player2'} assignment.slot - Which slot to assign
+ * @param {string|null} [assignment.playerId] - Player ID for singles (null to clear)
+ * @param {string|null} [assignment.pairId] - Pair ID for doubles (null to clear)
+ * @returns {Promise<{ matchId, slot, entityId, action }>}
+ * @throws {ApiError} err.code: ALREADY_PLACED | NOT_REGISTERED | BYE_SLOT_NOT_ASSIGNABLE | BRACKET_LOCKED | MATCH_NOT_FOUND | NOT_ROUND_1
+ */
+export const assignPosition = async (tournamentId, assignment) => {
+  const response = await apiClient.put(`/v1/tournaments/${tournamentId}/bracket/positions`, assignment);
+  return response.data.data;
+};
