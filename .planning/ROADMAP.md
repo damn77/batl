@@ -163,5 +163,5 @@ Plans:
 | 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
 | 14. Tournament Copy | 2/2 | Complete    | 2026-03-04 | - |
 | 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
-| 16. Admin Access Parity | v1.3 | 0/2 | Not started | - |
+| 16. Admin Access Parity | 1/2 | In Progress|  | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |

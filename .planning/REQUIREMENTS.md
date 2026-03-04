@@ -34,8 +34,8 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Admin Access Parity
 
-- [ ] **ADMIN-01**: Admin user can access all organizer functionality (tournament CRUD, draw, results, registration management)
-- [ ] **ADMIN-02**: Mixed-role users (Player+Organizer, Player+Admin, Player+Organizer+Admin) can access all functionalities of their combined roles
+- [x] **ADMIN-01**: Admin user can access all organizer functionality (tournament CRUD, draw, results, registration management)
+- [x] **ADMIN-02**: Mixed-role users (Player+Organizer, Player+Admin, Player+Organizer+Admin) can access all functionalities of their combined roles
 
 ### Bracket View UX Fixes
 
@@ -98,8 +98,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVERT-02 | Phase 15 | Complete |
 | REVERT-03 | Phase 15 | Complete |
 | REVERT-04 | Phase 15 | Complete |
-| ADMIN-01 | Phase 16 | Pending |
-| ADMIN-02 | Phase 16 | Pending |
+| ADMIN-01 | Phase 16 | Complete |
+| ADMIN-02 | Phase 16 | Complete |
 | UX-01 | Phase 17 | Complete |
 | UX-02 | Phase 17 | Complete |
 

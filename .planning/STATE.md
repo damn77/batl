@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: executing
-stopped_at: Phase 16 context gathered
-last_updated: "2026-03-04T19:09:50.691Z"
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-03-04T20:16:04.538Z"
 last_activity: "2026-03-04 — Phase 15 Plan 01 completed: tournament deletion (any status) + revert endpoint"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 9
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 15 P01 | 12m | 2 tasks | 4 files |
 | Phase 15 P02 | 2m | 2 tasks | 4 files |
 | Phase 15 P02 | 5min | 3 tasks | 4 files |
+| Phase 16-admin-access-parity P01 | 2m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,9 @@ Key architectural context for v1.3:
 - [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
 - [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
 - [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
+- [Phase 16-01]: ADMIN early-exit placed after isAuthenticated check but before role checks — preserves redirect to login for unauthenticated users
+- [Phase 16-01]: All 6 organizer routes simplified from requiredRoles array to requiredRole singular — ADMIN bypass in ProtectedRoute makes arrays unnecessary
+- [Phase 16-01]: seedingPlacementRoutes uses authorize('create', 'Tournament') — CASL already grants ADMIN can('manage','all') so no special ADMIN case needed
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T19:09:50.688Z
-Stopped at: Phase 16 context gathered
-Resume file: .planning/phases/16-admin-access-parity/16-CONTEXT.md
+Last session: 2026-03-04T20:16:04.535Z
+Stopped at: Completed 16-01-PLAN.md
+Resume file: None
