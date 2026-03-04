@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: executing
 stopped_at: Completed 15-02-PLAN.md — Phase 15 tournament deletion and revert UI complete
-last_updated: "2026-03-04T18:15:07.916Z"
+last_updated: "2026-03-04T18:22:47.793Z"
 last_activity: "2026-03-04 — Phase 15 Plan 01 completed: tournament deletion (any status) + revert endpoint"
 progress:
   total_phases: 6
