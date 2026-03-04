@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Phase: 12 of 16 (Manual Draw API)
-Plan: — of — in current phase
-Status: Ready to plan
-Last activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
+Phase: 15 of 16 (Tournament Deletion and Revert)
+Plan: 1 of 1 in current phase
+Status: In Progress
+Last activity: 2026-03-04 — Phase 15 Plan 01 completed: tournament deletion (any status) + revert endpoint
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 17-bracket-view-ux-fixes P01 | 1m | 2 tasks | 3 files |
 | Phase 14-tournament-copy P01 | 4m | 1 tasks | 5 files |
 | Phase 14-tournament-copy P02 | 8m | 1 tasks | 4 files |
+| Phase 15 P01 | 12m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Key architectural context for v1.3:
 - [Phase 14-01]: Registration open/close dates not copied — must be set fresh for new tournament
 - [Phase 14-tournament-copy]: Reuse creation modal for copy flow (copySource state distinguishes modes) rather than separate modal
 - [Phase 14-tournament-copy]: Three-dot dropdown (vertical ellipsis) replaces multiple inline buttons per tournament row
+- [Phase 15-01]: recalculateRankings called outside Prisma transaction (uses its own internal Prisma client — wrapping inside $transaction causes connection conflicts)
+- [Phase 15-01]: revert route uses authorize('update', 'Tournament') same as startTournament — ORGANIZER already has update permission, no new custom permission needed
+- [Phase 15-01]: ORGANIZER delete permission granted by merging delete into can() array, removing the cannot('delete', 'Tournament') override line
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T17:09:54.248Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-tournament-deletion-and-revert/15-CONTEXT.md
+Last session: 2026-03-04T17:27:00.000Z
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-tournament-deletion-and-revert/15-01-SUMMARY.md

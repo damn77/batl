@@ -26,11 +26,11 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Tournament Deletion
 
-- [ ] **DEL-01**: Organizer can delete a tournament
-- [ ] **DEL-02**: Deleting a tournament cascades to remove registrations, draw, and match results
+- [x] **DEL-01**: Organizer can delete a tournament
+- [x] **DEL-02**: Deleting a tournament cascades to remove registrations, draw, and match results
 - [ ] **DEL-03**: User sees a confirmation dialog before deletion with tournament details
 - [ ] **DEL-04**: Confirmation shows additional highlighted warning for in-progress or completed tournaments
-- [ ] **DEL-05**: Deleting a completed tournament triggers ranking recalculation for affected categories
+- [x] **DEL-05**: Deleting a completed tournament triggers ranking recalculation for affected categories
 
 ### Admin Access Parity
 
@@ -44,10 +44,10 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Revert to Scheduled
 
-- [ ] **REVERT-01**: Organizer can revert a tournament from IN_PROGRESS or COMPLETED back to SCHEDULED
-- [ ] **REVERT-02**: Reverting deletes the tournament draw (bracket, rounds, matches)
-- [ ] **REVERT-03**: Reverting unlocks player registration for the tournament
-- [ ] **REVERT-04**: Reverting a completed tournament triggers ranking recalculation for affected categories
+- [x] **REVERT-01**: Organizer can revert a tournament from IN_PROGRESS or COMPLETED back to SCHEDULED
+- [x] **REVERT-02**: Reverting deletes the tournament draw (bracket, rounds, matches)
+- [x] **REVERT-03**: Reverting unlocks player registration for the tournament
+- [x] **REVERT-04**: Reverting a completed tournament triggers ranking recalculation for affected categories
 
 ## Future Requirements
 
@@ -89,15 +89,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COPY-03 | Phase 14 | Complete |
 | COPY-04 | Phase 14 | Complete |
 | COPY-05 | Phase 14 | Complete |
-| DEL-01 | Phase 15 | Pending |
-| DEL-02 | Phase 15 | Pending |
+| DEL-01 | Phase 15 | Complete |
+| DEL-02 | Phase 15 | Complete |
 | DEL-03 | Phase 15 | Pending |
 | DEL-04 | Phase 15 | Pending |
-| DEL-05 | Phase 15 | Pending |
-| REVERT-01 | Phase 15 | Pending |
-| REVERT-02 | Phase 15 | Pending |
-| REVERT-03 | Phase 15 | Pending |
-| REVERT-04 | Phase 15 | Pending |
+| DEL-05 | Phase 15 | Complete |
+| REVERT-01 | Phase 15 | Complete |
+| REVERT-02 | Phase 15 | Complete |
+| REVERT-03 | Phase 15 | Complete |
+| REVERT-04 | Phase 15 | Complete |
 | ADMIN-01 | Phase 16 | Pending |
 | ADMIN-02 | Phase 16 | Pending |
 | UX-01 | Phase 17 | Complete |
