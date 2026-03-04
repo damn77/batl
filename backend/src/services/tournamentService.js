@@ -1140,6 +1140,164 @@ export async function deleteTournament(id) {
   await prisma.tournament.delete({ where: { id } });
 }
 /**
+ * Copy a tournament — creates a new SCHEDULED tournament pre-populated with the
+ * source tournament's configuration (category, format, scoring rules, location,
+ * capacity, and all auxiliary fields). No name, no dates, no registrations, no draw.
+ * TournamentPointConfig is cloned if the source has one.
+ *
+ * Phase 14: Tournament Copy
+ * Requirements: COPY-01, COPY-02, COPY-03, COPY-04
+ *
+ * @param {string} sourceId - ID of the tournament to copy
+ * @param {Object} overrides - Override fields from the request body (name, startDate, endDate, etc.)
+ * @param {string} userId - ID of the user performing the copy (becomes new tournament's organizer)
+ * @returns {Promise<Object>} { tournament, copiedFrom: { id, name } }
+ */
+export async function copyTournament(sourceId, overrides, userId) {
+  // Fetch source tournament with all needed relations
+  const source = await prisma.tournament.findUnique({
+    where: { id: sourceId },
+    include: {
+      pointConfig: true
+    }
+  });
+
+  if (!source) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  // Require name + startDate + endDate — these are non-nullable in the schema
+  const name = overrides.name;
+  const startDate = overrides.startDate;
+  const endDate = overrides.endDate;
+
+  if (!name || !startDate || !endDate) {
+    throw createHttpError(400, 'name, startDate, and endDate are required when copying a tournament', {
+      code: 'MISSING_REQUIRED_OVERRIDES'
+    });
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (end < start) {
+    throw createHttpError(400, 'End date must be after start date', {
+      code: 'INVALID_DATE_RANGE'
+    });
+  }
+
+  // Set organizer to the copying user
+  let organizerId = null;
+  if (userId) {
+    const organizer = await organizerService.findOrCreateOrganizer(userId);
+    organizerId = organizer.id;
+  }
+
+  // Resolve primary location — use override clubName if provided, otherwise keep source locationId
+  let locationId = source.locationId;
+  if (overrides.clubName !== undefined) {
+    if (overrides.clubName) {
+      const location = await locationService.findOrCreateLocation({
+        clubName: overrides.clubName,
+        address: overrides.address || null
+      });
+      locationId = location.id;
+    } else {
+      locationId = null;
+    }
+  }
+
+  // Build new tournament data — copy all config fields from source, apply overrides
+  const newTournamentData = {
+    name,
+    categoryId: source.categoryId,
+    description: overrides.description !== undefined ? (overrides.description || null) : (source.description || null),
+    locationId,
+    backupLocationId: source.backupLocationId,
+    courts: source.courts,
+    capacity: overrides.capacity !== undefined ? (overrides.capacity === null ? null : parseInt(overrides.capacity)) : source.capacity,
+    organizerId,
+    // Deputy organizer is NOT copied — the copying user is the new primary organizer
+    // and they can assign a deputy later
+    entryFee: source.entryFee,
+    rulesUrl: source.rulesUrl,
+    prizeDescription: source.prizeDescription,
+    minParticipants: source.minParticipants,
+    waitlistDisplayOrder: source.waitlistDisplayOrder,
+    formatType: source.formatType,
+    formatConfig: source.formatConfig,
+    defaultScoringRules: source.defaultScoringRules,
+    startDate: start,
+    endDate: end,
+    status: 'SCHEDULED',
+    registrationClosed: false
+    // registrationOpenDate and registrationCloseDate are NOT copied (dates must be set fresh)
+  };
+
+  // Use transaction to create tournament + optionally clone point config
+  const result = await prisma.$transaction(async (tx) => {
+    const newTournament = await tx.tournament.create({
+      data: newTournamentData,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            ageGroup: true,
+            gender: true
+          }
+        },
+        location: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        backupLocation: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+
+    // Clone TournamentPointConfig if source has one
+    let pointConfigCloned = false;
+    if (source.pointConfig) {
+      await tx.tournamentPointConfig.create({
+        data: {
+          tournamentId: newTournament.id,
+          calculationMethod: source.pointConfig.calculationMethod,
+          multiplicativeValue: source.pointConfig.multiplicativeValue,
+          doublePointsEnabled: source.pointConfig.doublePointsEnabled
+        }
+      });
+      pointConfigCloned = true;
+    }
+
+    return { newTournament, pointConfigCloned };
+  });
+
+  return {
+    tournament: result.newTournament,
+    copiedFrom: { id: source.id, name: source.name },
+    ...(result.pointConfigCloned && { pointConfigCloned: true })
+  };
+}
+
+/**
  * Get point preview for a tournament based on current registration count
  * @param {string} id - Tournament ID
  * @returns {Promise<Object>} Point preview data

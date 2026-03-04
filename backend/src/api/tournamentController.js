@@ -469,6 +469,101 @@ export async function getTournamentPointPreview(req, res, next) {
 }
 
 /**
+ * POST /api/v1/tournaments/:id/copy
+ * Copy a tournament — creates a new SCHEDULED tournament with source config pre-filled.
+ * Override fields in request body (name, startDate, endDate, etc.) are applied to the copy.
+ * Organizer of the new tournament is set to the copying user (not source's organizer).
+ *
+ * Phase 14: Tournament Copy
+ * Requirements: COPY-01, COPY-02, COPY-03, COPY-04
+ */
+export async function copyTournament(req, res, next) {
+  try {
+    const { id } = req.params;
+    const result = await tournamentService.copyTournament(id, req.body, req.user.id);
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        tournament: {
+          id: result.tournament.id,
+          name: result.tournament.name,
+          categoryId: result.tournament.categoryId,
+          description: result.tournament.description,
+          capacity: result.tournament.capacity,
+          courts: result.tournament.courts,
+          entryFee: result.tournament.entryFee,
+          rulesUrl: result.tournament.rulesUrl,
+          prizeDescription: result.tournament.prizeDescription,
+          minParticipants: result.tournament.minParticipants,
+          waitlistDisplayOrder: result.tournament.waitlistDisplayOrder,
+          formatType: result.tournament.formatType,
+          formatConfig: result.tournament.formatConfig,
+          defaultScoringRules: result.tournament.defaultScoringRules
+            ? (typeof result.tournament.defaultScoringRules === 'string'
+              ? JSON.parse(result.tournament.defaultScoringRules)
+              : result.tournament.defaultScoringRules)
+            : null,
+          clubName: result.tournament.location?.clubName || null,
+          address: result.tournament.location?.address || null,
+          location: result.tournament.location ? {
+            id: result.tournament.location.id,
+            clubName: result.tournament.location.clubName,
+            address: result.tournament.location.address
+          } : null,
+          backupLocation: result.tournament.backupLocation ? {
+            id: result.tournament.backupLocation.id,
+            clubName: result.tournament.backupLocation.clubName,
+            address: result.tournament.backupLocation.address
+          } : null,
+          organizer: result.tournament.organizer ? {
+            id: result.tournament.organizer.id,
+            name: result.tournament.organizer.name,
+            email: result.tournament.organizer.email,
+            phone: result.tournament.organizer.phone
+          } : null,
+          startDate: result.tournament.startDate,
+          endDate: result.tournament.endDate,
+          status: result.tournament.status,
+          registrationClosed: result.tournament.registrationClosed,
+          createdAt: result.tournament.createdAt,
+          updatedAt: result.tournament.updatedAt,
+          category: result.tournament.category ? {
+            id: result.tournament.category.id,
+            name: result.tournament.category.name,
+            type: result.tournament.category.type,
+            ageGroup: result.tournament.category.ageGroup,
+            gender: result.tournament.category.gender
+          } : null
+        },
+        copiedFrom: result.copiedFrom
+      },
+      message: 'Tournament copied successfully'
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: err.code || 'TOURNAMENT_NOT_FOUND',
+          message: err.message
+        }
+      });
+    }
+    if (err.statusCode === 400) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: err.code || 'VALIDATION_ERROR',
+          message: err.message
+        }
+      });
+    }
+    next(err);
+  }
+}
+
+/**
  * PATCH /api/v1/tournaments/:id/start
  * Start a tournament — transitions SCHEDULED → IN_PROGRESS, closes registration
  * Authorization: ADMIN or ORGANIZER roles required (LIFE-01, LIFE-02)

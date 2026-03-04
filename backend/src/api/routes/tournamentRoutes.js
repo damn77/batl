@@ -11,7 +11,8 @@ import {
   getFormatStructure,
   getMatches,
   getTournamentPointPreview,
-  startTournament
+  startTournament,
+  copyTournament
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -28,6 +29,7 @@ import {
   swapSlotsSchema,
   assignPositionSchema
 } from '../validators/bracketPersistenceValidator.js';
+import { copyTournamentSchema } from '../validators/tournamentCopyValidator.js';
 
 const router = express.Router();
 
@@ -94,6 +96,21 @@ router.post(
   authorize('create', 'Tournament'),
   validateBody(schemas.tournamentCreation),
   createTournament
+);
+
+/**
+ * POST /api/v1/tournaments/:id/copy
+ * Copy a tournament — creates a new SCHEDULED tournament with source config pre-filled.
+ * Authorization: ADMIN or ORGANIZER roles required
+ * Phase 14: Tournament Copy
+ * Note: Registered BEFORE the generic /:id routes to avoid path shadowing
+ */
+router.post(
+  '/:id/copy',
+  isAuthenticated,
+  authorize('create', 'Tournament'),
+  validateBody(copyTournamentSchema),
+  copyTournament
 );
 
 /**
