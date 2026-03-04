@@ -39,8 +39,8 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Bracket View UX Fixes
 
-- [ ] **UX-01**: Middle mouse wheel on bracket view scrolls up/down instead of zooming in/out
-- [ ] **UX-02**: Submit match modal for pairs shows both pair names at the top of the modal
+- [x] **UX-01**: Middle mouse wheel on bracket view scrolls up/down instead of zooming in/out
+- [x] **UX-02**: Submit match modal for pairs shows both pair names at the top of the modal
 
 ### Revert to Scheduled
 
@@ -100,8 +100,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVERT-04 | Phase 15 | Pending |
 | ADMIN-01 | Phase 16 | Pending |
 | ADMIN-02 | Phase 16 | Pending |
-| UX-01 | Phase 17 | Pending |
-| UX-02 | Phase 17 | Pending |
+| UX-01 | Phase 17 | Complete |
+| UX-02 | Phase 17 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 24 total

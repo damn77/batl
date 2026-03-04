@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
-stopped_at: Phase 17 context gathered (re-run)
-last_updated: "2026-03-04T14:21:33.654Z"
+stopped_at: Completed 17-bracket-view-ux-fixes/17-01-PLAN.md
+last_updated: "2026-03-04T14:39:32.592Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 6
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 12 P02 | 2m | 2 tasks | 5 files |
 | Phase 13 P01 | 2m | 2 tasks | 3 files |
 | Phase 13 P02 | 2m | 2 tasks | 3 files |
+| Phase 17-bracket-view-ux-fixes P01 | 1m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Key architectural context for v1.3:
 - [Phase 13]: [Phase 13-01]: bracketDrawMode/isManualDraw derived from structure.brackets[0].drawMode for Plan 02 manual editor
 - [Phase 13]: ManualDrawEditor uses immediate-save pattern: each dropdown selection calls assignPosition API directly, consistent with single-position assignment API design
 - [Phase 13]: Save Draw button hidden for manual draws (not disabled): manual mode has no pending swaps to batch-save
+- [Phase 17-bracket-view-ux-fixes]: Remove handleWheel entirely from useBracketNavigation (not a no-op) — cleaner, no dead code
+- [Phase 17-bracket-view-ux-fixes]: Detect doubles match in MatchResultModal via presence of pair1/pair2 on match object (not a passed prop)
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:21:33.652Z
-Stopped at: Phase 17 context gathered (re-run)
-Resume file: .planning/milestones/v1.3-phases/17-bracket-view-ux-fixes/17-CONTEXT.md
+Last session: 2026-03-04T14:39:32.590Z
+Stopped at: Completed 17-bracket-view-ux-fixes/17-01-PLAN.md
+Resume file: None
