@@ -991,5 +991,8 @@
     "seed": "Seed: {{seed}}",
     "processing": "Processing...",
     "confirmAndRegister": "Confirm and Register"
+  },
+  "warnings": {
+    "pastStartDate": "The start date is in the past. This tournament will be created as a backdated event."
   }
 }

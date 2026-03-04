@@ -87,8 +87,7 @@ const TournamentSetupPage = () => {
   };
 
   const handleCreateClick = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = new Date();
 
     setFormData({
       name: '',
@@ -97,8 +96,8 @@ const TournamentSetupPage = () => {
       clubName: '',
       address: '',
       capacity: '',
-      startDate: tomorrow,
-      endDate: tomorrow
+      startDate: today,
+      endDate: today
     });
     setIsSingleDay(true);
     setFormError(null);
@@ -224,6 +223,14 @@ const TournamentSetupPage = () => {
     } finally {
       setRecalculatingCategory(null);
     }
+  };
+
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const check = new Date(date);
+    check.setHours(0, 0, 0, 0);
+    return check < today;
   };
 
   return (
@@ -440,7 +447,6 @@ const TournamentSetupPage = () => {
                           endDate: isSingleDay ? date : formData.endDate
                         });
                       }}
-                      minDate={new Date()}
                       className="form-control"
                       dateFormat="yyyy-MM-dd"
                       required
@@ -463,6 +469,12 @@ const TournamentSetupPage = () => {
                   </Col>
                 )}
               </Row>
+
+              {isPastDate(formData.startDate) && (
+                <Alert variant="warning">
+                  {t('warnings.pastStartDate')}
+                </Alert>
+              )}
 
               <Form.Group className="mb-3">
                 <Form.Label>{t('form.labels.clubName')} *</Form.Label>
@@ -577,7 +589,6 @@ const TournamentSetupPage = () => {
                           endDate: isSingleDay ? date : formData.endDate
                         });
                       }}
-                      minDate={new Date()}
                       className="form-control"
                       dateFormat="yyyy-MM-dd"
                       required
@@ -600,6 +611,12 @@ const TournamentSetupPage = () => {
                   </Col>
                 )}
               </Row>
+
+              {isPastDate(formData.startDate) && (
+                <Alert variant="warning">
+                  {t('warnings.pastStartDate')}
+                </Alert>
+              )}
 
               <Form.Group className="mb-3">
                 <Form.Label>{t('form.labels.clubName')} *</Form.Label>
