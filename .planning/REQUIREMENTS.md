@@ -44,10 +44,10 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Revert to Scheduled
 
-- [x] **REVERT-01**: Organizer can revert a tournament from IN_PROGRESS or COMPLETED back to SCHEDULED
+- [x] **REVERT-01**: Organizer can revert a tournament from IN_PROGRESS back to SCHEDULED (COMPLETED tournaments use delete instead)
 - [x] **REVERT-02**: Reverting deletes the tournament draw (bracket, rounds, matches)
 - [x] **REVERT-03**: Reverting unlocks player registration for the tournament
-- [x] **REVERT-04**: Reverting a completed tournament triggers ranking recalculation for affected categories
+- [x] **REVERT-04**: Deleting a completed tournament triggers ranking recalculation for affected categories (via DEL-05; completed tournaments cannot be reverted)
 
 ## Future Requirements
 
