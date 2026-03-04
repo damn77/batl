@@ -4,7 +4,7 @@ milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: planning
 stopped_at: Completed 14-02-PLAN.md
-last_updated: "2026-03-04T16:05:40.942Z"
+last_updated: "2026-03-04T16:09:37.468Z"
 last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 6
