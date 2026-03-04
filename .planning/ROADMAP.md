@@ -5,6 +5,7 @@
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
 - ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
+- 🚧 **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16 (in progress)
 
 ## Phases
 
@@ -47,6 +48,72 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 </details>
 
+### 🚧 v1.3 Manual Draw & QoL (In Progress)
+
+**Milestone Goal:** Organizers can manually control bracket draw positions, copy existing tournament configurations, delete or revert tournaments, and admin users have full parity with organizer capabilities.
+
+- [ ] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation
+- [ ] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display
+- [ ] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament
+- [ ] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable
+- [ ] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities
+
+## Phase Details
+
+### Phase 12: Manual Draw API
+**Goal**: Organizers can generate an empty bracket and assign/clear player positions via API
+**Depends on**: Existing draw infrastructure (v1.0 Phase 01.1)
+**Requirements**: DRAW-01, DRAW-02, DRAW-06
+**Success Criteria** (what must be TRUE):
+  1. Calling the draw endpoint with "manual" mode creates a bracket with all positions empty (no players auto-placed)
+  2. An API endpoint accepts a player/pair assignment to a specific bracket position and persists it
+  3. The tournament start endpoint rejects start attempts when any registered player/pair is not yet placed in the bracket
+**Plans**: TBD
+
+### Phase 13: Manual Draw UI
+**Goal**: Organizers can interactively assign players to bracket positions and correct mistakes through the tournament draw page
+**Depends on**: Phase 12
+**Requirements**: DRAW-03, DRAW-04, DRAW-05
+**Success Criteria** (what must be TRUE):
+  1. Organizer sees a dropdown on each empty bracket position showing only unplaced players/pairs
+  2. Selecting a player from the dropdown assigns them to that position immediately
+  3. Organizer can click a clear button on any filled position to return it to empty, making that player available again in other dropdowns
+  4. A placement progress indicator shows how many positions are filled vs. total required before start is enabled
+**Plans**: TBD
+
+### Phase 14: Tournament Copy
+**Goal**: Organizers can create a new SCHEDULED tournament pre-populated with an existing tournament's configuration
+**Depends on**: Phases 12–13 (no hard dependency, can run in parallel)
+**Requirements**: COPY-01, COPY-02, COPY-03, COPY-04, COPY-05
+**Success Criteria** (what must be TRUE):
+  1. A "Copy tournament" action on the tournament page creates a new tournament in SCHEDULED status
+  2. The new tournament carries over category, rules, format, location, and capacity from the source tournament
+  3. The new tournament has no name, no dates, no registrations, and no draw (organizer must fill these in)
+  4. Organizer can edit every field of the copied tournament after creation, including all settings copied from the source
+**Plans**: TBD
+
+### Phase 15: Tournament Deletion and Revert
+**Goal**: Organizers can fully delete a tournament or revert it to SCHEDULED, with appropriate data cleanup and ranking correction
+**Depends on**: Phases 12–14 (no hard dependency)
+**Requirements**: DEL-01, DEL-02, DEL-03, DEL-04, DEL-05, REVERT-01, REVERT-02, REVERT-03, REVERT-04
+**Success Criteria** (what must be TRUE):
+  1. Clicking delete on a tournament shows a confirmation dialog displaying tournament name and key details
+  2. Confirmation dialog shows an additional highlighted warning when the tournament is IN_PROGRESS or COMPLETED
+  3. Confirming deletion removes the tournament and all associated registrations, draw data, and match results
+  4. Deleting a completed tournament triggers ranking recalculation for affected categories and removes those tournament results from rankings
+  5. Organizer can revert an IN_PROGRESS or COMPLETED tournament to SCHEDULED, which deletes the draw, unlocks player registration, and triggers ranking recalculation if the tournament was completed
+**Plans**: TBD
+
+### Phase 16: Admin Access Parity
+**Goal**: Admin users have full access to all organizer functionality and mixed-role users see combined capabilities
+**Depends on**: Phases 12–15 (validates across all new features too)
+**Requirements**: ADMIN-01, ADMIN-02
+**Success Criteria** (what must be TRUE):
+  1. Admin user can perform every organizer action (tournament CRUD, draw generation and management, result entry, registration management) without receiving permission errors
+  2. A user with both Player and Organizer roles can access both player-facing and organizer-facing pages and actions
+  3. A user with Player, Organizer, and Admin roles can access all functionality across all three roles simultaneously
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -66,3 +133,8 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
+| 12. Manual Draw API | v1.3 | 0/? | Not started | - |
+| 13. Manual Draw UI | v1.3 | 0/? | Not started | - |
+| 14. Tournament Copy | v1.3 | 0/? | Not started | - |
+| 15. Tournament Deletion and Revert | v1.3 | 0/? | Not started | - |
+| 16. Admin Access Parity | v1.3 | 0/? | Not started | - |

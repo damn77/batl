@@ -73,34 +73,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DRAW-01 | — | Pending |
-| DRAW-02 | — | Pending |
-| DRAW-03 | — | Pending |
-| DRAW-04 | — | Pending |
-| DRAW-05 | — | Pending |
-| DRAW-06 | — | Pending |
-| COPY-01 | — | Pending |
-| COPY-02 | — | Pending |
-| COPY-03 | — | Pending |
-| COPY-04 | — | Pending |
-| COPY-05 | — | Pending |
-| DEL-01 | — | Pending |
-| DEL-02 | — | Pending |
-| DEL-03 | — | Pending |
-| DEL-04 | — | Pending |
-| DEL-05 | — | Pending |
-| ADMIN-01 | — | Pending |
-| ADMIN-02 | — | Pending |
-| REVERT-01 | — | Pending |
-| REVERT-02 | — | Pending |
-| REVERT-03 | — | Pending |
-| REVERT-04 | — | Pending |
+| DRAW-01 | Phase 12 | Pending |
+| DRAW-02 | Phase 12 | Pending |
+| DRAW-06 | Phase 12 | Pending |
+| DRAW-03 | Phase 13 | Pending |
+| DRAW-04 | Phase 13 | Pending |
+| DRAW-05 | Phase 13 | Pending |
+| COPY-01 | Phase 14 | Pending |
+| COPY-02 | Phase 14 | Pending |
+| COPY-03 | Phase 14 | Pending |
+| COPY-04 | Phase 14 | Pending |
+| COPY-05 | Phase 14 | Pending |
+| DEL-01 | Phase 15 | Pending |
+| DEL-02 | Phase 15 | Pending |
+| DEL-03 | Phase 15 | Pending |
+| DEL-04 | Phase 15 | Pending |
+| DEL-05 | Phase 15 | Pending |
+| REVERT-01 | Phase 15 | Pending |
+| REVERT-02 | Phase 15 | Pending |
+| REVERT-03 | Phase 15 | Pending |
+| REVERT-04 | Phase 15 | Pending |
+| ADMIN-01 | Phase 16 | Pending |
+| ADMIN-02 | Phase 16 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation (v1.3 phases 12–16)*

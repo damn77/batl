@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
-status: defining_requirements
+status: roadmap_created
 stopped_at: null
 last_updated: "2026-03-04"
-last_activity: 2026-03-04 - Milestone v1.3 started
+last_activity: 2026-03-04 - Roadmap created for v1.3 (5 phases, 22 requirements)
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,20 +21,42 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Planning next milestone
+**Current focus:** Phase 12 — Manual Draw API
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-04 — Milestone v1.3 started
+Phase: 12 of 16 (Manual Draw API)
+Plan: — of — in current phase
+Status: Ready to plan
+Last activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (this milestone)
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
 
 All v1.2 decisions archived to PROJECT.md Key Decisions table.
+
+Key architectural context for v1.3:
+- Manual draw extends existing Bracket/Round/Match persistence from v1.0 Phase 01.1
+- Ranking recalculation (used by DEL and REVERT) already exists from Feature 008
+- Admin parity fix may touch CASL permission definitions
 
 ### Pending Todos
 
@@ -54,5 +76,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-04
-Stopped at: Completed quick task 2: Fix FK constraint error on Match pair1Id
+Stopped at: Roadmap created for v1.3 — ready to plan Phase 12
 Resume file: None
