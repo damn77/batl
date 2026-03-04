@@ -28,8 +28,8 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 - [x] **DEL-01**: Organizer can delete a tournament
 - [x] **DEL-02**: Deleting a tournament cascades to remove registrations, draw, and match results
-- [ ] **DEL-03**: User sees a confirmation dialog before deletion with tournament details
-- [ ] **DEL-04**: Confirmation shows additional highlighted warning for in-progress or completed tournaments
+- [x] **DEL-03**: User sees a confirmation dialog before deletion with tournament details
+- [x] **DEL-04**: Confirmation shows additional highlighted warning for in-progress or completed tournaments
 - [x] **DEL-05**: Deleting a completed tournament triggers ranking recalculation for affected categories
 
 ### Admin Access Parity
@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COPY-05 | Phase 14 | Complete |
 | DEL-01 | Phase 15 | Complete |
 | DEL-02 | Phase 15 | Complete |
-| DEL-03 | Phase 15 | Pending |
-| DEL-04 | Phase 15 | Pending |
+| DEL-03 | Phase 15 | Complete |
+| DEL-04 | Phase 15 | Complete |
 | DEL-05 | Phase 15 | Complete |
 | REVERT-01 | Phase 15 | Complete |
 | REVERT-02 | Phase 15 | Complete |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
-status: planning
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-04T17:09:54.250Z"
-last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
+status: executing
+stopped_at: "Completed 15-02-PLAN.md (checkpoint:human-verify Task 3 pending)"
+last_updated: "2026-03-04T17:45:37.955Z"
+last_activity: "2026-03-04 — Phase 15 Plan 01 completed: tournament deletion (any status) + revert endpoint"
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 14-tournament-copy P01 | 4m | 1 tasks | 5 files |
 | Phase 14-tournament-copy P02 | 8m | 1 tasks | 4 files |
 | Phase 15 P01 | 12m | 2 tasks | 4 files |
+| Phase 15 P02 | 2m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Key architectural context for v1.3:
 - [Phase 15-01]: recalculateRankings called outside Prisma transaction (uses its own internal Prisma client — wrapping inside $transaction causes connection conflicts)
 - [Phase 15-01]: revert route uses authorize('update', 'Tournament') same as startTournament — ORGANIZER already has update permission, no new custom permission needed
 - [Phase 15-01]: ORGANIZER delete permission granted by merging delete into can() array, removing the cannot('delete', 'Tournament') override line
+- [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
+- [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
+- [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T17:27:00.000Z
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-tournament-deletion-and-revert/15-01-SUMMARY.md
+Last session: 2026-03-04T17:45:37.953Z
+Stopped at: Completed 15-02-PLAN.md (checkpoint:human-verify Task 3 pending)
+Resume file: None
