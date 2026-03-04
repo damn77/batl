@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
-status: roadmap_created
-stopped_at: null
-last_updated: "2026-03-04"
-last_activity: 2026-03-04 - Roadmap created for v1.3 (5 phases, 22 requirements)
+status: planning
+stopped_at: Phase 12 context gathered
+last_updated: "2026-03-04T10:24:45.545Z"
+last_activity: 2026-03-04 — v1.3 roadmap created, 5 phases defined (12–16), 22 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
@@ -75,6 +75,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04
-Stopped at: Roadmap created for v1.3 — ready to plan Phase 12
-Resume file: None
+Last session: 2026-03-04T10:24:45.543Z
+Stopped at: Phase 12 context gathered
+Resume file: .planning/phases/12-manual-draw-api/12-CONTEXT.md
