@@ -1,22 +1,23 @@
 /**
  * Seed script for 11-player knockout tournament test data
  * Feature: 011-knockout-bracket-view
+ * Depends on main seed: npx prisma db seed
  *
  * Creates:
  * - 1 knockout tournament (active, Jan 1 - Dec 31, 2026)
- * - 11 players registered
+ * - 11 real BATL players registered
  * - First round completed (3 preliminary matches + 5 byes)
  *
- * Run: npx prisma db seed -- --seed-file prisma/seed-knockout-test.js
- * Or:  node prisma/seed-knockout-test.js
+ * Run: node prisma/seed-knockout-test.js
  */
 
 import { PrismaClient } from '@prisma/client';
+import { malePlayers } from './data/players.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🏆 Creating 11-player knockout tournament test data...\n');
+  console.log('Creating 11-player knockout tournament test data...\n');
 
   // ============================================
   // 1. Find required data
@@ -37,42 +38,29 @@ async function main() {
     }
   });
   if (!category) {
-    throw new Error('No men\'s singles category found. Run main seed first.');
+    throw new Error("No men's singles category found. Run main seed first.");
   }
 
-  // Find location
-  const location = await prisma.location.findFirst();
+  // Find ProSet location
+  const location = await prisma.location.findFirst({ where: { clubName: 'ProSet' } });
   if (!location) {
-    throw new Error('No location found. Run main seed first.');
+    throw new Error('No ProSet location found. Run main seed first: npx prisma db seed');
   }
 
-  // Find 11 male players
-  const players = await prisma.playerProfile.findMany({
-    where: { gender: 'MEN' },
-    take: 11,
-    orderBy: { name: 'asc' }
-  });
-
-  if (players.length < 11) {
-    // Create additional players if needed
-    console.log(`Found ${players.length} players, creating additional players...`);
-    const neededPlayers = 11 - players.length;
-    for (let i = 0; i < neededPlayers; i++) {
-      const player = await prisma.playerProfile.create({
-        data: {
-          name: `Test Player ${players.length + i + 1}`,
-          email: `testplayer${players.length + i + 1}@test.com`,
-          phone: `+1555000${String(players.length + i + 1).padStart(4, '0')}`,
-          birthDate: new Date(`198${i % 10}-0${(i % 9) + 1}-15`),
-          gender: 'MEN',
-          createdBy: organizer.userId
-        }
-      });
-      players.push(player);
+  // Find 11 specific real players by email
+  // Tomas Zaprazny, Laco Stevko, Erich Siebenstich ml., Juraj Macho, Patrik Kardos,
+  // Zdeno Forgac, Michal Pomsar, Peter Fuchs, Marcel Sramko, Miro Uhliar, Roman Rummel
+  const playerEmails = malePlayers.slice(0, 11).map(p => p.email);
+  const players = [];
+  for (const email of playerEmails) {
+    const player = await prisma.playerProfile.findFirst({ where: { email } });
+    if (!player) {
+      throw new Error(`Player not found: ${email}. Run main seed first: npx prisma db seed`);
     }
+    players.push(player);
   }
 
-  console.log(`✅ Found ${players.length} players`);
+  console.log(`Found ${players.length} real players`);
 
   // ============================================
   // 2. Create Tournament
@@ -80,7 +68,7 @@ async function main() {
 
   const tournament = await prisma.tournament.create({
     data: {
-      name: 'Test Knockout Championship 2026',
+      name: 'ProSet Knockout Championship 2026',
       categoryId: category.id,
       description: '11-player knockout tournament for bracket view testing. First round completed.',
       locationId: location.id,
@@ -108,7 +96,7 @@ async function main() {
     }
   });
 
-  console.log(`✅ Created tournament: ${tournament.name}`);
+  console.log(`Created tournament: ${tournament.name}`);
 
   // ============================================
   // 3. Register all 11 players
@@ -125,7 +113,7 @@ async function main() {
     });
   }
 
-  console.log('✅ Registered all 11 players');
+  console.log('Registered all 11 players');
 
   // ============================================
   // 4. Create Bracket (MAIN)
@@ -139,7 +127,7 @@ async function main() {
     }
   });
 
-  console.log('✅ Created main bracket');
+  console.log('Created main bracket');
 
   // ============================================
   // 5. Create Rounds
@@ -183,7 +171,7 @@ async function main() {
     }
   });
 
-  console.log('✅ Created 4 rounds');
+  console.log('Created 4 rounds');
 
   // ============================================
   // 6. Create Matches
@@ -197,68 +185,68 @@ async function main() {
   //            BYE  BYE  BYE  MATCH  MATCH  BYE  MATCH  BYE
 
   // Seeding (by registration order, 1-11):
-  // Seed 1: Position 1 (BYE) -> Player 1
-  // Seed 2: Position 16 (BYE) -> Player 2
-  // Seed 3: Position 8 (Match) -> Player 3
-  // Seed 4: Position 9 (Match) -> Player 4
-  // etc.
-
-  // Simple seeding for 11 players into 16 bracket:
-  // Players 1-5 get byes (top 5 seeds)
-  // Players 6-11 play preliminary matches (seeds 6-11)
+  // Seed 1: Tomas Zaprazny - Position 1 (BYE)
+  // Seed 2: Laco Stevko - Position 2 (BYE)
+  // Seed 3: Erich Siebenstich ml. - Position 3 (BYE)
+  // Seed 4: Juraj Macho - Position 6 (BYE)
+  // Seed 5: Patrik Kardos - Position 8 (BYE)
+  // Seed 6: Zdeno Forgac - Position 4 (Match vs Seed 11)
+  // Seed 7: Michal Pomsar - Position 5 (Match vs Seed 10)
+  // Seed 8: Peter Fuchs - Position 7 (Match vs Seed 9)
+  // Seed 9: Marcel Sramko - Position 7 (Match, upsets Seed 8)
+  // Seed 10: Miro Uhliar - Position 5 (Match, loses to Seed 7)
+  // Seed 11: Roman Rummel - Position 4 (Match, loses to Seed 6)
 
   // ROUND 1 - All 8 bracket positions (3 matches + 5 BYEs)
-  // Bracket structure for 11 players: "1110 0101" (0=match, 1=bye)
-  // Creating all matches including BYEs with matchNumber representing bracket position
 
-  // Position 1 (matchNumber 1): BYE - Seed 1 (Alex Player)
+  // Position 1 (matchNumber 1): BYE - Seed 1 (Tomas Zaprazny)
   const bye1 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 1,
-      player1: { connect: { id: players[0].id } }, // Seed 1 - Alex Player
+      player1: { connect: { id: players[0].id } }, // Seed 1 - Tomas Zaprazny
       status: 'BYE',
       isBye: true
     }
   });
 
-  // Position 2 (matchNumber 2): BYE - Seed 2 (David Brown)
+  // Position 2 (matchNumber 2): BYE - Seed 2 (Laco Stevko)
   const bye2 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 2,
-      player1: { connect: { id: players[1].id } }, // Seed 2 - David Brown
+      player1: { connect: { id: players[1].id } }, // Seed 2 - Laco Stevko
       status: 'BYE',
       isBye: true
     }
   });
 
-  // Position 3 (matchNumber 3): BYE - Seed 3 (James Taylor)
+  // Position 3 (matchNumber 3): BYE - Seed 3 (Erich Siebenstich ml.)
   const bye3 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 3,
-      player1: { connect: { id: players[2].id } }, // Seed 3 - James Taylor
+      player1: { connect: { id: players[2].id } }, // Seed 3 - Erich Siebenstich ml.
       status: 'BYE',
       isBye: true
     }
   });
 
-  // Position 4 (matchNumber 4): MATCH - Seed 6 vs Seed 11 -> Player 6 wins
+  // Position 4 (matchNumber 4): MATCH - Seed 6 (Zdeno Forgac) vs Seed 11 (Roman Rummel) -> Forgac wins
   const match1 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 4,
-      player1: { connect: { id: players[5].id } }, // Player 6 (seed 6) - Robert Wilson
-      player2: { connect: { id: players[10].id } }, // Player 11 (seed 11) - Thomas Moore
+      player1: { connect: { id: players[5].id } }, // Seed 6 - Zdeno Forgac
+      player2: { connect: { id: players[10].id } }, // Seed 11 - Roman Rummel
       status: 'COMPLETED',
       result: JSON.stringify({
         winner: 'PLAYER1',
@@ -272,15 +260,15 @@ async function main() {
     }
   });
 
-  // Position 5 (matchNumber 5): MATCH - Seed 7 vs Seed 10 -> Player 7 wins
+  // Position 5 (matchNumber 5): MATCH - Seed 7 (Michal Pomsar) vs Seed 10 (Miro Uhliar) -> Pomsar wins
   const match2 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 5,
-      player1: { connect: { id: players[6].id } }, // Player 7 (seed 7) - Test Player 10
-      player2: { connect: { id: players[9].id } }, // Player 10 (seed 10) - Test Player 8
+      player1: { connect: { id: players[6].id } }, // Seed 7 - Michal Pomsar
+      player2: { connect: { id: players[9].id } }, // Seed 10 - Miro Uhliar
       status: 'COMPLETED',
       result: JSON.stringify({
         winner: 'PLAYER1',
@@ -294,28 +282,28 @@ async function main() {
     }
   });
 
-  // Position 6 (matchNumber 6): BYE - Seed 4 (John Smith)
+  // Position 6 (matchNumber 6): BYE - Seed 4 (Juraj Macho)
   const bye4 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 6,
-      player1: { connect: { id: players[3].id } }, // Seed 4 - John Smith
+      player1: { connect: { id: players[3].id } }, // Seed 4 - Juraj Macho
       status: 'BYE',
       isBye: true
     }
   });
 
-  // Position 7 (matchNumber 7): MATCH - Seed 8 vs Seed 9 -> Player 9 wins (upset!)
+  // Position 7 (matchNumber 7): MATCH - Seed 8 (Peter Fuchs) vs Seed 9 (Marcel Sramko) -> Sramko wins (upset!)
   const match3 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 7,
-      player1: { connect: { id: players[7].id } }, // Player 8 (seed 8) - Test Player 12
-      player2: { connect: { id: players[8].id } }, // Player 9 (seed 9) - Test Player 14
+      player1: { connect: { id: players[7].id } }, // Seed 8 - Peter Fuchs
+      player2: { connect: { id: players[8].id } }, // Seed 9 - Marcel Sramko
       status: 'COMPLETED',
       result: JSON.stringify({
         winner: 'PLAYER2',
@@ -330,81 +318,81 @@ async function main() {
     }
   });
 
-  // Position 8 (matchNumber 8): BYE - Seed 5 (Mike Johnson)
+  // Position 8 (matchNumber 8): BYE - Seed 5 (Patrik Kardos)
   const bye5 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round1.id } },
       matchNumber: 8,
-      player1: { connect: { id: players[4].id } }, // Seed 5 - Mike Johnson
+      player1: { connect: { id: players[4].id } }, // Seed 5 - Patrik Kardos
       status: 'BYE',
       isBye: true
     }
   });
 
-  console.log('✅ Created 8 first-round positions (3 matches COMPLETED, 5 BYEs)');
+  console.log('Created 8 first-round positions (3 matches COMPLETED, 5 BYEs)');
 
   // ROUND 2 - Quarter-finals (4 matches)
   // Bracket progression: R1 positions 1-2 → R2M1, 3-4 → R2M2, 5-6 → R2M3, 7-8 → R2M4
   // matchNumber continues from Round 1 (9-12)
 
-  // Match 9: Seed 1 (BYE from pos 1) vs Seed 2 (BYE from pos 2) -> SCHEDULED
+  // Match 9: Zaprazny (BYE from pos 1) vs Stevko (BYE from pos 2) -> SCHEDULED
   const match9 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round2.id } },
       matchNumber: 9,
-      player1: { connect: { id: players[0].id } }, // Player 1 - Alex Player (seed 1, BYE from pos 1)
-      player2: { connect: { id: players[1].id } }, // Player 2 - David Brown (seed 2, BYE from pos 2)
+      player1: { connect: { id: players[0].id } }, // Seed 1 - Tomas Zaprazny (BYE from pos 1)
+      player2: { connect: { id: players[1].id } }, // Seed 2 - Laco Stevko (BYE from pos 2)
       status: 'SCHEDULED'
     }
   });
 
-  // Match 10: Seed 3 (BYE from pos 3) vs Winner of Match at pos 4 (Player 6) -> SCHEDULED
+  // Match 10: Siebenstich (BYE from pos 3) vs Forgac (won at pos 4) -> SCHEDULED
   const match10 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round2.id } },
       matchNumber: 10,
-      player1: { connect: { id: players[2].id } }, // Player 3 - James Taylor (seed 3, BYE from pos 3)
-      player2: { connect: { id: players[5].id } }, // Player 6 - Robert Wilson (won at pos 4)
+      player1: { connect: { id: players[2].id } }, // Seed 3 - Erich Siebenstich ml. (BYE from pos 3)
+      player2: { connect: { id: players[5].id } }, // Seed 6 - Zdeno Forgac (won at pos 4)
       status: 'SCHEDULED'
     }
   });
 
-  // Match 11: Winner of Match at pos 5 (Player 7) vs Seed 4 (BYE from pos 6) -> SCHEDULED
+  // Match 11: Pomsar (won at pos 5) vs Macho (BYE from pos 6) -> SCHEDULED
   const match11 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round2.id } },
       matchNumber: 11,
-      player1: { connect: { id: players[6].id } }, // Player 7 - Test Player 10 (won at pos 5)
-      player2: { connect: { id: players[3].id } }, // Player 4 - John Smith (seed 4, BYE from pos 6)
+      player1: { connect: { id: players[6].id } }, // Seed 7 - Michal Pomsar (won at pos 5)
+      player2: { connect: { id: players[3].id } }, // Seed 4 - Juraj Macho (BYE from pos 6)
       status: 'SCHEDULED'
     }
   });
 
-  // Match 12: Winner of Match at pos 7 (Player 9) vs Seed 5 (BYE from pos 8) -> SCHEDULED
+  // Match 12: Sramko (won at pos 7, upset) vs Kardos (BYE from pos 8) -> SCHEDULED
   const match12 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
       bracket: { connect: { id: bracket.id } },
       round: { connect: { id: round2.id } },
       matchNumber: 12,
-      player1: { connect: { id: players[8].id } }, // Player 9 - Test Player 14 (won at pos 7)
-      player2: { connect: { id: players[4].id } }, // Player 5 - Mike Johnson (seed 5, BYE from pos 8)
+      player1: { connect: { id: players[8].id } }, // Seed 9 - Marcel Sramko (won at pos 7, upset)
+      player2: { connect: { id: players[4].id } }, // Seed 5 - Patrik Kardos (BYE from pos 8)
       status: 'SCHEDULED'
     }
   });
 
-  console.log('✅ Created 4 second-round matches (all SCHEDULED)');
+  console.log('Created 4 second-round matches (all SCHEDULED)');
 
   // ROUND 3 - Semifinals (2 matches) - TBD players
-  // For TBD matches, we need placeholder players. Using first two players as placeholders.
+  // Using top seeds as placeholders for the TBD bracket positions
   const match13 = await prisma.match.create({
     data: {
       tournament: { connect: { id: tournament.id } },
@@ -429,7 +417,7 @@ async function main() {
     }
   });
 
-  console.log('✅ Created 2 semifinal matches (all SCHEDULED)');
+  console.log('Created 2 semifinal matches (all SCHEDULED)');
 
   // ROUND 4 - Final (1 match)
   const match15 = await prisma.match.create({
@@ -444,16 +432,17 @@ async function main() {
     }
   });
 
-  console.log('✅ Created final match (SCHEDULED)');
+  console.log('Created final match (SCHEDULED)');
 
   // ============================================
   // Summary
   // ============================================
 
-  console.log('\n🎉 Test data created successfully!\n');
+  console.log('\nTest data created successfully!\n');
   console.log('Tournament Summary:');
   console.log(`  Name: ${tournament.name}`);
   console.log(`  ID: ${tournament.id}`);
+  console.log(`  Location: ProSet`);
   console.log(`  Status: IN_PROGRESS`);
   console.log(`  Players: 11`);
   console.log(`  Bracket size: 16`);

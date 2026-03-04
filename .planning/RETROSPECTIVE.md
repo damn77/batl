@@ -103,9 +103,56 @@
 
 ---
 
+## Milestone: v1.2 — Data Seeding Update
+
+**Shipped:** 2026-03-04
+**Phases:** 3 | **Plans:** 5 | **Timeline:** 1 day (2026-03-03 → 2026-03-04)
+
+### What Was Built
+
+- Seeded 34 real BATL league players (18 male, 16 female) with linked ADMIN and ORGANIZER accounts
+- Created 18 mixed doubles pairs in Mixed Doubles Open with zero-point rankings
+- Consolidated all locations to "ProSet" across all seed scripts
+- Replaced linear ranking formula with 16-entry RANKING_PROFILES lookup for realistic varied values
+- Merged two active-tournament seed scripts into one; all scripts reference real players by email
+
+### What Worked
+
+- **Data file extraction pattern**: Separating player data to `backend/prisma/data/players.js` as a shared ES module made it trivial for 3 seed scripts to reference the same real players consistently
+- **Email-based player lookup**: Using `findFirst({ where: { email } })` instead of alphabetical `findMany` guarantees deterministic real player references across all seeds
+- **2-phase milestone structure**: Phase 9 (data content) and Phase 10 (quality/consolidation) had a natural delivery boundary — Phase 9 produces a usable DB, Phase 10 polishes the tooling
+- **Single audit cycle**: Only 1 audit with 1 gap closure phase (Phase 11) needed — significantly more efficient than v1.1's 5-audit cycle
+
+### What Was Inefficient
+
+- **Missing SUMMARY frontmatter**: Plans 09-02 and 10-02 were executed without `requirements_completed` in their SUMMARY frontmatter — caught by audit and fixed in Phase 11
+- **Organizer schema mismatch**: `seed-active-tournament.js` used non-existent `organizationName` field (Prisma error) — not caught during Phase 10 execution, required Phase 11 gap closure
+- **organizer.username stale reference**: `seed-active-tournament.js` accesses `organizer.username` (non-existent field on User model) — silently falls back but produces incorrect output. Identified but not fixed.
+
+### Patterns Established
+
+- **Shared seed data module**: Extract seed data to `backend/prisma/data/players.js` — all seed scripts import from a single source of truth
+- **RANKING_PROFILES lookup array**: Pre-sorted descending profiles with irregular point gaps, varied tournament counts, and seedingScore < totalPoints for realistic rankings display
+- **findFirst + conditional create**: Idempotent doubles pair creation pattern for seed scripts that may run multiple times
+
+### Key Lessons
+
+1. **Always include `requirements_completed` in SUMMARY frontmatter at execution time** — not as a post-hoc fix. The audit's 3-source cross-reference depends on it.
+2. **Test seed scripts against fresh databases during execution** — the organizer schema bug would have been caught immediately if `seed-active-tournament.js` had been run against an empty DB during Phase 10.
+3. **Data-only milestones are fast** — no new API endpoints, no frontend changes, no complex integration. 5 plans in 1 day with minimal audit friction.
+
+### Cost Observations
+
+- Model: mixed opus/sonnet
+- Sessions: ~2 sessions across 1 day
+- Notable: Smallest milestone yet (3 phases, 5 plans) — data-only changes have much lower complexity ceiling
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Phases | Plans | Timeline | Notes |
 |-----------|--------|-------|----------|-------|
 | v1.0 Tournament Core | 4 | 13 | 3 days | First milestone; full knockout execution loop |
 | v1.1 Consolation Brackets | 8 | 15 | 4 days | 5 audit iterations; doubles integration hardening |
+| v1.2 Data Seeding Update | 3 | 5 | 1 day | Data-only; 1 audit, 1 gap closure phase |

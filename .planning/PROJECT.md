@@ -52,11 +52,19 @@ A complete tournament runs from registration to final standings without the orga
 - ✓ Consolation points awarded based on final consolation round won — v1.1 (PTS-01)
 - ✓ Consolation point tables pre-seeded and admin-editable — v1.1 (PTS-02)
 
+<!-- v1.2: Data Seeding Update -->
+
+- ✓ 34 real BATL league players seeded with linked accounts — v1.2 (PLAY-01, PLAY-02, ACCT-01, ACCT-02)
+- ✓ 18 mixed doubles pairs and category registrations from league data — v1.2 (PAIR-01, PAIR-02, TOURN-01)
+- ✓ All locations standardized to "ProSet" — v1.2 (LOC-01, LOC-02)
+- ✓ Realistic ranking data with varied point values and tournament counts — v1.2 (DATA-01, DATA-02)
+- ✓ Seed scripts consolidated and referencing real players — v1.2 (SCRP-01, SCRP-02, SCRP-03)
+
 ### Active
 
-(None — start next milestone to define)
+(No active requirements — planning next milestone)
 
-### Future (v1.2+)
+### Future (v1.3+)
 
 - Group stage visualization and result entry (round-robin matches)
 - Swiss system pairing and result tracking
@@ -65,6 +73,7 @@ A complete tournament runs from registration to final standings without the orga
 - Player statistics: win/loss record per category per season, head-to-head view
 - Organizer dashboard with active tournaments, pending result confirmations
 - Result edit history — log of who changed what and when (organizer view)
+- Production data seeding / migration tooling
 
 ### Out of Scope
 
@@ -82,7 +91,8 @@ A complete tournament runs from registration to final standings without the orga
 - **Testing**: Vitest (frontend), Jest (backend), 89+ backend tests passing
 - **v1.0 shipped 2026-02-28** — full knockout tournament execution loop functional end-to-end
 - **v1.1 shipped 2026-03-03** — consolation brackets with MATCH_2 guarantee, loser routing, opt-out, result entry, cascade recalculation, and consolation point awards
-- **15 features delivered** (001–011 + v1.0 + v1.1 milestone phases); ~41,700 LOC; architecture is stable and well-tested
+- **v1.2 shipped 2026-03-04** — real league data seeding with 34 players, 18 mixed doubles pairs, realistic rankings, all scripts referencing real players and ProSet
+- **15 features delivered** (001–011 + v1.0–v1.2 milestone phases); ~41,700 LOC; architecture is stable and well-tested
 - Organizer and player roles are both active users of the app; admin manages configuration
 - Scoring is format-dependent: sets (e.g. 6:4, 7:5), match-level (e.g. 7:5), or tiebreak-only depending on tournament rules
 - Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — targeted for v1.2+
@@ -114,6 +124,9 @@ A complete tournament runs from registration to final standings without the orga
 | DRY_RUN_RESULT throw pattern for impact detection | Service throws to rollback transaction, controller returns 200 with impact data | ✓ Good — clean separation of concerns |
 | Server-side consolation result derivation | Results auto-derived from DB, never passed by caller | ✓ Good — no client-side enumeration errors |
 | 5 milestone audits with iterative gap closure | Each audit drove new phases (5.1, 5.2, 6, 6.1, 7, 8) | ✓ Good — systematic quality assurance |
+| Player data extracted to separate ES module (data/players.js) | Data vs logic separation for seed scripts | ✓ Good — 3 scripts import from single source of truth |
+| Email-based player lookup in test seeds | Deterministic references instead of alphabetical findMany | ✓ Good — guaranteed real named players in all seeds |
+| RANKING_PROFILES lookup array for mock data | Replaces linear formula with realistic varied values | ✓ Good — rankings page looks realistic |
 
 ---
-*Last updated: 2026-03-03 after v1.1 milestone*
+*Last updated: 2026-03-04 after v1.2 milestone*

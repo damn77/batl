@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.2 Data Seeding Update (Shipped: 2026-03-04)
+
+**Phases completed:** 3 phases, 5 plans, 4 tasks
+**Timeline:** 1 day (2026-03-03 → 2026-03-04)
+**Files changed:** 24 files, ~3,300 lines added
+**Commits:** 30
+
+**Delivered:** Real league data seeding — all seed scripts now populate 34 real BATL players with linked accounts, 18 mixed doubles pairs, realistic ranking data, and the ProSet location, replacing all prototype placeholder values.
+
+**Key accomplishments:**
+- Seeded 34 real BATL league players (18 male, 16 female) with linked user accounts (ADMIN + ORGANIZER)
+- Created 18 mixed doubles pairs in Mixed Doubles Open category with zero-point rankings
+- Consolidated all locations to "ProSet" and removed 4 generic placeholder locations
+- Replaced linear ranking formula (1000/900/800) with realistic varied point values and tournament counts
+- Merged two active-tournament seed scripts into one; all scripts reference real players by email
+
+**Requirements:** 19/19 v1.2 requirements complete (PLAY-01–03, ACCT-01–03, PAIR-01–02, TOURN-01–04, LOC-01–02, DATA-01–02, SCRP-01–03)
+**Audit:** Passed — 1 audit with 1 gap closure phase (Phase 11)
+
+---
+
 ## v1.1 Consolation Brackets (Shipped: 2026-03-03)
 
 **Phases completed:** 8 phases, 15 plans
