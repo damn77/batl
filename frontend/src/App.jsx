@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Alert } from 'react-bootstrap';
 import { AuthProvider, useAuth } from './utils/AuthContext';
 import { ModalProvider, useModal } from './utils/ModalContext';
 import { ToastProvider } from './utils/ToastContext';
@@ -174,7 +175,15 @@ function AppContent() {
           path="/player/profile"
           element={
             <ProtectedRoute requiredRole="PLAYER">
-              <Navigate to={`/players/${user?.playerId}`} replace />
+              {user?.playerId ? (
+                <Navigate to={`/players/${user.playerId}`} replace />
+              ) : (
+                <div className="container mt-4">
+                  <Alert variant="warning">
+                    You are viewing as admin — no player profile linked. Visit the Players page to create or link a profile.
+                  </Alert>
+                </div>
+              )}
             </ProtectedRoute>
           }
         />
