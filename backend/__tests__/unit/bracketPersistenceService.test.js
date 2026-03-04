@@ -220,7 +220,8 @@ describe('generateBracket()', () => {
       data: {
         tournamentId: 'tour-1',
         bracketType: 'MAIN',
-        matchGuarantee: 'MATCH_1'
+        matchGuarantee: 'MATCH_1',
+        drawMode: 'SEEDED'
       }
     });
   });

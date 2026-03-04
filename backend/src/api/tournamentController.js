@@ -485,7 +485,11 @@ export async function startTournament(req, res, next) {
     if (err.statusCode) {
       return res.status(err.statusCode).json({
         success: false,
-        error: { code: err.code, message: err.message }
+        error: {
+          code: err.code,
+          message: err.message,
+          ...(err.details && { details: err.details })
+        }
       });
     }
     next(err);
