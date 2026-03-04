@@ -18,10 +18,10 @@ Requirements for v1.3 Manual Draw & QoL milestone. Each maps to roadmap phases.
 
 ### Tournament Copy
 
-- [ ] **COPY-01**: Organizer can create a new tournament by copying an existing tournament's configuration
-- [ ] **COPY-02**: Copied tournament includes category, rules, format, location, and capacity settings
-- [ ] **COPY-03**: Copied tournament does not include name, dates, registrations, or draw
-- [ ] **COPY-04**: Copied tournament is created in SCHEDULED status
+- [x] **COPY-01**: Organizer can create a new tournament by copying an existing tournament's configuration
+- [x] **COPY-02**: Copied tournament includes category, rules, format, location, and capacity settings
+- [x] **COPY-03**: Copied tournament does not include name, dates, registrations, or draw
+- [x] **COPY-04**: Copied tournament is created in SCHEDULED status
 - [ ] **COPY-05**: Organizer can modify any parameter of the copied tournament after creation
 
 ### Tournament Deletion
@@ -84,10 +84,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DRAW-03 | Phase 13 | Complete |
 | DRAW-04 | Phase 13 | Complete |
 | DRAW-05 | Phase 13 | Complete |
-| COPY-01 | Phase 14 | Pending |
-| COPY-02 | Phase 14 | Pending |
-| COPY-03 | Phase 14 | Pending |
-| COPY-04 | Phase 14 | Pending |
+| COPY-01 | Phase 14 | Complete |
+| COPY-02 | Phase 14 | Complete |
+| COPY-03 | Phase 14 | Complete |
+| COPY-04 | Phase 14 | Complete |
 | COPY-05 | Phase 14 | Pending |
 | DEL-01 | Phase 15 | Pending |
 | DEL-02 | Phase 15 | Pending |
