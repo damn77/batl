@@ -57,6 +57,8 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 - [x] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament (completed 2026-03-04)
 - [x] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable (completed 2026-03-04)
 - [x] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities (completed 2026-03-04)
+- [ ] **Phase 18: Phase 13 Verification & DRAW-05 Gap Closure** — Verify DRAW-03/04 implementations, implement/fix DRAW-05, create Phase 13 VERIFICATION.md
+- [ ] **Phase 19: Integration Bug Fixes** — Fix format filter forwarding and player count guard mismatch
 
 ## Phase Details
 
@@ -140,6 +142,28 @@ Plans:
 Plans:
 - [ ] 17-01-PLAN.md — Remove wheel-zoom, update nav hint, fix pair name display in modal
 
+### Phase 18: Phase 13 Verification & DRAW-05 Gap Closure
+**Goal**: Verify Phase 13 manual draw UI requirements and close DRAW-05 gap
+**Depends on**: Phase 13
+**Requirements**: DRAW-03, DRAW-04, DRAW-05
+**Gap Closure**: Closes gaps from v1.3 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. DRAW-03 verified: Organizer can assign a player/pair to any empty bracket position from a dropdown
+  2. DRAW-04 verified: Position assignment dropdown shows only players/pairs not yet placed
+  3. DRAW-05 implemented and verified: Organizer can clear a filled bracket position back to empty
+  4. Phase 13 VERIFICATION.md exists documenting all verification results
+**Plans**: TBD
+
+### Phase 19: Integration Bug Fixes
+**Goal**: Fix format filter forwarding and player count guard mismatch identified in milestone audit
+**Depends on**: None (independent fixes)
+**Requirements**: COPY-05, DRAW-06 (UX improvements)
+**Gap Closure**: Closes integration gaps from v1.3 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. Format filter dropdown on TournamentSetupPage filters tournaments by format type (frontend service forwards param, backend schema allows it)
+  2. Generate bracket button is disabled when player count < 4 (matching backend minimum), with explanatory message
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -165,3 +189,5 @@ Plans:
 | 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
+| 18. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 0/0 | Pending | — |
+| 19. Integration Bug Fixes | v1.3 | 0/0 | Pending | — |
