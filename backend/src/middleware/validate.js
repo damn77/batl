@@ -386,6 +386,7 @@ export const schemas = {
   tournamentListQuery: Joi.object({
     categoryId: Joi.string().uuid().optional(),
     status: Joi.string().valid('SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED').optional(),
+    formatType: Joi.string().valid('KNOCKOUT', 'GROUP', 'SWISS', 'COMBINED').optional(),
     startDate: Joi.date().iso().optional(),
     page: Joi.number().integer().min(1).default(1).optional(),
     limit: Joi.number().integer().min(1).max(100).default(20).optional()

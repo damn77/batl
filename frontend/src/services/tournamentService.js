@@ -7,7 +7,7 @@ import apiClient from './apiClient';
 
 /**
  * Get all tournaments with optional filters
- * @param {Object} filters - Optional filters (categoryId, status, startDate, page, limit)
+ * @param {Object} filters - Optional filters (categoryId, status, formatType, startDate, page, limit)
  * @returns {Promise} List of tournaments with pagination
  */
 export const listTournaments = async (filters = {}) => {
@@ -15,6 +15,7 @@ export const listTournaments = async (filters = {}) => {
 
   if (filters.categoryId) params.append('categoryId', filters.categoryId);
   if (filters.status) params.append('status', filters.status);
+  if (filters.formatType) params.append('formatType', filters.formatType);
   if (filters.startDate) params.append('startDate', filters.startDate);
   if (filters.page) params.append('page', filters.page);
   if (filters.limit) params.append('limit', filters.limit);
