@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Manual Draw & QoL
 status: completed
-stopped_at: Completed 18-01-PLAN.md — Phase 13 DRAW-03/04/05 verified with 15 tests and VERIFICATION.md
-last_updated: "2026-03-05T23:07:58.972Z"
-last_activity: "2026-03-04 — Phase 16 Plan 02 completed: NavBar admin sections, warning banners, human verification passed"
+stopped_at: Completed 19-01-PLAN.md — formatType filter forwarding (COPY-05) and player count guard fix (DRAW-06)
+last_updated: "2026-03-06T00:00:00.000Z"
+last_activity: "2026-03-06 — Phase 19 Plan 01 completed: integration bug fixes for COPY-05 and DRAW-06"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 ## Current Position
 
-Phase: 16 of 16 (Admin Access Parity)
-Plan: 2 of 2 in current phase
+Phase: 19 of 19 (Integration Bug Fixes)
+Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-03-04 — Phase 16 Plan 02 completed: NavBar admin sections, warning banners, human verification passed
+Last activity: 2026-03-06 — Phase 19 Plan 01 completed: formatType filter forwarding and player count guard fixed (COPY-05, DRAW-06)
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 16-admin-access-parity P01 | 2m | 2 tasks | 3 files |
 | Phase 16 P02 | 3min | 3 tasks | 5 files |
 | Phase 18-phase13-verification-draw05 P01 | 2m | 2 tasks | 2 files |
+| Phase 19-integration-bug-fixes P01 | 5m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Key architectural context for v1.3:
 - [Phase 16-02]: Admin warning banner gated on user?.role === 'ADMIN' only (not ORGANIZER) per plan spec
 - [Phase 16-02]: PLAYER section condition unchanged — ADMIN gets player links via dedicated admin-only section
 - [Phase 18-phase13-verification-draw05]: Used unit test pattern (mocked Prisma) for assignPosition tests — consistent with bracketPersistenceService.test.js and avoids DB setup overhead
+- [Phase 19-01]: No client-side filtering workaround added for formatType — fixed the correct layer (Joi schema + service param forwarding)
+- [Phase 19-01]: Player count guard raised to 4 to match backend bracket template minimum (docs/bracket-templates-all.json starts at 4)
 
 ### Pending Todos
 
@@ -120,6 +123,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T23:05:37.696Z
-Stopped at: Completed 18-01-PLAN.md — Phase 13 DRAW-03/04/05 verified with 15 tests and VERIFICATION.md
+Last session: 2026-03-06T00:00:00.000Z
+Stopped at: Completed 19-01-PLAN.md — formatType filter forwarding (COPY-05) and player count guard fix (DRAW-06)
 Resume file: None

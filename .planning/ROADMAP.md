@@ -58,7 +58,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 - [x] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable (completed 2026-03-04)
 - [x] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities (completed 2026-03-04)
 - [x] **Phase 18: Phase 13 Verification & DRAW-05 Gap Closure** — Verify DRAW-03/04 implementations, implement/fix DRAW-05, create Phase 13 VERIFICATION.md (completed 2026-03-05)
-- [ ] **Phase 19: Integration Bug Fixes** — Fix format filter forwarding and player count guard mismatch
+- [x] **Phase 19: Integration Bug Fixes** — Fix format filter forwarding and player count guard mismatch (completed 2026-03-06)
 
 ## Phase Details
 
@@ -194,4 +194,4 @@ Plans:
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
 | 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2026-03-05 | — |
-| 19. Integration Bug Fixes | v1.3 | 0/1 | Pending | — |
+| 19. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
