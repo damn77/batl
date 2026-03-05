@@ -393,7 +393,7 @@ const BracketGenerationSection = ({
             variant="primary"
             size="lg"
             onClick={handleGenerateBracket}
-            disabled={generating || registeredPlayers.length < 2}
+            disabled={generating || registeredPlayers.length < 4}
           >
             {generating ? (
               <>
@@ -404,9 +404,9 @@ const BracketGenerationSection = ({
               drawMode === 'manual' ? 'Generate Empty Bracket' : 'Generate Draw'
             )}
           </Button>
-          {registeredPlayers.length < 2 && (
+          {registeredPlayers.length < 4 && (
             <p className="text-warning mt-2 mb-0">
-              <small>At least 2 players are required to generate a draw.</small>
+              <small>At least 4 players are required to generate a draw.</small>
             </p>
           )}
         </Card.Body>
