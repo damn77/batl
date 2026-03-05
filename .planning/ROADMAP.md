@@ -194,4 +194,4 @@ Plans:
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
 | 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2026-03-05 | — |
-| 19. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
+| 19. Integration Bug Fixes | v1.3 | Complete    | 2026-03-05 | 2026-03-06 |
