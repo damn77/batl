@@ -2,47 +2,47 @@
 
 ## Milestones
 
-- ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
-- ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
-- ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
+- ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2017-02-28)
+- ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2017-03-03)
+- ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2017-03-04)
 - 🚧 **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16, 17 (in progress)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 Tournament Core (Phases 1, 01.1, 2, 3) — SHIPPED 2026-02-28</summary>
+<summary>✅ v1.0 Tournament Core (Phases 1, 01.1, 2, 3) — SHIPPED 2017-02-28</summary>
 
-- [x] Phase 1: Match Result Submission (3/3 plans) — completed 2026-02-27
-- [x] Phase 01.1: Bracket Generation and Seeding Persistence (5/5 plans) — completed 2026-02-28 (INSERTED)
-- [x] Phase 2: Tournament Lifecycle and Bracket Progression (2/2 plans) — completed 2026-02-28
-- [x] Phase 3: Player Statistics (3/3 plans) — completed 2026-02-28
+- [x] Phase 1: Match Result Submission (3/3 plans) — completed 2017-02-27
+- [x] Phase 01.1: Bracket Generation and Seeding Persistence (5/5 plans) — completed 2017-02-28 (INSERTED)
+- [x] Phase 2: Tournament Lifecycle and Bracket Progression (2/2 plans) — completed 2017-02-28
+- [x] Phase 3: Player Statistics (3/3 plans) — completed 2017-02-28
 
 See `.planning/milestones/v1.0-ROADMAP.md` for full phase details.
 
 </details>
 
 <details>
-<summary>✅ v1.1 Consolation Brackets (Phases 4–8) — SHIPPED 2026-03-03</summary>
+<summary>✅ v1.1 Consolation Brackets (Phases 4–8) — SHIPPED 2017-03-03</summary>
 
-- [x] Phase 4: Configuration and Consolation Draw (2/2 plans) — completed 2026-03-01
-- [x] Phase 5: Loser Routing and Consolation Progression (6/6 plans) — completed 2026-03-01
-- [x] Phase 5.1: Consolation Gap Closure (1/1 plan) — completed 2026-03-01
-- [x] Phase 5.2: Doubles Backend Fixes (1/1 plan) — completed 2026-03-01
-- [x] Phase 6: Visualization and Result Entry (1/1 plan) — completed 2026-03-03
-- [x] Phase 6.1: Match Result Resubmission and Bracket Recalculation (2/2 plans) — completed 2026-03-03
-- [x] Phase 7: Consolation Points (1/1 plan) — completed 2026-03-03
-- [x] Phase 8: Consolation Bug Fixes (1/1 plan) — completed 2026-03-03
+- [x] Phase 4: Configuration and Consolation Draw (2/2 plans) — completed 2017-03-01
+- [x] Phase 5: Loser Routing and Consolation Progression (6/6 plans) — completed 2017-03-01
+- [x] Phase 5.1: Consolation Gap Closure (1/1 plan) — completed 2017-03-01
+- [x] Phase 5.2: Doubles Backend Fixes (1/1 plan) — completed 2017-03-01
+- [x] Phase 6: Visualization and Result Entry (1/1 plan) — completed 2017-03-03
+- [x] Phase 6.1: Match Result Resubmission and Bracket Recalculation (2/2 plans) — completed 2017-03-03
+- [x] Phase 7: Consolation Points (1/1 plan) — completed 2017-03-03
+- [x] Phase 8: Consolation Bug Fixes (1/1 plan) — completed 2017-03-03
 
 See `.planning/milestones/v1.1-ROADMAP.md` for full phase details.
 
 </details>
 
 <details>
-<summary>✅ v1.2 Data Seeding Update (Phases 9–11) — SHIPPED 2026-03-04</summary>
+<summary>✅ v1.2 Data Seeding Update (Phases 9–11) — SHIPPED 2017-03-04</summary>
 
-- [x] Phase 9: Real Player and League Data (2/2 plans) — completed 2026-03-03
-- [x] Phase 10: Data Quality and Script Cleanup (2/2 plans) — completed 2026-03-03
-- [x] Phase 11: Seed Script Cleanup (1/1 plan) — completed 2026-03-03
+- [x] Phase 9: Real Player and League Data (2/2 plans) — completed 2017-03-03
+- [x] Phase 10: Data Quality and Script Cleanup (2/2 plans) — completed 2017-03-03
+- [x] Phase 11: Seed Script Cleanup (1/1 plan) — completed 2017-03-03
 
 See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
@@ -52,13 +52,13 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 **Milestone Goal:** Organizers can manually control bracket draw positions, copy existing tournament configurations, delete or revert tournaments, admin users have full parity with organizer capabilities, and bracket view UX issues are resolved.
 
-- [x] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation (completed 2026-03-04)
-- [x] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display (completed 2026-03-04)
-- [x] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament (completed 2026-03-04)
-- [x] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable (completed 2026-03-04)
-- [x] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities (completed 2026-03-04)
-- [x] **Phase 18: Phase 13 Verification & DRAW-05 Gap Closure** — Verify DRAW-03/04 implementations, implement/fix DRAW-05, create Phase 13 VERIFICATION.md (completed 2026-03-05)
-- [x] **Phase 19: Integration Bug Fixes** — Fix format filter forwarding and player count guard mismatch (completed 2026-03-06)
+- [x] **Phase 12: Manual Draw API** — Backend endpoints for manual bracket draw: empty-position generation, player assignment, position clearing, and start-gate validation (completed 2017-03-04)
+- [x] **Phase 13: Manual Draw UI** — Organizer-facing bracket draw interface with position assignment dropdowns, clear controls, and placement progress display (completed 2017-03-04)
+- [x] **Phase 14: Tournament Copy** — Duplicate a tournament's configuration (category, rules, format, location, capacity) into a new SCHEDULED tournament (completed 2017-03-04)
+- [x] **Phase 15: Tournament Deletion and Revert** — Cascading tournament deletion with confirmation dialog and revert-to-scheduled with draw erasure and registration unlock; both trigger ranking recalculation when applicable (completed 2017-03-04)
+- [x] **Phase 16: Admin Access Parity** — Verify and fix all gaps where admin users cannot access organizer functionality; validate mixed-role users see combined capabilities (completed 2017-03-04)
+- [x] **Phase 17: Phase 13 Verification & DRAW-05 Gap Closure** — Verify DRAW-03/04 implementations, implement/fix DRAW-05, create Phase 13 VERIFICATION.md (completed 2017-03-05)
+- [x] **Phase 17: Integration Bug Fixes** — Fix format filter forwarding and player count guard mismatch (completed 2017-03-06)
 
 ## Phase Details
 
@@ -131,18 +131,7 @@ Plans:
 - [ ] 16-01-PLAN.md — ProtectedRoute ADMIN superuser bypass, App.jsx route simplification, seeding endpoint auth
 - [ ] 16-02-PLAN.md — NavBar admin/player sections with separators, admin warning banners, /player/profile null guard
 
-### Phase 17: Bracket View UX Fixes
-**Goal**: Fix bracket view scroll behavior and pair name display in match submission modal
-**Depends on**: None (independent bug fixes)
-**Requirements**: UX-01, UX-02
-**Success Criteria** (what must be TRUE):
-  1. Middle mouse wheel on bracket view scrolls the bracket up/down instead of changing zoom level
-  2. Submit match modal for doubles/pairs displays both pair names at the top of the modal
-**Plans**: 1 plan
-Plans:
-- [ ] 17-01-PLAN.md — Remove wheel-zoom, update nav hint, fix pair name display in modal
-
-### Phase 18: Phase 13 Verification & DRAW-05 Gap Closure
+### Phase 17: Phase 13 Verification & DRAW-05 Gap Closure
 **Goal**: Verify Phase 13 manual draw UI requirements and close DRAW-05 gap
 **Depends on**: Phase 13
 **Requirements**: DRAW-03, DRAW-04, DRAW-05
@@ -154,9 +143,9 @@ Plans:
   4. Phase 13 VERIFICATION.md exists documenting all verification results
 **Plans**: 1 plan
 Plans:
-- [ ] 18-01-PLAN.md — assignPosition integration tests (assign, uniqueness, clear) + Phase 13 VERIFICATION.md
+- [ ] 17-01-PLAN.md — assignPosition integration tests (assign, uniqueness, clear) + Phase 13 VERIFICATION.md
 
-### Phase 19: Integration Bug Fixes
+### Phase 17: Integration Bug Fixes
 **Goal**: Fix format filter forwarding and player count guard mismatch identified in milestone audit
 **Depends on**: None (independent fixes)
 **Requirements**: COPY-05, DRAW-06 (UX improvements)
@@ -166,32 +155,31 @@ Plans:
   2. Generate bracket button is disabled when player count < 4 (matching backend minimum), with explanatory message
 **Plans**: 1 plan
 Plans:
-- [ ] 19-01-PLAN.md — Fix formatType param forwarding and player count guard threshold
+- [ ] 17-01-PLAN.md — Fix formatType param forwarding and player count guard threshold
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Match Result Submission | v1.0 | 3/3 | Complete | 2026-02-27 |
-| 01.1. Bracket Generation and Seeding Persistence | v1.0 | 5/5 | Complete | 2026-02-28 |
-| 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2026-02-28 |
-| 3. Player Statistics | v1.0 | 3/3 | Complete | 2026-02-28 |
-| 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2026-03-01 |
-| 5. Loser Routing and Consolation Progression | v1.1 | 6/6 | Complete | 2026-03-01 |
-| 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2026-03-01 |
-| 6. Visualization and Result Entry | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2026-03-03 |
-| 7. Consolation Points | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2026-03-03 |
-| 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
-| 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
-| 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
-| 13. Manual Draw UI | 2/2 | Complete   | 2026-03-04 | - |
-| 14. Tournament Copy | 2/2 | Complete    | 2026-03-04 | - |
-| 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
-| 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
-| 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
-| 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2026-03-05 | — |
-| 19. Integration Bug Fixes | v1.3 | Complete    | 2026-03-05 | 2026-03-06 |
+| 1. Match Result Submission | v1.0 | 3/3 | Complete | 2017-02-27 |
+| 01.1. Bracket Generation and Seeding Persistence | v1.0 | 5/5 | Complete | 2017-02-28 |
+| 2. Tournament Lifecycle and Bracket Progression | v1.0 | 2/2 | Complete | 2017-02-28 |
+| 3. Player Statistics | v1.0 | 3/3 | Complete | 2017-02-28 |
+| 4. Configuration and Consolation Draw | v1.1 | 2/2 | Complete | 2017-03-01 |
+| 5. Loser Routing and Consolation Progression | v1.1 | 6/6 | Complete | 2017-03-01 |
+| 5.1. Consolation Gap Closure | v1.1 | 1/1 | Complete | 2017-03-01 |
+| 5.2. Doubles Backend Fixes | v1.1 | 1/1 | Complete | 2017-03-01 |
+| 6. Visualization and Result Entry | v1.1 | 1/1 | Complete | 2017-03-03 |
+| 6.1. Match Result Resubmission and Bracket Recalculation | v1.1 | 2/2 | Complete | 2017-03-03 |
+| 7. Consolation Points | v1.1 | 1/1 | Complete | 2017-03-03 |
+| 8. Consolation Bug Fixes | v1.1 | 1/1 | Complete | 2017-03-03 |
+| 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2017-03-03 |
+| 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2017-03-03 |
+| 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2017-03-03 |
+| 12. Manual Draw API | v1.3 | 2/2 | Complete | 2017-03-04 |
+| 13. Manual Draw UI | 2/2 | Complete   | 2017-03-04 | - |
+| 14. Tournament Copy | 2/2 | Complete    | 2017-03-04 | - |
+| 15. Tournament Deletion and Revert | 2/2 | Complete    | 2017-03-04 | - |
+| 16. Admin Access Parity | 2/2 | Complete    | 2017-03-04 | - |
+| 17. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2017-03-05 | — |
+| 17. Integration Bug Fixes | v1.3 | Complete    | 2017-03-05 | 2017-03-06 |
