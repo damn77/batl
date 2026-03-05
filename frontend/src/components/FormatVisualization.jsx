@@ -143,7 +143,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                 )}
 
                 {formatType === 'KNOCKOUT' && (
-                  <div className="d-flex flex-column gap-4">
+                  <div className="d-flex flex-column">
                     {isOrganizerOrAdmin && (tournament.status === 'SCHEDULED' || (tournament.status === 'IN_PROGRESS' && !(structure?.brackets?.length > 0))) ? (
                       /* Organizer/Admin SCHEDULED or IN_PROGRESS-without-bracket: full draw workflow */
                       <BracketGenerationSection
@@ -179,10 +179,13 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                         })}
                         {sortedBrackets.length > 1 && (
                           <Tab.Container defaultActiveKey={sortedBrackets[0].id}>
-                            <Nav variant="tabs" className="mb-3">
+                            <Nav variant="tabs">
                               {sortedBrackets.map(bracket => (
                                 <Nav.Item key={bracket.id}>
-                                  <Nav.Link eventKey={bracket.id}>
+                                  <Nav.Link
+                                    eventKey={bracket.id}
+                                    style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0' } : undefined}
+                                  >
                                     {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
                                   </Nav.Link>
                                 </Nav.Item>
@@ -192,7 +195,11 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                               {sortedBrackets.map(bracket => {
                                 const bracketRounds = structure.rounds?.filter(r => r.bracketId === bracket.id) || [];
                                 return (
-                                  <Tab.Pane key={bracket.id} eventKey={bracket.id}>
+                                  <Tab.Pane
+                                    key={bracket.id}
+                                    eventKey={bracket.id}
+                                    style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0', margin: '-1rem', marginTop: 0, padding: '1rem', paddingTop: '1rem' } : { paddingTop: '1rem' }}
+                                  >
                                     <KnockoutBracket
                                       tournamentId={tournament.id}
                                       bracket={bracket}

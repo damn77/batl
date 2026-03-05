@@ -236,8 +236,10 @@ const KnockoutBracket = ({
   };
 
   // Wrapper classes
+  const isConsolation = bracket?.bracketType === 'CONSOLATION';
   const wrapperClasses = [
     'knockout-bracket',
+    isConsolation && 'bracket-consolation',
     className
   ].filter(Boolean).join(' ');
 

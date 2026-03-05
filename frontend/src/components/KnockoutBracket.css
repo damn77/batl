@@ -621,6 +621,19 @@
   }
 }
 
+/* Consolation bracket visual distinction */
+.knockout-bracket.bracket-consolation {
+  background-color: #fff8f0;
+}
+
+.knockout-bracket.bracket-consolation .bracket-controls-wrapper {
+  background: rgba(255, 248, 240, 0.95);
+}
+
+.knockout-bracket.bracket-consolation .bracket-match:not(.empty) {
+  border-left: 3px solid #f0ad4e;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .bracket-match {

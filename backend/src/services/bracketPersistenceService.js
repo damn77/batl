@@ -768,11 +768,11 @@ export async function assignPosition(tournamentId, assignment) {
  * Business rules (DRAW-06, DRAW-07):
  *   - Tournament must exist → TOURNAMENT_NOT_FOUND
  *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED
- *   - None of the targeted matches may be BYE matches → BYE_SLOT_NOT_SWAPPABLE
+ *   - BYE matches only allow player1 (auto-advance) slot swaps → BYE_SLOT_NOT_SWAPPABLE
  *   - All updates happen in a single transaction (no partial updates on failure)
  *
  * @param {string} tournamentId - Tournament primary key
- * @param {Array<{matchId: string, field: 'player1Id'|'player2Id', newPlayerId: string}>} swaps
+ * @param {Array<{matchId: string, field: 'player1Id'|'player2Id'|'pair1Id'|'pair2Id', newPlayerId: string}>} swaps
  * @returns {Promise<{swapped: number}>} Number of swaps applied
  * @throws {Error} TOURNAMENT_NOT_FOUND | BRACKET_LOCKED | BYE_SLOT_NOT_SWAPPABLE
  */
@@ -800,24 +800,75 @@ export async function swapSlots(tournamentId, swaps) {
     where: { id: { in: matchIds } }
   });
 
-  // Step 3: Guard — no BYE matches allowed (DRAW-07)
-  const byeMatch = matches.find((m) => m.isBye);
-  if (byeMatch) {
+  // Step 3: Guard — BYE matches only allow player1 (auto-advancing slot) swaps (DRAW-07)
+  const byeMatchIds = new Set(matches.filter((m) => m.isBye).map((m) => m.id));
+  const blockedSwap = swaps.find(
+    (s) => byeMatchIds.has(s.matchId) && (s.field === 'player2Id' || s.field === 'pair2Id')
+  );
+  if (blockedSwap) {
     throw makeError(
       'BYE_SLOT_NOT_SWAPPABLE',
-      `Match ${byeMatch.id} is a BYE match and cannot have slots swapped`
+      `Match ${blockedSwap.matchId} is a BYE match — only the player1 (auto-advance) slot can be changed`
     );
   }
 
   // Step 4: Atomically apply all swaps in a single transaction (DRAW-06)
+  let totalSwaps = swaps.length;
   await prisma.$transaction(async (tx) => {
     for (const swap of swaps) {
       await tx.match.update({
         where: { id: swap.matchId },
         data: { [swap.field]: swap.newPlayerId }
       });
+
+      // Step 5: Cascade BYE auto-advancement to the next round
+      // When a BYE match's player1/pair1 is changed, the winner (who auto-advances)
+      // must be updated in the corresponding next-round match slot.
+      const match = matches.find((m) => m.id === swap.matchId);
+      if (match?.isBye && (swap.field === 'player1Id' || swap.field === 'pair1Id')) {
+        // Find this match's round to locate the next round
+        const round = await tx.round.findUnique({ where: { id: match.roundId } });
+        if (!round) continue;
+
+        const nextRound = await tx.round.findFirst({
+          where: { bracketId: round.bracketId, roundNumber: round.roundNumber + 1 }
+        });
+        if (!nextRound) continue;
+
+        // Determine position: match's index in its round → next round slot
+        const currentRoundMatches = await tx.match.findMany({
+          where: { roundId: round.id },
+          orderBy: { matchNumber: 'asc' },
+          select: { id: true }
+        });
+        const posInRound = currentRoundMatches.findIndex((m) => m.id === match.id);
+        if (posInRound < 0) continue;
+
+        const nextPosInRound = Math.floor(posInRound / 2);
+        const isTopSlot = posInRound % 2 === 0; // even → player1/pair1, odd → player2/pair2
+
+        const nextRoundMatches = await tx.match.findMany({
+          where: { roundId: nextRound.id },
+          orderBy: { matchNumber: 'asc' },
+          select: { id: true }
+        });
+        const nextMatch = nextRoundMatches[nextPosInRound];
+        if (!nextMatch) continue;
+
+        // Update the correct slot in the next round match
+        const isPair = swap.field === 'pair1Id';
+        const nextSlotField = isPair
+          ? (isTopSlot ? 'pair1Id' : 'pair2Id')
+          : (isTopSlot ? 'player1Id' : 'player2Id');
+
+        await tx.match.update({
+          where: { id: nextMatch.id },
+          data: { [nextSlotField]: swap.newPlayerId }
+        });
+        totalSwaps++;
+      }
     }
   });
 
-  return { swapped: swaps.length };
+  return { swapped: totalSwaps };
 }

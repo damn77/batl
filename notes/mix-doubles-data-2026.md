@@ -35,7 +35,7 @@
 - Kika Gardonova
 - Zuzka Oravkinova
 - Lenka Cubonova
-- Denisa Futurova
+- Denisa Faturova
 - Hela Motlova
 - Danka Peskova
 
@@ -58,6 +58,6 @@ Some players are part of multiple pairs.
 - Fatura V. Faturova D. 
 - Koco V. • Motlova H. 
 - Parak R. Kleinova D.
-- Pesko M. - Peširová D.
-- Pretrech M. - Sojkova D.
+- Pesko M. - Peskova D.
+- Petrech M. - Sojkova D.
 

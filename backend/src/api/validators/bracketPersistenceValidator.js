@@ -40,7 +40,7 @@ export const swapSlotsSchema = Joi.object({
   swaps: Joi.array().items(
     Joi.object({
       matchId: Joi.string().uuid().required(),
-      field: Joi.string().valid('player1Id', 'player2Id').required(),
+      field: Joi.string().valid('player1Id', 'player2Id', 'pair1Id', 'pair2Id').required(),
       newPlayerId: Joi.string().uuid().allow(null).required()
     })
   ).min(1).required()
