@@ -149,6 +149,56 @@
 
 ---
 
+## Milestone: v1.3 — Manual Draw & QoL
+
+**Shipped:** 2026-03-06
+**Phases:** 7 | **Plans:** 12 | **Timeline:** 2 days (2026-03-04 → 2026-03-06)
+
+### What Was Built
+
+- Manual bracket draw with empty-position generation, player assignment dropdowns, and start-gate validation
+- Tournament copy — one-click configuration duplication into new SCHEDULED tournament
+- Tournament deletion with cascading cleanup (registrations, draw, results) and ranking recalculation
+- Revert-to-SCHEDULED for IN_PROGRESS tournaments (erase draw, unlock registration)
+- ADMIN superuser bypass in ProtectedRoute for full organizer parity
+- Integration fixes: format filter forwarding and player count guard alignment
+
+### What Worked
+
+- **Parallel phase execution**: Phases 14 (Copy) and 15 (Delete/Revert) were independent and could be planned/executed without blocking each other
+- **Single milestone audit**: 1 audit with `tech_debt` status — identified 1 medium dead code issue and 2 integration gaps (COPY-05, DRAW-06), both fixed in gap closure phases
+- **Immediate-save pattern for manual draw**: Each dropdown selection calls API directly instead of batching — matches the single-position API design and avoids client-side state complexity
+- **ADMIN early-exit pattern**: Single check at ProtectedRoute level grants all organizer routes without modifying each page's authorization logic
+- **Three-dot dropdown consolidation**: Replacing multiple inline buttons with an action dropdown scaled cleanly across Copy, Delete, and Revert actions
+
+### What Was Inefficient
+
+- **Dead code in BracketGenerationSection**: The `showRevertOnly` branch (lines 196-249) became unreachable because FormatVisualization bypasses BracketGenerationSection for IN_PROGRESS+hasBracket — accepted as tech debt rather than fixed
+- **Duplicate revertTournament in two services**: `tournamentService` and `tournamentViewService` both implement revert — each serves its own page context but could be consolidated
+- **Phase numbering confusion**: Two phases both numbered "17" in ROADMAP.md (bracket-view-ux-fixes was removed, then phase13-verification reused the number, then integration-bug-fixes also used 17) — disk directories diverged to 17 and 18
+
+### Patterns Established
+
+- **drawMode as String (not enum)**: Avoid Prisma enum migration for low-cardinality fields with only 2 values
+- **assignPosition inner async helper**: `getByeAdjacentRound2Update()` inside transaction closure for reuse across assign/clear/reassign steps
+- **registrationClosed as proxy for has-draw**: Tournament list page lacks structure data, so `registrationClosed` indicates draw existence for UI gating
+- **ADMIN superuser bypass pattern**: Check `user.role === 'ADMIN'` after `isAuthenticated` but before role-specific checks — single exit point, no per-route changes
+
+### Key Lessons
+
+1. **Phase numbering must be strictly monotonic** — reusing phase numbers (even after removal) creates confusion between ROADMAP, disk directories, and STATE tracking. Use the next available number.
+2. **Test CASL permissions with superuser early** — ADMIN access gaps weren't caught until Phase 16 because earlier phases tested only ORGANIZER. Include ADMIN in E2E test matrix from Phase 12.
+3. **Dead code from conditional UI paths is hard to detect** — the BracketGenerationSection revert branch looked correct in isolation but was unreachable due to parent component routing. Integration-level testing (not unit) catches this.
+4. **Audit-driven gap closure is converging** — v1.0 had no audits, v1.1 had 5, v1.2 had 1, v1.3 had 1. Planning quality is improving.
+
+### Cost Observations
+
+- Model: mixed opus/sonnet
+- Sessions: ~4 sessions across 2 days
+- Notable: Fastest multi-feature milestone (7 phases in 2 days) — well-understood codebase patterns from v1.0–v1.2 reduced exploration time
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Phases | Plans | Timeline | Notes |
@@ -156,3 +206,4 @@
 | v1.0 Tournament Core | 4 | 13 | 3 days | First milestone; full knockout execution loop |
 | v1.1 Consolation Brackets | 8 | 15 | 4 days | 5 audit iterations; doubles integration hardening |
 | v1.2 Data Seeding Update | 3 | 5 | 1 day | Data-only; 1 audit, 1 gap closure phase |
+| v1.3 Manual Draw & QoL | 7 | 12 | 2 days | Multi-feature QoL; 1 audit, 2 gap closure phases |

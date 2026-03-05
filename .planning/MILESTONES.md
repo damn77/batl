@@ -1,5 +1,27 @@
 # Milestones
 
+## v1.3 Manual Draw & QoL (Shipped: 2026-03-06)
+
+**Phases completed:** 7 phases, 12 plans
+**Timeline:** 2 days (2026-03-04 → 2026-03-06)
+**Files changed:** 29 files, ~2,040 lines added
+**Commits:** 24
+
+**Delivered:** Manual bracket draw for organizer-controlled player placement, tournament copy/delete/revert lifecycle actions, admin access parity with organizer role, and integration bug fixes for format filtering and player count guards.
+
+**Key accomplishments:**
+- Manual bracket draw — empty bracket generation with position-by-position player assignment via dropdowns and start-gate validation
+- Tournament copy — one-click duplication of tournament config (category, rules, format, location, capacity) into new SCHEDULED tournament
+- Tournament deletion with cascading cleanup (registrations, draw, results) and ranking recalculation for completed tournaments
+- Revert-to-SCHEDULED for IN_PROGRESS tournaments — erases draw, unlocks registration
+- ADMIN superuser bypass in ProtectedRoute for full organizer functionality parity
+- Integration fixes: format filter forwarding (COPY-05) and player count guard alignment (DRAW-06)
+
+**Requirements:** 24/24 v1.3 requirements complete (DRAW-01–06, COPY-01–05, DEL-01–05, REVERT-01–04, ADMIN-01–02, UX-01–02)
+**Audit:** tech_debt — 1 dead code issue accepted (BracketGenerationSection revert branch unreachable)
+
+---
+
 ## v1.2 Data Seeding Update (Shipped: 2026-03-04)
 
 **Phases completed:** 3 phases, 5 plans, 4 tasks

@@ -4,7 +4,7 @@
 
 BATL is a web application for managing amateur tennis league tournaments end-to-end. Organizers create and run tournaments (registration, seeded draws, results), and players self-report match results, view their standings, and track their match history — replacing the WhatsApp groups and spreadsheets that amateur leagues currently depend on.
 
-The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee), ensuring every player gets at least 2 real matches with automated loser routing, bracket progression, and consolation point awards.
+The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee), ensuring every player gets at least 2 real matches with automated loser routing, bracket progression, and consolation point awards. As of v1.3, organizers can also manually assign players to bracket positions, copy tournament configurations, delete/revert tournaments, and admin users have full organizer parity.
 
 ## Core Value
 
@@ -60,15 +60,18 @@ A complete tournament runs from registration to final standings without the orga
 - ✓ Realistic ranking data with varied point values and tournament counts — v1.2 (DATA-01, DATA-02)
 - ✓ Seed scripts consolidated and referencing real players — v1.2 (SCRP-01, SCRP-02, SCRP-03)
 
-### Active
-
 <!-- v1.3: Manual Draw & QoL -->
 
-- [ ] Manual bracket draw — organizer manually assigns players to bracket positions
-- [ ] Copy tournament — duplicate config/rules from existing tournament
-- [ ] Delete tournament — cascading deletion with ranking recalculation
-- [ ] Admin access parity — verify admin can do everything organizer can
-- [ ] Revert tournament to scheduled — reset state, unlock registration, delete draw
+- ✓ Manual bracket draw with position-by-position player assignment — v1.3 (DRAW-01–06)
+- ✓ Tournament copy (duplicate config/rules into new SCHEDULED tournament) — v1.3 (COPY-01–05)
+- ✓ Tournament deletion with cascading cleanup and ranking recalculation — v1.3 (DEL-01–05)
+- ✓ Revert tournament to SCHEDULED (erase draw, unlock registration) — v1.3 (REVERT-01–04)
+- ✓ Admin access parity with organizer role — v1.3 (ADMIN-01–02)
+- ✓ Bracket view UX fixes (scroll behavior, doubles modal) — v1.3 (UX-01–02)
+
+### Active
+
+(None yet — define in next milestone)
 
 ### Future (v1.3+)
 
@@ -98,7 +101,8 @@ A complete tournament runs from registration to final standings without the orga
 - **v1.0 shipped 2026-02-28** — full knockout tournament execution loop functional end-to-end
 - **v1.1 shipped 2026-03-03** — consolation brackets with MATCH_2 guarantee, loser routing, opt-out, result entry, cascade recalculation, and consolation point awards
 - **v1.2 shipped 2026-03-04** — real league data seeding with 34 players, 18 mixed doubles pairs, realistic rankings, all scripts referencing real players and ProSet
-- **15 features delivered** (001–011 + v1.0–v1.2 milestone phases); ~41,700 LOC; architecture is stable and well-tested
+- **v1.3 shipped 2026-03-06** — manual bracket draw, tournament copy/delete/revert, admin access parity, integration fixes
+- **15 features delivered** (001–011 + v1.0–v1.3 milestone phases); ~43,500 LOC; architecture is stable and well-tested
 - Organizer and player roles are both active users of the app; admin manages configuration
 - Scoring is format-dependent: sets (e.g. 6:4, 7:5), match-level (e.g. 7:5), or tiebreak-only depending on tournament rules
 - Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — targeted for v1.2+
@@ -133,17 +137,17 @@ A complete tournament runs from registration to final standings without the orga
 | Player data extracted to separate ES module (data/players.js) | Data vs logic separation for seed scripts | ✓ Good — 3 scripts import from single source of truth |
 | Email-based player lookup in test seeds | Deterministic references instead of alphabetical findMany | ✓ Good — guaranteed real named players in all seeds |
 | RANKING_PROFILES lookup array for mock data | Replaces linear formula with realistic varied values | ✓ Good — rankings page looks realistic |
+| drawMode stored as String (not enum) | Avoid Prisma enum migration for two values | ✓ Good — simpler schema evolution |
+| Manual draw uses immediate-save per dropdown | Each assignment calls API directly, consistent with single-position API design | ✓ Good — no batch complexity |
+| ADMIN superuser bypass in ProtectedRoute | Single early-exit grants all organizer access | ✓ Good — clean RBAC model |
+| recalculateRankings outside Prisma transaction | Uses its own Prisma client internally — wrapping causes connection conflicts | ✓ Good — avoids deadlock |
+| Three-dot dropdown for tournament actions | Replaces multiple inline buttons per row | ✓ Good — cleaner UI, scalable for more actions |
 
-## Current Milestone: v1.3 Manual Draw & QoL
+## Current State
 
-**Goal:** Add manual bracket draw for flexible tournament management and quality-of-life improvements for organizers.
+v1.3 shipped. All 4 milestones complete (v1.0–v1.3). 18 phases across 4 milestones. Full tournament lifecycle operational: registration → seeded/manual draw → bracket progression → results → rankings → consolation brackets.
 
-**Target features:**
-- Manual bracket draw (organizer assigns players to positions)
-- Copy tournament (prefill config/rules from existing)
-- Delete tournament (cascading delete with ranking recalculation)
-- Admin access parity (verify admin = organizer access)
-- Revert tournament to scheduled (reset state, unlock registration, delete draw)
+**Next milestone:** Not yet planned. Run `/gsd:new-milestone` to define v1.4 scope.
 
 ---
-*Last updated: 2026-03-04 after v1.3 milestone start*
+*Last updated: 2026-03-06 after v1.3 milestone*
