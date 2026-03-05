@@ -191,5 +191,5 @@ Plans:
 | 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
-| 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete   | 2026-03-05 | — |
+| 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2026-03-05 | — |
 | 19. Integration Bug Fixes | v1.3 | 0/0 | Pending | — |
