@@ -152,7 +152,9 @@ Plans:
   2. DRAW-04 verified: Position assignment dropdown shows only players/pairs not yet placed
   3. DRAW-05 implemented and verified: Organizer can clear a filled bracket position back to empty
   4. Phase 13 VERIFICATION.md exists documenting all verification results
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 18-01-PLAN.md — assignPosition integration tests (assign, uniqueness, clear) + Phase 13 VERIFICATION.md
 
 ### Phase 19: Integration Bug Fixes
 **Goal**: Fix format filter forwarding and player count guard mismatch identified in milestone audit
@@ -189,5 +191,5 @@ Plans:
 | 15. Tournament Deletion and Revert | 2/2 | Complete    | 2026-03-04 | - |
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
-| 18. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 0/0 | Pending | — |
+| 18. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 0/1 | Pending | — |
 | 19. Integration Bug Fixes | v1.3 | 0/0 | Pending | — |
