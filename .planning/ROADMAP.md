@@ -164,7 +164,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Format filter dropdown on TournamentSetupPage filters tournaments by format type (frontend service forwards param, backend schema allows it)
   2. Generate bracket button is disabled when player count < 4 (matching backend minimum), with explanatory message
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 19-01-PLAN.md — Fix formatType param forwarding and player count guard threshold
 
 ## Progress
 
@@ -192,4 +194,4 @@ Plans:
 | 16. Admin Access Parity | 2/2 | Complete    | 2026-03-04 | - |
 | 17. Bracket View UX Fixes | 1/1 | Complete    | 2026-03-04 | - |
 | 18. Phase 13 Verification & DRAW-05 Gap Closure | 1/1 | Complete    | 2026-03-05 | — |
-| 19. Integration Bug Fixes | v1.3 | 0/0 | Pending | — |
+| 19. Integration Bug Fixes | v1.3 | 0/1 | Pending | — |
