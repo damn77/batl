@@ -176,7 +176,7 @@ Plans:
 | 17. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 1/1 | Complete | 2026-03-05 |
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
-| 21. Navigation Fix | 1/1 | Complete   | 2026-03-06 | - |
+| 21. Navigation Fix | 1/1 | Complete    | 2026-03-06 | - |
 | 22. Tournament View Layout | v1.4 | 0/TBD | Not started | - |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
