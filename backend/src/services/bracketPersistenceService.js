@@ -353,7 +353,9 @@ export async function generateBracket(tournamentId, options = {}) {
               pair1Id: isManual ? null : (pos1?.entityId || null),
               pair2Id: isManual ? null : (pos2?.entityId || null),
               player1Id: null,
-              player2Id: null
+              player2Id: null,
+              pair1Seed: isManual ? null : (pos1?.seed || null),
+              pair2Seed: isManual ? null : (pos2?.seed || null)
             };
           } else {
             matchData = {
@@ -366,7 +368,9 @@ export async function generateBracket(tournamentId, options = {}) {
               // Manual mode: all player slots null (organizer places manually)
               // Seeded mode: BYE matches have player in slot 1, BYE slot null
               player1Id: isManual ? null : (pos1?.entityId || null),
-              player2Id: isManual ? null : (pos2?.entityId || null)
+              player2Id: isManual ? null : (pos2?.entityId || null),
+              player1Seed: isManual ? null : (pos1?.seed || null),
+              player2Seed: isManual ? null : (pos2?.seed || null)
             };
           }
 
@@ -378,7 +382,8 @@ export async function generateBracket(tournamentId, options = {}) {
             byeInfo.push({
               posInRound: i,
               playerId: categoryType !== 'DOUBLES' ? (pos1?.entityId || null) : null,
-              pairId: categoryType === 'DOUBLES' ? (pos1?.entityId || null) : null
+              pairId: categoryType === 'DOUBLES' ? (pos1?.entityId || null) : null,
+              seed: pos1?.seed || null
             });
           }
         }
@@ -416,11 +421,11 @@ export async function generateBracket(tournamentId, options = {}) {
 
       const updateData = {};
       if (categoryType === 'DOUBLES') {
-        if (isPlayer1Slot) updateData.pair1Id = bye.pairId;
-        else updateData.pair2Id = bye.pairId;
+        if (isPlayer1Slot) { updateData.pair1Id = bye.pairId; updateData.pair1Seed = bye.seed; }
+        else { updateData.pair2Id = bye.pairId; updateData.pair2Seed = bye.seed; }
       } else {
-        if (isPlayer1Slot) updateData.player1Id = bye.playerId;
-        else updateData.player2Id = bye.playerId;
+        if (isPlayer1Slot) { updateData.player1Id = bye.playerId; updateData.player1Seed = bye.seed; }
+        else { updateData.player2Id = bye.playerId; updateData.player2Seed = bye.seed; }
       }
       await tx.match.update({ where: { id: targetMatchId }, data: updateData });
     }

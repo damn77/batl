@@ -504,6 +504,10 @@ model Match {
   isBye              Boolean @default(false) // T011: Indicates if match is a first-round BYE
   pair1Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
   pair2Id            String? // Foreign key to DoublesPair (for doubles tournaments only) - 006-doubles-pairs
+  player1Seed        Int?    // Seed number for player/pair in slot 1 (null = unseeded or manual draw)
+  player2Seed        Int?    // Seed number for player/pair in slot 2 (null = unseeded or manual draw)
+  pair1Seed          Int?    // Seed number for pair in slot 1 (doubles only, null = unseeded or manual draw)
+  pair2Seed          Int?    // Seed number for pair in slot 2 (doubles only, null = unseeded or manual draw)
   status             MatchStatus @default(SCHEDULED)
   result             String? // JSON: Match result (scores, winner)
   ruleOverrides      String? // JSON: Match-specific rule overrides
