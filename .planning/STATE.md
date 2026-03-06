@@ -121,9 +121,10 @@ None.
 | 1 | Allow backdated tournament start dates with past-date warning banner | 2026-03-04 | 93ad06d | [1-allow-backdated-tournament-start-dates-w](./quick/1-allow-backdated-tournament-start-dates-w/) |
 | 2 | Fix FK constraint error on Match pair1Id for doubles draw generation | 2026-03-04 | dca5d38 | [2-fix-fk-constraint-error-on-match-pair1id](./quick/2-fix-fk-constraint-error-on-match-pair1id/) |
 | 3 | Visually identify seeded players in bracket view with [N] seed badges | 2026-03-06 | ded6412 | [3-visually-identify-seeded-players-in-brac](./quick/3-visually-identify-seeded-players-in-brac/) |
+| 4 | Fill Ranking/Seed/Bracket/Round columns in Registered Players list with real data | 2026-03-06 | 4c5caaf | [4-in-tournament-registered-players-list-th](./quick/4-in-tournament-registered-players-list-th/) |
 
 ## Session Continuity
 
 Last session: 2026-03-06T01:27:00.000Z
-Stopped at: Completed quick task 3 — seed number display in knockout bracket view
+Stopped at: Completed quick task 4 — enriched registration columns (ranking, seed, bracket, round)
 Resume file: None
