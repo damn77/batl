@@ -246,7 +246,12 @@ const BracketMatch = ({
               getPlayerName(match.player1, match.pair1, isDoubles)
             )
           )}
-          {(isBye ? byeActivePlayer : match.player1)?.seed && <span className="seed-badge">[{(isBye ? byeActivePlayer : match.player1).seed}]</span>}
+          {(() => {
+            const seed = isBye
+              ? (match.player1Seed || match.player2Seed || match.pair1Seed || match.pair2Seed)
+              : (isDoubles ? match.pair1Seed : match.player1Seed);
+            return seed ? <span className="seed-badge">[{seed}]</span> : null;
+          })()}
         </span>
         {topPlayerState === 'winner' && <span className="winner-icon" aria-label="Winner">&#127942;</span>}
       </div>
@@ -265,7 +270,9 @@ const BracketMatch = ({
             ) : (
               getPlayerName(match.player2, match.pair2, isDoubles)
             )}
-            {match.player2?.seed && <span className="seed-badge">[{match.player2.seed}]</span>}
+            {(isDoubles ? match.pair2Seed : match.player2Seed) != null && (isDoubles ? match.pair2Seed : match.player2Seed) !== 0 &&
+              <span className="seed-badge">[{isDoubles ? match.pair2Seed : match.player2Seed}]</span>
+            }
           </span>
           {bottomPlayerState === 'winner' && <span className="winner-icon" aria-label="Winner">&#127942;</span>}
         </div>
@@ -312,13 +319,11 @@ BracketMatch.propTypes = {
     matchNumber: PropTypes.number,
     player1: PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
-      seed: PropTypes.number
+      name: PropTypes.string
     }),
     player2: PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
-      seed: PropTypes.number
+      name: PropTypes.string
     }),
     pair1: PropTypes.shape({
       id: PropTypes.string,
@@ -332,6 +337,11 @@ BracketMatch.propTypes = {
       player1: PropTypes.object,
       player2: PropTypes.object
     }),
+    // Match-level seed fields (snapshot from draw generation time)
+    player1Seed: PropTypes.number,
+    player2Seed: PropTypes.number,
+    pair1Seed: PropTypes.number,
+    pair2Seed: PropTypes.number,
     matchResult: PropTypes.shape({
       winner: PropTypes.oneOf(['PLAYER1', 'PLAYER2']),
       sets: PropTypes.arrayOf(PropTypes.shape({

@@ -185,11 +185,38 @@ export async function generateBracket(tournamentId, options = {}) {
     actualSeed = null;
   } else {
     // Step 7 (seeded): Call seeding placement service to get seeded positions
-    const seedingResult = await generateSeededBracket(
-      tournament.categoryId,
-      playerCount,
-      randomSeed
-    );
+    let seedingResult;
+    try {
+      seedingResult = await generateSeededBracket(
+        tournament.categoryId,
+        playerCount,
+        randomSeed
+      );
+    } catch (seedingError) {
+      // Fallback: if seeding fails for any reason (no rankings, service error),
+      // create an empty bracket and let all players go through unseeded placement
+      const templateResult = await getBracketByPlayerCount(playerCount);
+      seedingResult = {
+        bracket: {
+          playerCount,
+          bracketSize: templateResult.bracketSize,
+          structure: (templateResult.structure || '').replace(/\s/g, ''),
+          seedCount: 0,
+          positions: Array.from({ length: templateResult.bracketSize }, (_, i) => ({
+            positionNumber: i + 1,
+            positionIndex: i,
+            seed: null,
+            entityId: null,
+            entityType: null,
+            entityName: null,
+            isBye: false,
+            isPreliminary: false
+          })),
+          randomSeed: randomSeed || null
+        },
+        seedingInfo: { seedCount: 0, note: 'Seeding unavailable, using random placement.' }
+      };
+    }
 
     // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
     // '0' means preliminary match. Length = bracketSize / 2.
@@ -326,7 +353,9 @@ export async function generateBracket(tournamentId, options = {}) {
               pair1Id: isManual ? null : (pos1?.entityId || null),
               pair2Id: isManual ? null : (pos2?.entityId || null),
               player1Id: null,
-              player2Id: null
+              player2Id: null,
+              pair1Seed: isManual ? null : (pos1?.seed || null),
+              pair2Seed: isManual ? null : (pos2?.seed || null)
             };
           } else {
             matchData = {
@@ -339,7 +368,9 @@ export async function generateBracket(tournamentId, options = {}) {
               // Manual mode: all player slots null (organizer places manually)
               // Seeded mode: BYE matches have player in slot 1, BYE slot null
               player1Id: isManual ? null : (pos1?.entityId || null),
-              player2Id: isManual ? null : (pos2?.entityId || null)
+              player2Id: isManual ? null : (pos2?.entityId || null),
+              player1Seed: isManual ? null : (pos1?.seed || null),
+              player2Seed: isManual ? null : (pos2?.seed || null)
             };
           }
 
@@ -351,7 +382,8 @@ export async function generateBracket(tournamentId, options = {}) {
             byeInfo.push({
               posInRound: i,
               playerId: categoryType !== 'DOUBLES' ? (pos1?.entityId || null) : null,
-              pairId: categoryType === 'DOUBLES' ? (pos1?.entityId || null) : null
+              pairId: categoryType === 'DOUBLES' ? (pos1?.entityId || null) : null,
+              seed: pos1?.seed || null
             });
           }
         }
@@ -389,11 +421,11 @@ export async function generateBracket(tournamentId, options = {}) {
 
       const updateData = {};
       if (categoryType === 'DOUBLES') {
-        if (isPlayer1Slot) updateData.pair1Id = bye.pairId;
-        else updateData.pair2Id = bye.pairId;
+        if (isPlayer1Slot) { updateData.pair1Id = bye.pairId; updateData.pair1Seed = bye.seed; }
+        else { updateData.pair2Id = bye.pairId; updateData.pair2Seed = bye.seed; }
       } else {
-        if (isPlayer1Slot) updateData.player1Id = bye.playerId;
-        else updateData.player2Id = bye.playerId;
+        if (isPlayer1Slot) { updateData.player1Id = bye.playerId; updateData.player1Seed = bye.seed; }
+        else { updateData.player2Id = bye.playerId; updateData.player2Seed = bye.seed; }
       }
       await tx.match.update({ where: { id: targetMatchId }, data: updateData });
     }

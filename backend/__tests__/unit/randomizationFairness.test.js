@@ -173,7 +173,7 @@ describe('Randomization Fairness (User Story 3)', () => {
       }));
 
       // Count occurrences of each seed in each quarter
-      // For 32-player bracket: free positions at indices 3, 11, 19, 27 (quarters 0, 1, 2, 3)
+      // For 32-player bracket: free positions at indices 7, 8, 23, 24 (quarters 0, 1, 2, 3)
       const quarterCounts = {
         5: [0, 0, 0, 0], // Seed 5 in quarters 0,1,2,3
         6: [0, 0, 0, 0],
@@ -232,7 +232,7 @@ describe('Randomization Fairness (User Story 3)', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
         const positions = placeEightSeeds(bracketSize, seeds, randomSeed);
-        const seed5To8Positions = [3, 11, 19, 27].map((idx) => ({
+        const seed5To8Positions = [7, 8, 23, 24].map((idx) => ({
           index: idx,
           seed: positions[idx].seed,
           entityId: positions[idx].entityId
@@ -262,7 +262,7 @@ describe('Randomization Fairness (User Story 4)', () => {
       }));
 
       // Count occurrences of each seed in each eighth
-      // For 64-player bracket: free positions at indices 3, 11, 19, 27, 35, 43, 51, 59
+      // For 64-player bracket: free positions at indices 7, 8, 23, 24, 39, 40, 55, 56
       const eighthCounts = {
         9: [0, 0, 0, 0, 0, 0, 0, 0], // Seed 9 in eighths 0-7
         10: [0, 0, 0, 0, 0, 0, 0, 0],
@@ -325,7 +325,7 @@ describe('Randomization Fairness (User Story 4)', () => {
       const results = [];
       for (let i = 0; i < 10; i++) {
         const positions = placeSixteenSeeds(bracketSize, seeds, randomSeed);
-        const seed9To16Positions = [3, 11, 19, 27, 35, 43, 51, 59].map((idx) => ({
+        const seed9To16Positions = [7, 8, 23, 24, 39, 40, 55, 56].map((idx) => ({
           index: idx,
           seed: positions[idx].seed,
           entityId: positions[idx].entityId

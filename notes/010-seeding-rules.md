@@ -10,8 +10,14 @@ Contains:
 - update of tests
 - update of DB seeding scripts for manual testing purposes(if needed)
 
-Doesn't contain:
-- UI or any graphical changes
+### Number of players to be seeded ###
+Number of seeded players depends on number of players participating in the bracket.
+Consolation tournaments are not seeded, players are placed based on position in main bracket.
+
+- 9 or less players - 2 seeded players
+- 10 to 19 players - 4 seeded players
+- 20 to 39 players - 8 seeded players
+- 40 or more players - 16 seeded players
 
 ### Seed position in bracket ###
 

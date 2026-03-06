@@ -269,17 +269,25 @@ export async function advanceBracketSlot(tx, updatedMatch, winnerId) {
 
   const winnerPairId = winnerIsPlayer1 ? updatedMatch.pair1Id : updatedMatch.pair2Id;
 
+  // Carry the winner's seed to the next round (snapshot from draw generation time)
+  const winnerSeed = winnerIsPlayer1 ? updatedMatch.player1Seed : updatedMatch.player2Seed;
+  const winnerPairSeed = winnerIsPlayer1 ? updatedMatch.pair1Seed : updatedMatch.pair2Seed;
+
   // Build update payload — doubles and singles are mutually exclusive:
   //   Doubles (winnerPairId set): write only pair slot; player slot stays null
   //   Singles (winnerPairId null): write only player slot; pair slot stays null
   // Writing winnerId (a pairId) into player1Id/player2Id would violate the PlayerProfile FK.
   let updateData;
   if (winnerPairId) {
-    // Doubles: advance the pair slot only
-    updateData = isOdd ? { pair1Id: winnerPairId } : { pair2Id: winnerPairId };
+    // Doubles: advance the pair slot only (carry seed too)
+    updateData = isOdd
+      ? { pair1Id: winnerPairId, pair1Seed: winnerPairSeed ?? null }
+      : { pair2Id: winnerPairId, pair2Seed: winnerPairSeed ?? null };
   } else {
-    // Singles: advance the player slot only
-    updateData = isOdd ? { player1Id: winnerId } : { player2Id: winnerId };
+    // Singles: advance the player slot only (carry seed too)
+    updateData = isOdd
+      ? { player1Id: winnerId, player1Seed: winnerSeed ?? null }
+      : { player2Id: winnerId, player2Seed: winnerSeed ?? null };
   }
 
   await tx.match.update({

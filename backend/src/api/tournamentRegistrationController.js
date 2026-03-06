@@ -6,6 +6,20 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
+ * Converts a round number to a display label (e.g. 'Final', 'SF', 'QF', 'R1')
+ * @param {number} roundNumber - 1-indexed round number
+ * @param {number} totalRounds - total number of rounds in the bracket
+ * @returns {string} round label
+ */
+function getRoundLabel(roundNumber, totalRounds) {
+  const diff = totalRounds - roundNumber;
+  if (diff === 0) return 'Final';
+  if (diff === 1) return 'SF';
+  if (diff === 2) return 'QF';
+  return `R${roundNumber}`;
+}
+
+/**
  * T018: POST /api/tournaments/:tournamentId/register
  * Register authenticated player for a tournament
  * Authorization: PLAYER or ORGANIZER
@@ -446,6 +460,69 @@ export async function getTournamentRegistrations(req, res, next) {
         orderBy: { registrationTimestamp: 'asc' }
       });
 
+      const pairIds = pairRegistrations.map(r => r.pair.id);
+      const currentYear = new Date().getFullYear();
+
+      // Enrich with ranking and bracket data in parallel
+      const [doublesRankingEntries, doublesMatches] = await Promise.all([
+        prisma.rankingEntry.findMany({
+          where: {
+            pairId: { in: pairIds },
+            ranking: {
+              categoryId: tournament.categoryId,
+              year: currentYear,
+              type: 'PAIR',
+              isArchived: false
+            }
+          },
+          select: { pairId: true, rank: true }
+        }),
+        prisma.match.findMany({
+          where: { tournamentId },
+          include: {
+            round: { select: { roundNumber: true } }
+          }
+        })
+      ]);
+
+      const rankByPairId = Object.fromEntries(
+        doublesRankingEntries.map(e => [e.pairId, e.rank])
+      );
+
+      // Build seed lookup: pair -> seed number
+      const seedByPairId = {};
+      for (const match of doublesMatches) {
+        if (match.pair1Id && match.pair1Seed != null) seedByPairId[match.pair1Id] = match.pair1Seed;
+        if (match.pair2Id && match.pair2Seed != null) seedByPairId[match.pair2Id] = match.pair2Seed;
+      }
+
+      // Build bracket position from round 1 matches (sorted by matchNumber)
+      const bracketPositionByPairId = {};
+      const round1DoubleMatches = doublesMatches
+        .filter(m => m.round?.roundNumber === 1)
+        .sort((a, b) => a.matchNumber - b.matchNumber);
+      let dPos = 1;
+      for (const match of round1DoubleMatches) {
+        if (match.pair1Id) bracketPositionByPairId[match.pair1Id] = dPos;
+        dPos++;
+        if (match.pair2Id) bracketPositionByPairId[match.pair2Id] = dPos;
+        dPos++;
+      }
+
+      // Build furthest round: max roundNumber per pair
+      const maxRoundByPairId = {};
+      for (const match of doublesMatches) {
+        if (!match.round) continue;
+        const rn = match.round.roundNumber;
+        if (match.pair1Id) maxRoundByPairId[match.pair1Id] = Math.max(maxRoundByPairId[match.pair1Id] || 0, rn);
+        if (match.pair2Id) maxRoundByPairId[match.pair2Id] = Math.max(maxRoundByPairId[match.pair2Id] || 0, rn);
+      }
+      const totalDoubleRounds = doublesMatches.reduce((max, m) => Math.max(max, m.round?.roundNumber || 0), 0);
+      const furthestRoundByPairId = {};
+      for (const [pairId, rn] of Object.entries(maxRoundByPairId)) {
+        furthestRoundByPairId[pairId] = getRoundLabel(rn, totalDoubleRounds);
+      }
+
       return res.status(200).json({
         success: true,
         data: {
@@ -456,6 +533,10 @@ export async function getTournamentRegistrations(req, res, next) {
             status: reg.status,
             registrationTimestamp: reg.registrationTimestamp,
             seedPosition: reg.seedPosition,
+            ranking: rankByPairId[reg.pair.id] || null,
+            seed: seedByPairId[reg.pair.id] != null ? seedByPairId[reg.pair.id] : null,
+            bracketPosition: bracketPositionByPairId[reg.pair.id] || null,
+            furthestRound: furthestRoundByPairId[reg.pair.id] || null,
             pair: {
               id: reg.pair.id,
               seedingScore: reg.pair.seedingScore,
@@ -480,6 +561,69 @@ export async function getTournamentRegistrations(req, res, next) {
       status
     );
 
+    const currentYear = new Date().getFullYear();
+    const playerIds = registrations.map(r => r.player.id);
+
+    // Enrich with ranking and bracket data in parallel
+    const [singlesRankingEntries, singlesMatches] = await Promise.all([
+      prisma.rankingEntry.findMany({
+        where: {
+          playerId: { in: playerIds },
+          ranking: {
+            categoryId: tournament.categoryId,
+            year: currentYear,
+            type: 'SINGLES',
+            isArchived: false
+          }
+        },
+        select: { playerId: true, rank: true }
+      }),
+      prisma.match.findMany({
+        where: { tournamentId },
+        include: {
+          round: { select: { roundNumber: true } }
+        }
+      })
+    ]);
+
+    const rankByPlayerId = Object.fromEntries(
+      singlesRankingEntries.map(e => [e.playerId, e.rank])
+    );
+
+    // Build seed lookup: player -> seed number
+    const seedByPlayerId = {};
+    for (const match of singlesMatches) {
+      if (match.player1Id && match.player1Seed != null) seedByPlayerId[match.player1Id] = match.player1Seed;
+      if (match.player2Id && match.player2Seed != null) seedByPlayerId[match.player2Id] = match.player2Seed;
+    }
+
+    // Build bracket position from round 1 matches (sorted by matchNumber)
+    const bracketPositionByPlayerId = {};
+    const round1Matches = singlesMatches
+      .filter(m => m.round?.roundNumber === 1)
+      .sort((a, b) => a.matchNumber - b.matchNumber);
+    let pos = 1;
+    for (const match of round1Matches) {
+      if (match.player1Id) bracketPositionByPlayerId[match.player1Id] = pos;
+      pos++;
+      if (match.player2Id) bracketPositionByPlayerId[match.player2Id] = pos;
+      pos++;
+    }
+
+    // Build furthest round: max roundNumber per player
+    const maxRoundByPlayerId = {};
+    for (const match of singlesMatches) {
+      if (!match.round) continue;
+      const rn = match.round.roundNumber;
+      if (match.player1Id) maxRoundByPlayerId[match.player1Id] = Math.max(maxRoundByPlayerId[match.player1Id] || 0, rn);
+      if (match.player2Id) maxRoundByPlayerId[match.player2Id] = Math.max(maxRoundByPlayerId[match.player2Id] || 0, rn);
+    }
+    const totalRounds = singlesMatches.reduce((max, m) => Math.max(max, m.round?.roundNumber || 0), 0);
+    const furthestRoundByPlayerId = {};
+    for (const [playerId, rn] of Object.entries(maxRoundByPlayerId)) {
+      furthestRoundByPlayerId[playerId] = getRoundLabel(rn, totalRounds);
+    }
+
     return res.status(200).json({
       success: true,
       data: {
@@ -492,8 +636,12 @@ export async function getTournamentRegistrations(req, res, next) {
           player: {
             id: reg.player.id,
             name: reg.player.name,
-            email: isPrivileged ? reg.player.email : undefined
-          }
+            email: isPrivileged ? reg.player.email : undefined,
+            ranking: rankByPlayerId[reg.player.id] || null
+          },
+          seed: seedByPlayerId[reg.player.id] != null ? seedByPlayerId[reg.player.id] : null,
+          bracketPosition: bracketPositionByPlayerId[reg.player.id] || null,
+          furthestRound: furthestRoundByPlayerId[reg.player.id] || null
         })),
         count: registrations.length
       }
