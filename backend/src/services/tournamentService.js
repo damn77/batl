@@ -8,6 +8,7 @@ import * as organizerService from './organizerService.js';
 import * as ruleComplexityService from './ruleComplexityService.js';
 import { getParticipantRange } from '../utils/participantRange.js';
 import { getPointTableForRange } from './pointTableService.js';
+import { recalculateRankings } from './rankingService.js';
 
 const prisma = new PrismaClient();
 
@@ -581,6 +582,7 @@ export async function getFormatStructure(id) {
           matchGuarantee: true,
           ruleOverrides: true,
           placementRange: true,
+          drawMode: true,
           _count: {
             select: { rounds: true }
           }
@@ -1115,29 +1117,266 @@ async function handleCapacityChange(tournamentId, newCapacity, categoryType) {
 
 
 /**
- * Delete tournament (only if status is SCHEDULED)
- * Cannot delete tournaments that are IN_PROGRESS or COMPLETED
+ * Delete tournament (any status)
+ * For COMPLETED tournaments: removes TournamentResults and triggers ranking recalculation
+ * For all statuses: Prisma cascade handles remaining children
+ *
+ * Requirements: DEL-01, DEL-02, DEL-05
  */
 export async function deleteTournament(id) {
   const tournament = await prisma.tournament.findUnique({
     where: { id },
-    select: { status: true }
+    select: { status: true, categoryId: true }
   });
 
   if (!tournament) {
     throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
   }
 
-  // T050: Only allow deletion if tournament hasn't started
-  if (tournament.status !== 'SCHEDULED') {
-    throw createHttpError(409, 'Cannot delete tournament that is IN_PROGRESS, COMPLETED, or CANCELLED', {
-      code: 'TOURNAMENT_STARTED',
-      currentStatus: tournament.status
+  // For COMPLETED tournaments: collect affected categoryIds, delete TournamentResults,
+  // then recalculate rankings. Done OUTSIDE transaction so recalculateRankings can use its own Prisma instance.
+  if (tournament.status === 'COMPLETED') {
+    const results = await prisma.tournamentResult.findMany({
+      where: { tournamentId: id },
+      include: {
+        rankingEntry: {
+          include: {
+            ranking: { select: { categoryId: true } }
+          }
+        }
+      }
+    });
+
+    // Collect unique categoryIds from affected ranking entries
+    const categoryIds = [...new Set(
+      results
+        .map(r => r.rankingEntry?.ranking?.categoryId)
+        .filter(Boolean)
+    )];
+
+    // Delete TournamentResults (point awards)
+    await prisma.tournamentResult.deleteMany({ where: { tournamentId: id } });
+
+    // Recalculate rankings for each affected category
+    for (const categoryId of categoryIds) {
+      await recalculateRankings(categoryId);
+    }
+  }
+
+  // Delete the tournament — Prisma cascade handles remaining children
+  await prisma.tournament.delete({ where: { id } });
+}
+
+/**
+ * Revert a tournament to SCHEDULED status
+ * Deletes the bracket, rounds, and matches; reopens registration
+ *
+ * Requirements: REVERT-01, REVERT-02, REVERT-03, REVERT-04
+ */
+export async function revertTournament(id) {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id },
+    select: { status: true, categoryId: true }
+  });
+
+  if (!tournament) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  // COMPLETED and CANCELLED cannot be reverted
+  if (tournament.status === 'COMPLETED') {
+    throw createHttpError(409, 'Completed tournaments can only be deleted, not reverted', {
+      code: 'REVERT_NOT_ALLOWED'
     });
   }
 
-  await prisma.tournament.delete({ where: { id } });
+  if (tournament.status === 'CANCELLED') {
+    throw createHttpError(409, 'Cancelled tournaments cannot be reverted', {
+      code: 'REVERT_NOT_ALLOWED'
+    });
+  }
+
+  // SCHEDULED with no draw cannot be reverted
+  if (tournament.status === 'SCHEDULED') {
+    const bracketCount = await prisma.bracket.count({ where: { tournamentId: id } });
+    if (bracketCount === 0) {
+      throw createHttpError(409, 'Tournament has no draw to revert', {
+        code: 'NO_DRAW_TO_REVERT'
+      });
+    }
+  }
+
+  // Delete draw data and reset to SCHEDULED inside a transaction
+  const updated = await prisma.$transaction(async (tx) => {
+    await tx.match.deleteMany({ where: { tournamentId: id } });
+    await tx.round.deleteMany({ where: { tournamentId: id } });
+    await tx.bracket.deleteMany({ where: { tournamentId: id } });
+    return tx.tournament.update({
+      where: { id },
+      data: { status: 'SCHEDULED', registrationClosed: false }
+    });
+  });
+
+  return updated;
 }
+/**
+ * Copy a tournament — creates a new SCHEDULED tournament pre-populated with the
+ * source tournament's configuration (category, format, scoring rules, location,
+ * capacity, and all auxiliary fields). No name, no dates, no registrations, no draw.
+ * TournamentPointConfig is cloned if the source has one.
+ *
+ * Phase 14: Tournament Copy
+ * Requirements: COPY-01, COPY-02, COPY-03, COPY-04
+ *
+ * @param {string} sourceId - ID of the tournament to copy
+ * @param {Object} overrides - Override fields from the request body (name, startDate, endDate, etc.)
+ * @param {string} userId - ID of the user performing the copy (becomes new tournament's organizer)
+ * @returns {Promise<Object>} { tournament, copiedFrom: { id, name } }
+ */
+export async function copyTournament(sourceId, overrides, userId) {
+  // Fetch source tournament with all needed relations
+  const source = await prisma.tournament.findUnique({
+    where: { id: sourceId },
+    include: {
+      pointConfig: true
+    }
+  });
+
+  if (!source) {
+    throw createHttpError(404, 'Tournament not found', { code: 'TOURNAMENT_NOT_FOUND' });
+  }
+
+  // Require name + startDate + endDate — these are non-nullable in the schema
+  const name = overrides.name;
+  const startDate = overrides.startDate;
+  const endDate = overrides.endDate;
+
+  if (!name || !startDate || !endDate) {
+    throw createHttpError(400, 'name, startDate, and endDate are required when copying a tournament', {
+      code: 'MISSING_REQUIRED_OVERRIDES'
+    });
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (end < start) {
+    throw createHttpError(400, 'End date must be after start date', {
+      code: 'INVALID_DATE_RANGE'
+    });
+  }
+
+  // Set organizer to the copying user
+  let organizerId = null;
+  if (userId) {
+    const organizer = await organizerService.findOrCreateOrganizer(userId);
+    organizerId = organizer.id;
+  }
+
+  // Resolve primary location — use override clubName if provided, otherwise keep source locationId
+  let locationId = source.locationId;
+  if (overrides.clubName !== undefined) {
+    if (overrides.clubName) {
+      const location = await locationService.findOrCreateLocation({
+        clubName: overrides.clubName,
+        address: overrides.address || null
+      });
+      locationId = location.id;
+    } else {
+      locationId = null;
+    }
+  }
+
+  // Build new tournament data — copy all config fields from source, apply overrides
+  const newTournamentData = {
+    name,
+    categoryId: source.categoryId,
+    description: overrides.description !== undefined ? (overrides.description || null) : (source.description || null),
+    locationId,
+    backupLocationId: source.backupLocationId,
+    courts: source.courts,
+    capacity: overrides.capacity !== undefined ? (overrides.capacity === null ? null : parseInt(overrides.capacity)) : source.capacity,
+    organizerId,
+    // Deputy organizer is NOT copied — the copying user is the new primary organizer
+    // and they can assign a deputy later
+    entryFee: source.entryFee,
+    rulesUrl: source.rulesUrl,
+    prizeDescription: source.prizeDescription,
+    minParticipants: source.minParticipants,
+    waitlistDisplayOrder: source.waitlistDisplayOrder,
+    formatType: source.formatType,
+    formatConfig: source.formatConfig,
+    defaultScoringRules: source.defaultScoringRules,
+    startDate: start,
+    endDate: end,
+    status: 'SCHEDULED',
+    registrationClosed: false
+    // registrationOpenDate and registrationCloseDate are NOT copied (dates must be set fresh)
+  };
+
+  // Use transaction to create tournament + optionally clone point config
+  const result = await prisma.$transaction(async (tx) => {
+    const newTournament = await tx.tournament.create({
+      data: newTournamentData,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            ageGroup: true,
+            gender: true
+          }
+        },
+        location: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        backupLocation: {
+          select: {
+            id: true,
+            clubName: true,
+            address: true
+          }
+        },
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+
+    // Clone TournamentPointConfig if source has one
+    let pointConfigCloned = false;
+    if (source.pointConfig) {
+      await tx.tournamentPointConfig.create({
+        data: {
+          tournamentId: newTournament.id,
+          calculationMethod: source.pointConfig.calculationMethod,
+          multiplicativeValue: source.pointConfig.multiplicativeValue,
+          doublePointsEnabled: source.pointConfig.doublePointsEnabled
+        }
+      });
+      pointConfigCloned = true;
+    }
+
+    return { newTournament, pointConfigCloned };
+  });
+
+  return {
+    tournament: result.newTournament,
+    copiedFrom: { id: source.id, name: source.name },
+    ...(result.pointConfigCloned && { pointConfigCloned: true })
+  };
+}
+
 /**
  * Get point preview for a tournament based on current registration count
  * @param {string} id - Tournament ID

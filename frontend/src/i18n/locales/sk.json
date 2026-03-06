@@ -75,7 +75,8 @@
     "edit": "Upraviť",
     "saveChanges": "Uložiť zmeny",
     "configureRules": "Konfigurovať pravidlá",
-    "recalcSeeding": "Prepočítať nasadenie"
+    "recalcSeeding": "Prepočítať nasadenie",
+    "copyTournament": "Kopírovať turnaj"
   },
   "filters": {
     "allCategories": "Všetky kategórie",
@@ -374,6 +375,9 @@
     "createTournament": {
       "title": "Vytvoriť turnaj"
     },
+    "copyTournament": {
+      "title": "Kopírovať turnaj"
+    },
     "editTournament": {
       "title": "Upraviť turnaj"
     },
@@ -482,7 +486,8 @@
     "matchRulesUpdated": "Pravidlá zápasu boli úspešne aktualizované!",
     "roundRulesUpdated": "Pravidlá kola boli úspešne aktualizované!",
     "seedingRecalculated": "Nasadenie prepočítané pre {{categoryName}}: {{pairsUpdated}} párov aktualizovaných",
-    "failedToRecalculateSeeding": "Nepodarilo sa prepočítať nasadenie"
+    "failedToRecalculateSeeding": "Nepodarilo sa prepočítať nasadenie",
+    "copyingFrom": "Kopírovanie z: {{name}}"
   },
   "badges": {
     "hasAccount": "Môže sa prihlásiť",

@@ -95,31 +95,6 @@ export function useBracketNavigation({
     setTranslateY(newTranslateY);
   }, [containerRef, scale]);
 
-  // Mouse wheel zoom handler (T023)
-  const handleWheel = useCallback((e) => {
-    e.preventDefault();
-
-    // Determine zoom direction
-    const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
-    const newScale = clampScale(scale + delta);
-
-    if (newScale !== scale && containerRef?.current) {
-      // Get mouse position relative to container
-      const rect = containerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      // Zoom toward mouse position
-      const scaleRatio = newScale / scale;
-      const newTranslateX = mouseX - (mouseX - translateX) * scaleRatio;
-      const newTranslateY = mouseY - (mouseY - translateY) * scaleRatio;
-
-      setScale(newScale);
-      setTranslateX(newTranslateX);
-      setTranslateY(newTranslateY);
-    }
-  }, [scale, translateX, translateY, zoomStep, clampScale, containerRef]);
-
   // Mouse drag handlers (T024)
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return; // Only left mouse button
@@ -238,7 +213,6 @@ export function useBracketNavigation({
     centerOnElement,
 
     // Event handlers
-    handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,

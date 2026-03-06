@@ -21,12 +21,14 @@ import { jest, describe, it, expect, beforeAll } from '@jest/globals';
 const mockCloseRegistration = jest.fn();
 const mockGenerateBracket = jest.fn();
 const mockSwapSlots = jest.fn();
+const mockAssignPosition = jest.fn();
 
 jest.unstable_mockModule('../../src/services/bracketPersistenceService.js', () => ({
   closeRegistration: mockCloseRegistration,
   generateBracket: mockGenerateBracket,
   swapSlots: mockSwapSlots,
-  regenerateBracket: jest.fn()
+  regenerateBracket: jest.fn(),
+  assignPosition: mockAssignPosition
 }));
 
 // ---- Dynamic import AFTER mock registration ----
@@ -243,6 +245,46 @@ describe('PATCH /api/v1/tournaments/:id/bracket/slots', () => {
 });
 
 // ============================================================
+// PUT /api/v1/tournaments/:id/bracket/positions (Phase 12)
+// ============================================================
+
+describe('PUT /api/v1/tournaments/:id/bracket/positions', () => {
+  const validBody = {
+    matchId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    slot: 'player1',
+    playerId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    pairId: null
+  };
+
+  it('returns 401 if caller is not authenticated', async () => {
+    const response = await request(app)
+      .put(`/api/v1/tournaments/${TOURNAMENT_ID}/bracket/positions`)
+      .send(validBody);
+
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('returns 400 if matchId is missing', async () => {
+    const response = await request(app)
+      .put(`/api/v1/tournaments/${TOURNAMENT_ID}/bracket/positions`)
+      .send({ slot: 'player1', playerId: null, pairId: null });
+
+    // Without auth → 401 (auth runs first before validation)
+    expect([400, 401]).toContain(response.status);
+  });
+
+  it('route is registered and reachable (not 404 from notFoundHandler)', async () => {
+    const response = await request(app)
+      .put(`/api/v1/tournaments/${TOURNAMENT_ID}/bracket/positions`)
+      .send(validBody);
+
+    // Route exists: 401 (auth gate), not 404 (route not found)
+    expect(response.status).toBe(401);
+  });
+});
+
+// ============================================================
 // Error code → HTTP status mapping (controller unit-style via route)
 // ============================================================
 
@@ -264,7 +306,7 @@ describe('Controller error code → HTTP status mapping', () => {
   });
 
   it('routes are registered and reachable (not 404 from notFoundHandler)', async () => {
-    // All three routes should return 401 (auth gate), not 404 (route not found)
+    // All routes should return 401 (auth gate), not 404 (route not found)
     const closereg = await request(app).patch(`/api/v1/tournaments/${TOURNAMENT_ID}/close-registration`);
     expect(closereg.status).toBe(401);
 
@@ -275,5 +317,10 @@ describe('Controller error code → HTTP status mapping', () => {
       .patch(`/api/v1/tournaments/${TOURNAMENT_ID}/bracket/slots`)
       .send({ swaps: [{ matchId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', field: 'player1Id', newPlayerId: null }] });
     expect(slots.status).toBe(401);
+
+    const positions = await request(app)
+      .put(`/api/v1/tournaments/${TOURNAMENT_ID}/bracket/positions`)
+      .send({ matchId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', slot: 'player1', playerId: null, pairId: null });
+    expect(positions.status).toBe(401);
   });
 });

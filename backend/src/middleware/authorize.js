@@ -18,14 +18,13 @@ export const defineAbilitiesFor = (user) => {
 
       case 'ORGANIZER':
         // Organizer permissions
-        can(['create', 'read', 'update'], 'Tournament');
+        can(['create', 'read', 'update', 'delete'], 'Tournament');
         can(['create', 'read', 'update'], 'Category'); // Category management
         can(['create', 'read', 'update'], 'Registration'); // Can register any player
         can('reactivate', 'Registration'); // Can reactivate registrations
         can('manage', 'PlayerProfile'); // Full access to player profiles
         can('read', 'User', { role: 'ORGANIZER' }); // Can view other organizers
         can('read', 'User', { role: 'PLAYER' });
-        cannot('delete', 'Tournament'); // Preserve data integrity
         cannot('delete', 'Category'); // Only ADMIN can delete categories
         break;
 

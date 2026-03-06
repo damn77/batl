@@ -25,6 +25,11 @@ const ProtectedRoute = ({ children, requiredRole = null, requiredRoles = [] }) =
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // ADMIN is superuser — bypasses all role-based route restrictions
+  if (user?.role === 'ADMIN') {
+    return children;
+  }
+
   // Check role requirements
   if (requiredRole && user?.role !== requiredRole) {
     // Redirect to appropriate dashboard based on user's actual role

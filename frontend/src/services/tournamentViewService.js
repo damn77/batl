@@ -220,11 +220,11 @@ export const useFormatStructure = (id, shouldFetch = false) => {
  * @param {boolean} shouldFetch - Only fetch when true
  * @returns {Object} { data, error, isLoading, mutate }
  */
-export const useMatches = (id, filters = {}, shouldFetch = false) => {
+export const useMatches = (id, filters = {}, shouldFetch = false, refreshKey = 0) => {
   const filterKey = JSON.stringify(filters);
 
   const { data, error, mutate } = useSWR(
-    id && shouldFetch ? `/tournaments/${id}/matches?${filterKey}` : null,
+    id && shouldFetch ? `/tournaments/${id}/matches?${filterKey}&_r=${refreshKey}` : null,
     () => getMatches(id, filters),
     {
       revalidateOnFocus: true,
@@ -239,6 +239,16 @@ export const useMatches = (id, filters = {}, shouldFetch = false) => {
     isError: error,
     mutate
   };
+};
+
+/**
+ * Revert a tournament to SCHEDULED — deletes draw and reopens registration (REVERT-01)
+ * @param {string} id - Tournament UUID
+ * @returns {Promise} Updated tournament
+ */
+export const revertTournament = async (id) => {
+  const response = await apiClient.post(`/v1/tournaments/${id}/revert`);
+  return response.data;
 };
 
 /**

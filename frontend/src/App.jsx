@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Alert } from 'react-bootstrap';
 import { AuthProvider, useAuth } from './utils/AuthContext';
 import { ModalProvider, useModal } from './utils/ModalContext';
+import { ToastProvider } from './utils/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -97,7 +99,7 @@ function AppContent() {
         <Route
           path="/organizer/players"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <OrganizerPlayersPage />
             </ProtectedRoute>
           }
@@ -105,7 +107,7 @@ function AppContent() {
         <Route
           path="/organizer/players/:id"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <PlayerDetailPage />
             </ProtectedRoute>
           }
@@ -113,7 +115,7 @@ function AppContent() {
         <Route
           path="/organizer/categories"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <CategoryManagementPage />
             </ProtectedRoute>
           }
@@ -121,7 +123,7 @@ function AppContent() {
         <Route
           path="/organizer/tournaments"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentSetupPage />
             </ProtectedRoute>
           }
@@ -129,7 +131,7 @@ function AppContent() {
         <Route
           path="/organizer/tournament/:id/rules"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentRulesSetupPage />
             </ProtectedRoute>
           }
@@ -137,7 +139,7 @@ function AppContent() {
         <Route
           path="/organizer/tournament/:id/points"
           element={
-            <ProtectedRoute requiredRoles={['ORGANIZER', 'ADMIN']}>
+            <ProtectedRoute requiredRole="ORGANIZER">
               <TournamentPointConfigPage />
             </ProtectedRoute>
           }
@@ -173,7 +175,15 @@ function AppContent() {
           path="/player/profile"
           element={
             <ProtectedRoute requiredRole="PLAYER">
-              <Navigate to={`/players/${user?.playerId}`} replace />
+              {user?.playerId ? (
+                <Navigate to={`/players/${user.playerId}`} replace />
+              ) : (
+                <div className="container mt-4">
+                  <Alert variant="warning">
+                    You are viewing as admin — no player profile linked. Visit the Players page to create or link a profile.
+                  </Alert>
+                </div>
+              )}
             </ProtectedRoute>
           }
         />
@@ -215,7 +225,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ModalProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </ModalProvider>
       </AuthProvider>
     </BrowserRouter>

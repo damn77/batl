@@ -334,6 +334,16 @@ const PairRegistrationPage = () => {
           </Col>
         </Row>
 
+        {user?.role === 'ADMIN' && !user?.playerId && (
+          <Row className="mt-3">
+            <Col>
+              <Alert variant="warning" className="mb-3">
+                You are viewing as admin — no player profile linked. Some player features may not work.
+              </Alert>
+            </Col>
+          </Row>
+        )}
+
         {loading && (
           <Row className="mt-3">
             <Col className="text-center">

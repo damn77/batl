@@ -5,6 +5,7 @@
 - ✅ **v1.0 Tournament Core** — Phases 1, 01.1, 2, 3 (shipped 2026-02-28)
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
 - ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
+- ✅ **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16, 17, 18 (shipped 2026-03-06)
 
 ## Phases
 
@@ -47,6 +48,21 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 
 </details>
 
+<details>
+<summary>✅ v1.3 Manual Draw & QoL (Phases 12–18) — SHIPPED 2026-03-06</summary>
+
+- [x] Phase 12: Manual Draw API (2/2 plans) — completed 2026-03-04
+- [x] Phase 13: Manual Draw UI (2/2 plans) — completed 2026-03-04
+- [x] Phase 14: Tournament Copy (2/2 plans) — completed 2026-03-04
+- [x] Phase 15: Tournament Deletion and Revert (2/2 plans) — completed 2026-03-04
+- [x] Phase 16: Admin Access Parity (2/2 plans) — completed 2026-03-04
+- [x] Phase 17: Phase 13 Verification & DRAW-05 Gap Closure (1/1 plan) — completed 2026-03-05
+- [x] Phase 18: Integration Bug Fixes (1/1 plan) — completed 2026-03-06
+
+See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -66,3 +82,10 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details.
 | 9. Real Player and League Data | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 10. Data Quality and Script Cleanup | v1.2 | 2/2 | Complete | 2026-03-03 |
 | 11. Seed Script Cleanup | v1.2 | 1/1 | Complete | 2026-03-03 |
+| 12. Manual Draw API | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 13. Manual Draw UI | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 14. Tournament Copy | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 15. Tournament Deletion and Revert | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 16. Admin Access Parity | v1.3 | 2/2 | Complete | 2026-03-04 |
+| 17. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 1/1 | Complete | 2026-03-05 |
+| 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |

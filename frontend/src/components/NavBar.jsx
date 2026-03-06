@@ -134,6 +134,50 @@ const NavBar = () => {
               </>
             )}
 
+            {/* Admin-Only Links — admin user management + player-facing pages */}
+            {user && user.role === 'ADMIN' && (
+              <>
+                <li className="navbar-text text-white-50 small px-2" style={{ opacity: 0.6 }}>|</li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/admin/users')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Users
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/admin/point-tables')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Point Tables
+                  </span>
+                </li>
+                <li className="navbar-text text-white-50 small px-2" style={{ opacity: 0.6 }}>|</li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/tournaments')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Registrations
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    onClick={() => navigate('/player/register')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {t('nav.categories')}
+                  </span>
+                </li>
+              </>
+            )}
+
             {/* Player Links */}
             {user && user.role === 'PLAYER' && (
               <>
@@ -143,7 +187,7 @@ const NavBar = () => {
                     onClick={() => navigate('/player/tournaments')}
                     style={{ cursor: 'pointer' }}
                   >
-                    {t('nav.tournaments')}
+                    Registrations
                   </span>
                 </li>
                 <li className="nav-item">

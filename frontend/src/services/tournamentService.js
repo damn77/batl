@@ -7,7 +7,7 @@ import apiClient from './apiClient';
 
 /**
  * Get all tournaments with optional filters
- * @param {Object} filters - Optional filters (categoryId, status, startDate, page, limit)
+ * @param {Object} filters - Optional filters (categoryId, status, formatType, startDate, page, limit)
  * @returns {Promise} List of tournaments with pagination
  */
 export const listTournaments = async (filters = {}) => {
@@ -15,6 +15,7 @@ export const listTournaments = async (filters = {}) => {
 
   if (filters.categoryId) params.append('categoryId', filters.categoryId);
   if (filters.status) params.append('status', filters.status);
+  if (filters.formatType) params.append('formatType', filters.formatType);
   if (filters.startDate) params.append('startDate', filters.startDate);
   if (filters.page) params.append('page', filters.page);
   if (filters.limit) params.append('limit', filters.limit);
@@ -131,6 +132,27 @@ export const calculateTournamentPoints = async (id, results) => {
 export const startTournament = async (id) => {
   const response = await apiClient.patch(`/v1/tournaments/${id}/start`);
   return response.data.data;
+};
+
+/**
+ * Copy a tournament — creates a new tournament from an existing one (COPY-01)
+ * @param {string} sourceId - Source tournament UUID
+ * @param {Object} overrides - Fields to override (name, description, startDate, endDate, capacity, clubName, address)
+ * @returns {Promise<{tournament: Object, copiedFrom: {id: string, name: string}}>}
+ */
+export const copyTournament = async (sourceId, overrides = {}) => {
+  const response = await apiClient.post(`/v1/tournaments/${sourceId}/copy`, overrides);
+  return response.data.data;
+};
+
+/**
+ * Revert a tournament to SCHEDULED — deletes draw and reopens registration (DEL-03)
+ * @param {string} id - Tournament UUID
+ * @returns {Promise} Updated tournament
+ */
+export const revertTournament = async (id) => {
+  const response = await apiClient.post(`/v1/tournaments/${id}/revert`);
+  return response.data;
 };
 
 // Point calculation methods

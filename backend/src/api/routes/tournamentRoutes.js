@@ -8,10 +8,12 @@ import {
   createTournament,
   updateTournament,
   deleteTournament,
+  revertTournament,
   getFormatStructure,
   getMatches,
   getTournamentPointPreview,
-  startTournament
+  startTournament,
+  copyTournament
 } from '../tournamentController.js';
 import { isAuthenticated } from '../../middleware/auth.js';
 import { authorize } from '../../middleware/authorize.js';
@@ -19,13 +21,16 @@ import { validateBody, validateQuery, schemas } from '../../middleware/validate.
 import {
   closeTournamentRegistration,
   generateTournamentBracket,
-  swapBracketSlots
+  swapBracketSlots,
+  assignBracketPosition
 } from '../bracketPersistenceController.js';
 import { recordConsolationOptOut } from '../consolationOptOutController.js';
 import {
   generateBracketSchema,
-  swapSlotsSchema
+  swapSlotsSchema,
+  assignPositionSchema
 } from '../validators/bracketPersistenceValidator.js';
+import { copyTournamentSchema } from '../validators/tournamentCopyValidator.js';
 
 const router = express.Router();
 
@@ -95,6 +100,21 @@ router.post(
 );
 
 /**
+ * POST /api/v1/tournaments/:id/copy
+ * Copy a tournament — creates a new SCHEDULED tournament with source config pre-filled.
+ * Authorization: ADMIN or ORGANIZER roles required
+ * Phase 14: Tournament Copy
+ * Note: Registered BEFORE the generic /:id routes to avoid path shadowing
+ */
+router.post(
+  '/:id/copy',
+  isAuthenticated,
+  authorize('create', 'Tournament'),
+  validateBody(copyTournamentSchema),
+  copyTournament
+);
+
+/**
  * PATCH /api/v1/tournaments/:id/start
  * Start a tournament — transitions SCHEDULED → IN_PROGRESS, closes registration
  * Authorization: ADMIN or ORGANIZER roles required (LIFE-01, LIFE-02)
@@ -105,6 +125,19 @@ router.patch(
   isAuthenticated,
   authorize('update', 'Tournament'),
   startTournament
+);
+
+/**
+ * POST /api/v1/tournaments/:id/revert
+ * Revert tournament to SCHEDULED — deletes draw data, reopens registration
+ * Authorization: ADMIN or ORGANIZER roles required (REVERT-01)
+ * Note: Registered BEFORE the generic /:id route to avoid path shadowing
+ */
+router.post(
+  '/:id/revert',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  revertTournament
 );
 
 /**
@@ -122,8 +155,8 @@ router.patch(
 
 /**
  * DELETE /api/v1/tournaments/:id
- * Delete tournament (only if status is SCHEDULED)
- * Authorization: ADMIN role required (T047)
+ * Delete tournament (any status; COMPLETED triggers ranking recalculation)
+ * Authorization: ADMIN or ORGANIZER roles required (DEL-01, DEL-05)
  */
 router.delete(
   '/:id',
@@ -346,6 +379,20 @@ router.patch(
   authorize('update', 'Tournament'),
   validateBody(swapSlotsSchema),
   swapBracketSlots
+);
+
+/**
+ * PUT /api/v1/tournaments/:id/bracket/positions
+ * Assign or clear a player/pair position in the bracket
+ * Authorization: ORGANIZER or ADMIN
+ * Phase 12: Manual Draw API
+ */
+router.put(
+  '/:id/bracket/positions',
+  isAuthenticated,
+  authorize('update', 'Tournament'),
+  validateBody(assignPositionSchema),
+  assignBracketPosition
 );
 
 // ============================================

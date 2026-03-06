@@ -5,6 +5,8 @@
 
 import express from 'express';
 import { generateBracket } from '../seedingController.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { authorize } from '../../middleware/authorize.js';
 
 const router = express.Router();
 
@@ -13,6 +15,6 @@ const router = express.Router();
  * Generate a seeded tournament bracket
  * Authorization: ORGANIZER or ADMIN role required
  */
-router.post('/generate-bracket', generateBracket);
+router.post('/generate-bracket', isAuthenticated, authorize('create', 'Tournament'), generateBracket);
 
 export default router;

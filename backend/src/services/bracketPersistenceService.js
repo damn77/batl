@@ -15,6 +15,7 @@
 import { PrismaClient } from '@prisma/client';
 import seedrandom from 'seedrandom';
 import { generateSeededBracket } from './seedingPlacementService.js';
+import { getBracketByPlayerCount } from './bracketService.js';
 
 const prisma = new PrismaClient();
 
@@ -85,11 +86,12 @@ export async function closeRegistration(tournamentId) {
  * @param {Object} [options={}] - Generation options
  * @param {string} [options.randomSeed] - Optional deterministic seed for reproducibility
  * @param {string} [options.doublesMethod='PAIR_SCORE'] - 'PAIR_SCORE' | 'AVERAGE_SCORE'
+ * @param {string} [options.mode='seeded'] - 'seeded' | 'manual'. Manual mode creates empty bracket (no auto-placement)
  * @returns {Promise<{bracket: Object, roundCount: number, matchCount: number}>}
  * @throws {Error} TOURNAMENT_NOT_FOUND | REGISTRATION_NOT_CLOSED | BRACKET_LOCKED | INSUFFICIENT_PLAYERS
  */
 export async function generateBracket(tournamentId, options = {}) {
-  const { randomSeed } = options;
+  const { randomSeed, mode = 'seeded' } = options;
 
   // Step 1: Load tournament with category info
   const tournament = await prisma.tournament.findUnique({
@@ -169,85 +171,100 @@ export async function generateBracket(tournamentId, options = {}) {
     );
   }
 
-  // Step 7: Call seeding placement service to get seeded positions
-  const seedingResult = await generateSeededBracket(
-    tournament.categoryId,
-    playerCount,
-    randomSeed
-  );
+  // --- MANUAL MODE: skip seeding, create empty bracket ---
+  // Step 7 (manual): Load bracket template to determine BYE positions from structure string
+  let positions, bracketSize, structure, actualSeed;
 
-  // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
-  // '0' means preliminary match. Length = bracketSize / 2.
-  const { positions, bracketSize, structure: rawStructure, randomSeed: actualSeed } =
-    seedingResult.bracket;
-  const structure = (rawStructure || '').replace(/\s/g, '');
+  if (mode === 'manual') {
+    const templateResult = await getBracketByPlayerCount(playerCount);
+    bracketSize = templateResult.bracketSize;
+    structure = (templateResult.structure || '').replace(/\s/g, '');
 
-  // Step 7b: Fill unseeded players into empty non-BYE match positions.
-  // generateSeededBracket only places seeds; remaining slots need real players.
-  const seededIds = new Set(positions.filter(p => p.entityId).map(p => p.entityId));
-  const unseeded = allEntities.filter(e => !seededIds.has(e.entityId));
+    // Build positions array: bracketSize slots, all null (no players placed yet)
+    positions = Array.from({ length: bracketSize }, () => ({ entityId: null }));
+    actualSeed = null;
+  } else {
+    // Step 7 (seeded): Call seeding placement service to get seeded positions
+    const seedingResult = await generateSeededBracket(
+      tournament.categoryId,
+      playerCount,
+      randomSeed
+    );
 
-  // Shuffle unseeded players deterministically using the same random seed
-  const rng = seedrandom(actualSeed || randomSeed || 'default');
-  for (let i = unseeded.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
-  }
+    // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
+    // '0' means preliminary match. Length = bracketSize / 2.
+    ({ positions, bracketSize, randomSeed: actualSeed } = seedingResult.bracket);
+    const rawStructure = seedingResult.bracket.structure;
+    structure = (rawStructure || '').replace(/\s/g, '');
 
-  // Normalize BYE matches: player always in the first (even) slot, BYE in the second (odd) slot.
-  // placeTwoSeeds places seed2 at the very last position (odd slot of the bottom BYE match),
-  // but the UI convention is player-first in every match. Move any entity sitting in an odd BYE
-  // slot to the even slot of the same match.
-  const totalMatches = bracketSize / 2;
-  for (let matchIdx = 0; matchIdx < totalMatches; matchIdx++) {
-    if (!structure || structure[matchIdx] !== '1') continue;
-    const evenIdx = matchIdx * 2;
-    const oddIdx = matchIdx * 2 + 1;
-    if (!positions[evenIdx].entityId && positions[oddIdx].entityId) {
-      positions[evenIdx].entityId = positions[oddIdx].entityId;
-      positions[oddIdx].entityId = null;
+    // Step 7b: Fill unseeded players into empty non-BYE match positions.
+    // generateSeededBracket only places seeds; remaining slots need real players.
+    const seededIds = new Set(positions.filter(p => p.entityId).map(p => p.entityId));
+    const unseeded = allEntities.filter(e => !seededIds.has(e.entityId));
+
+    // Shuffle unseeded players deterministically using the same random seed
+    const rng = seedrandom(actualSeed || randomSeed || 'default');
+    for (let i = unseeded.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [unseeded[i], unseeded[j]] = [unseeded[j], unseeded[i]];
     }
-  }
 
-  // BYE slot is always the second (odd) position in each BYE match.
-  const byeSlotIndices = new Set();
-  for (let matchIdx = 0; matchIdx < totalMatches; matchIdx++) {
-    if (!structure || structure[matchIdx] !== '1') continue;
-    byeSlotIndices.add(matchIdx * 2 + 1);
-  }
-
-  let unseededIdx = 0;
-  for (let posIdx = 0; posIdx < positions.length; posIdx++) {
-    if (positions[posIdx].entityId) continue;    // already has a seed or normalized seed
-    if (byeSlotIndices.has(posIdx)) continue;    // actual BYE slot — leave null
-    if (unseededIdx < unseeded.length) {
-      positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
+    // Normalize BYE matches: player always in the first (even) slot, BYE in the second (odd) slot.
+    // placeTwoSeeds places seed2 at the very last position (odd slot of the bottom BYE match),
+    // but the UI convention is player-first in every match. Move any entity sitting in an odd BYE
+    // slot to the even slot of the same match.
+    const totalMatchesSeeded = bracketSize / 2;
+    for (let matchIdx = 0; matchIdx < totalMatchesSeeded; matchIdx++) {
+      if (!structure || structure[matchIdx] !== '1') continue;
+      const evenIdx = matchIdx * 2;
+      const oddIdx = matchIdx * 2 + 1;
+      if (!positions[evenIdx].entityId && positions[oddIdx].entityId) {
+        positions[evenIdx].entityId = positions[oddIdx].entityId;
+        positions[oddIdx].entityId = null;
+      }
     }
-  }
 
-  // Step 7c: Defensive guard — validate entity IDs match expected table.
-  // For DOUBLES, all entityIds must be valid DoublesPair IDs.
-  // This prevents a raw FK constraint violation from reaching Prisma and provides
-  // a clear, actionable error message if the wrong ranking type was used for seeding.
-  if (categoryType === 'DOUBLES') {
-    const entityIds = positions
-      .map(p => p.entityId)
-      .filter(id => id != null);
-    if (entityIds.length > 0) {
-      const pairCount = await prisma.doublesPair.count({
-        where: { id: { in: entityIds } }
-      });
-      if (pairCount !== entityIds.length) {
-        throw makeError(
-          'INVALID_ENTITY_IDS',
-          `Seeding returned ${entityIds.length - pairCount} entity IDs that are not valid DoublesPair records. This typically means ranking entries of the wrong type (MEN/WOMEN instead of PAIR) were used for seeding.`
-        );
+    // BYE slot is always the second (odd) position in each BYE match.
+    const byeSlotIndices = new Set();
+    for (let matchIdx = 0; matchIdx < totalMatchesSeeded; matchIdx++) {
+      if (!structure || structure[matchIdx] !== '1') continue;
+      byeSlotIndices.add(matchIdx * 2 + 1);
+    }
+
+    let unseededIdx = 0;
+    for (let posIdx = 0; posIdx < positions.length; posIdx++) {
+      if (positions[posIdx].entityId) continue;    // already has a seed or normalized seed
+      if (byeSlotIndices.has(posIdx)) continue;    // actual BYE slot — leave null
+      if (unseededIdx < unseeded.length) {
+        positions[posIdx].entityId = unseeded[unseededIdx++].entityId;
+      }
+    }
+
+    // Step 7c: Defensive guard — validate entity IDs match expected table.
+    // For DOUBLES, all entityIds must be valid DoublesPair IDs.
+    // This prevents a raw FK constraint violation from reaching Prisma and provides
+    // a clear, actionable error message if the wrong ranking type was used for seeding.
+    if (categoryType === 'DOUBLES') {
+      const entityIds = positions
+        .map(p => p.entityId)
+        .filter(id => id != null);
+      if (entityIds.length > 0) {
+        const pairCount = await prisma.doublesPair.count({
+          where: { id: { in: entityIds } }
+        });
+        if (pairCount !== entityIds.length) {
+          throw makeError(
+            'INVALID_ENTITY_IDS',
+            `Seeding returned ${entityIds.length - pairCount} entity IDs that are not valid DoublesPair records. This typically means ranking entries of the wrong type (MEN/WOMEN instead of PAIR) were used for seeding.`
+          );
+        }
       }
     }
   }
 
   // Step 8: Persist atomically inside a Prisma transaction (DRAW-02, DRAW-04)
   let matchCount = 0;
+  const isManual = mode === 'manual';
 
   const result = await prisma.$transaction(async (tx) => {
     // Step 8a: Delete existing records in cascade order (DRAW-04)
@@ -261,7 +278,8 @@ export async function generateBracket(tournamentId, options = {}) {
       data: {
         tournamentId,
         bracketType: 'MAIN',
-        matchGuarantee
+        matchGuarantee,
+        drawMode: isManual ? 'MANUAL' : 'SEEDED'
       }
     });
 
@@ -269,7 +287,7 @@ export async function generateBracket(tournamentId, options = {}) {
     const totalRounds = Math.log2(bracketSize);
     let matchNumber = 1;
 
-    // Collected during Round 1 creation for BYE pre-population in Round 2
+    // Collected during Round 1 creation for BYE pre-population in Round 2 (seeded mode only)
     const byeInfo = []; // { posInRound, playerId, pairId }
     const round2MatchIds = []; // IDs of Round 2 matches in creation order
 
@@ -303,8 +321,10 @@ export async function generateBracket(tournamentId, options = {}) {
               matchNumber: matchNumber++,
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
-              pair1Id: pos1?.entityId || null,
-              pair2Id: pos2?.entityId || null,
+              // Manual mode: all player/pair slots null (organizer places manually)
+              // Seeded mode: BYE matches set isBye=true with player in slot 1, BYE slot null
+              pair1Id: isManual ? null : (pos1?.entityId || null),
+              pair2Id: isManual ? null : (pos2?.entityId || null),
               player1Id: null,
               player2Id: null
             };
@@ -316,16 +336,18 @@ export async function generateBracket(tournamentId, options = {}) {
               matchNumber: matchNumber++,
               isBye: isByeMatch,
               status: isByeMatch ? 'BYE' : 'SCHEDULED',
-              player1Id: pos1?.entityId || null,
-              player2Id: pos2?.entityId || null
+              // Manual mode: all player slots null (organizer places manually)
+              // Seeded mode: BYE matches have player in slot 1, BYE slot null
+              player1Id: isManual ? null : (pos1?.entityId || null),
+              player2Id: isManual ? null : (pos2?.entityId || null)
             };
           }
 
           await tx.match.create({ data: matchData });
           matchCount++;
 
-          // Track BYE matches so we can pre-populate their Round 2 slot below
-          if (isByeMatch) {
+          // Track BYE matches for Round 2 pre-population (seeded mode only — no players to advance in manual)
+          if (isByeMatch && !isManual) {
             byeInfo.push({
               posInRound: i,
               playerId: categoryType !== 'DOUBLES' ? (pos1?.entityId || null) : null,
@@ -334,7 +356,7 @@ export async function generateBracket(tournamentId, options = {}) {
           }
         }
       } else {
-        // Rounds 2+: placeholder matches — player IDs start null (BYEs pre-populated below)
+        // Rounds 2+: placeholder matches — player IDs start null (BYEs pre-populated below in seeded mode)
         const matchesInRound = bracketSize / Math.pow(2, roundNum);
         for (let i = 0; i < matchesInRound; i++) {
           const created = await tx.match.create({
@@ -355,9 +377,10 @@ export async function generateBracket(tournamentId, options = {}) {
       }
     }
 
-    // Step 8d: Pre-populate Round 2 slots for BYE players.
+    // Step 8d: Pre-populate Round 2 slots for BYE players (seeded mode only).
     // BYE matches auto-advance their player — no result is ever submitted for them,
     // so advanceBracketSlot never runs. We seed Round 2 here at bracket creation time.
+    // In manual mode, players haven't been placed yet, so we skip this step.
     for (const bye of byeInfo) {
       const round2Idx = Math.floor(bye.posInRound / 2);
       const isPlayer1Slot = bye.posInRound % 2 === 0;
@@ -376,6 +399,7 @@ export async function generateBracket(tournamentId, options = {}) {
     }
 
     // Step 8e: Generate CONSOLATION bracket when matchGuarantee === 'MATCH_2'
+    // Consolation bracket is always empty at generation time — applies to both modes
     let consolationBracket = null;
     if (matchGuarantee === 'MATCH_2') {
       consolationBracket = await generateConsolationBracket(
@@ -460,16 +484,295 @@ export async function regenerateBracket(tournamentId, options = {}) {
 }
 
 /**
+ * Assign or clear a player/pair in a specific Round 1 bracket slot.
+ *
+ * Business rules (DRAW-01, DRAW-02, DRAW-06):
+ *   - Tournament must exist → TOURNAMENT_NOT_FOUND
+ *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED
+ *   - Target match must exist in this tournament and be Round 1 → MATCH_NOT_FOUND / NOT_ROUND_1
+ *   - Target match must not be a BYE match → BYE_SLOT_NOT_ASSIGNABLE
+ *   - If assigning (entityId not null):
+ *       - Player/pair must be registered → NOT_REGISTERED
+ *       - Player/pair must not already be placed in a different slot → ALREADY_PLACED
+ *   - Assigning next to a BYE match auto-advances the player to Round 2
+ *   - Clearing a BYE-adjacent slot also removes the player from Round 2
+ *   - Reassignment atomically clears old occupant (with Round 2 undo) and places new entity
+ *
+ * @param {string} tournamentId - Tournament primary key
+ * @param {Object} assignment - Assignment details
+ * @param {string} assignment.matchId - Target Round 1 match ID
+ * @param {'player1'|'player2'} assignment.slot - Which slot in the match
+ * @param {string|null} assignment.playerId - Player profile ID for singles (null to clear)
+ * @param {string|null} assignment.pairId - Doubles pair ID for doubles (null to clear)
+ * @returns {Promise<{matchId: string, slot: string, entityId: string|null, action: string}>}
+ * @throws {Error} TOURNAMENT_NOT_FOUND | BRACKET_LOCKED | MATCH_NOT_FOUND | NOT_ROUND_1 | BYE_SLOT_NOT_ASSIGNABLE | NOT_REGISTERED | ALREADY_PLACED
+ */
+export async function assignPosition(tournamentId, assignment) {
+  const { matchId, slot, playerId, pairId } = assignment;
+
+  return prisma.$transaction(async (tx) => {
+    // Step 1: Load and validate tournament
+    const tournament = await tx.tournament.findUnique({
+      where: { id: tournamentId },
+      select: {
+        id: true,
+        status: true,
+        categoryId: true,
+        category: { select: { type: true } }
+      }
+    });
+
+    if (!tournament) {
+      throw makeError('TOURNAMENT_NOT_FOUND', `Tournament ${tournamentId} not found`);
+    }
+
+    if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
+      throw makeError(
+        'BRACKET_LOCKED',
+        'Cannot modify bracket when tournament is in progress or completed'
+      );
+    }
+
+    // Step 2: Load and validate target match
+    const targetMatch = await tx.match.findUnique({
+      where: { id: matchId },
+      include: { round: { select: { roundNumber: true, bracketId: true } } }
+    });
+
+    if (!targetMatch || targetMatch.tournamentId !== tournamentId) {
+      throw makeError('MATCH_NOT_FOUND', `Match ${matchId} not found in tournament ${tournamentId}`);
+    }
+
+    if (targetMatch.round?.roundNumber !== 1) {
+      throw makeError('NOT_ROUND_1', 'Can only assign positions in Round 1');
+    }
+
+    if (targetMatch.isBye && slot === 'player2') {
+      throw makeError('BYE_SLOT_NOT_ASSIGNABLE', 'Cannot assign players to the BYE slot');
+    }
+
+    // Step 3: Determine entity field names based on category type
+    const isDoubles = tournament.category?.type === 'DOUBLES';
+    const entityId = isDoubles ? pairId : playerId;
+    const entityField1 = isDoubles ? 'pair1Id' : 'player1Id';
+    const entityField2 = isDoubles ? 'pair2Id' : 'player2Id';
+    const slotField = slot === 'player1' ? entityField1 : entityField2;
+
+    // Step 4: If assigning (not clearing), validate registration and uniqueness
+    if (entityId !== null && entityId !== undefined) {
+      // Registration check
+      if (isDoubles) {
+        const pairReg = await tx.pairRegistration.findFirst({
+          where: { tournamentId, pairId: entityId, status: 'REGISTERED' }
+        });
+        if (!pairReg) {
+          throw makeError('NOT_REGISTERED', 'Pair is not registered for this tournament');
+        }
+      } else {
+        const playerReg = await tx.tournamentRegistration.findFirst({
+          where: { tournamentId, playerId: entityId, status: 'REGISTERED' }
+        });
+        if (!playerReg) {
+          throw makeError('NOT_REGISTERED', 'Player is not registered for this tournament');
+        }
+      }
+
+      // Already-placed check: load all Round 1 matches in the MAIN bracket
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      for (const m of round1Matches) {
+        const inSlot1 = m[entityField1] === entityId;
+        const inSlot2 = m[entityField2] === entityId;
+        if (inSlot1 || inSlot2) {
+          // Check if same match + same slot (no-op: already assigned here)
+          const sameMatch = m.id === matchId;
+          const sameSlot = (inSlot1 && slot === 'player1') || (inSlot2 && slot === 'player2');
+          if (sameMatch && sameSlot) {
+            // Already assigned to this exact slot — no-op
+            return {
+              matchId,
+              slot,
+              entityId,
+              action: 'assigned'
+            };
+          }
+          throw makeError(
+            'ALREADY_PLACED',
+            'Player/pair is already placed at a different bracket position'
+          );
+        }
+      }
+    }
+
+    // Helper to compute BYE-adjacent Round 2 update data
+    // Returns { round2MatchId, round2UpdateData } or null if not BYE-adjacent
+    async function getByeAdjacentRound2Update(matchIdToCheck, entityToPlace) {
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      const posInRound = round1Matches.findIndex(m => m.id === matchIdToCheck);
+      if (posInRound === -1) return null;
+
+      // Partner match index: even pairs with odd (posInRound+1), odd pairs with even (posInRound-1)
+      const partnerIdx = posInRound % 2 === 0 ? posInRound + 1 : posInRound - 1;
+      const partnerMatch = round1Matches[partnerIdx];
+      if (!partnerMatch || !partnerMatch.isBye) return null;
+
+      // This match is BYE-adjacent — get the Round 2 match
+      const round2MatchIdx = Math.floor(posInRound / 2);
+      const isPlayer1Slot = posInRound % 2 === 0;
+
+      const round2Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      const round2Match = round2Matches[round2MatchIdx];
+      if (!round2Match) return null;
+
+      const round2Field = isPlayer1Slot ? entityField1 : entityField2;
+      return {
+        round2MatchId: round2Match.id,
+        round2Field,
+        round2UpdateData: { [round2Field]: entityToPlace }
+      };
+    }
+
+    // Step 5: Handle current occupant of the target slot (reassignment)
+    const currentOccupant = targetMatch[slotField];
+
+    if (currentOccupant !== null && currentOccupant !== undefined && currentOccupant !== entityId) {
+      // Undo Round 2 pre-population for the old occupant if BYE-adjacent
+      const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, null);
+      if (byeAdjacentInfo) {
+        await tx.match.update({
+          where: { id: byeAdjacentInfo.round2MatchId },
+          data: byeAdjacentInfo.round2UpdateData
+        });
+      }
+
+      // Clear the target slot
+      await tx.match.update({
+        where: { id: matchId },
+        data: { [slotField]: null }
+      });
+    }
+
+    // Step 6 & 7: If clearing (entityId is null/undefined), also undo Round 2 pre-population
+    if (entityId === null || entityId === undefined) {
+      if (currentOccupant !== null && currentOccupant !== undefined) {
+        // Was occupied — undo Round 2 advancement if BYE-adjacent
+        const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, null);
+        if (byeAdjacentInfo) {
+          await tx.match.update({
+            where: { id: byeAdjacentInfo.round2MatchId },
+            data: byeAdjacentInfo.round2UpdateData
+          });
+        }
+        // Undo Round 2 advancement if match itself is a BYE
+        if (targetMatch.isBye && slot === 'player1') {
+          const bracketId = targetMatch.round?.bracketId;
+          const round1Matches = await tx.match.findMany({
+            where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+            orderBy: { matchNumber: 'asc' }
+          });
+          const posInRound = round1Matches.findIndex(m => m.id === matchId);
+          if (posInRound !== -1) {
+            const round2MatchIdx = Math.floor(posInRound / 2);
+            const isPlayer1InR2 = posInRound % 2 === 0;
+            const round2Matches = await tx.match.findMany({
+              where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+              orderBy: { matchNumber: 'asc' }
+            });
+            const round2Match = round2Matches[round2MatchIdx];
+            if (round2Match) {
+              const r2Field = isPlayer1InR2 ? entityField1 : entityField2;
+              await tx.match.update({
+                where: { id: round2Match.id },
+                data: { [r2Field]: null }
+              });
+            }
+          }
+        }
+        // Clear the slot
+        await tx.match.update({
+          where: { id: matchId },
+          data: { [slotField]: null }
+        });
+      }
+
+      return { matchId, slot, entityId: null, action: 'cleared' };
+    }
+
+    // Step 8: Assign the new entity
+    await tx.match.update({
+      where: { id: matchId },
+      data: { [slotField]: entityId }
+    });
+
+    // BYE auto-advance: if this match is BYE-adjacent, pre-populate Round 2
+    const byeAdjacentInfo = await getByeAdjacentRound2Update(matchId, entityId);
+    if (byeAdjacentInfo) {
+      await tx.match.update({
+        where: { id: byeAdjacentInfo.round2MatchId },
+        data: byeAdjacentInfo.round2UpdateData
+      });
+    }
+
+    // BYE match auto-advance: if the match itself is a BYE, the player1 auto-advances to Round 2
+    if (targetMatch.isBye && slot === 'player1') {
+      const bracketId = targetMatch.round?.bracketId;
+      const round1Matches = await tx.match.findMany({
+        where: { tournamentId, round: { bracketId, roundNumber: 1 } },
+        orderBy: { matchNumber: 'asc' }
+      });
+      const posInRound = round1Matches.findIndex(m => m.id === matchId);
+      if (posInRound !== -1) {
+        const round2MatchIdx = Math.floor(posInRound / 2);
+        const isPlayer1InR2 = posInRound % 2 === 0;
+        const round2Matches = await tx.match.findMany({
+          where: { tournamentId, round: { bracketId, roundNumber: 2 } },
+          orderBy: { matchNumber: 'asc' }
+        });
+        const round2Match = round2Matches[round2MatchIdx];
+        if (round2Match) {
+          const r2Field = isPlayer1InR2 ? entityField1 : entityField2;
+          await tx.match.update({
+            where: { id: round2Match.id },
+            data: { [r2Field]: entityId }
+          });
+        }
+      }
+    }
+
+    // Step 9: Return result
+    return {
+      matchId,
+      slot,
+      entityId,
+      action: 'assigned'
+    };
+  });
+}
+
+/**
  * Atomically swap player slots across multiple matches.
  *
  * Business rules (DRAW-06, DRAW-07):
  *   - Tournament must exist → TOURNAMENT_NOT_FOUND
  *   - Tournament must not be IN_PROGRESS or COMPLETED → BRACKET_LOCKED
- *   - None of the targeted matches may be BYE matches → BYE_SLOT_NOT_SWAPPABLE
+ *   - BYE matches only allow player1 (auto-advance) slot swaps → BYE_SLOT_NOT_SWAPPABLE
  *   - All updates happen in a single transaction (no partial updates on failure)
  *
  * @param {string} tournamentId - Tournament primary key
- * @param {Array<{matchId: string, field: 'player1Id'|'player2Id', newPlayerId: string}>} swaps
+ * @param {Array<{matchId: string, field: 'player1Id'|'player2Id'|'pair1Id'|'pair2Id', newPlayerId: string}>} swaps
  * @returns {Promise<{swapped: number}>} Number of swaps applied
  * @throws {Error} TOURNAMENT_NOT_FOUND | BRACKET_LOCKED | BYE_SLOT_NOT_SWAPPABLE
  */
@@ -497,24 +800,75 @@ export async function swapSlots(tournamentId, swaps) {
     where: { id: { in: matchIds } }
   });
 
-  // Step 3: Guard — no BYE matches allowed (DRAW-07)
-  const byeMatch = matches.find((m) => m.isBye);
-  if (byeMatch) {
+  // Step 3: Guard — BYE matches only allow player1 (auto-advancing slot) swaps (DRAW-07)
+  const byeMatchIds = new Set(matches.filter((m) => m.isBye).map((m) => m.id));
+  const blockedSwap = swaps.find(
+    (s) => byeMatchIds.has(s.matchId) && (s.field === 'player2Id' || s.field === 'pair2Id')
+  );
+  if (blockedSwap) {
     throw makeError(
       'BYE_SLOT_NOT_SWAPPABLE',
-      `Match ${byeMatch.id} is a BYE match and cannot have slots swapped`
+      `Match ${blockedSwap.matchId} is a BYE match — only the player1 (auto-advance) slot can be changed`
     );
   }
 
   // Step 4: Atomically apply all swaps in a single transaction (DRAW-06)
+  let totalSwaps = swaps.length;
   await prisma.$transaction(async (tx) => {
     for (const swap of swaps) {
       await tx.match.update({
         where: { id: swap.matchId },
         data: { [swap.field]: swap.newPlayerId }
       });
+
+      // Step 5: Cascade BYE auto-advancement to the next round
+      // When a BYE match's player1/pair1 is changed, the winner (who auto-advances)
+      // must be updated in the corresponding next-round match slot.
+      const match = matches.find((m) => m.id === swap.matchId);
+      if (match?.isBye && (swap.field === 'player1Id' || swap.field === 'pair1Id')) {
+        // Find this match's round to locate the next round
+        const round = await tx.round.findUnique({ where: { id: match.roundId } });
+        if (!round) continue;
+
+        const nextRound = await tx.round.findFirst({
+          where: { bracketId: round.bracketId, roundNumber: round.roundNumber + 1 }
+        });
+        if (!nextRound) continue;
+
+        // Determine position: match's index in its round → next round slot
+        const currentRoundMatches = await tx.match.findMany({
+          where: { roundId: round.id },
+          orderBy: { matchNumber: 'asc' },
+          select: { id: true }
+        });
+        const posInRound = currentRoundMatches.findIndex((m) => m.id === match.id);
+        if (posInRound < 0) continue;
+
+        const nextPosInRound = Math.floor(posInRound / 2);
+        const isTopSlot = posInRound % 2 === 0; // even → player1/pair1, odd → player2/pair2
+
+        const nextRoundMatches = await tx.match.findMany({
+          where: { roundId: nextRound.id },
+          orderBy: { matchNumber: 'asc' },
+          select: { id: true }
+        });
+        const nextMatch = nextRoundMatches[nextPosInRound];
+        if (!nextMatch) continue;
+
+        // Update the correct slot in the next round match
+        const isPair = swap.field === 'pair1Id';
+        const nextSlotField = isPair
+          ? (isTopSlot ? 'pair1Id' : 'pair2Id')
+          : (isTopSlot ? 'player1Id' : 'player2Id');
+
+        await tx.match.update({
+          where: { id: nextMatch.id },
+          data: { [nextSlotField]: swap.newPlayerId }
+        });
+        totalSwaps++;
+      }
     }
   });
 
-  return { swapped: swaps.length };
+  return { swapped: totalSwaps };
 }

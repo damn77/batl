@@ -276,8 +276,13 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
   // Guard: don't render if no match selected
   if (!match) return null;
 
-  const player1Name = match.player1?.name || match.pair1?.name || 'Player 1';
-  const player2Name = match.player2?.name || match.pair2?.name || 'Player 2';
+  const isDoublesMatch = !!(match.pair1 || match.pair2);
+  const player1Name = isDoublesMatch
+    ? (match.pair1 ? `${match.pair1.player1?.name || '?'} / ${match.pair1.player2?.name || '?'}` : 'Pair 1')
+    : (match.player1?.name || 'Player 1');
+  const player2Name = isDoublesMatch
+    ? (match.pair2 ? `${match.pair2.player1?.name || '?'} / ${match.pair2.player2?.name || '?'}` : 'Pair 2')
+    : (match.player2?.name || 'Player 2');
 
   // Non-organizer winner lock: submit is blocked when winner would change
   const isSubmitBlockedByWinnerLock = !isOrganizer && isWinnerChanging;
@@ -286,7 +291,15 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
     <Modal show={!!match} onHide={onClose} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
-          {player1Name} vs {player2Name}
+          {isDoublesMatch ? (
+            <div style={{ lineHeight: '1.6' }}>
+              <div>{player1Name}</div>
+              <div className="text-muted" style={{ fontSize: '0.85em' }}>vs</div>
+              <div>{player2Name}</div>
+            </div>
+          ) : (
+            <>{player1Name} vs {player2Name}</>
+          )}
         </Modal.Title>
       </Modal.Header>
 

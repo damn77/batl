@@ -202,6 +202,12 @@ const PlayerRegistrationPage = () => {
           </Col>
         </Row>
 
+        {user?.role === 'ADMIN' && !user?.playerId && (
+          <Alert variant="warning" className="mb-3">
+            You are viewing as admin — no player profile linked. Some player features may not work.
+          </Alert>
+        )}
+
         {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
         {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)}>{success}</Alert>}
 

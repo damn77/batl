@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card, Badge, Alert, Spinner, Form, Modal, Table, Dropdown } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useTranslation } from 'react-i18next';
@@ -9,15 +9,20 @@ import {
   listTournaments,
   createTournament,
   updateTournament,
+  copyTournament,
+  deleteTournament,
+  revertTournament,
   TOURNAMENT_STATUS,
   STATUS_VARIANTS
 } from '../services/tournamentService';
 import { listCategories } from '../services/categoryService';
 import { recalculateCategorySeeding } from '../services/pairService';
+import { useToast } from '../utils/ToastContext';
 
 const TournamentSetupPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const [tournaments, setTournaments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +56,19 @@ const TournamentSetupPage = () => {
   // T064: Seeding recalculation state
   const [recalculatingCategory, setRecalculatingCategory] = useState(null);
   const [seedingSuccess, setSeedingSuccess] = useState(null);
+
+  // Copy mode: track source tournament when copying
+  const [copySource, setCopySource] = useState(null);
+
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteTournament, setPendingDeleteTournament] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Revert confirmation state
+  const [showRevertConfirm, setShowRevertConfirm] = useState(false);
+  const [pendingRevertTournament, setPendingRevertTournament] = useState(null);
+  const [reverting, setReverting] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -104,6 +122,25 @@ const TournamentSetupPage = () => {
     setShowCreateModal(true);
   };
 
+  const handleCopyClick = (tournament) => {
+    const today = new Date();
+
+    setCopySource({ id: tournament.id, name: tournament.name });
+    setFormData({
+      name: '',
+      categoryId: tournament.categoryId,
+      description: tournament.description || '',
+      clubName: tournament.clubName || '',
+      address: tournament.address || '',
+      capacity: tournament.capacity || '',
+      startDate: today,
+      endDate: today
+    });
+    setIsSingleDay(true);
+    setFormError(null);
+    setShowCreateModal(true);
+  };
+
   const handleSubmitCreate = async (e) => {
     e.preventDefault();
 
@@ -124,13 +161,20 @@ const TournamentSetupPage = () => {
       // Use startDate for endDate if single day tournament
       const endDate = isSingleDay ? formData.startDate : formData.endDate;
 
-      await createTournament({
+      const payload = {
         ...formData,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
         startDate: formData.startDate.toISOString(),
         endDate: endDate.toISOString()
-      });
+      };
 
+      if (copySource) {
+        await copyTournament(copySource.id, payload);
+      } else {
+        await createTournament(payload);
+      }
+
+      setCopySource(null);
       setShowCreateModal(false);
       loadTournaments();
     } catch (err) {
@@ -231,6 +275,46 @@ const TournamentSetupPage = () => {
     const check = new Date(date);
     check.setHours(0, 0, 0, 0);
     return check < today;
+  };
+
+  const handleDeleteClick = (tournament) => {
+    setPendingDeleteTournament(tournament);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteTournament(pendingDeleteTournament.id);
+      showSuccess(`Tournament "${pendingDeleteTournament.name}" deleted successfully.`);
+      setShowDeleteConfirm(false);
+      setPendingDeleteTournament(null);
+      loadTournaments();
+    } catch (err) {
+      showError(err.message || 'Failed to delete tournament');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleRevertClick = (tournament) => {
+    setPendingRevertTournament(tournament);
+    setShowRevertConfirm(true);
+  };
+
+  const handleConfirmRevert = async () => {
+    setReverting(true);
+    try {
+      await revertTournament(pendingRevertTournament.id);
+      showSuccess(`Tournament "${pendingRevertTournament.name}" reverted to SCHEDULED.`);
+      setShowRevertConfirm(false);
+      setPendingRevertTournament(null);
+      loadTournaments();
+    } catch (err) {
+      showError(err.message || 'Failed to revert tournament');
+    } finally {
+      setReverting(false);
+    }
   };
 
   return (
@@ -346,42 +430,45 @@ const TournamentSetupPage = () => {
                         </Badge>
                       </td>
                       <td>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleEditClick(tournament)}
-                          className="me-2"
-                        >
-                          {t('buttons.edit')}
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
-                          className="me-2"
-                        >
-                          {t('buttons.configureRules')}
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}
-                          className="me-2"
-                        >
-                          {t('buttons.configurePoints')}
-                        </Button>
-                        {/* T064: Recalculate seeding button for DOUBLES categories */}
-                        {tournament.category?.type === 'DOUBLES' && (
-                          <Button
-                            variant="outline-info"
-                            size="sm"
-                            onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
-                            disabled={recalculatingCategory === tournament.categoryId}
-                            title={t('help.recalculateSeeding')}
-                          >
-                            {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
-                          </Button>
-                        )}
+                        <Dropdown align="end">
+                          <Dropdown.Toggle variant="link" className="text-dark p-0 border-0" bsPrefix="p-0">
+                            &#8942;
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item onClick={() => handleEditClick(tournament)}>
+                              {t('buttons.edit')}
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}>
+                              {t('buttons.configureRules')}
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}>
+                              {t('buttons.configurePoints')}
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item onClick={() => handleCopyClick(tournament)}>
+                              {t('buttons.copyTournament')}
+                            </Dropdown.Item>
+                            {tournament.category?.type === 'DOUBLES' && (
+                              <Dropdown.Item
+                                onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
+                                disabled={recalculatingCategory === tournament.categoryId}
+                              >
+                                {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
+                              </Dropdown.Item>
+                            )}
+                            {/* Revert — only when tournament has draw or is IN_PROGRESS */}
+                            {(tournament.status === 'IN_PROGRESS' ||
+                              (tournament.status === 'SCHEDULED' && tournament.registrationClosed)) && (
+                              <Dropdown.Item onClick={() => handleRevertClick(tournament)}>
+                                Revert to Scheduled
+                              </Dropdown.Item>
+                            )}
+                            <Dropdown.Divider />
+                            <Dropdown.Item className="text-danger" onClick={() => handleDeleteClick(tournament)}>
+                              Delete Tournament
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
                       </td>
                     </tr>
                   ))}
@@ -392,12 +479,17 @@ const TournamentSetupPage = () => {
         )}
 
         {/* Create Modal */}
-        <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
+        <Modal show={showCreateModal} onHide={() => { setShowCreateModal(false); setCopySource(null); }} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>{t('modals.createTournament.title')}</Modal.Title>
+            <Modal.Title>{copySource ? t('modals.copyTournament.title') : t('modals.createTournament.title')}</Modal.Title>
           </Modal.Header>
           <Form onSubmit={handleSubmitCreate}>
             <Modal.Body>
+              {copySource && (
+                <Alert variant="info" className="mb-3">
+                  {t('alerts.copyingFrom', { name: copySource.name })}
+                </Alert>
+              )}
               {formError && <Alert variant="danger">{formError}</Alert>}
 
               <Form.Group className="mb-3">
@@ -674,6 +766,63 @@ const TournamentSetupPage = () => {
             </Modal.Footer>
           </Form>
         </Modal>
+        {/* Delete Confirmation Modal */}
+        <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Tournament</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to delete <strong>{pendingDeleteTournament?.name}</strong>?</p>
+            <p className="text-muted mb-2">
+              Status: <Badge bg={STATUS_VARIANTS[pendingDeleteTournament?.status]}>
+                {pendingDeleteTournament?.status}
+              </Badge>
+              {' '}&middot; {pendingDeleteTournament?.registeredCount || 0} registered player(s)
+            </p>
+            {(pendingDeleteTournament?.status === 'IN_PROGRESS' ||
+              pendingDeleteTournament?.status === 'COMPLETED') && (
+              <Alert variant="danger" className="mb-0">
+                <Alert.Heading as="h6">Warning</Alert.Heading>
+                {pendingDeleteTournament?.status === 'IN_PROGRESS'
+                  ? 'This tournament has matches in progress. All match data will be permanently deleted.'
+                  : 'This tournament is completed. All results and ranking points will be permanently removed and rankings will be recalculated.'}
+              </Alert>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Revert Confirmation Modal */}
+        <Modal show={showRevertConfirm} onHide={() => setShowRevertConfirm(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Revert to Scheduled</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to revert <strong>{pendingRevertTournament?.name}</strong> to SCHEDULED?</p>
+            <p>This will:</p>
+            <ul>
+              <li>Delete the tournament draw (bracket, rounds, matches)</li>
+              <li>Reopen player registration</li>
+            </ul>
+            <p className="text-muted">Registrations will be preserved.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowRevertConfirm(false)} disabled={reverting}>
+              Cancel
+            </Button>
+            <Button variant="warning" onClick={handleConfirmRevert} disabled={reverting}>
+              {reverting ? 'Reverting...' : 'Revert to Scheduled'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
       </Container>
     </>
   );
