@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Manual Draw & QoL
-status: completed
-stopped_at: Completed 19-01-PLAN.md — formatType filter forwarding (COPY-05) and player count guard fix (DRAW-06)
-last_updated: "2026-03-05T23:48:50.430Z"
-last_activity: "2026-03-06 — Phase 19 Plan 01 completed: formatType filter forwarding and player count guard fixed (COPY-05, DRAW-06)"
+milestone: v1.4
+milestone_name: UI Rework & Mobile Design
+status: active
+stopped_at: ""
+last_updated: "2026-03-06"
+last_activity: "2026-03-06 — Milestone v1.4 started"
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** Planning next milestone
+**Current focus:** v1.4 UI Rework & Mobile Design
 
 ## Current Position
 
-Phase: 19 of 18 (Integration Bug Fixes)
-Plan: 1 of 1 in current phase
-Status: Complete
-Last activity: 2026-03-06 — Phase 19 Plan 01 completed: formatType filter forwarding and player count guard fixed (COPY-05, DRAW-06)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-06 — Milestone v1.4 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
