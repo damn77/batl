@@ -87,7 +87,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
   3. The viewport meta tag includes viewport-fit=cover so content respects device notch/home indicator
 **Plans**: 1 plan
 Plans:
-- [ ] 20-01-PLAN.md — Install QR code plugin, add dev:mobile script, update viewport meta tag
+- [x] 20-01-PLAN.md — Install QR code plugin, add dev:mobile script, update viewport meta tag
 
 ### Phase 21: Navigation Fix
 **Goal**: Users can open, navigate, and close the mobile menu on any mobile browser
@@ -98,7 +98,9 @@ Plans:
   2. User taps a menu item and the drawer closes automatically, landing on the target page
   3. Admin, organizer, and player role-gated links appear correctly in the mobile drawer based on logged-in role
   4. Desktop navigation bar is unchanged at lg+ breakpoint
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 21-01-PLAN.md — Refactor NavBar to React Bootstrap Offcanvas, fix LanguageSwitcher, add 150ms animation
 
 ### Phase 22: Tournament View Layout
 **Goal**: Tournament page content surfaces in the right order based on tournament status, bracket-first for live tournaments
@@ -173,8 +175,8 @@ Plans:
 | 16. Admin Access Parity | v1.3 | 2/2 | Complete | 2026-03-04 |
 | 17. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 1/1 | Complete | 2026-03-05 |
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
-| 20. Mobile Dev Tooling | 1/1 | Complete    | 2026-03-06 | - |
-| 21. Navigation Fix | v1.4 | 0/TBD | Not started | - |
+| 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
+| 21. Navigation Fix | v1.4 | 0/1 | Planning | - |
 | 22. Tournament View Layout | v1.4 | 0/TBD | Not started | - |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
