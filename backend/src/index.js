@@ -62,8 +62,8 @@ const corsOptions = {
       return callback(new Error('Not allowed by CORS'));
     }
 
-    // In development, allow any localhost port
-    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    // In development, allow any localhost port and LAN IPs (for mobile testing)
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.match(/^http:\/\/192\.168\.\d+\.\d+:/)) {
       return callback(null, true);
     }
 

@@ -17,7 +17,7 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <Dropdown align="end">
+    <Dropdown align="end" drop="down">
       <Dropdown.Toggle
         variant="link"
         className="nav-link text-white p-0"
@@ -25,7 +25,7 @@ const LanguageSwitcher = () => {
       >
         {currentLang.flag} {currentLang.code.toUpperCase()}
       </Dropdown.Toggle>
-      <Dropdown.Menu>
+      <Dropdown.Menu style={{ transform: 'translateY(0)', top: '0', position: 'absolute' }}>
         {languages.map(lang => (
           <Dropdown.Item
             key={lang.code}

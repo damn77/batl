@@ -306,8 +306,8 @@ const NavBar = () => {
               </Nav>
             )}
 
-            {/* Drawer footer — user info / auth buttons + language switcher */}
-            <div className="mt-auto border-top pt-3 pb-2">
+            {/* Drawer footer — mobile only */}
+            <div className="mt-auto border-top pt-3 pb-2 d-lg-none">
               <div className="mb-2">
                 <LanguageSwitcher />
               </div>
@@ -342,8 +342,40 @@ const NavBar = () => {
                 </div>
               )}
             </div>
+
           </Offcanvas.Body>
         </Navbar.Offcanvas>
+
+        {/* Desktop navbar controls — language switcher + auth (outside Offcanvas) */}
+        <div className="d-none d-lg-flex align-items-center gap-3">
+          <LanguageSwitcher />
+          {user ? (
+            <>
+              <span className="text-white small">{user.email}</span>
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={handleLogout}
+              >
+                {t('nav.logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="btn btn-outline-light btn-sm"
+                onClick={openLoginModal}
+              >
+                {t('nav.login')}
+              </button>
+              <button
+                className="btn btn-light btn-sm"
+                onClick={openRegisterModal}
+              >
+                {t('nav.register')}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </Navbar>
   );
