@@ -147,7 +147,6 @@ const PlayerListPanel = ({ tournament }) => {
 
   // T061-T064: Render format-specific data
   const renderFormatSpecificData = (registration, column) => {
-    // Placeholder - will be populated when format data is available from backend
     const formatData = registration.formatData || {};
 
     switch (column) {
@@ -156,9 +155,9 @@ const PlayerListPanel = ({ tournament }) => {
       case 'Position':
         return formatData.seedPosition || '-';
       case 'Bracket':
-        return formatData.bracketType || '-';
+        return registration.bracketPosition != null ? registration.bracketPosition : '-';
       case 'Round':
-        return formatData.currentRound ? `Round ${formatData.currentRound}` : '-';
+        return registration.furthestRound || '-';
       case 'Placement':
         return formatData.placement || '-';
       default:
@@ -189,10 +188,10 @@ const PlayerListPanel = ({ tournament }) => {
             </strong>
           </td>
           <td className="text-center">
-            {registration.pair?.seedingScore || '-'}
+            {registration.ranking != null ? registration.ranking : (registration.pair?.seedingScore || '-')}
           </td>
           <td className="text-center">
-            {registration.seedPosition || '-'}
+            {registration.seed != null ? registration.seed : '-'}
           </td>
           {formatSpecificColumns.map(column => (
             <td key={column} className="text-center">
@@ -230,10 +229,10 @@ const PlayerListPanel = ({ tournament }) => {
           </strong>
         </td>
         <td className="text-center">
-          {registration.player?.ranking || '-'}
+          {registration.player?.ranking != null ? registration.player.ranking : '-'}
         </td>
         <td className="text-center">
-          {registration.seedPosition || '-'}
+          {registration.seed != null ? registration.seed : '-'}
         </td>
         {formatSpecificColumns.map(column => (
           <td key={column} className="text-center">
