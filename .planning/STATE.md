@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Phase 20 Plan 01 — awaiting Task 3 human-verify checkpoint
-last_updated: "2026-03-06T17:26:44.112Z"
+stopped_at: Completed 20-mobile-dev-tooling plan 01 (20-01-PLAN.md)
+last_updated: "2026-03-06T17:37:19.902Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
@@ -46,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+| Phase 20-mobile-dev-tooling P01 | 30min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Key architectural context for v1.4:
 - Score entry fix: type="text" inputMode="numeric" on score fields (type="number" shows decimal keypad on iOS)
 - Phase ordering rationale: tooling → nav → layout → bracket/score → organizer → responsive sweep
 - [Phase 20]: vite-plugin-qrcode added unconditionally to plugins; --host CLI flag drives QR activation, not server.host config
+- [Phase 20-mobile-dev-tooling]: VITE_API_URL commented out in .env.development so Vite proxy handles /api requests from mobile devices — mobile cannot resolve localhost to dev machine
+- [Phase 20-mobile-dev-tooling]: vite-plugin-qrcode added unconditionally; --host CLI flag in dev:mobile script activates network binding and QR output without affecting regular dev script
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T17:26:22.891Z
-Stopped at: Phase 20 Plan 01 — awaiting Task 3 human-verify checkpoint
+Last session: 2026-03-06T17:37:19.899Z
+Stopped at: Completed 20-mobile-dev-tooling plan 01 (20-01-PLAN.md)
 Resume file: None
