@@ -112,12 +112,12 @@ describe('8-Seed Placement (User Story 3)', () => {
         expect(seed1To4Positions).not.toContain(pos);
       });
 
-      // Seeds 5-8 should be in "free" quarter positions
-      // Quarter 1 free position: position 4 (index 3) - middle of quarter
-      // Quarter 2 free position: position 12 (index 11)
-      // Quarter 3 free position: position 20 (index 19)
-      // Quarter 4 free position: position 28 (index 27)
-      const expectedFreePositions = [3, 11, 19, 27];
+      // Seeds 5-8 should be in "free" quarter positions (top/bottom of quarter)
+      // Quarter 1 (0-7): Seed 1 at 0 (top), free = 7 (bottom)
+      // Quarter 2 (8-15): Seed 3/4 at 15 (bottom), free = 8 (top)
+      // Quarter 3 (16-23): Seed 4/3 at 16 (top), free = 23 (bottom)
+      // Quarter 4 (24-31): Seed 2 at 31 (bottom), free = 24 (top)
+      const expectedFreePositions = [7, 8, 23, 24];
       seed5To8Positions.forEach((pos) => {
         expect(expectedFreePositions).toContain(pos);
       });
@@ -132,14 +132,14 @@ describe('8-Seed Placement (User Story 3)', () => {
       const positions1 = placeEightSeeds(bracketSize, seeds, 'deterministic-seed-1');
       const positions2 = placeEightSeeds(bracketSize, seeds, 'deterministic-seed-1');
 
-      const seeds5To8Pos1 = [3, 11, 19, 27].map((idx) => positions1[idx].seed);
-      const seeds5To8Pos2 = [3, 11, 19, 27].map((idx) => positions2[idx].seed);
+      const seeds5To8Pos1 = [7, 8, 23, 24].map((idx) => positions1[idx].seed);
+      const seeds5To8Pos2 = [7, 8, 23, 24].map((idx) => positions2[idx].seed);
 
       expect(seeds5To8Pos1).toEqual(seeds5To8Pos2);
 
       // Different seed might produce different results
       const positions3 = placeEightSeeds(bracketSize, seeds, 'deterministic-seed-2');
-      const seeds5To8Pos3 = [3, 11, 19, 27].map((idx) => positions3[idx].seed);
+      const seeds5To8Pos3 = [7, 8, 23, 24].map((idx) => positions3[idx].seed);
 
       // Verify the seeds are valid (5, 6, 7, 8 in some order)
       expect(seeds5To8Pos3.sort()).toEqual([5, 6, 7, 8]);
@@ -191,12 +191,15 @@ describe('8-Seed Placement (User Story 3)', () => {
       expect(seededPositions).toHaveLength(8);
 
       // For 64-player bracket, quarters are 16 positions each
-      // Free positions: quarterStart + quarterSize/2 - 1 = 0+8-1=7, 16+8-1=23, 32+8-1=39, 48+8-1=55
+      // Q1 (0-15): Seed 1 at 0, free = 15
+      // Q2 (16-31): Seed 3/4 at 31, free = 16
+      // Q3 (32-47): Seed 4/3 at 32, free = 47
+      // Q4 (48-63): Seed 2 at 63, free = 48
       const seed5To8Indices = positions
         .filter((p) => p.seed >= 5 && p.seed <= 8)
         .map((p) => p.positionIndex);
 
-      const expectedFreePositions = [7, 23, 39, 55];
+      const expectedFreePositions = [15, 16, 47, 48];
       seed5To8Indices.forEach((idx) => {
         expect(expectedFreePositions).toContain(idx);
       });

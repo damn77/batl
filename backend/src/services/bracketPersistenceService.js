@@ -185,11 +185,38 @@ export async function generateBracket(tournamentId, options = {}) {
     actualSeed = null;
   } else {
     // Step 7 (seeded): Call seeding placement service to get seeded positions
-    const seedingResult = await generateSeededBracket(
-      tournament.categoryId,
-      playerCount,
-      randomSeed
-    );
+    let seedingResult;
+    try {
+      seedingResult = await generateSeededBracket(
+        tournament.categoryId,
+        playerCount,
+        randomSeed
+      );
+    } catch (seedingError) {
+      // Fallback: if seeding fails for any reason (no rankings, service error),
+      // create an empty bracket and let all players go through unseeded placement
+      const templateResult = await getBracketByPlayerCount(playerCount);
+      seedingResult = {
+        bracket: {
+          playerCount,
+          bracketSize: templateResult.bracketSize,
+          structure: (templateResult.structure || '').replace(/\s/g, ''),
+          seedCount: 0,
+          positions: Array.from({ length: templateResult.bracketSize }, (_, i) => ({
+            positionNumber: i + 1,
+            positionIndex: i,
+            seed: null,
+            entityId: null,
+            entityType: null,
+            entityName: null,
+            isBye: false,
+            isPreliminary: false
+          })),
+          randomSeed: randomSeed || null
+        },
+        seedingInfo: { seedCount: 0, note: 'Seeding unavailable, using random placement.' }
+      };
+    }
 
     // structure is match-indexed: structure[matchIdx] === '1' means BYE match,
     // '0' means preliminary match. Length = bracketSize / 2.

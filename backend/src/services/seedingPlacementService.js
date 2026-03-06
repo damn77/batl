@@ -262,13 +262,26 @@ export function placeEightSeeds(bracketSize, seeds, randomSeed, structure) {
   const positions = placeFourSeeds(bracketSize, seeds.slice(0, 4), randomSeed, structure);
 
   // Step 2: Divide bracket into quarters and find free positions
+  // The free position is the top or bottom of each quarter that was NOT
+  // occupied by the recursive 4-seed placement (seeds 1-4).
   const quarterSize = bracketSize / 4;
   const freePositions = [];
 
   for (let quarter = 0; quarter < 4; quarter++) {
     const quarterStart = quarter * quarterSize;
-    // Free position is at the middle of each quarter
-    const freeIndex = quarterStart + Math.floor(quarterSize / 2) - 1;
+    const quarterEnd = quarterStart + quarterSize - 1;
+
+    const topOccupied = positions[quarterStart].seed !== null;
+    const bottomOccupied = positions[quarterEnd].seed !== null;
+
+    let freeIndex;
+    if (topOccupied && !bottomOccupied) {
+      freeIndex = quarterEnd;
+    } else if (!topOccupied && bottomOccupied) {
+      freeIndex = quarterStart;
+    } else {
+      freeIndex = quarterEnd; // fallback
+    }
     freePositions.push(freeIndex);
   }
 
@@ -331,13 +344,26 @@ export function placeSixteenSeeds(bracketSize, seeds, randomSeed, structure) {
   const positions = placeEightSeeds(bracketSize, seeds.slice(0, 8), randomSeed, structure);
 
   // Step 2: Divide bracket into eighths and find free positions
+  // The free position is the top or bottom of each eighth that was NOT
+  // occupied by the recursive 8-seed placement (seeds 1-8).
   const eighthSize = bracketSize / 8;
   const freePositions = [];
 
   for (let eighth = 0; eighth < 8; eighth++) {
     const eighthStart = eighth * eighthSize;
-    // Free position is at the middle of each eighth
-    const freeIndex = eighthStart + Math.floor(eighthSize / 2) - 1;
+    const eighthEnd = eighthStart + eighthSize - 1;
+
+    const topOccupied = positions[eighthStart].seed !== null;
+    const bottomOccupied = positions[eighthEnd].seed !== null;
+
+    let freeIndex;
+    if (topOccupied && !bottomOccupied) {
+      freeIndex = eighthEnd;
+    } else if (!topOccupied && bottomOccupied) {
+      freeIndex = eighthStart;
+    } else {
+      freeIndex = eighthEnd; // fallback
+    }
     freePositions.push(freeIndex);
   }
 
@@ -393,7 +419,7 @@ export async function getSeededPlayers(categoryId, seedCount) {
   const rankings = await getRankingsForCategory(categoryId, currentYear);
 
   if (!rankings || rankings.length === 0) {
-    throw new Error(`No rankings found for category ${categoryId}`);
+    return []; // No rankings available — caller decides how to handle
   }
 
   // Determine category type from the rankings data.
@@ -414,22 +440,13 @@ export async function getSeededPlayers(categoryId, seedCount) {
   const allEntries = relevantRankings.flatMap(ranking => ranking.entries || []);
 
   if (allEntries.length === 0) {
-    if (categoryType === 'DOUBLES') {
-      throw new Error(`No PAIR rankings found for doubles category ${categoryId}`);
-    }
-    throw new Error(`No ranking entries found for category ${categoryId}`);
+    return []; // No entries available — caller decides how to handle
   }
 
-  // Sort by rank and take top N
+  // Sort by rank and take top N (return whatever is available, up to seedCount)
   const topEntries = allEntries
     .sort((a, b) => a.rank - b.rank)
     .slice(0, seedCount);
-
-  if (topEntries.length < seedCount) {
-    throw new Error(
-      `Insufficient rankings: ${topEntries.length} available, ${seedCount} required`
-    );
-  }
 
   // Transform to seeding format
   return topEntries.map(entry => {
@@ -593,61 +610,98 @@ export async function generateSeededBracket(categoryId, playerCount, randomSeed)
   // Get bracket structure from feature 009
   const bracket = await getBracketStructure(playerCount);
 
-  // Determine seed count based on player count
-  const seedCount = getSeedCount(playerCount);
+  // Determine requested seed count based on player count
+  const requestedSeedCount = getSeedCount(playerCount);
 
   // Get top N ranked players/pairs from feature 008
-  const seeds = await getSeededPlayers(categoryId, seedCount);
+  const seeds = await getSeededPlayers(categoryId, requestedSeedCount);
+
+  // Determine actual seed tier based on available rankings
+  // Reduce to the highest valid seed tier that has enough ranked players: 16→8→4→2→0
+  let actualSeedCount;
+  if (seeds.length >= 16) {
+    actualSeedCount = 16;
+  } else if (seeds.length >= 8) {
+    actualSeedCount = 8;
+  } else if (seeds.length >= 4) {
+    actualSeedCount = 4;
+  } else if (seeds.length >= 2) {
+    actualSeedCount = 2;
+  } else if (seeds.length === 1) {
+    actualSeedCount = 1; // Special case: only seed 1 placed
+  } else {
+    actualSeedCount = 0; // No seeding — all positions empty for unseeded pool
+  }
+
+  // Cap actual seed count to what was requested (e.g., don't use 8 seeds for a 9-player tournament)
+  if (actualSeedCount > requestedSeedCount) {
+    actualSeedCount = requestedSeedCount;
+  }
 
   // Generate random seed if not provided
   const actualRandomSeed = randomSeed || createRandomSeed();
 
-  // Apply seeding placement based on seed count
+  // Apply seeding placement based on actual seed count
   let positions;
-  if (seedCount === 2) {
-    positions = placeTwoSeeds(bracket.bracketSize, seeds, bracket.structure);
-  } else if (seedCount === 4) {
-    // T047: 4-seed placement (User Story 2)
-    positions = placeFourSeeds(bracket.bracketSize, seeds, actualRandomSeed);
-    // Apply bracket structure (byes/preliminaries) to positions
+  if (actualSeedCount === 0) {
+    // No seeding — return empty positions
+    positions = placeTwoSeeds(bracket.bracketSize, [
+      { entityId: null, entityName: null, entityType: null },
+      { entityId: null, entityName: null, entityType: null }
+    ], bracket.structure);
+    // Clear the fake seeds
+    positions.forEach(p => { p.seed = null; p.entityId = null; p.entityType = null; p.entityName = null; });
+  } else if (actualSeedCount === 1) {
+    // Only seed 1 placed at top; seed 2 slot left empty
+    positions = placeTwoSeeds(bracket.bracketSize, [
+      seeds[0],
+      { entityId: null, entityName: null, entityType: null }
+    ], bracket.structure);
+    // Clear the fake seed 2
+    positions[bracket.bracketSize - 1].seed = null;
+    positions[bracket.bracketSize - 1].entityId = null;
+    positions[bracket.bracketSize - 1].entityType = null;
+    positions[bracket.bracketSize - 1].entityName = null;
+  } else if (actualSeedCount === 2) {
+    positions = placeTwoSeeds(bracket.bracketSize, seeds.slice(0, 2), bracket.structure);
+  } else if (actualSeedCount === 4) {
+    positions = placeFourSeeds(bracket.bracketSize, seeds.slice(0, 4), actualRandomSeed);
     positions = positions.map((pos, idx) => ({
       ...pos,
       isBye: bracket.structure[idx] === '1',
       isPreliminary: bracket.structure[idx] === '0'
     }));
-  } else if (seedCount === 8) {
-    // T070: 8-seed placement (User Story 3)
-    positions = placeEightSeeds(bracket.bracketSize, seeds, actualRandomSeed);
-    // Apply bracket structure (byes/preliminaries) to positions
+  } else if (actualSeedCount === 8) {
+    positions = placeEightSeeds(bracket.bracketSize, seeds.slice(0, 8), actualRandomSeed);
     positions = positions.map((pos, idx) => ({
       ...pos,
       isBye: bracket.structure[idx] === '1',
       isPreliminary: bracket.structure[idx] === '0'
     }));
-  } else if (seedCount === 16) {
-    // T096: 16-seed placement (User Story 4)
-    positions = placeSixteenSeeds(bracket.bracketSize, seeds, actualRandomSeed);
-    // Apply bracket structure (byes/preliminaries) to positions
+  } else if (actualSeedCount === 16) {
+    positions = placeSixteenSeeds(bracket.bracketSize, seeds.slice(0, 16), actualRandomSeed);
     positions = positions.map((pos, idx) => ({
       ...pos,
       isBye: bracket.structure[idx] === '1',
       isPreliminary: bracket.structure[idx] === '0'
     }));
-  } else {
-    throw new Error(`Seeding for ${seedCount} seeds not yet implemented`);
   }
 
-  // Build seeding info
+  // Build seeding info (reflect actual seeds used)
   const seedingInfo = {
-    seedCount,
+    seedCount: actualSeedCount,
+    requestedSeedCount,
     seedRange: {
-      min: seedCount === 2 ? 4 : seedCount === 4 ? 10 : seedCount === 8 ? 20 : 40,
-      max: seedCount === 2 ? 9 : seedCount === 4 ? 19 : seedCount === 8 ? 39 : 128
+      min: requestedSeedCount === 2 ? 4 : requestedSeedCount === 4 ? 10 : requestedSeedCount === 8 ? 20 : 40,
+      max: requestedSeedCount === 2 ? 9 : requestedSeedCount === 4 ? 19 : requestedSeedCount === 8 ? 39 : 128
     },
-    note:
-      seedCount === 2
-        ? 'Seeding positions are determined by category rankings. 1st seed at top, 2nd seed at bottom.'
-        : `Seeding positions are determined by category rankings. Positions ${seedCount / 2 + 1}-${seedCount} are randomized for fairness.`
+    note: actualSeedCount === 0
+      ? 'No ranked players available. All positions left for unseeded placement.'
+      : actualSeedCount < requestedSeedCount
+        ? `Only ${actualSeedCount} ranked players available (${requestedSeedCount} requested). Reduced to ${actualSeedCount}-seed placement.`
+        : actualSeedCount === 2
+          ? 'Seeding positions are determined by category rankings. 1st seed at top, 2nd seed at bottom.'
+          : `Seeding positions are determined by category rankings. Positions ${actualSeedCount / 2 + 1}-${actualSeedCount} are randomized for fairness.`
   };
 
   return {
@@ -656,7 +710,7 @@ export async function generateSeededBracket(categoryId, playerCount, randomSeed)
       playerCount: bracket.playerCount,
       bracketSize: bracket.bracketSize,
       structure: bracket.structure,
-      seedCount,
+      seedCount: actualSeedCount,
       positions,
       randomSeed: actualRandomSeed,
       generatedAt: new Date().toISOString()
