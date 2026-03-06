@@ -458,7 +458,7 @@ describe('swapSlots()', () => {
 // DRAW-07: BYE slot guard
 // ===========================================================================
 describe('swapSlots() BYE guard', () => {
-  it('throws BYE_SLOT_NOT_SWAPPABLE if any targeted match has isBye=true', async () => {
+  it('throws BYE_SLOT_NOT_SWAPPABLE when swapping player2 on a BYE match', async () => {
     mockPrisma.tournament.findUnique.mockResolvedValue({
       id: 'tour-1',
       status: 'SCHEDULED'
@@ -471,7 +471,7 @@ describe('swapSlots() BYE guard', () => {
     await expect(
       swapSlots('tour-1', [
         { matchId: 'match-1', field: 'player1Id', newPlayerId: 'player-A' },
-        { matchId: 'match-bye', field: 'player1Id', newPlayerId: 'player-B' }
+        { matchId: 'match-bye', field: 'player2Id', newPlayerId: 'player-B' }
       ])
     ).rejects.toMatchObject({ code: 'BYE_SLOT_NOT_SWAPPABLE' });
   });
