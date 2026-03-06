@@ -14,9 +14,9 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Navigation
 
-- [ ] **NAV-01**: User can open and navigate the mobile hamburger menu on all mobile browsers
-- [ ] **NAV-02**: Mobile navigation drawer closes automatically after selecting a menu item
-- [ ] **NAV-03**: All role-gated navigation links (admin, organizer, player) are accessible on mobile
+- [x] **NAV-01**: User can open and navigate the mobile hamburger menu on all mobile browsers
+- [x] **NAV-02**: Mobile navigation drawer closes automatically after selecting a menu item
+- [x] **NAV-03**: All role-gated navigation links (admin, organizer, player) are accessible on mobile
 
 ### Tournament View Layout
 
@@ -89,9 +89,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | TOOL-01 | Phase 20 | Complete |
 | TOOL-02 | Phase 20 | Complete |
-| NAV-01 | Phase 21 | Pending |
-| NAV-02 | Phase 21 | Pending |
-| NAV-03 | Phase 21 | Pending |
+| NAV-01 | Phase 21 | Complete |
+| NAV-02 | Phase 21 | Complete |
+| NAV-03 | Phase 21 | Complete |
 | LAYOUT-01 | Phase 22 | Pending |
 | LAYOUT-02 | Phase 22 | Pending |
 | LAYOUT-03 | Phase 22 | Pending |

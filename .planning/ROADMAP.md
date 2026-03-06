@@ -69,7 +69,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
 **Milestone Goal:** Restructure the UI for mobile-first usage — bracket-centric tournament view, status-aware content visibility, app-wide responsive layout, full organizer mobile support, and light visual refresh.
 
 - [x] **Phase 20: Mobile Dev Tooling** — QR code access and network-reachable Vite dev server for real-device testing (completed 2026-03-06)
-- [ ] **Phase 21: Navigation Fix** — Working mobile hamburger menu with Offcanvas drawer and auto-close on tap
+- [x] **Phase 21: Navigation Fix** — Working mobile hamburger menu with Offcanvas drawer and auto-close on tap (completed 2026-03-06)
 - [ ] **Phase 22: Tournament View Layout** — Status-aware section ordering with bracket as hero for IN_PROGRESS tournaments
 - [ ] **Phase 23: Bracket and Score Entry Mobile UX** — Touch-safe bracket navigation and fullscreen mobile score entry modal
 - [ ] **Phase 24: Organizer Mobile Support** — Result submission and correction fully usable on touch devices
@@ -176,7 +176,7 @@ Plans:
 | 17. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 1/1 | Complete | 2026-03-05 |
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
-| 21. Navigation Fix | v1.4 | 0/1 | Planning | - |
+| 21. Navigation Fix | 1/1 | Complete   | 2026-03-06 | - |
 | 22. Tournament View Layout | v1.4 | 0/TBD | Not started | - |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |

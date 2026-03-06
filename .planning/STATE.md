@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Phase 21 context gathered
-last_updated: "2026-03-06T19:07:27.856Z"
+stopped_at: "Phase 21-01 checkpoint:human-verify — awaiting real-device mobile nav verification"
+last_updated: "2026-03-06T19:43:34.408Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
   percent: 0
 ---
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 20-mobile-dev-tooling P01 | 30min | 3 tasks | 4 files |
+| Phase 21-navigation-fix P01 | 2min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,8 @@ Key architectural context for v1.4:
 - [Phase 20]: vite-plugin-qrcode added unconditionally to plugins; --host CLI flag drives QR activation, not server.host config
 - [Phase 20-mobile-dev-tooling]: VITE_API_URL commented out in .env.development so Vite proxy handles /api requests from mobile devices — mobile cannot resolve localhost to dev machine
 - [Phase 20-mobile-dev-tooling]: vite-plugin-qrcode added unconditionally; --host CLI flag in dev:mobile script activates network binding and QR output without affecting regular dev script
+- [Phase 21-navigation-fix]: Accordion placed as sibling to Nav so Accordion.Header clicks don't trigger collapseOnSelect and close the drawer
+- [Phase 21-navigation-fix]: Desktop ADMIN links rendered in a separate d-none d-lg-flex Nav; Accordion only shows on mobile (d-lg-none)
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T19:07:27.854Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-navigation-fix/21-CONTEXT.md
+Last session: 2026-03-06T19:43:34.405Z
+Stopped at: Phase 21-01 checkpoint:human-verify — awaiting real-device mobile nav verification
+Resume file: None
