@@ -5,9 +5,9 @@ milestone_name: UI Rework & Mobile Design
 status: active
 stopped_at: ""
 last_updated: "2026-03-06"
-last_activity: "2026-03-06 — Milestone v1.4 started"
+last_activity: "2026-03-06 — Roadmap created for v1.4 (6 phases, 28 requirements mapped)"
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** v1.4 UI Rework & Mobile Design
+**Current focus:** v1.4 UI Rework & Mobile Design — Phase 20 (Mobile Dev Tooling)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-06 — Milestone v1.4 started
+Phase: 20 of 25 (Mobile Dev Tooling)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,65 +46,22 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
-| Phase 12 P01 | 3m | 2 tasks | 7 files |
-| Phase 12 P02 | 2m | 2 tasks | 5 files |
-| Phase 13 P01 | 2m | 2 tasks | 3 files |
-| Phase 13 P02 | 2m | 2 tasks | 3 files |
-| Phase 17-bracket-view-ux-fixes P01 | 1m | 2 tasks | 3 files |
-| Phase 14-tournament-copy P01 | 4m | 1 tasks | 5 files |
-| Phase 14-tournament-copy P02 | 8m | 1 tasks | 4 files |
-| Phase 15 P01 | 12m | 2 tasks | 4 files |
-| Phase 15 P02 | 2m | 2 tasks | 4 files |
-| Phase 15 P02 | 5min | 3 tasks | 4 files |
-| Phase 16-admin-access-parity P01 | 2m | 2 tasks | 3 files |
-| Phase 16 P02 | 3min | 3 tasks | 5 files |
-| Phase 18-phase13-verification-draw05 P01 | 2m | 2 tasks | 2 files |
-| Phase 19-integration-bug-fixes P01 | 5m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
 ### Decisions
 
-All v1.2 decisions archived to PROJECT.md Key Decisions table.
+All v1.3 decisions archived to PROJECT.md Key Decisions table.
 
-Key architectural context for v1.3:
-- Manual draw extends existing Bracket/Round/Match persistence from v1.0 Phase 01.1
-- Ranking recalculation (used by DEL and REVERT) already exists from Feature 008
-- Admin parity fix may touch CASL permission definitions
-- [Phase 12]: drawMode stored as String in schema to avoid enum migration for two values
-- [Phase 12]: Manual mode uses getBracketByPlayerCount for BYE structure, skips BYE Round 2 pre-population
-- [Phase 12]: Bracket integrity check in startTournament covers both seeded and manual modes as safety net
-- [Phase 12]: assignPosition uses inner async helper getByeAdjacentRound2Update() inside transaction closure for reuse across assign/clear/reassign steps
-- [Phase 12]: assignPositionSchema uses default(null) for playerId/pairId instead of .oxor() — cleaner UX for null-to-clear pattern
-- [Phase 13]: drawMode defaults to 'seeded' in UI state to preserve existing seeded workflow
-- [Phase 13]: [Phase 13-01]: bracketDrawMode/isManualDraw derived from structure.brackets[0].drawMode for Plan 02 manual editor
-- [Phase 13]: ManualDrawEditor uses immediate-save pattern: each dropdown selection calls assignPosition API directly, consistent with single-position assignment API design
-- [Phase 13]: Save Draw button hidden for manual draws (not disabled): manual mode has no pending swaps to batch-save
-- [Phase 17-bracket-view-ux-fixes]: Remove handleWheel entirely from useBracketNavigation (not a no-op) — cleaner, no dead code
-- [Phase 17-bracket-view-ux-fixes]: Detect doubles match in MatchResultModal via presence of pair1/pair2 on match object (not a passed prop)
-- [Phase 14-01]: Validator accepts all override fields as optional; service enforces name+startDate+endDate (required by DB schema)
-- [Phase 14-01]: Deputy organizer is NOT copied; copying user becomes primary organizer, deputy assigned later
-- [Phase 14-01]: Registration open/close dates not copied — must be set fresh for new tournament
-- [Phase 14-tournament-copy]: Reuse creation modal for copy flow (copySource state distinguishes modes) rather than separate modal
-- [Phase 14-tournament-copy]: Three-dot dropdown (vertical ellipsis) replaces multiple inline buttons per tournament row
-- [Phase 15-01]: recalculateRankings called outside Prisma transaction (uses its own internal Prisma client — wrapping inside $transaction causes connection conflicts)
-- [Phase 15-01]: revert route uses authorize('update', 'Tournament') same as startTournament — ORGANIZER already has update permission, no new custom permission needed
-- [Phase 15-01]: ORGANIZER delete permission granted by merging delete into can() array, removing the cannot('delete', 'Tournament') override line
-- [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
-- [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
-- [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
-- [Phase 15-02]: registrationClosed used as proxy for has-draw in dropdown (list page lacks structure data)
-- [Phase 15-02]: IN_PROGRESS+hasBracket in BracketGenerationSection shows revert-only card instead of null — prevents organizer lockout
-- [Phase 15-02]: revertTournament duplicated in tournamentService and tournamentViewService — each serves its own page context
-- [Phase 16-01]: ADMIN early-exit placed after isAuthenticated check but before role checks — preserves redirect to login for unauthenticated users
-- [Phase 16-01]: All 6 organizer routes simplified from requiredRoles array to requiredRole singular — ADMIN bypass in ProtectedRoute makes arrays unnecessary
-- [Phase 16-01]: seedingPlacementRoutes uses authorize('create', 'Tournament') — CASL already grants ADMIN can('manage','all') so no special ADMIN case needed
-- [Phase 16-02]: Admin player-facing links use hardcoded 'Registrations' label (not t('nav.tournaments')) to avoid affecting other usages of that translation key
-- [Phase 16-02]: Admin warning banner gated on user?.role === 'ADMIN' only (not ORGANIZER) per plan spec
-- [Phase 16-02]: PLAYER section condition unchanged — ADMIN gets player links via dedicated admin-only section
-- [Phase 18-phase13-verification-draw05]: Used unit test pattern (mocked Prisma) for assignPosition tests — consistent with bracketPersistenceService.test.js and avoids DB setup overhead
-- [Phase 19-01]: No client-side filtering workaround added for formatType — fixed the correct layer (Joi schema + service param forwarding)
-- [Phase 19-01]: Player count guard raised to 4 to match backend bracket template minimum (docs/bracket-templates-all.json starts at 4)
+Key architectural context for v1.4:
+- Frontend-only milestone — no backend API changes, Express/Prisma untouched
+- Primary stack additions: vite-plugin-qrcode (dev dep only), no production library changes in v1.4 core
+- react-zoom-pan-pinch deferred to v1.4.x pending real-device validation of +/- button UX
+- NavBar fix: replace data-bs-toggle plain nav with React Bootstrap Navbar.Offcanvas (collapseOnSelect)
+- Tournament view restructure: buildSectionOrder(status, role) function, Accordion for collapsible secondary sections
+- Bracket touch fix: imperative addEventListener({passive: false}) on DOM node — React registers touch as passive by default
+- Score entry fix: type="text" inputMode="numeric" on score fields (type="number" shows decimal keypad on iOS)
+- Phase ordering rationale: tooling → nav → layout → bracket/score → organizer → responsive sweep
 
 ### Pending Todos
 
@@ -112,19 +69,12 @@ None.
 
 ### Blockers/Concerns
 
-None.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 1 | Allow backdated tournament start dates with past-date warning banner | 2026-03-04 | 93ad06d | [1-allow-backdated-tournament-start-dates-w](./quick/1-allow-backdated-tournament-start-dates-w/) |
-| 2 | Fix FK constraint error on Match pair1Id for doubles draw generation | 2026-03-04 | dca5d38 | [2-fix-fk-constraint-error-on-match-pair1id](./quick/2-fix-fk-constraint-error-on-match-pair1id/) |
-| 3 | Visually identify seeded players in bracket view with [N] seed badges | 2026-03-06 | ded6412 | [3-visually-identify-seeded-players-in-brac](./quick/3-visually-identify-seeded-players-in-brac/) |
-| 4 | Fill Ranking/Seed/Bracket/Round columns in Registered Players list with real data | 2026-03-06 | 4c5caaf | [4-in-tournament-registered-players-list-th](./quick/4-in-tournament-registered-players-list-th/) |
+- [Phase 23]: Pinch-to-zoom decision gate — verify +/- button UX on real device before committing to react-zoom-pan-pinch
+- [Phase 23]: BYE row vertical whitespace on mobile — visibility:hidden wastes space; display:none may break connector lines
+- [Phase 24]: Manual draw mobile UX extent unknown — searchable select may suffice OR bottom-sheet picker needed (HIGH effort path)
 
 ## Session Continuity
 
-Last session: 2026-03-06T01:27:00.000Z
-Stopped at: Completed quick task 4 — enriched registration columns (ranking, seed, bracket, round)
+Last session: 2026-03-06
+Stopped at: Roadmap created — 6 phases (20–25), 28/28 v1.4 requirements mapped
 Resume file: None

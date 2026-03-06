@@ -87,40 +87,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOOL-01 | — | Pending |
-| TOOL-02 | — | Pending |
-| NAV-01 | — | Pending |
-| NAV-02 | — | Pending |
-| NAV-03 | — | Pending |
-| LAYOUT-01 | — | Pending |
-| LAYOUT-02 | — | Pending |
-| LAYOUT-03 | — | Pending |
-| LAYOUT-04 | — | Pending |
-| LAYOUT-05 | — | Pending |
-| BRKT-01 | — | Pending |
-| BRKT-02 | — | Pending |
-| BRKT-03 | — | Pending |
-| BRKT-04 | — | Pending |
-| SCORE-01 | — | Pending |
-| SCORE-02 | — | Pending |
-| SCORE-03 | — | Pending |
-| SCORE-04 | — | Pending |
-| ORG-01 | — | Pending |
-| ORG-02 | — | Pending |
-| RESP-01 | — | Pending |
-| RESP-02 | — | Pending |
-| RESP-03 | — | Pending |
-| RESP-04 | — | Pending |
-| RESP-05 | — | Pending |
-| RESP-06 | — | Pending |
-| RESP-07 | — | Pending |
-| RESP-08 | — | Pending |
+| TOOL-01 | Phase 20 | Pending |
+| TOOL-02 | Phase 20 | Pending |
+| NAV-01 | Phase 21 | Pending |
+| NAV-02 | Phase 21 | Pending |
+| NAV-03 | Phase 21 | Pending |
+| LAYOUT-01 | Phase 22 | Pending |
+| LAYOUT-02 | Phase 22 | Pending |
+| LAYOUT-03 | Phase 22 | Pending |
+| LAYOUT-04 | Phase 22 | Pending |
+| LAYOUT-05 | Phase 22 | Pending |
+| BRKT-01 | Phase 23 | Pending |
+| BRKT-02 | Phase 23 | Pending |
+| BRKT-03 | Phase 23 | Pending |
+| BRKT-04 | Phase 23 | Pending |
+| SCORE-01 | Phase 23 | Pending |
+| SCORE-02 | Phase 23 | Pending |
+| SCORE-03 | Phase 23 | Pending |
+| SCORE-04 | Phase 23 | Pending |
+| ORG-01 | Phase 24 | Pending |
+| ORG-02 | Phase 24 | Pending |
+| RESP-01 | Phase 25 | Pending |
+| RESP-02 | Phase 25 | Pending |
+| RESP-03 | Phase 25 | Pending |
+| RESP-04 | Phase 25 | Pending |
+| RESP-05 | Phase 25 | Pending |
+| RESP-06 | Phase 25 | Pending |
+| RESP-07 | Phase 25 | Pending |
+| RESP-08 | Phase 25 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 28 total
-- Mapped to phases: 0
-- Unmapped: 28 ⚠️
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation*
