@@ -95,18 +95,18 @@ async function cascadeClearWinnerFromNextRounds(tx, consolationBracketId, source
     } catch { /* ignore */ }
   }
 
-  // Clear winnerId's slot in this next-round match
+  // Clear winnerId's slot in this next-round match (ID and seed)
   const isInSlot1 = winnerIsDoubles
     ? nextMatch.pair1Id === winnerId
     : nextMatch.player1Id === winnerId;
 
   const slotClearData = {};
   if (winnerIsDoubles) {
-    if (isInSlot1) slotClearData.pair1Id = null;
-    else slotClearData.pair2Id = null;
+    if (isInSlot1) { slotClearData.pair1Id = null; slotClearData.pair1Seed = null; }
+    else { slotClearData.pair2Id = null; slotClearData.pair2Seed = null; }
   } else {
-    if (isInSlot1) slotClearData.player1Id = null;
-    else slotClearData.player2Id = null;
+    if (isInSlot1) { slotClearData.player1Id = null; slotClearData.player1Seed = null; }
+    else { slotClearData.player2Id = null; slotClearData.player2Seed = null; }
   }
 
   await tx.match.update({
@@ -198,18 +198,18 @@ export async function cascadeClearMainBracket(tx, bracketId, sourceMatchId, winn
     } catch { /* ignore */ }
   }
 
-  // Clear winnerId's slot in the next-round match
+  // Clear winnerId's slot in the next-round match (ID and seed)
   const isInSlot1 = winnerIsDoubles
     ? nextMatch.pair1Id === winnerId
     : nextMatch.player1Id === winnerId;
 
   const slotClearData = {};
   if (winnerIsDoubles) {
-    if (isInSlot1) slotClearData.pair1Id = null;
-    else slotClearData.pair2Id = null;
+    if (isInSlot1) { slotClearData.pair1Id = null; slotClearData.pair1Seed = null; }
+    else { slotClearData.pair2Id = null; slotClearData.pair2Seed = null; }
   } else {
-    if (isInSlot1) slotClearData.player1Id = null;
-    else slotClearData.player2Id = null;
+    if (isInSlot1) { slotClearData.player1Id = null; slotClearData.player1Seed = null; }
+    else { slotClearData.player2Id = null; slotClearData.player2Seed = null; }
   }
 
   await tx.match.update({
