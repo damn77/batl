@@ -9,8 +9,8 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Mobile Dev Tooling
 
-- [ ] **TOOL-01**: Developer can access the app on a mobile device by scanning a QR code from the terminal
-- [ ] **TOOL-02**: Vite dev server is accessible from other devices on the local network
+- [x] **TOOL-01**: Developer can access the app on a mobile device by scanning a QR code from the terminal
+- [x] **TOOL-02**: Vite dev server is accessible from other devices on the local network
 
 ### Navigation
 
@@ -87,8 +87,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOOL-01 | Phase 20 | Pending |
-| TOOL-02 | Phase 20 | Pending |
+| TOOL-01 | Phase 20 | Complete |
+| TOOL-02 | Phase 20 | Complete |
 | NAV-01 | Phase 21 | Pending |
 | NAV-02 | Phase 21 | Pending |
 | NAV-03 | Phase 21 | Pending |

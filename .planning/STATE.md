@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Phase 20 context gathered
-last_updated: "2026-03-06T16:58:58.239Z"
+stopped_at: Phase 20 Plan 01 — awaiting Task 3 human-verify checkpoint
+last_updated: "2026-03-06T17:26:44.112Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -62,6 +62,7 @@ Key architectural context for v1.4:
 - Bracket touch fix: imperative addEventListener({passive: false}) on DOM node — React registers touch as passive by default
 - Score entry fix: type="text" inputMode="numeric" on score fields (type="number" shows decimal keypad on iOS)
 - Phase ordering rationale: tooling → nav → layout → bracket/score → organizer → responsive sweep
+- [Phase 20]: vite-plugin-qrcode added unconditionally to plugins; --host CLI flag drives QR activation, not server.host config
 
 ### Pending Todos
 
@@ -75,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T16:58:58.237Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-mobile-dev-tooling/20-CONTEXT.md
+Last session: 2026-03-06T17:26:22.891Z
+Stopped at: Phase 20 Plan 01 — awaiting Task 3 human-verify checkpoint
+Resume file: None
