@@ -5,6 +5,7 @@ import { mutate as globalMutate } from 'swr';
 import { submitMatchResult, submitMatchResultDryRun } from '../services/matchService';
 import SetsScoreForm from './SetsScoreForm';
 import BigTiebreakForm from './BigTiebreakForm';
+import './MatchResultModal.css';
 
 /**
  * MatchResultModal — role-aware match result dialog.
@@ -288,7 +289,7 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
   const isSubmitBlockedByWinnerLock = !isOrganizer && isWinnerChanging;
 
   return (
-    <Modal show={!!match} onHide={onClose} centered size="lg">
+    <Modal show={!!match} onHide={onClose} centered size="lg" fullscreen="sm-down" className="match-result-modal">
       <Modal.Header closeButton>
         <Modal.Title>
           {isDoublesMatch ? (
