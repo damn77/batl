@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Phase 22 context gathered
-last_updated: "2026-03-07T00:20:56.210Z"
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-03-07T00:41:58.475Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 0
 ---
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 20-mobile-dev-tooling P01 | 30min | 3 tasks | 4 files |
 | Phase 21-navigation-fix P01 | 2min | 1 tasks | 4 files |
 | Phase 21-navigation-fix P01 | 45min | 2 tasks | 5 files |
+| Phase 22-tournament-view-layout P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Key architectural context for v1.4:
 - [Phase 21-navigation-fix]: Desktop controls moved outside Navbar.Offcanvas into container-fluid d-none d-lg-flex to fix desktop layout regression
 - [Phase 21-navigation-fix]: LanguageSwitcher: drop=down + position:absolute to prevent dropdown clipping inside Offcanvas overflow context
 - [Phase 21-navigation-fix]: CORS whitelist extended with 192.168.x.x LAN IP pattern for mobile dev testing (development only)
+- [Phase 22-01]: TournamentInfoPanel renders Accordion.Item children (not a full Accordion) — parent TournamentViewPage owns the Accordion wrapper
+- [Phase 22-01]: COMPLETED status section order puts points/players first so rankings are prominent after tournament ends
+- [Phase 22-01]: alwaysExpanded prop on FormatVisualization enables hero bracket rendering without toggle header or Collapse wrapper
 
 ### Pending Todos
 
@@ -86,6 +90,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T00:20:56.208Z
-Stopped at: Phase 22 context gathered
-Resume file: .planning/phases/22-tournament-view-layout/22-CONTEXT.md
+Last session: 2026-03-07T00:41:58.473Z
+Stopped at: Completed 22-01-PLAN.md
+Resume file: None

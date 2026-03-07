@@ -180,7 +180,7 @@ Plans:
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
-| 22. Tournament View Layout | v1.4 | 0/2 | Not started | - |
+| 22. Tournament View Layout | 1/2 | In Progress|  | - |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
 | 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
