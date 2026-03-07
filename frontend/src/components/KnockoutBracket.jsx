@@ -126,9 +126,13 @@ const KnockoutBracket = ({
   // Refs
   const containerRef = useRef(null);
 
+  // On mobile, default to 50% zoom so more of the bracket is visible
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const effectiveInitialScale = initialScale === 1.0 && isMobile ? 0.5 : initialScale;
+
   // Navigation hook (T030)
   const navigation = useBracketNavigation({
-    initialScale,
+    initialScale: effectiveInitialScale,
     roundCount: rounds?.length || 0
   });
 
