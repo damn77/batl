@@ -42,8 +42,8 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Organizer Mobile
 
-- [ ] **ORG-01**: Organizer can submit and correct match results on a mobile device
-- [ ] **ORG-02**: Result correction modal is fullscreen and touch-friendly on mobile
+- [x] **ORG-01**: Organizer can submit and correct match results on a mobile device
+- [x] **ORG-02**: Result correction modal is fullscreen and touch-friendly on mobile
 
 ### App-Wide Responsive
 
@@ -105,8 +105,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCORE-02 | Phase 23 | Complete |
 | SCORE-03 | Phase 23 | Complete |
 | SCORE-04 | Phase 23 | Complete |
-| ORG-01 | Phase 24 | Pending |
-| ORG-02 | Phase 24 | Pending |
+| ORG-01 | Phase 24 | Complete |
+| ORG-02 | Phase 24 | Complete |
 | RESP-01 | Phase 25 | Pending |
 | RESP-02 | Phase 25 | Pending |
 | RESP-03 | Phase 25 | Pending |
