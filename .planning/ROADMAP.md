@@ -100,7 +100,7 @@ Plans:
   4. Desktop navigation bar is unchanged at lg+ breakpoint
 **Plans**: 1 plan
 Plans:
-- [ ] 21-01-PLAN.md — Refactor NavBar to React Bootstrap Offcanvas, fix LanguageSwitcher, add 150ms animation
+- [x] 21-01-PLAN.md — Refactor NavBar to React Bootstrap Offcanvas, fix LanguageSwitcher, add 150ms animation
 
 ### Phase 22: Tournament View Layout
 **Goal**: Tournament page content surfaces in the right order based on tournament status, bracket-first for live tournaments
@@ -112,7 +112,10 @@ Plans:
   3. User taps any secondary section header and it expands; taps again and it collapses
   4. A SCHEDULED tournament shows registration information first; a COMPLETED tournament shows the champion banner first
   5. The champion banner is prominently displayed at the top for COMPLETED tournaments
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 22-01-PLAN.md — Create section ordering utility, refactor TournamentInfoPanel to accordion items, add alwaysExpanded to FormatVisualization
+- [ ] 22-02-PLAN.md — Wire hero zone + accordion layout into TournamentViewPage
 
 ### Phase 23: Bracket and Score Entry Mobile UX
 **Goal**: Players can navigate the bracket and submit match scores on a real mobile device without workarounds
@@ -176,8 +179,8 @@ Plans:
 | 17. Phase 13 Verification & DRAW-05 Gap Closure | v1.3 | 1/1 | Complete | 2026-03-05 |
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
-| 21. Navigation Fix | 1/1 | Complete    | 2026-03-06 | - |
-| 22. Tournament View Layout | v1.4 | 0/TBD | Not started | - |
+| 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
+| 22. Tournament View Layout | v1.4 | 0/2 | Not started | - |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
 | 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
