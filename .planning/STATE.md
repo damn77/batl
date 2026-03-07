@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-07T00:41:58.475Z"
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-03-07T00:52:40.707Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 21-navigation-fix P01 | 2min | 1 tasks | 4 files |
 | Phase 21-navigation-fix P01 | 45min | 2 tasks | 5 files |
 | Phase 22-tournament-view-layout P01 | 3min | 2 tasks | 3 files |
+| Phase 22-tournament-view-layout P02 | multi-session | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Key architectural context for v1.4:
 - [Phase 22-01]: TournamentInfoPanel renders Accordion.Item children (not a full Accordion) — parent TournamentViewPage owns the Accordion wrapper
 - [Phase 22-01]: COMPLETED status section order puts points/players first so rankings are prominent after tournament ends
 - [Phase 22-01]: alwaysExpanded prop on FormatVisualization enables hero bracket rendering without toggle header or Collapse wrapper
+- [Phase 22-02]: Organizer & Registration accordion collapsed by default for ALL statuses — avoids visual noise on first load, user-verified at checkpoint
+- [Phase 22-02]: renderSection switch pattern maps string section keys to Accordion.Items; TournamentInfoPanel fragment renders both location-schedule and organizer-registration items, skip key deduplication via null return
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T00:41:58.473Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-03-07T00:52:40.704Z
+Stopped at: Completed 22-02-PLAN.md
 Resume file: None

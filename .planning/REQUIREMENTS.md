@@ -20,11 +20,11 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Tournament View Layout
 
-- [ ] **LAYOUT-01**: User sees the bracket as the primary (hero) element when tournament is IN_PROGRESS
-- [ ] **LAYOUT-02**: Secondary sections (registration info, format/rules, point tables, player list) are collapsed by default on mobile for IN_PROGRESS tournaments
+- [x] **LAYOUT-01**: User sees the bracket as the primary (hero) element when tournament is IN_PROGRESS
+- [x] **LAYOUT-02**: Secondary sections (registration info, format/rules, point tables, player list) are collapsed by default on mobile for IN_PROGRESS tournaments
 - [x] **LAYOUT-03**: User can expand/collapse individual secondary sections on the tournament page
 - [x] **LAYOUT-04**: Section ordering adapts based on tournament status (SCHEDULED shows registration first, IN_PROGRESS shows bracket first, COMPLETED shows champion/results first)
-- [ ] **LAYOUT-05**: Champion banner displays prominently for COMPLETED tournaments
+- [x] **LAYOUT-05**: Champion banner displays prominently for COMPLETED tournaments
 
 ### Bracket Mobile UX
 
@@ -92,11 +92,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NAV-01 | Phase 21 | Complete |
 | NAV-02 | Phase 21 | Complete |
 | NAV-03 | Phase 21 | Complete |
-| LAYOUT-01 | Phase 22 | Pending |
-| LAYOUT-02 | Phase 22 | Pending |
+| LAYOUT-01 | Phase 22 | Complete |
+| LAYOUT-02 | Phase 22 | Complete |
 | LAYOUT-03 | Phase 22 | Complete |
 | LAYOUT-04 | Phase 22 | Complete |
-| LAYOUT-05 | Phase 22 | Pending |
+| LAYOUT-05 | Phase 22 | Complete |
 | BRKT-01 | Phase 23 | Pending |
 | BRKT-02 | Phase 23 | Pending |
 | BRKT-03 | Phase 23 | Pending |
