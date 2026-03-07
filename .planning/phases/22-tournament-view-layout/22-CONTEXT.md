@@ -37,6 +37,7 @@ Tournament page content surfaces in the right order based on tournament status. 
   - "Location & Schedule" — higher priority, expanded by default for SCHEDULED
   - "Organizer & Registration" — lower priority, collapsed by default
 - Both items are part of the main page accordion (not nested)
+- **Compact density** — current info section wastes too much space. Tighten spacing, reduce padding, use smaller text/line-height. Information should be dense and scannable on both desktop and mobile.
 
 ### Champion banner
 - Keep existing yellow Alert design (no upgrade this phase)
@@ -58,6 +59,7 @@ Tournament page content surfaces in the right order based on tournament status. 
 - "Location & Schedule are higher priority. Organizer and registration lower priority — minimized by default"
 - Info panel should arrange vertically (not two-column)
 - Bracket should feel like a true hero element — always visible, not collapsible
+- "Information section has very low density — compact the text more to not use as much space, both in browser and mobile"
 
 </specifics>
 
