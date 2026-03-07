@@ -1,9 +1,7 @@
 // T018-T031: Tournament Registration Controller
 // HTTP handlers for tournament registration endpoints (003-tournament-registration)
 import * as tournamentRegistrationService from '../services/tournamentRegistrationService.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 /**
  * Converts a round number to a display label (e.g. 'Final', 'SF', 'QF', 'R1')

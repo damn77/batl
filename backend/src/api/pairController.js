@@ -1,13 +1,11 @@
 // Doubles Pair Controller
 // Feature: 006-doubles-pairs
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import * as pairService from '../services/pairService.js';
 
 import { canCreatePair, canManagePairs } from '../middleware/pairAuth.js';
 import { PairErrorStatusCodes } from '../utils/pairErrors.js';
-
-const prisma = new PrismaClient();
 
 /**
  * POST /api/v1/pairs
