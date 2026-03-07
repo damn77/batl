@@ -34,7 +34,7 @@ export function buildSectionOrder(status) {
 export function getDefaultActiveKeys(status) {
   switch (status) {
     case 'SCHEDULED':
-      return ['location-schedule', 'organizer-registration'];
+      return ['location-schedule'];
     case 'IN_PROGRESS':
       return [];
     case 'COMPLETED':
