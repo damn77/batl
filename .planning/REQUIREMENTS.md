@@ -28,10 +28,10 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Bracket Mobile UX
 
-- [ ] **BRKT-01**: Bracket auto-scales to fit the viewport width on initial mobile load
-- [ ] **BRKT-02**: User can pan the bracket via touch drag on real mobile devices (passive event fix)
-- [ ] **BRKT-03**: Zoom in/out buttons meet 44px minimum tap target size
-- [ ] **BRKT-04**: Bracket controls (zoom, reset, BYE toggle) are accessible and usable on mobile screens
+- [x] **BRKT-01**: Bracket auto-scales to fit the viewport width on initial mobile load
+- [x] **BRKT-02**: User can pan the bracket via touch drag on real mobile devices (passive event fix)
+- [x] **BRKT-03**: Zoom in/out buttons meet 44px minimum tap target size
+- [x] **BRKT-04**: Bracket controls (zoom, reset, BYE toggle) are accessible and usable on mobile screens
 
 ### Score Entry
 
@@ -97,10 +97,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAYOUT-03 | Phase 22 | Complete |
 | LAYOUT-04 | Phase 22 | Complete |
 | LAYOUT-05 | Phase 22 | Complete |
-| BRKT-01 | Phase 23 | Pending |
-| BRKT-02 | Phase 23 | Pending |
-| BRKT-03 | Phase 23 | Pending |
-| BRKT-04 | Phase 23 | Pending |
+| BRKT-01 | Phase 23 | Complete |
+| BRKT-02 | Phase 23 | Complete |
+| BRKT-03 | Phase 23 | Complete |
+| BRKT-04 | Phase 23 | Complete |
 | SCORE-01 | Phase 23 | Pending |
 | SCORE-02 | Phase 23 | Pending |
 | SCORE-03 | Phase 23 | Pending |
