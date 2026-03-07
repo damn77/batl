@@ -31,4 +31,24 @@
     min-height: 44px;
     font-size: 1rem;
   }
+
+  /* Segmented ButtonGroup tap targets on mobile */
+  .match-result-modal .mode-toggle-mobile .btn {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* Confirmation buttons: primary full-width on top, secondaries side-by-side below */
+  .match-result-modal .confirmation-buttons {
+    flex-direction: column;
+  }
+
+  .match-result-modal .confirmation-buttons .confirm-primary {
+    width: 100%;
+    order: -1;
+  }
+
+  .match-result-modal .confirmation-buttons .confirm-secondary {
+    flex: 1;
+  }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import { Modal, Button, ButtonGroup, Form, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { mutate as globalMutate } from 'swr';
 import { submitMatchResult, submitMatchResultDryRun } from '../services/matchService';
@@ -370,7 +370,8 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
         ) : isOrganizer ? (
           /* Mode 3: Organizer editable — score or special outcome */
           <>
-            <div className="mb-3">
+            {/* Desktop: inline radios (>=576px) */}
+            <div className="mode-toggle-desktop d-none d-sm-block mb-3">
               <Form.Check
                 type="radio"
                 inline
@@ -389,6 +390,25 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                 checked={mode === 'special'}
                 onChange={() => setMode('special')}
               />
+            </div>
+            {/* Mobile: segmented ButtonGroup (<576px) */}
+            <div className="mode-toggle-mobile d-sm-none mb-3">
+              <ButtonGroup className="w-100">
+                <Button
+                  className="flex-fill"
+                  variant={mode === 'score' ? 'primary' : 'outline-primary'}
+                  onClick={() => setMode('score')}
+                >
+                  Enter score
+                </Button>
+                <Button
+                  className="flex-fill"
+                  variant={mode === 'special' ? 'primary' : 'outline-primary'}
+                  onClick={() => setMode('special')}
+                >
+                  Special outcome
+                </Button>
+              </ButtonGroup>
             </div>
 
             {mode === 'score' ? (
@@ -510,35 +530,43 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
 
       {!isReadOnly && (
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Cancel
-          </Button>
           {pendingWinnerChange ? (
-            <>
-              <Button variant="outline-secondary" onClick={() => setPendingWinnerChange(null)} disabled={submitting}>
-                Go Back
-              </Button>
-              <Button variant="danger" onClick={handleConfirmWinnerChange} disabled={submitting}>
+            <div className="confirmation-buttons d-flex flex-wrap gap-2 w-100">
+              <Button className="confirm-primary" variant="danger" onClick={handleConfirmWinnerChange} disabled={submitting}>
                 {submitting ? 'Saving...' : 'Confirm Change'}
               </Button>
-            </>
-          ) : pendingInvalidSubmit ? (
-            <>
-              <Button variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
-                Fix Scores
+              <Button className="confirm-secondary" variant="outline-secondary" onClick={() => setPendingWinnerChange(null)} disabled={submitting}>
+                Go Back
               </Button>
-              <Button variant="danger" onClick={handleConfirmInvalidSubmit} disabled={submitting}>
+              <Button className="confirm-secondary" variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+            </div>
+          ) : pendingInvalidSubmit ? (
+            <div className="confirmation-buttons d-flex flex-wrap gap-2 w-100">
+              <Button className="confirm-primary" variant="danger" onClick={handleConfirmInvalidSubmit} disabled={submitting}>
                 {submitting ? 'Saving...' : 'Submit Anyway'}
               </Button>
-            </>
+              <Button className="confirm-secondary" variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
+                Fix Scores
+              </Button>
+              <Button className="confirm-secondary" variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              disabled={submitting || isSubmitBlockedByWinnerLock}
-            >
-              {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
-            </Button>
+            <>
+              <Button variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSubmit}
+                disabled={submitting || isSubmitBlockedByWinnerLock}
+              >
+                {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
+              </Button>
+            </>
           )}
         </Modal.Footer>
       )}
