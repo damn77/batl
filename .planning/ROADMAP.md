@@ -64,7 +64,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
 
 </details>
 
-### 🚧 v1.4 UI Rework & Mobile Design (In Progress)
+### v1.4 UI Rework & Mobile Design (In Progress)
 
 **Milestone Goal:** Restructure the UI for mobile-first usage — bracket-centric tournament view, status-aware content visibility, app-wide responsive layout, full organizer mobile support, and light visual refresh.
 
@@ -114,8 +114,8 @@ Plans:
   5. The champion banner is prominently displayed at the top for COMPLETED tournaments
 **Plans**: 2 plans
 Plans:
-- [ ] 22-01-PLAN.md — Create section ordering utility, refactor TournamentInfoPanel to accordion items, add alwaysExpanded to FormatVisualization
-- [ ] 22-02-PLAN.md — Wire hero zone + accordion layout into TournamentViewPage
+- [x] 22-01-PLAN.md — Create section ordering utility, refactor TournamentInfoPanel to accordion items, add alwaysExpanded to FormatVisualization
+- [x] 22-02-PLAN.md — Wire hero zone + accordion layout into TournamentViewPage
 
 ### Phase 23: Bracket and Score Entry Mobile UX
 **Goal**: Players can navigate the bracket and submit match scores on a real mobile device without workarounds
@@ -128,7 +128,10 @@ Plans:
   4. User taps "Enter Score" and the score entry modal opens fullscreen on mobile (sm-down)
   5. Score input fields show an integer numeric keypad on iOS Safari (no decimal key)
   6. The modal submit button remains visible and tappable when the iOS keyboard is open
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 23-01-PLAN.md — Add 44px mobile tap targets for bracket controls
+- [ ] 23-02-PLAN.md — Fullscreen score modal, sticky footer, numeric keyboard, 44px inputs
 
 ### Phase 24: Organizer Mobile Support
 **Goal**: Organizer can manage match results and corrections from a phone at courtside
@@ -180,7 +183,7 @@ Plans:
 | 18. Integration Bug Fixes | v1.3 | 1/1 | Complete | 2026-03-06 |
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
-| 22. Tournament View Layout | 2/2 | Complete   | 2026-03-07 | - |
-| 23. Bracket and Score Entry Mobile UX | v1.4 | 0/TBD | Not started | - |
+| 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
+| 23. Bracket and Score Entry Mobile UX | v1.4 | 0/2 | Not started | - |
 | 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
 | 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
