@@ -92,7 +92,7 @@ const BracketControls = ({
         title="Reset view to default zoom and position"
         aria-label="Reset view"
       >
-        <span aria-hidden="true">{'\u21BA'}</span> Reset
+        <span aria-hidden="true">{'\u21BA'}</span>
       </Button>
 
       {/* BYE toggle button (FR-008) - only shown if tournament has BYEs */}
@@ -107,8 +107,6 @@ const BracketControls = ({
           aria-pressed={showByes}
         >
           <span aria-hidden="true">{showByes ? '\uD83D\uDC41' : '\uD83D\uDC41\uFE0F'}</span>
-          {' '}
-          {showByes ? 'Hide BYEs' : 'Show BYEs'}
         </Button>
       )}
     </div>
