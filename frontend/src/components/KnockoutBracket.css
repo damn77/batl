@@ -545,13 +545,35 @@
   }
 
   .bracket-controls-wrapper {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.5rem;
+  }
+
+  /* 44px minimum tap targets for all bracket control buttons */
+  .bracket-controls .btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 1rem;
+  }
+
+  /* Ensure ButtonGroup buttons also get 44px height (ButtonGroup can override) */
+  .bracket-controls .btn-group .btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 1rem;
   }
 
   .bracket-controls {
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  /* 44px tap target for My Match button */
+  .bracket-my-match .btn {
+    min-height: 44px;
+    font-size: 1rem;
   }
 
   .bracket-my-match {
