@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Completed quick-5 (migrate PrismaClient instances)
-last_updated: "2026-03-07T08:53:38.878Z"
-last_activity: 2026-03-07 - Completed quick task 5: Migrate all PrismaClient instances to shared singleton
+stopped_at: Completed quick-6 (fix mobile bracket drag)
+last_updated: "2026-03-07T09:03:33Z"
+last_activity: 2026-03-07 - Completed quick task 6: Fix mobile bracket touch drag with callback ref pattern
 progress:
   total_phases: 6
   completed_phases: 3
@@ -96,9 +96,10 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 5 | Migrate all PrismaClient instances to shared singleton | 2026-03-07 | fb4b327 | [5-migrate-all-prismaclient-instances-to-sh](./quick/5-migrate-all-prismaclient-instances-to-sh/) |
+| 6 | Fix mobile bracket touch drag with callback ref pattern | 2026-03-07 | 4b42a7e | [6-fix-mobile-bracket-drag-not-working-whil](./quick/6-fix-mobile-bracket-drag-not-working-whil/) |
 
 ## Session Continuity
 
-Last session: 2026-03-07T08:53:38.876Z
-Stopped at: Completed quick-5 (migrate PrismaClient instances)
+Last session: 2026-03-07T09:03:33Z
+Stopped at: Completed quick-6 (fix mobile bracket drag)
 Resume file: None
