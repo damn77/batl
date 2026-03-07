@@ -35,26 +35,58 @@ export function useBracketNavigation({
   const [translateY, setTranslateY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Refs for drag tracking
+  // Refs for drag tracking (use refs for values needed in imperative listeners)
   const dragStartRef = useRef({ x: 0, y: 0 });
   const lastTranslateRef = useRef({ x: 0, y: 0 });
   const pinchStartDistanceRef = useRef(0);
   const pinchStartScaleRef = useRef(1);
+  const isDraggingRef = useRef(false);
+  const scaleRef = useRef(initialScale);
+  const translateRef = useRef({ x: 0, y: 0 });
+
+  // Keep refs in sync with state
+  useEffect(() => { scaleRef.current = scale; }, [scale]);
+  useEffect(() => { translateRef.current = { x: translateX, y: translateY }; }, [translateX, translateY]);
+  useEffect(() => { isDraggingRef.current = isDragging; }, [isDragging]);
 
   // Clamp scale to valid range
   const clampScale = useCallback((newScale) => {
     return Math.min(maxScale, Math.max(minScale, newScale));
   }, [minScale, maxScale]);
 
+  // Zoom centered on viewport middle
+  const zoomToCenter = useCallback((newScale) => {
+    const el = containerRef?.current;
+    if (!el) {
+      setScale(newScale);
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const oldScale = scaleRef.current;
+    const { x: tx, y: ty } = translateRef.current;
+
+    // Adjust translate so the viewport center stays fixed
+    const newTx = cx - (newScale / oldScale) * (cx - tx);
+    const newTy = cy - (newScale / oldScale) * (cy - ty);
+
+    setScale(newScale);
+    setTranslateX(newTx);
+    setTranslateY(newTy);
+  }, [containerRef]);
+
   // Zoom in (T021)
   const zoomIn = useCallback(() => {
-    setScale(prev => clampScale(prev + zoomStep));
-  }, [clampScale, zoomStep]);
+    const newScale = clampScale(scaleRef.current + zoomStep);
+    zoomToCenter(newScale);
+  }, [clampScale, zoomStep, zoomToCenter]);
 
   // Zoom out (T021)
   const zoomOut = useCallback(() => {
-    setScale(prev => clampScale(prev - zoomStep));
-  }, [clampScale, zoomStep]);
+    const newScale = clampScale(scaleRef.current - zoomStep);
+    zoomToCenter(newScale);
+  }, [clampScale, zoomStep, zoomToCenter]);
 
   // Reset to default view (T027, FR-012)
   const reset = useCallback(() => {
@@ -88,12 +120,13 @@ export function useBracketNavigation({
     const containerCenterX = containerRect.width / 2;
     const containerCenterY = containerRect.height / 2;
 
-    const newTranslateX = containerCenterX - elementCenterX * scale;
-    const newTranslateY = containerCenterY - elementCenterY * scale;
+    const currentScale = scaleRef.current;
+    const newTranslateX = containerCenterX - elementCenterX * currentScale;
+    const newTranslateY = containerCenterY - elementCenterY * currentScale;
 
     setTranslateX(newTranslateX);
     setTranslateY(newTranslateY);
-  }, [containerRef, scale]);
+  }, [containerRef]);
 
   // Mouse drag handlers (T024)
   const handleMouseDown = useCallback((e) => {
@@ -101,91 +134,92 @@ export function useBracketNavigation({
 
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-    lastTranslateRef.current = { x: translateX, y: translateY };
+    lastTranslateRef.current = { x: translateRef.current.x, y: translateRef.current.y };
 
     // Prevent text selection during drag
     e.preventDefault();
-  }, [translateX, translateY]);
+  }, []);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
 
     const deltaX = e.clientX - dragStartRef.current.x;
     const deltaY = e.clientY - dragStartRef.current.y;
 
     setTranslateX(lastTranslateRef.current.x + deltaX);
     setTranslateY(lastTranslateRef.current.y + deltaY);
-  }, [isDragging]);
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Touch handlers for mobile (T025, T026)
-  const handleTouchStart = useCallback((e) => {
-    if (e.touches.length === 1) {
-      // Single touch - pan
-      setIsDragging(true);
-      dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      lastTranslateRef.current = { x: translateX, y: translateY };
-    } else if (e.touches.length === 2) {
-      // Two fingers - pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
-      pinchStartDistanceRef.current = distance;
-      pinchStartScaleRef.current = scale;
-    }
-  }, [translateX, translateY, scale]);
+  // Attach touch listeners imperatively with { passive: false } so preventDefault works.
+  // React 19 registers synthetic touch listeners as passive, making preventDefault a no-op.
+  useEffect(() => {
+    const el = containerRef?.current;
+    if (!el) return;
 
-  const handleTouchMove = useCallback((e) => {
-    if (e.touches.length === 1 && isDragging) {
-      // Single touch - pan
-      const deltaX = e.touches[0].clientX - dragStartRef.current.x;
-      const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+    const onTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        setIsDragging(true);
+        dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        lastTranslateRef.current = { x: translateRef.current.x, y: translateRef.current.y };
+      } else if (e.touches.length === 2) {
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        pinchStartDistanceRef.current = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        pinchStartScaleRef.current = scaleRef.current;
+      }
+      e.preventDefault();
+    };
 
-      setTranslateX(lastTranslateRef.current.x + deltaX);
-      setTranslateY(lastTranslateRef.current.y + deltaY);
-    } else if (e.touches.length === 2) {
-      // Two fingers - pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
+    const onTouchMove = (e) => {
+      if (e.touches.length === 1 && isDraggingRef.current) {
+        const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+        const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+        setTranslateX(lastTranslateRef.current.x + deltaX);
+        setTranslateY(lastTranslateRef.current.y + deltaY);
+      } else if (e.touches.length === 2) {
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const scaleChange = distance / pinchStartDistanceRef.current;
+        const newScale = clampScale(pinchStartScaleRef.current * scaleChange);
+        setScale(newScale);
+      }
+      e.preventDefault();
+    };
 
-      const scaleChange = distance / pinchStartDistanceRef.current;
-      const newScale = clampScale(pinchStartScaleRef.current * scaleChange);
-      setScale(newScale);
-    }
+    const onTouchEnd = () => {
+      setIsDragging(false);
+    };
 
-    e.preventDefault();
-  }, [isDragging, clampScale]);
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd);
 
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [containerRef, clampScale]);
 
   // Add global mouse up handler to handle drag release outside container
   useEffect(() => {
     const handleGlobalMouseUp = () => {
-      if (isDragging) {
+      if (isDraggingRef.current) {
         setIsDragging(false);
       }
     };
 
     window.addEventListener('mouseup', handleGlobalMouseUp);
-    window.addEventListener('touchend', handleGlobalMouseUp);
 
     return () => {
       window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('touchend', handleGlobalMouseUp);
     };
-  }, [isDragging]);
+  }, []);
 
   // Generate CSS transform string
   const transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
@@ -212,13 +246,10 @@ export function useBracketNavigation({
     panTo,
     centerOnElement,
 
-    // Event handlers
+    // Event handlers (mouse only — touch is attached imperatively)
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
 
     // Computed values
     transform,

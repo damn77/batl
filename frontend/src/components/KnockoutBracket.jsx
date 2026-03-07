@@ -308,9 +308,6 @@ const KnockoutBracket = ({
                 onMouseDown={navigation.handleMouseDown}
                 onMouseMove={navigation.handleMouseMove}
                 onMouseUp={navigation.handleMouseUp}
-                onTouchStart={navigation.handleTouchStart}
-                onTouchMove={navigation.handleTouchMove}
-                onTouchEnd={navigation.handleTouchEnd}
               >
                 <div
                   className={viewportContentClasses}
