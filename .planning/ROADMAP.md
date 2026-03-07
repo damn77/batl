@@ -187,5 +187,5 @@ Plans:
 | 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 2/2 | Complete | 2026-03-07 |
-| 24. Organizer Mobile Support | 1/1 | Complete   | 2026-03-07 | - |
+| 24. Organizer Mobile Support | 1/1 | Complete    | 2026-03-07 | - |
 | 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
