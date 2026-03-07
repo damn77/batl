@@ -11,220 +11,271 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { VIEWPORT_CONSTRAINTS } from '../utils/bracketUtils';
 
-/**
- * Custom hook for bracket viewport navigation
- *
- * @param {Object} options - Configuration options
- * @param {number} options.initialScale - Initial zoom scale (default 1.0)
- * @param {number} options.minScale - Minimum zoom scale (default 0.25)
- * @param {number} options.maxScale - Maximum zoom scale (default 4.0)
- * @param {number} options.zoomStep - Zoom increment per step (default 0.25)
- * @param {React.RefObject} options.containerRef - Ref to the bracket container element
- * @returns {Object} Navigation state and handlers
- */
+// Layout constants for bracket width calculations
+const ROUND_WIDTH = 253; // measured rendered match box width at 100% zoom
+const ROUND_GAP = 48;    // matches .bracket-grid gap: 3rem
+
 export function useBracketNavigation({
   initialScale = VIEWPORT_CONSTRAINTS.DEFAULT_SCALE,
   minScale = VIEWPORT_CONSTRAINTS.MIN_SCALE,
   maxScale = VIEWPORT_CONSTRAINTS.MAX_SCALE,
   zoomStep = VIEWPORT_CONSTRAINTS.ZOOM_STEP,
-  containerRef
+  roundCount = 0
 } = {}) {
-  // Viewport state
   const [scale, setScale] = useState(initialScale);
   const [translateX, setTranslateX] = useState(0);
   const [translateY, setTranslateY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Refs for drag tracking
+  // Callback ref pattern: viewportNode state triggers useEffect re-runs
+  // when the conditionally-rendered viewport div mounts/unmounts.
+  const [viewportNode, setViewportNode] = useState(null);
+  const viewportNodeRef = useRef(null);
+  const setViewportRef = useCallback((node) => {
+    viewportNodeRef.current = node;
+    setViewportNode(node);
+  }, []);
+
   const dragStartRef = useRef({ x: 0, y: 0 });
   const lastTranslateRef = useRef({ x: 0, y: 0 });
   const pinchStartDistanceRef = useRef(0);
   const pinchStartScaleRef = useRef(1);
+  const isDraggingRef = useRef(false);
+  const touchMovedRef = useRef(false);
+  const scaleRef = useRef(initialScale);
+  const translateRef = useRef({ x: 0, y: 0 });
 
-  // Clamp scale to valid range
+  useEffect(() => { scaleRef.current = scale; }, [scale]);
+  useEffect(() => { translateRef.current = { x: translateX, y: translateY }; }, [translateX, translateY]);
+  useEffect(() => { isDraggingRef.current = isDragging; }, [isDragging]);
+
   const clampScale = useCallback((newScale) => {
     return Math.min(maxScale, Math.max(minScale, newScale));
   }, [minScale, maxScale]);
 
-  // Zoom in (T021)
+  // Clamp translate so content fills viewport with no whitespace gaps.
+  // When scaled content < viewport: center on that axis.
+  // When scaled content > viewport: prevent dragging past edges.
+  // NOTE: Measures .bracket-grid directly because .bracket-container has
+  // overflow-x:auto which captures overflow, hiding the true content size
+  // from scrollWidth on .bracket-viewport-content.
+  const clampTranslate = useCallback((tx, ty, s) => {
+    const el = viewportNodeRef.current;
+    if (!el) return { x: tx, y: ty };
+
+    const gridEl = el.querySelector('.bracket-grid');
+    if (!gridEl) return { x: tx, y: ty };
+
+    const vpW = el.clientWidth;
+    const vpH = el.clientHeight;
+    const contentW = gridEl.scrollWidth * s;
+    const contentH = gridEl.scrollHeight * s;
+
+    let cx = tx, cy = ty;
+
+    if (contentW <= vpW) {
+      // Content fits horizontally — center it
+      cx = (vpW - contentW) / 2;
+    } else {
+      // Content overflows — don't let edges pull away from viewport
+      cx = Math.min(0, Math.max(vpW - contentW, cx));
+    }
+
+    if (contentH <= vpH) {
+      // Content fits vertically — pin to top
+      cy = 0;
+    } else {
+      cy = Math.min(0, Math.max(vpH - contentH, cy));
+    }
+
+    return { x: cx, y: cy };
+  }, []);
+
+  const applyTransform = useCallback((newScale, tx, ty) => {
+    const clamped = clampTranslate(tx, ty, newScale);
+    setScale(newScale);
+    setTranslateX(clamped.x);
+    setTranslateY(clamped.y);
+  }, [clampTranslate]);
+
+  // Zoom centered on viewport middle, then clamp
+  const zoomToCenter = useCallback((newScale) => {
+    const el = viewportNodeRef.current;
+    if (!el) { setScale(newScale); return; }
+
+    const rect = el.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const oldScale = scaleRef.current;
+    const { x: tx, y: ty } = translateRef.current;
+
+    const newTx = cx - (newScale / oldScale) * (cx - tx);
+    const newTy = cy - (newScale / oldScale) * (cy - ty);
+
+    applyTransform(newScale, newTx, newTy);
+  }, [applyTransform]);
+
   const zoomIn = useCallback(() => {
-    setScale(prev => clampScale(prev + zoomStep));
-  }, [clampScale, zoomStep]);
+    zoomToCenter(clampScale(scaleRef.current + zoomStep));
+  }, [clampScale, zoomStep, zoomToCenter]);
 
-  // Zoom out (T021)
   const zoomOut = useCallback(() => {
-    setScale(prev => clampScale(prev - zoomStep));
-  }, [clampScale, zoomStep]);
+    zoomToCenter(clampScale(scaleRef.current - zoomStep));
+  }, [clampScale, zoomStep, zoomToCenter]);
 
-  // Reset to default view (T027, FR-012)
   const reset = useCallback(() => {
-    setScale(initialScale);
-    setTranslateX(0);
-    setTranslateY(0);
-  }, [initialScale]);
+    applyTransform(initialScale, 0, 0);
+  }, [initialScale, applyTransform]);
 
-  // Pan to specific coordinates (T022)
   const panTo = useCallback((x, y) => {
     setTranslateX(x);
     setTranslateY(y);
   }, []);
 
-  // Center viewport on a specific element (T043, for My Match)
   const centerOnElement = useCallback((elementId) => {
-    if (!containerRef?.current) return;
-
-    const element = containerRef.current.querySelector(`[data-match-id="${elementId}"]`);
+    if (!viewportNodeRef.current) return;
+    const element = viewportNodeRef.current.querySelector(`[data-match-id="${elementId}"]`);
     if (!element) return;
 
-    const container = containerRef.current;
+    const container = viewportNodeRef.current;
     const containerRect = container.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Calculate element's position relative to container
     const elementCenterX = elementRect.left - containerRect.left + elementRect.width / 2;
     const elementCenterY = elementRect.top - containerRect.top + elementRect.height / 2;
 
-    // Calculate translation to center the element
-    const containerCenterX = containerRect.width / 2;
-    const containerCenterY = containerRect.height / 2;
+    const currentScale = scaleRef.current;
+    const newTx = containerRect.width / 2 - elementCenterX * currentScale;
+    const newTy = containerRect.height / 2 - elementCenterY * currentScale;
 
-    const newTranslateX = containerCenterX - elementCenterX * scale;
-    const newTranslateY = containerCenterY - elementCenterY * scale;
+    setTranslateX(newTx);
+    setTranslateY(newTy);
+  }, []);
 
-    setTranslateX(newTranslateX);
-    setTranslateY(newTranslateY);
-  }, [containerRef, scale]);
-
-  // Mouse drag handlers (T024)
+  // Mouse drag handlers
   const handleMouseDown = useCallback((e) => {
-    if (e.button !== 0) return; // Only left mouse button
-
+    if (e.button !== 0) return;
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, y: e.clientY };
-    lastTranslateRef.current = { x: translateX, y: translateY };
-
-    // Prevent text selection during drag
+    lastTranslateRef.current = { x: translateRef.current.x, y: translateRef.current.y };
     e.preventDefault();
-  }, [translateX, translateY]);
+  }, []);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
-
+    if (!isDraggingRef.current) return;
     const deltaX = e.clientX - dragStartRef.current.x;
     const deltaY = e.clientY - dragStartRef.current.y;
-
     setTranslateX(lastTranslateRef.current.x + deltaX);
     setTranslateY(lastTranslateRef.current.y + deltaY);
-  }, [isDragging]);
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Touch handlers for mobile (T025, T026)
-  const handleTouchStart = useCallback((e) => {
-    if (e.touches.length === 1) {
-      // Single touch - pan
-      setIsDragging(true);
-      dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      lastTranslateRef.current = { x: translateX, y: translateY };
-    } else if (e.touches.length === 2) {
-      // Two fingers - pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
-      pinchStartDistanceRef.current = distance;
-      pinchStartScaleRef.current = scale;
-    }
-  }, [translateX, translateY, scale]);
-
-  const handleTouchMove = useCallback((e) => {
-    if (e.touches.length === 1 && isDragging) {
-      // Single touch - pan
-      const deltaX = e.touches[0].clientX - dragStartRef.current.x;
-      const deltaY = e.touches[0].clientY - dragStartRef.current.y;
-
-      setTranslateX(lastTranslateRef.current.x + deltaX);
-      setTranslateY(lastTranslateRef.current.y + deltaY);
-    } else if (e.touches.length === 2) {
-      // Two fingers - pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      );
-
-      const scaleChange = distance / pinchStartDistanceRef.current;
-      const newScale = clampScale(pinchStartScaleRef.current * scaleChange);
-      setScale(newScale);
-    }
-
-    e.preventDefault();
-  }, [isDragging, clampScale]);
-
-  const handleTouchEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Add global mouse up handler to handle drag release outside container
+  // Imperative touch listeners with { passive: false }
+  // KEY FIX: depends on viewportNode STATE so this re-runs when the
+  // conditionally-rendered viewport div mounts (callback ref sets state).
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
+    const el = viewportNode;
+    if (!el) return;
+
+    const TAP_THRESHOLD = 10; // px — movement below this is a tap, not a drag
+
+    const onTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        touchMovedRef.current = false;
+        setIsDragging(true);
+        dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        lastTranslateRef.current = { x: translateRef.current.x, y: translateRef.current.y };
+      } else if (e.touches.length === 2) {
+        touchMovedRef.current = true; // pinch is never a tap
+        const t1 = e.touches[0], t2 = e.touches[1];
+        pinchStartDistanceRef.current = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        pinchStartScaleRef.current = scaleRef.current;
+      }
+      e.preventDefault();
+    };
+
+    const onTouchMove = (e) => {
+      if (e.touches.length === 1 && isDraggingRef.current) {
+        const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+        const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+        if (Math.abs(deltaX) > TAP_THRESHOLD || Math.abs(deltaY) > TAP_THRESHOLD) {
+          touchMovedRef.current = true;
+        }
+        setTranslateX(lastTranslateRef.current.x + deltaX);
+        setTranslateY(lastTranslateRef.current.y + deltaY);
+      } else if (e.touches.length === 2) {
+        const t1 = e.touches[0], t2 = e.touches[1];
+        const distance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const newScale = clampScale(pinchStartScaleRef.current * (distance / pinchStartDistanceRef.current));
+        setScale(newScale);
+      }
+      e.preventDefault();
+    };
+
+    const onTouchEnd = (e) => {
+      setIsDragging(false);
+      // If finger barely moved, it was a tap — synthesize click since
+      // preventDefault on touchstart suppresses the browser's native click.
+      if (!touchMovedRef.current && e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target) {
+          target.click();
+        }
       }
     };
 
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    window.addEventListener('touchend', handleGlobalMouseUp);
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd);
 
     return () => {
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-      window.removeEventListener('touchend', handleGlobalMouseUp);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [isDragging]);
+  }, [viewportNode, clampScale]);
 
-  // Generate CSS transform string
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDraggingRef.current) setIsDragging(false);
+    };
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, []);
+
   const transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
 
-  // Container style object for convenience
+  // Size the viewport-content div based on the bracket's natural width
+  // (derived from round count) so it is never clipped by the viewport.
+  // The CSS transform handles visual scaling — the DOM element just needs
+  // to be large enough to hold the un-clipped bracket grid.
+  const naturalWidth = roundCount > 0
+    ? roundCount * ROUND_WIDTH + (roundCount - 1) * ROUND_GAP
+    : 0;
+
+  const el = viewportNodeRef.current; // eslint-disable-line react-hooks/refs -- reading clientWidth for layout sizing, not reactive state
+  const vpWidth = el ? el.clientWidth : 0;
+  // Content must be at least as wide as the viewport or the bracket's natural width
+  const contentWidth = Math.max(naturalWidth, vpWidth); // eslint-disable-line react-hooks/refs
+
   const containerStyle = {
     transform,
     transformOrigin: '0 0',
     transition: isDragging ? 'none' : 'transform 0.15s ease-out',
     cursor: isDragging ? 'grabbing' : 'grab',
+    width: `${contentWidth}px`,
   };
 
   return {
-    // Current state
-    scale,
-    translateX,
-    translateY,
-    isDragging,
-
-    // Actions
-    zoomIn,
-    zoomOut,
-    reset,
-    panTo,
-    centerOnElement,
-
-    // Event handlers
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-
-    // Computed values
-    transform,
-    containerStyle,
-
-    // Utilities
+    scale, translateX, translateY, isDragging,
+    zoomIn, zoomOut, reset, panTo, centerOnElement,
+    handleMouseDown, handleMouseMove, handleMouseUp,
+    transform, containerStyle,
+    setViewportRef,
     canZoomIn: scale < maxScale,
     canZoomOut: scale > minScale,
   };

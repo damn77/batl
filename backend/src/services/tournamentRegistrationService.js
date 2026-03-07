@@ -1,12 +1,10 @@
 // 003-tournament-registration: Tournament Registration Service
 // Handles tournament registration with auto-category enrollment, waitlist management, and smart cleanup
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import * as registrationService from './registrationService.js';
 import * as categoryService from './categoryService.js';
 import * as sharedTournamentService from './sharedTournamentService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * T013: Check tournament capacity and determine registration status

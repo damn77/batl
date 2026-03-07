@@ -1,12 +1,10 @@
 // Pair Registration Service
 // Feature: 006-doubles-pairs
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { PairErrorCodes, createPairError, createEligibilityError } from '../utils/pairErrors.js';
 import { canOverrideEligibility } from '../middleware/pairAuth.js';
 import { pairRegistrationLogger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Register a pair for a tournament

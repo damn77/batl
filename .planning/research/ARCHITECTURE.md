@@ -1,663 +1,644 @@
 # Architecture Research
 
-**Domain:** Amateur tennis league tournament management — match results, state machines, group/Swiss pairing
-**Researched:** 2026-02-26
-**Confidence:** HIGH (based on direct codebase analysis of 11 delivered features)
+**Domain:** Mobile-first UI rework — React Bootstrap 2.10 / Bootstrap 5.3, responsive layout restructure
+**Researched:** 2026-03-06
+**Confidence:** HIGH (direct codebase analysis + official Bootstrap 5.3 / React Bootstrap docs)
 
 ---
 
 ## Standard Architecture
 
-This is a subsequent-milestone research document. The architecture is not being designed from scratch — it integrates into an established three-tier system with specific conventions and constraints.
+This is a subsequent-milestone document. No new backend services are introduced. The milestone restructures the **frontend presentation layer** of an established React 19 SPA. All backend API contracts (001–011) remain unchanged.
 
-### System Overview
+### System Overview — What Changes in v1.4
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        React 19 Frontend                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
-│  │ Result Entry │  │ Group Stage  │  │ Swiss Pairing│               │
-│  │   Page/Form  │  │ Visualization│  │    View      │               │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘               │
-│         │                 │                 │                        │
-│  ┌──────▼─────────────────▼─────────────────▼───────────────────┐   │
-│  │              Frontend Service Layer (axios wrappers)          │   │
-│  │  matchResultService  groupService  swissService  statsService │   │
-│  └──────────────────────────────┬────────────────────────────────┘   │
-└─────────────────────────────────┼───────────────────────────────────┘
-                                  │ HTTP (REST)
-┌─────────────────────────────────▼───────────────────────────────────┐
-│                       Express 5.1 API Server                         │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │          Middleware Pipeline (auth → authz → validate)         │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
-│  │ matchResult  │  │    group     │  │    swiss     │               │
-│  │ Controller   │  │  Controller  │  │  Controller  │               │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘               │
-│         │                 │                 │                        │
-│  ┌──────▼─────────────────▼─────────────────▼───────────────────┐   │
-│  │                    Service Layer                               │   │
-│  │  matchResultService  groupStandingsService  swissPairingService│   │
-│  │  tournamentLifecycleService  bracketProgressionService        │   │
-│  │  playerStatsService                                           │   │
-│  └──────────────────────────────┬────────────────────────────────┘   │
-└─────────────────────────────────┼───────────────────────────────────┘
-                                  │ Prisma ORM
-┌─────────────────────────────────▼───────────────────────────────────┐
-│                         PostgreSQL Database                           │
-│  Match  MatchResultSubmission  GroupStanding  SwissMatchHistory      │
-│  Tournament  TournamentRegistration  PlayerProfile  RankingEntry     │
+│                        React 19 Frontend (v1.4 changes)              │
+│                                                                       │
+│  BEFORE (desktop-first):                                              │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  NavBar (expand-lg, no offcanvas, email visible at all sizes) │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  TournamentViewPage:                                          │    │
+│  │    TournamentHeader                                           │    │
+│  │    TournamentInfoPanel (always open, 2-col lg layout)        │    │
+│  │    FormatVisualization (collapsible, never hero on mobile)   │    │
+│  │    OrganizerRegistrationPanel                                 │    │
+│  │    PlayerListPanel                                            │    │
+│  │    PointPreviewPanel                                          │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│                                                                       │
+│  AFTER (mobile-first):                                                │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  NavBar (offcanvas drawer on mobile, full bar on lg+)        │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  TournamentViewPage (status-aware layout):                    │    │
+│  │    TournamentHeader (always)                                  │    │
+│  │    [IN_PROGRESS] FormatVisualization (bracket hero, top)     │    │
+│  │    TournamentInfoPanel (collapsible accordion)               │    │
+│  │    [ORGANIZER] OrganizerRegistrationPanel (accordion)        │    │
+│  │    PlayerListPanel (accordion or tab)                        │    │
+│  │    PointPreviewPanel (accordion, low priority)               │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│                                                                       │
+│  KnockoutBracket (refactored for touch):                             │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │  Mobile: auto-fit scale, larger tap targets, pinch native    │    │
+│  │  Desktop: existing zoom/pan with keyboard shortcuts          │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
+                        No backend changes
+┌─────────────────────────────────────────────────────────────────────┐
+│  Express 5.1 API Server — unchanged from v1.3                        │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+### Component Responsibilities — New vs Modified
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| matchResultService | Result submission, dispute detection, confirmation, immutability enforcement | New service: `backend/src/services/matchResultService.js` |
-| tournamentLifecycleService | SCHEDULED → IN_PROGRESS → COMPLETED state machine, trigger conditions | Extends `backend/src/services/tournamentService.js` or new service |
-| bracketProgressionService | On confirmed result: determine next match, advance winner to next slot | New service: `backend/src/services/bracketProgressionService.js` |
-| groupStandingsService | Round-robin match scheduling, standings calculation, tiebreaker resolution | New service: `backend/src/services/groupStandingsService.js` |
-| swissPairingService | Round pairing (avoid rematches, pair by score), N-round management | New service: `backend/src/services/swissPairingService.js` |
-| playerStatsService | Match history aggregation, win rate, head-to-head computation | New service: `backend/src/services/playerStatsService.js` |
-| matchResultController | HTTP handlers for submit/confirm/dispute endpoints | New: `backend/src/api/matchResultController.js` |
-| groupController | HTTP handlers for group standings, schedule endpoints | New or extends existing |
-| swissController | HTTP handlers for Swiss pairing, round endpoints | New: `backend/src/api/swissController.js` |
+| Component | Status | Responsibility Change |
+|-----------|--------|----------------------|
+| `NavBar.jsx` | MODIFIED | Add `Navbar.Offcanvas` for mobile; `expand="lg"` keeps desktop bar intact |
+| `TournamentViewPage.jsx` | MODIFIED | Status-aware section ordering; bracket is hero when IN_PROGRESS |
+| `TournamentInfoPanel.jsx` | MODIFIED | Default collapsed on mobile (Collapse), switch to `Accordion` variant |
+| `FormatVisualization.jsx` | MODIFIED | Auto-expand when tournament is IN_PROGRESS (remove manual expand requirement on mobile) |
+| `KnockoutBracket.jsx` | MODIFIED | Add pinch-zoom fallback via `touch-action: pinch-zoom`; larger tap targets; auto-scale on mount |
+| `KnockoutBracket.css` | MODIFIED | Mobile breakpoints for bracket-round min-width, match height, control layout |
+| `BracketControls.jsx` | MODIFIED | Touch-friendly button sizing (min 44px tap targets); reorder controls for mobile first |
+| `MatchResultModal.jsx` | MODIFIED | Full-screen modal on mobile (`fullscreen="sm-down"`); larger form inputs |
+| `ManualDrawEditor.jsx` | MODIFIED | Stacked single-column layout on mobile; larger dropdown touch targets |
+| `PlayerListPanel.jsx` | MODIFIED | Collapsible on mobile; table → card list on xs |
+| `TournamentHeader.jsx` | MODIFIED | Stack badges vertically on xs; reduce font sizes |
+| `OrganizerDashboard.jsx` | MODIFIED | Replace `col-md-4` grid cards with functional nav links; add quick-action layout |
+| `useBracketNavigation.js` | MODIFIED | Add `wheel` event for trackpad pinch; improve pinch-zoom accuracy |
 
 ---
 
 ## Recommended Project Structure
 
-The new code slots into the existing directory layout without restructuring.
+The mobile rework is CSS-first and prop-adjustment-first. No new files are required for most changes. New files are needed only for the mobile dev tooling and possibly a shared `MobileCard` utility component.
 
 ```
-backend/src/
-├── api/
-│   ├── routes/
-│   │   ├── matchResultRoutes.js       # POST /api/v1/matches/:id/submit-result
-│   │   │                              # POST /api/v1/matches/:id/confirm-result
-│   │   │                              # POST /api/v1/matches/:id/dispute-result
-│   │   ├── groupRoutes.js             # GET /api/v1/tournaments/:id/group-standings
-│   │   │                              # POST /api/v1/tournaments/:id/generate-schedule
-│   │   └── swissRoutes.js             # POST /api/v1/tournaments/:id/generate-round
-│   │                                  # GET /api/v1/tournaments/:id/swiss-standings
-│   ├── validators/
-│   │   ├── matchResultValidator.js    # Joi: score format, winner field
-│   │   └── swissPairingValidator.js   # Joi: roundNumber, randomSeed
-│   ├── matchResultController.js
-│   ├── groupController.js
-│   └── swissController.js
+frontend/src/
+├── components/
+│   ├── NavBar.jsx                  # MODIFIED: offcanvas drawer on mobile
+│   ├── KnockoutBracket.jsx         # MODIFIED: touch-first, auto-scale
+│   ├── KnockoutBracket.css         # MODIFIED: mobile breakpoints expanded
+│   ├── BracketControls.jsx         # MODIFIED: 44px tap targets
+│   ├── BracketMatch.jsx            # MODIFIED: larger touch area on mobile
+│   ├── MatchResultModal.jsx        # MODIFIED: fullscreen on sm-down
+│   ├── ManualDrawEditor.jsx        # MODIFIED: single-column stacked on mobile
+│   ├── PlayerListPanel.jsx         # MODIFIED: collapsible + card view on xs
+│   ├── TournamentHeader.jsx        # MODIFIED: responsive badge stacking
+│   ├── TournamentInfoPanel.jsx     # MODIFIED: Accordion wrapper for mobile
+│   ├── FormatVisualization.jsx     # MODIFIED: auto-expand for IN_PROGRESS
+│   └── OrganizerRegistrationPanel.jsx  # MODIFIED: collapsible on mobile
 │
-├── services/
-│   ├── matchResultService.js          # Core result submission state machine
-│   ├── tournamentLifecycleService.js  # Tournament status transitions
-│   ├── bracketProgressionService.js   # Advance winner to next bracket slot
-│   ├── groupStandingsService.js       # Group stage scheduling + standings
-│   ├── swissPairingService.js         # Swiss round pairing algorithm
-│   └── playerStatsService.js          # Aggregated statistics
+├── pages/
+│   ├── TournamentViewPage.jsx      # MODIFIED: status-aware layout logic
+│   ├── TournamentSetupPage.jsx     # MODIFIED: responsive table → card list
+│   ├── CategoryRankingsPage.jsx    # MODIFIED: responsive table
+│   ├── OrganizerDashboard.jsx      # MODIFIED: functional quick-action layout
+│   └── PlayerProfilePage.jsx       # MODIFIED: responsive layout
 │
-├── types/
-│   └── resultStatus.js               # PENDING_CONFIRMATION, CONFIRMED, DISPUTED
+├── hooks/
+│   ├── useBracketNavigation.js     # MODIFIED: wheel event, pinch improvement
+│   └── useBreakpoint.js            # NEW: `useBreakpoint()` hook for JS-based
+│                                   #   breakpoint detection when CSS alone
+│                                   #   is insufficient
 │
 └── utils/
-    └── standingsCalculator.js         # Shared tiebreaker logic (sets/games won)
-
-frontend/src/
-├── pages/
-│   ├── MatchResultPage.jsx            # Score entry form (touch-optimized)
-│   ├── OrganizerPendingResultsPage.jsx # Pending confirmation dashboard
-│   ├── GroupStagePage.jsx             # Group schedule + standings table
-│   └── SwissStandingsPage.jsx         # Swiss rounds + standings
-├── components/
-│   ├── ScoreEntryForm.jsx             # Format-aware score entry
-│   ├── GroupStandingsTable.jsx        # Round-robin standings display
-│   └── SwissPairingTable.jsx          # Swiss round pairings display
-└── services/
-    ├── matchResultService.js          # API calls for result submission
-    └── playerStatsService.js          # API calls for statistics
+    └── mobileDetect.js             # NEW (optional): UA-based touch device
+                                    #   detection for bracket auto-scale
 ```
+
+### Structure Rationale
+
+- **No new pages needed:** All changes are within existing page structure. Adding new routes would fragment the experience.
+- **`useBreakpoint.js` is optional but useful:** Bootstrap handles 95% of cases via CSS. The hook is needed only for JS-side logic (e.g., starting the bracket at a different scale on mobile).
+- **CSS changes are co-located:** `KnockoutBracket.css` keeps all bracket styles in one file. Do not create a separate `KnockoutBracket.mobile.css`.
+- **No Redux or global state additions:** The existing React hook + context pattern handles all state. A `useBreakpoint` hook is local to the component that needs it.
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: Result Submission as a Separate State Object
+### Pattern 1: Bootstrap 5.3 Breakpoint Strategy
 
-**What:** The match result submission is not stored in the `Match.result` field directly. Instead a separate `MatchResultSubmission` table holds the pending submission alongside its dispute state. The `Match.result` field is written — and becomes immutable — only when an organizer confirms.
+**What:** Mobile-first CSS using Bootstrap's six breakpoints. Apply base styles for xs (< 576px), then override with `sm:`, `md:`, `lg:` utilities for larger screens. Never write desktop-first CSS with `max-width` overrides.
 
-**When to use:** When you need to distinguish "player submitted" from "organizer confirmed" and preserve the submission audit trail.
+**When to use:** All responsive layout decisions. The BATL target is "players on phones at the court" (xs, sm) and "organizers on laptops" (lg, xl).
 
 **Trade-offs:**
-- Pro: Clear separation of the submission workflow from the match record. Match.result stays immutable after confirmation.
-- Pro: Dispute state lives in the submission, not the match, keeping the Match model clean.
-- Con: Two tables to read when rendering a match. Acceptable since match reads always include submission via join.
+- Pro: Consistent with Bootstrap's mobile-first philosophy. Works with existing React Bootstrap components without custom overrides.
+- Con: Some existing components were written desktop-first (e.g., `TournamentInfoPanel` with `Col lg={6}` but no xs handling). These need a targeted audit pass, not a full rewrite.
 
-**Example schema addition:**
-```javascript
-// New Prisma model
-model MatchResultSubmission {
-  id            String               @id @default(uuid())
-  matchId       String               @unique // One pending submission per match
-  submittedById String               // PlayerProfile.id of submitter
-  scores        String               // JSON: [{ set: 1, player1: 6, player2: 4 }, ...]
-  winnerId      String               // PlayerProfile.id declared as winner
-  status        ResultSubmissionStatus @default(PENDING_CONFIRMATION)
-  disputedById  String?              // PlayerProfile.id of disputing player
-  disputeReason String?
-  confirmedById String?              // User.id of confirming organizer
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-
-  match         Match                @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  submitter     PlayerProfile        @relation("SubmissionSubmitter", fields: [submittedById], references: [id])
-  winner        PlayerProfile        @relation("SubmissionWinner", fields: [winnerId], references: [id])
-}
-
-enum ResultSubmissionStatus {
-  PENDING_CONFIRMATION  // First player submitted, waiting for organizer
-  DISPUTED              // Opposing player flagged a conflict
-  CONFIRMED             // Organizer confirmed — triggers bracket progression
-  REJECTED              // Organizer rejected — match back to SCHEDULED
-}
+**Bootstrap 5.3 Breakpoints:**
+```
+xs: < 576px   — phones (primary target for players)
+sm: >= 576px  — large phones / small tablets
+md: >= 768px  — tablets
+lg: >= 992px  — laptops (primary target for organizers)
+xl: >= 1200px — desktops
 ```
 
-### Pattern 2: Tournament Lifecycle as Explicit Transition Functions
+**Example — TournamentInfoPanel two-column fix:**
+```jsx
+// BEFORE (desktop-first, no mobile column handling):
+<Col lg={6} className="mb-4 mb-lg-0">...</Col>
+<Col lg={6}>...</Col>
 
-**What:** Tournament status changes (SCHEDULED → IN_PROGRESS → COMPLETED) are handled by dedicated service functions with guard conditions, not by allowing direct status updates from the controller.
+// AFTER (mobile-first — full width on mobile, side-by-side on lg+):
+<Col xs={12} lg={6} className="mb-3 mb-lg-0">...</Col>
+<Col xs={12} lg={6}>...</Col>
+```
 
-**When to use:** When lifecycle transitions have business rules (e.g., can't complete a tournament with unconfirmed matches).
+**Source:** [Bootstrap 5.3 Breakpoints](https://getbootstrap.com/docs/5.3/layout/breakpoints/)
+
+---
+
+### Pattern 2: NavBar Offcanvas Drawer (mobile hamburger)
+
+**What:** Replace the current `navbar-collapse` behavior (inline dropdown) with `Navbar.Offcanvas` from React Bootstrap. The navbar becomes a slide-in drawer on mobile. At `lg+` it renders as the standard horizontal bar with no change.
+
+**When to use:** The current NavBar has 8-12 nav items depending on role. On mobile, an inline collapse that stacks all items is difficult to use — a drawer is standard.
 
 **Trade-offs:**
-- Pro: Guard conditions are co-located with the transition. Prevents impossible states.
-- Con: Slightly more code than a simple field update. Worth it for data integrity.
+- Pro: React Bootstrap's `Navbar.Offcanvas` is built-in. No third-party library needed. `expand="lg"` prop handles the breakpoint automatically.
+- Pro: Drawer closes when a nav item is selected (`collapseOnSelect`). Works with React Router `<Link>` via the existing `onClick/navigate` pattern.
+- Con: The existing `NavBar.jsx` uses `onClick/navigate` instead of `<NavLink>` components. `collapseOnSelect` requires `Nav.Link` components with `href` or `eventKey`. This means the NavBar implementation needs a refactor to use proper React Router `NavLink` components inside `Nav.Link`.
+- Con: `placement="end"` (right-side drawer) is the Bootstrap 5.3 default for navbar offcanvas. This is standard and expected by mobile users.
+
+**Example refactored NavBar structure:**
+```jsx
+<Navbar expand="lg" className="navbar-dark bg-primary">
+  <Container fluid>
+    <Navbar.Brand onClick={handleHomeClick} style={{ cursor: 'pointer' }}>
+      BATL
+    </Navbar.Brand>
+    <Navbar.Toggle aria-controls="offcanvasNavbar" />
+    <Navbar.Offcanvas
+      id="offcanvasNavbar"
+      placement="end"
+      restoreFocus={false}
+    >
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>Menu</Offcanvas.Title>
+      </Offcanvas.Header>
+      <Offcanvas.Body>
+        <Nav className="flex-grow-1">
+          <Nav.Link as={NavLink} to="/rankings">Rankings</Nav.Link>
+          {/* role-gated links */}
+        </Nav>
+        {/* auth buttons */}
+      </Offcanvas.Body>
+    </Navbar.Offcanvas>
+  </Container>
+</Navbar>
+```
+
+**Source:** [React Bootstrap Navbar](https://react-bootstrap.netlify.app/docs/components/navbar/), [React Bootstrap Offcanvas](https://react-bootstrap.netlify.app/docs/components/offcanvas/)
+
+---
+
+### Pattern 3: Status-Aware Layout Ordering in TournamentViewPage
+
+**What:** The sections of `TournamentViewPage` are reordered based on `tournament.status`. When a tournament is `IN_PROGRESS`, the bracket is the primary content — it moves to the top, above info/logistics details. When `SCHEDULED`, registration info and player list are primary.
+
+**When to use:** Any page with multiple sections where the user's task depends on tournament status. The "scroll past a collapsed FormatVisualization to see registration info" problem is a mobile pain point unique to this page.
+
+**Trade-offs:**
+- Pro: Zero API changes. Pure React render-order logic.
+- Pro: Reuses the existing `FormatVisualization` with a prop change (`defaultExpanded={true}` when IN_PROGRESS).
+- Con: Conditional section ordering makes the JSX more complex. Use a helper function or constants array to define the order, not nested ternaries.
+
+**Recommended implementation pattern:**
+```jsx
+// Status-aware section ordering — no ternary nesting
+const sections = buildSectionOrder(tournament.status, user?.role);
+
+// sections = [
+//   { key: 'bracket',      Component: FormatVisualization,         priority: 1 },
+//   { key: 'info',         Component: TournamentInfoPanel,         priority: 2 },
+//   { key: 'optout',       Component: ConsolationOptOutPanel,      priority: 3 },
+//   { key: 'registration', Component: OrganizerRegistrationPanel,  priority: 4 },
+//   { key: 'players',      Component: PlayerListPanel,             priority: 5 },
+//   { key: 'points',       Component: PointPreviewPanel,           priority: 6 },
+// ]
+
+return (
+  <>
+    {sections.map(({ key, Component, props }) => (
+      <Row key={key} className="mt-3">
+        <Col><Component {...props} /></Col>
+      </Row>
+    ))}
+  </>
+);
+```
+
+---
+
+### Pattern 4: Accordion for Collapsible Sections (not custom Collapse)
+
+**What:** Use React Bootstrap's `Accordion` component for sections that should be collapsed by default on mobile. The existing `TournamentInfoPanel` uses a custom `Collapse` with a manual button. The Accordion gives this pattern built-in for free with proper accessibility.
+
+**When to use:** Any panel that is "secondary" information on mobile — tournament details, point preview, player list on the view page.
+
+**Trade-offs:**
+- Pro: Accordion is accessible (ARIA roles), animates correctly, and handles multiple-open behavior. No JS state management needed.
+- Pro: `defaultActiveKey` can be set based on status (e.g., bracket open by default when IN_PROGRESS, info closed).
+- Con: Accordion styling conflicts with Bootstrap's Card-within-Card pattern that `TournamentInfoPanel` currently uses. The Panel will need minor visual adjustment.
+- Con: Not every section needs to become an accordion item. Overusing accordion creates a "nothing is immediately visible" problem. Use for sections with 3+ fields, not for single-action panels.
 
 **Example:**
+```jsx
+// Accordion wrapping secondary sections on mobile
+<Accordion defaultActiveKey={tournament.status === 'IN_PROGRESS' ? null : '0'}>
+  <Accordion.Item eventKey="0">
+    <Accordion.Header>Tournament Details</Accordion.Header>
+    <Accordion.Body>
+      <TournamentInfoPanel tournament={tournament} />
+    </Accordion.Body>
+  </Accordion.Item>
+</Accordion>
+```
+
+---
+
+### Pattern 5: KnockoutBracket Mobile Touch Refactoring
+
+**What:** The existing `useBracketNavigation.js` hook already handles `touchstart/touchmove/touchend` for pan, and two-finger pinch for zoom. The gaps are: (1) `touch-action: none` in the viewport CSS prevents native browser scroll on the page while inside the bracket, (2) the initial scale on mobile should auto-fit the bracket rather than default to 1.0, and (3) tap targets on `BracketMatch` components are 120px tall which is acceptable but buttons in `BracketControls` need auditing for 44px minimum.
+
+**Do not replace the custom hook with `react-zoom-pan-pinch`** — the existing implementation is functional and well-tested. Targeted fixes are the right approach.
+
+**When to use:** Specifically for the KnockoutBracket viewport. The existing drag/pinch implementation is sound; the mobile gaps are fixable within the existing architecture.
+
+**Trade-offs:**
+- Pro: No new library dependency. Fixes are surgical.
+- Con: Auto-scale-on-mount requires knowing the bracket's rendered width, which is only available after the first render. Use a `useEffect` with a `ResizeObserver` or `getBoundingClientRect()` on the container ref.
+
+**Touch-action fix:**
+```css
+/* CURRENT (blocks page scroll when finger starts on bracket): */
+.bracket-viewport {
+  touch-action: pan-x pan-y; /* allows scroll but not pinch */
+}
+
+/* RECOMMENDED: Use pinch-zoom to allow native pinch gesture */
+.bracket-viewport {
+  touch-action: pinch-zoom; /* allows pinch-to-zoom natively, blocks pan-to-scroll */
+}
+
+/* OR: Accept JS-only control for the bracket (current approach is fine if page scroll outside works) */
+.bracket-viewport {
+  touch-action: none; /* full JS control — acceptable if the bracket has its own scroll */
+  overflow: auto;
+}
+```
+
+**Auto-scale on mobile (useEffect pattern):**
 ```javascript
-// backend/src/services/tournamentLifecycleService.js
+// In KnockoutBracket.jsx, after matches load
+useEffect(() => {
+  if (!containerRef.current || !matches?.length) return;
+  const isMobile = window.innerWidth < 768;
+  if (!isMobile) return;
 
-export async function startTournament(tournamentId, actingUserId) {
-  const t = await prisma.tournament.findUnique({ where: { id: tournamentId } });
-  if (t.status !== 'SCHEDULED') {
-    throw createHttpError(409, 'Tournament must be SCHEDULED to start', { code: 'INVALID_STATUS_TRANSITION' });
+  const bracketWidth = containerRef.current.scrollWidth;
+  const viewportWidth = containerRef.current.clientWidth;
+  if (bracketWidth > viewportWidth) {
+    const fitScale = viewportWidth / bracketWidth * 0.95; // 5% margin
+    navigation.setScale(Math.max(0.25, fitScale)); // clamp to min
   }
-  // Guard: must have at least minParticipants registered
-  const count = await getRegisteredCount(tournamentId);
-  if (t.minParticipants && count < t.minParticipants) {
-    throw createHttpError(409, 'Insufficient participants to start', { code: 'INSUFFICIENT_PARTICIPANTS' });
-  }
-  return prisma.tournament.update({
-    where: { id: tournamentId },
-    data: { status: 'IN_PROGRESS', lastStatusChange: new Date() }
-  });
-}
-
-export async function completeTournament(tournamentId, actingUserId) {
-  // Guard: all matches must be COMPLETED or CANCELLED (no pending results)
-  const unfinished = await prisma.match.count({
-    where: { tournamentId, status: { in: ['SCHEDULED', 'IN_PROGRESS'] } }
-  });
-  if (unfinished > 0) {
-    throw createHttpError(409, 'Cannot complete: unfinished matches remain', { code: 'UNFINISHED_MATCHES' });
-  }
-  return prisma.tournament.update({
-    where: { id: tournamentId },
-    data: { status: 'COMPLETED', lastStatusChange: new Date() }
-  });
-}
+}, [matches]);
 ```
 
-### Pattern 3: Bracket Progression as a Post-Confirmation Side Effect
+**Tap target audit (BracketControls):**
+```jsx
+// Ensure all buttons meet 44px minimum (Apple HIG / WCAG 2.5.5)
+<Button size="sm" style={{ minWidth: 44, minHeight: 44 }}>+</Button>
+// OR use Bootstrap's btn-lg on mobile:
+<Button size={isMobile ? 'lg' : 'sm'}>+</Button>
+```
 
-**What:** When `matchResultService.confirmResult()` runs, it calls `bracketProgressionService.advanceWinner()` as the final step. This keeps the progression logic separate from result storage but tightly coupled to the confirmation event.
+---
 
-**When to use:** Whenever a confirmed result should automatically drive the next state.
+### Pattern 6: Responsive Tables → Card Lists on xs
+
+**What:** TanStack React Table renders as `<table>` elements that overflow horizontally on mobile. For list pages (`TournamentSetupPage`, `CategoryRankingsPage`, `OrganizerPlayersPage`), the pattern is: render table on md+, render card list on xs/sm.
+
+**When to use:** Any page with a data table that has 4+ columns. The bracket and match result table are excluded (they have custom rendering).
 
 **Trade-offs:**
-- Pro: Result confirmation and progression happen atomically in one service call. Easier to test.
-- Con: `matchResultService` must know about `bracketProgressionService`. Acceptable — they are tightly related domain concerns.
+- Pro: Cards are naturally touch-friendly. Each row becomes a tappable card with key fields visible.
+- Pro: Uses `d-none d-md-block` / `d-block d-md-none` Bootstrap utilities — no JS needed.
+- Con: Duplicate rendering (table + card list) doubles the JSX. Use a `MobileCard` wrapper component to avoid repeating card structure.
+- Con: The card list cannot sort columns (no header). Acceptable for list pages where the default sort (date desc, name asc) is the mobile use case.
 
-**Example data flow:**
+**Example structure:**
+```jsx
+{/* Table view — md and above */}
+<div className="d-none d-md-block">
+  <Table striped hover responsive>
+    {/* existing TanStack table */}
+  </Table>
+</div>
+
+{/* Card list — xs and sm */}
+<div className="d-md-none">
+  {tournaments.map(t => (
+    <Card key={t.id} className="mb-2" onClick={() => navigate(`/tournaments/${t.id}`)}>
+      <Card.Body className="py-2">
+        <div className="d-flex justify-content-between align-items-start">
+          <strong>{t.name}</strong>
+          <Badge bg={STATUS_VARIANTS[t.status]}>{t.status}</Badge>
+        </div>
+        <small className="text-muted">{t.category?.name} · {formatDate(t.startDate)}</small>
+      </Card.Body>
+    </Card>
+  ))}
+</div>
 ```
-POST /api/v1/matches/:id/confirm-result
-  → matchResultController.confirmResult()
-  → matchResultService.confirmResult(matchId, organizerId)
-      → UPDATE MatchResultSubmission.status = CONFIRMED
-      → UPDATE Match.status = COMPLETED, Match.result = scores (immutable snapshot)
-      → bracketProgressionService.advanceWinner(matchId, winnerId)
-          → Find next match slot for this bracket position
-          → UPDATE next Match: set player1Id or player2Id = winnerId
-      → tournamentLifecycleService.checkAutoComplete(tournamentId)
-          → If all matches COMPLETED → UPDATE Tournament.status = COMPLETED
-```
 
-### Pattern 4: Group Standings as Computed-then-Cached
+---
 
-**What:** Group standings (sets won, games won, head-to-head) are not stored in a separate row updated after every match. They are computed from the `Match` table on read and cached in a `GroupStanding` table only when a round is fully complete (all matches in the group played).
+### Pattern 7: MatchResultModal Full-Screen on Mobile
 
-**When to use:** When standings have complex tiebreakers that are easier to recalculate than to keep incrementally correct.
+**What:** The existing `MatchResultModal` opens as a centered modal dialog. On xs screens (375px phones), a centered modal with score entry forms is difficult to use. Bootstrap 5.3 supports `fullscreen="sm-down"` prop on the `Modal` component to make it fill the screen on small devices.
+
+**When to use:** Any modal with form inputs on mobile. The score entry UX is the most critical touch interaction in the app.
 
 **Trade-offs:**
-- Pro: No risk of stale standing data from incremental update bugs.
-- Con: Slightly slower reads for large groups. Acceptable at amateur league scale (groups of 4-8).
+- Pro: Single prop change. No layout restructuring needed.
+- Pro: Full-screen gives more space for the score entry forms and large "Submit" button.
+- Con: Full-screen modals need an explicit close button (not backdrop click). React Bootstrap's fullscreen modal adds this automatically.
 
-**Recommended approach:** Compute on every GET request for in-progress groups. Write to `GroupStanding` on round completion. This eliminates a separate cache invalidation problem.
-
-**GroupStanding schema addition:**
-```javascript
-model GroupStanding {
-  id              String  @id @default(uuid())
-  groupId         String
-  playerId        String
-  matchesPlayed   Int     @default(0)
-  wins            Int     @default(0)
-  losses          Int     @default(0)
-  setsWon         Int     @default(0)
-  setsLost        Int     @default(0)
-  gamesWon        Int     @default(0)
-  gamesLost       Int     @default(0)
-  points          Int     @default(0)  // 2 for win, 1 for loss, 0 for absent
-  position        Int?    // Final standing position (set when group is complete)
-  updatedAt       DateTime @updatedAt
-
-  group  Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  player PlayerProfile @relation(fields: [playerId], references: [id])
-
-  @@unique([groupId, playerId])
-  @@index([groupId, points])
-}
+**Example:**
+```jsx
+<Modal
+  show={!!selectedMatch}
+  onHide={onClose}
+  fullscreen="sm-down"  // full screen on phones, centered dialog on tablets+
+  centered
+>
+  {/* existing modal content */}
+</Modal>
 ```
-
-### Pattern 5: Swiss Pairing as a Stateless Algorithm Over Match History
-
-**What:** Swiss pairing for round N is determined by reading completed match results from previous rounds and running a pairing algorithm. The algorithm output (pairs for the new round) is persisted as scheduled `Match` rows. No separate "Swiss state" table is needed.
-
-**When to use:** When the pairing algorithm is deterministic given the history and you don't need to resume mid-algorithm.
-
-**Trade-offs:**
-- Pro: No additional state table. The existing `Match` and `Round` models are sufficient.
-- Con: Regenerating pairings is a full re-read of match history. Acceptable at amateur scale (max 128 players, max 20 rounds per spec).
-
-**Pairing logic summary:**
-1. Read all `Match` rows for the tournament with status COMPLETED
-2. Build a player-vs-player history map (rematch prevention)
-3. Sort players by current Swiss score (wins × 2 + byes × 1)
-4. Pair by adjacent score using a stable matching algorithm that respects rematch constraint
-5. Persist new `Match` rows with the new `Round.roundNumber`
 
 ---
 
 ## Data Flow
 
-### Result Submission Flow
+### Mobile Layout Decision Flow
 
 ```
-Player (mobile browser)
-    ↓ POST /api/v1/matches/:id/submit-result
-    │  Body: { scores: [{set:1,p1:6,p2:4},...], winnerId }
+TournamentViewPage renders
     ↓
-matchResultController.submitResult()
-    ↓ validates: player is participant in match, match status SCHEDULED/IN_PROGRESS
-    ↓
-matchResultService.submitResult(matchId, playerId, { scores, winnerId })
-    ↓ validates score format against tournament scoring rules (JSON in Tournament.defaultScoringRules)
-    ↓ INSERT MatchResultSubmission { status: PENDING_CONFIRMATION }
-    ↓ UPDATE Match.status = IN_PROGRESS (first submission triggers in-progress)
-    ↓ (optional) INSERT Notification for organizer
-    ↓
-Response: { success: true, data: { submissionId, status: 'PENDING_CONFIRMATION' } }
-```
-
-```
-Opposing player (if they dispute)
-    ↓ POST /api/v1/matches/:id/dispute-result
-    │  Body: { reason }
-    ↓
-matchResultService.disputeResult(matchId, playerId, reason)
-    ↓ validates: player is participant, submission exists in PENDING state
-    ↓ UPDATE MatchResultSubmission { status: DISPUTED, disputedById, disputeReason }
-    ↓
-Response: { success: true, data: { status: 'DISPUTED' } }
-```
-
-```
-Organizer (confirms or rejects)
-    ↓ POST /api/v1/matches/:id/confirm-result   OR   reject-result
-    ↓
-matchResultService.confirmResult(matchId, organizerId)
-    ↓ validates: submission exists, organizer role
-    ↓ UPDATE MatchResultSubmission { status: CONFIRMED, confirmedById }
-    ↓ UPDATE Match { status: COMPLETED, result: scores (immutable), completedAt, completedWithRules }
-    ↓ bracketProgressionService.advanceWinner(matchId, winnerId)
-    │     ↓ find next match in bracket tree
-    │     ↓ UPDATE next Match.player1Id or player2Id = winnerId
-    ↓ tournamentLifecycleService.checkAutoComplete(tournamentId)
-    ↓
-Response: { success: true, data: { match: {...} } }
-```
-
-### Tournament Lifecycle Flow
-
-```
-SCHEDULED
+tournament.status?
+    ├── 'SCHEDULED'
+    │   Order: Header → Info (open) → BracketGen → PlayerList → Points
     │
-    ├── Organizer calls startTournament() → guard: minParticipants met
+    ├── 'IN_PROGRESS'
+    │   Order: Header → Bracket (auto-expanded hero) → ConsolationOptOut
+    │          → Info (collapsed accordion) → OrganizerPanel
+    │          → PlayerList (collapsed) → Points (collapsed)
     │
-    ▼
-IN_PROGRESS
-    │   [Matches are played and confirmed one by one]
-    │
-    ├── After each match confirmation:
-    │   tournamentLifecycleService.checkAutoComplete()
-    │   → count SCHEDULED/IN_PROGRESS matches
-    │   → if 0 remain: auto-transition to COMPLETED
-    │
-    ├── OR organizer explicitly calls completeTournament()
-    │
-    ▼
-COMPLETED
-    │   [Immutable. Point calculation endpoint can now be called]
-    │
-    └── POST /api/v1/tournaments/:id/calculate-points (Feature 008)
+    └── 'COMPLETED'
+        Order: Header → Champion banner → Bracket (collapsed, results viewable)
+               → Info (collapsed) → PlayerList → Points
 ```
 
-### Group Stage Flow
+### NavBar State Flow (Mobile)
 
 ```
-Organizer action: "Generate Group Schedule"
-    ↓ POST /api/v1/tournaments/:id/generate-schedule
+User on mobile (< lg breakpoint)
     ↓
-groupStandingsService.generateSchedule(tournamentId)
-    ↓ reads GroupParticipant rows for each Group
-    ↓ generates round-robin pairs (N*(N-1)/2 matches per group)
-    ↓ INSERT Match rows for each pair (status: SCHEDULED)
+Bootstrap renders: [BATL logo] [hamburger button]
     ↓
-Player submits + organizer confirms each match
+User taps hamburger
     ↓
-GET /api/v1/tournaments/:id/group-standings
+Navbar.Offcanvas opens (placement="end" — slides from right)
     ↓
-groupStandingsService.calculateStandings(tournamentId)
-    ↓ reads all COMPLETED Match rows in each group
-    ↓ aggregates: wins, sets won, games won per player
-    ↓ applies tiebreaker chain: points → sets ratio → games ratio → head-to-head
-    ↓ returns sorted standings per group
+User taps nav link
+    ↓
+React Router navigates
+collapseOnSelect → Offcanvas closes automatically
 ```
 
-### Swiss Round Flow
+### Bracket Touch Interaction Flow
 
 ```
-POST /api/v1/tournaments/:id/generate-round
-    Body: { roundNumber, randomSeed? }
+User lands on TournamentViewPage (IN_PROGRESS, mobile)
     ↓
-swissPairingService.generateRound(tournamentId, roundNumber, randomSeed)
-    ↓ reads all COMPLETED Match rows for previous rounds
-    ↓ builds score table: playerId → currentScore
-    ↓ builds rematch map: Set of played player-pairs
-    ↓ runs pairing algorithm: sort by score, pair adjacent, avoid rematches
-    ↓ INSERT Round row + INSERT Match rows for new round
+FormatVisualization auto-expands (no manual expand needed)
     ↓
-Response: { success: true, data: { roundNumber, matches: [...] } }
-```
-
-### Player Statistics Flow
-
-```
-GET /api/v1/players/:id/stats?categoryId=...&year=...
+KnockoutBracket mounts
     ↓
-playerStatsService.getStats(playerId, { categoryId, year })
-    ↓ reads Match rows where player1Id or player2Id = playerId
-    │   + joins to Tournament (for categoryId filter + dates)
-    │   + filters to COMPLETED status only
-    ↓ computes: matchesPlayed, wins, losses, winRate
-    ↓ computes: set win rate, game win rate
-    ↓ computes: head-to-head vs specific opponents (from Match pairs)
-    ↓ reads TournamentResult rows for points history (from Feature 008)
+useEffect: measure bracket width vs viewport
+    If bracketWidth > viewport: setScale(fitScale)
     ↓
-Response: { success: true, data: { stats, matchHistory, headToHead } }
+User sees bracket fitted to screen
+    ↓
+Single finger drag → pans bracket
+Two finger pinch → zooms bracket
+Tap on match card → opens MatchResultModal (fullscreen on mobile)
+    ↓
+User submits score → form optimized for touch (large inputs, clear labels)
 ```
 
 ---
 
-## Database Model Additions Needed
+## Component Integration Points
 
-### New Enum
+### New vs Modified Components
 
-```prisma
-enum ResultSubmissionStatus {
-  PENDING_CONFIRMATION
-  DISPUTED
-  CONFIRMED
-  REJECTED
-}
-```
-
-### New Model: MatchResultSubmission
-
-```prisma
-model MatchResultSubmission {
-  id            String                 @id @default(uuid())
-  matchId       String                 @unique  // One submission per match at a time
-  submittedById String                 // PlayerProfile.id
-  scores        String                 // JSON array of set scores
-  winnerId      String                 // PlayerProfile.id or DoublesPair.id
-  winnerType    String                 // "PLAYER" or "PAIR"
-  status        ResultSubmissionStatus @default(PENDING_CONFIRMATION)
-  disputedById  String?                // PlayerProfile.id of disputing player
-  disputeReason String?
-  confirmedById String?                // User.id of confirming organizer
-  rejectedById  String?                // User.id of rejecting organizer
-  rejectionReason String?
-  submittedAt   DateTime               @default(now())
-  resolvedAt    DateTime?              // When confirmed/rejected
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt
-
-  match         Match                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
-
-  @@index([matchId])
-  @@index([submittedById])
-  @@index([status])
-}
-```
-
-### New Model: GroupStanding
-
-```prisma
-model GroupStanding {
-  id            String  @id @default(uuid())
-  groupId       String
-  playerId      String
-  matchesPlayed Int     @default(0)
-  wins          Int     @default(0)
-  losses        Int     @default(0)
-  setsWon       Int     @default(0)
-  setsLost      Int     @default(0)
-  gamesWon      Int     @default(0)
-  gamesLost     Int     @default(0)
-  points        Int     @default(0)  // 2 = win, 1 = loss, 0 = walkover/absent
-  position      Int?                 // Set when group is complete
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  group  Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  player PlayerProfile @relation(fields: [playerId], references: [id])
-
-  @@unique([groupId, playerId])
-  @@index([groupId])
-  @@index([groupId, points])
-}
-```
-
-### Match Model Modifications (No new table, extend existing)
-
-The existing `Match` model already has:
-- `result String?` — JSON for confirmed result
-- `completedWithRules String?` — immutable rules snapshot
-- `completedAt DateTime?`
-- `status MatchStatus` — SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED, BYE
-
-No changes to `Match` itself are required. `MatchResultSubmission` handles the submission workflow as a separate concern.
-
-### SwissMatchHistory — Not Needed
-
-Swiss pairing history is derived from the existing `Match` table filtered by `tournamentId` and `status: COMPLETED`. No additional model required.
+| Component | New/Modified | Integration Notes |
+|-----------|-------------|-------------------|
+| `NavBar.jsx` | MODIFIED | Requires switching from raw `<nav>` to React Bootstrap `Navbar` with `Navbar.Offcanvas`. The existing `onClick/navigate` pattern must change to `Nav.Link as={NavLink}` for `collapseOnSelect` to work. |
+| `TournamentViewPage.jsx` | MODIFIED | Section ordering logic. No new API calls. `FormatVisualization` gets a `forceExpand={status === 'IN_PROGRESS'}` prop. |
+| `FormatVisualization.jsx` | MODIFIED | Accept `forceExpand` prop. When true, `setIsExpanded(true)` on mount. The existing lazy-load logic (`isExpanded && bracket`) still works. |
+| `TournamentInfoPanel.jsx` | MODIFIED | Wrap in Accordion when `defaultCollapsed` prop passed, or refactor internal `Collapse` to be collapsed-by-default. |
+| `KnockoutBracket.jsx` | MODIFIED | Add auto-scale `useEffect`. Pass `fullscreen="sm-down"` to `MatchResultModal`. |
+| `useBracketNavigation.js` | MODIFIED | Expose `setScale()` for external control (auto-scale effect). Add `wheel` event for trackpad pinch-to-zoom. |
+| `BracketControls.jsx` | MODIFIED | Increase button size on mobile (44px min). Reorder: +/- zoom are primary; BYE toggle is secondary. |
+| `MatchResultModal.jsx` | MODIFIED | Add `fullscreen="sm-down"`. Audit form input sizes (Bootstrap `form-control-lg` on mobile). |
+| `ManualDrawEditor.jsx` | MODIFIED | Stacked `Col xs={12}` layout. Each slot gets its own Card row. |
+| `PlayerListPanel.jsx` | MODIFIED | Add collapsible wrapper + card view on xs. |
+| `useBreakpoint.js` | NEW | `const { isMobile, isTablet } = useBreakpoint()` — uses `window.matchMedia`. Optional; only create if 3+ components need JS-side breakpoint checks. |
 
 ---
 
-## Component Boundaries
+## Suggested Build Order (Phase Dependencies)
 
-| Boundary | Communication | Direction | Notes |
-|----------|---------------|-----------|-------|
-| `matchResultService` ↔ `bracketProgressionService` | Direct function call | matchResult calls bracket | Called only on CONFIRMED result |
-| `matchResultService` ↔ `tournamentLifecycleService` | Direct function call | matchResult calls lifecycle | Auto-complete check after each confirmation |
-| `bracketProgressionService` ↔ Prisma `Match` | Prisma queries | bracket writes Match | Finds next bracket slot, updates player assignment |
-| `groupStandingsService` ↔ Prisma `Match` + `GroupStanding` | Prisma queries | service reads Match, writes GroupStanding | Reads completed matches, writes computed standings |
-| `swissPairingService` ↔ Prisma `Match` + `Round` | Prisma queries | service reads history, writes new Round+Match | Stateless pairing over match history |
-| `playerStatsService` ↔ Prisma `Match` + `TournamentResult` | Prisma queries | stats reads both | Aggregates from existing Feature 008 data |
-| Frontend `matchResultService` ↔ Backend `/api/v1/matches` | REST HTTP | frontend calls backend | Score submission, dispute, confirmation |
-| `tournamentLifecycleService` ↔ `pointCalculationService` (Feature 008) | Manual trigger via API | organizer triggers | Point calculation stays as explicit POST after COMPLETED |
+### Phase 1: Navigation Fix (Prerequisite — known bug)
 
----
+Fix first because it affects every page. Broken mobile nav is a blocker for testing anything else on mobile.
 
-## Suggested Build Order (Dependencies)
+1. Refactor `NavBar.jsx` to `Navbar.Offcanvas` with `expand="lg"`
+2. Switch nav items to `Nav.Link as={NavLink}` for `collapseOnSelect`
+3. Test all role-gated nav items (ADMIN, ORGANIZER, PLAYER)
+4. Verify desktop layout unchanged at lg+
 
-Build in this sequence to minimize blocked work:
+### Phase 2: TournamentViewPage Restructure
 
-### Phase 1: Match Result Submission (Foundation)
+Highest user impact. Players use this page on mobile at the court.
 
-Must come first. All other features (bracket progression, stats) depend on confirmed match results.
+1. Add `forceExpand` prop to `FormatVisualization`
+2. Implement status-aware section ordering in `TournamentViewPage`
+3. Default-collapse `TournamentInfoPanel` on mobile (Accordion or prop)
+4. Default-collapse `PlayerListPanel` on mobile
+5. Default-collapse `PointPreviewPanel` on mobile
+6. Champion banner positioning
 
-1. `MatchResultSubmission` Prisma model + migration
-2. `matchResultService.js` — submit, dispute, confirm, reject
-3. `matchResultController.js` + `matchResultRoutes.js`
-4. `matchResultValidator.js` (Joi: score format validation against tournament rules)
-5. Frontend `ScoreEntryForm.jsx` + `MatchResultPage.jsx`
-6. Frontend `OrganizerPendingResultsPage.jsx`
+### Phase 3: Bracket Mobile UX
 
-### Phase 2: Tournament State Machine + Bracket Progression
+Depends on Phase 2 (bracket is already visible as hero; now optimize its touch behavior).
 
-Depends on Phase 1 (needs confirmed match results to drive transitions).
+1. Add auto-scale `useEffect` to `KnockoutBracket`
+2. Expose `setScale` from `useBracketNavigation` for external control
+3. Audit and fix `touch-action` CSS on `.bracket-viewport`
+4. Increase tap targets in `BracketControls` to 44px minimum
+5. Add `fullscreen="sm-down"` to `MatchResultModal`
+6. Audit `MatchResultModal` form inputs for touch ergonomics (input size, spacing)
 
-1. `tournamentLifecycleService.js` — startTournament, completeTournament, checkAutoComplete
-2. `bracketProgressionService.js` — advanceWinner, findNextBracketSlot
-3. Integrate progression into `matchResultService.confirmResult()`
-4. Add lifecycle endpoints to `tournamentRoutes.js`
+### Phase 4: Organizer Mobile — Manual Draw + Result Corrections
 
-### Phase 3: Group Stage
+Depends on Phase 3 (modal is fullscreen). Organizer workflows on mobile.
 
-Depends on Phase 1 (group matches use same result submission flow) and Phase 2 (tournament lifecycle).
+1. Refactor `ManualDrawEditor` to single-column stacked layout on xs
+2. Test manual draw workflow on mobile viewport
+3. Audit `OrganizerRegistrationPanel` — collapsible on mobile
+4. Test result correction (organizer edit) via fullscreen modal on mobile
 
-1. `GroupStanding` Prisma model + migration
-2. `groupStandingsService.js` — generateSchedule, calculateStandings
-3. `groupController.js` + `groupRoutes.js`
-4. `standingsCalculator.js` utility (tiebreaker logic, reused by Swiss)
-5. Frontend `GroupStagePage.jsx` + `GroupStandingsTable.jsx`
+### Phase 5: App-wide Responsive Pass
 
-### Phase 4: Swiss System
+Targets the remaining list/table pages. Can be done in parallel by sub-task if needed.
 
-Depends on Phase 1 (Swiss match results) and the `standingsCalculator` utility from Phase 3.
+1. `TournamentSetupPage` — table to card list on xs, filter controls responsive
+2. `CategoryRankingsPage` — table responsive, rankings tabs usable on mobile
+3. `OrganizerDashboard` — replace placeholder `coming soon` cards with functional navigation links
+4. `OrganizerPlayersPage` — table to card list on xs
+5. `PlayerPublicProfilePage` — responsive audit
+6. `TournamentsListPage` — responsive audit
 
-1. `swissPairingService.js` — generateRound, calculateStandings
-2. `swissController.js` + `swissRoutes.js`
-3. `swissPairingValidator.js`
-4. Frontend `SwissStandingsPage.jsx` + `SwissPairingTable.jsx`
+### Phase 6: Visual Refresh + Dev Tooling
 
-### Phase 5: Player Statistics
+No dependency. Can be done in any order after Phase 1.
 
-Depends on Phase 1 (needs completed matches). Can start in parallel with Phase 3 if needed.
-
-1. `playerStatsService.js` — getStats, getMatchHistory, getHeadToHead
-2. Add `/api/v1/players/:id/stats` endpoint
-3. Frontend `PlayerStatsPage.jsx`
-
-### Phase 6: Combined Format
-
-Depends on Phase 3 (group stage) and Phase 2 (bracket progression). Group → Knockout advancement.
-
-1. `combinedFormatService.js` — advanceFromGroups, buildAdvancementBracket
-2. Integrate with existing COMBINED formatType handling in `tournamentService.js`
+1. Mobile dev tooling: browser-sync, device testing setup, viewport meta tag verification
+2. Typography and spacing pass (Bootstrap spacing utilities, `fs-` classes)
+3. Color and visual refinements (consistent Bootstrap semantic colors)
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Storing Score Strings Directly in Match.result Before Confirmation
+### Anti-Pattern 1: `max-width` Overrides for Mobile
 
-**What people do:** Write the player's submitted score directly to `Match.result` when the player submits it.
+**What people do:** Write desktop styles first, then add `@media (max-width: 768px)` overrides for mobile.
 
-**Why it's wrong:** `Match.result` is documented as the immutable confirmed result. Writing a pre-confirmation score creates ambiguity — is this a confirmed or pending result? The existing `completedWithRules` field assumes finality. Overwriting before confirmation breaks the "results are immutable after confirmation" constraint.
+**Why it's wrong:** Bootstrap is mobile-first. Adding `max-width` overrides fights Bootstrap's cascade. The existing `KnockoutBracket.css` already has some mobile overrides — this pattern should not be extended.
 
-**Do this instead:** Use `MatchResultSubmission.scores` for the pending submission. Only write to `Match.result` during `confirmResult()`.
+**Do this instead:** Write base styles for xs, extend with `@media (min-width: ...)`. For Bootstrap utilities, use `col-xs-12 col-lg-6` not `col-12` with a `max-width` override.
 
-### Anti-Pattern 2: Inline Standings Calculation in the Controller
+---
 
-**What people do:** Calculate group standings or Swiss scores inside the controller handler with a long function.
+### Anti-Pattern 2: JS-Based Device Detection for Layout
 
-**Why it's wrong:** The existing codebase places all business logic in services, controllers only orchestrate. Tiebreaker logic for standings is complex (sets won → games won → head-to-head chain). It needs to be independently testable, and it is shared between group stage and potentially Swiss.
+**What people do:** Use `navigator.userAgent` or `window.innerWidth` checks in render to conditionally render mobile vs desktop JSX trees.
 
-**Do this instead:** `standingsCalculator.js` utility function, called from `groupStandingsService` and `swissPairingService`. Test the calculator independently.
+**Why it's wrong:** Creates SSR/hydration mismatches, re-renders on resize, and is unnecessary when Bootstrap CSS handles it via breakpoints. It also creates two separate code paths that diverge over time.
 
-### Anti-Pattern 3: Checking "Is Tournament Complete?" in Every Match Update
+**Do this instead:** Use Bootstrap `d-none d-md-block` / `d-md-none` utilities for show/hide. Reserve `useBreakpoint.js` for cases where the JS logic genuinely differs (e.g., auto-scale on bracket mount), not for layout decisions.
 
-**What people do:** After each match result, run a query counting all matches to check if the tournament is done, inline in the match update transaction.
+---
 
-**Why it's wrong:** For large bracket tournaments (128 players = 127 matches), this count runs on every single match confirmation. As a side-effect in the service, it causes latency spikes near the end of the tournament when the court is busy.
+### Anti-Pattern 3: Replacing KnockoutBracket with a Library
 
-**Do this instead:** `tournamentLifecycleService.checkAutoComplete()` runs the count asynchronously after the match confirmation response is sent (similar to how Feature 006's `recalculateCategorySeedingScores` is called with `.catch()` as a fire-and-forget). Return the match confirmation immediately; auto-complete happens asynchronously.
+**What people do:** See the bracket touch complexity and replace the custom implementation with `react-zoom-pan-pinch` or similar.
 
-### Anti-Pattern 4: Single MatchResult Table for Both Singles and Doubles
+**Why it's wrong:** The existing `useBracketNavigation` hook is 230 lines, well-structured, and the touch handlers already work. The gaps are specific: auto-scale, trackpad pinch, tap target sizes. A full replacement introduces untested behavior for the consolation bracket, highlight system, "My Match" navigation, and BYE toggle — all of which are implemented in the existing components.
 
-**What people do:** Assume `winnerId` is always a `PlayerProfile.id` and use a foreign key directly.
+**Do this instead:** Targeted additions to the existing hook: expose `setScale`, add `wheel` event handler, fix `touch-action` CSS. Total change is ~30 lines.
 
-**Why it's wrong:** The existing `Match` model has both `player1Id/player2Id` (singles) and `pair1Id/pair2Id` (doubles). The winner in a doubles match is a `DoublesPair`, not a `PlayerProfile`. The existing schema handles this via `isBye`, `pair1Id`, `pair2Id`.
+---
 
-**Do this instead:** In `MatchResultSubmission`, use `winnerId String` + `winnerType String` ("PLAYER" or "PAIR") to keep the same polymorphic pattern the existing codebase uses. Do not add a foreign key constraint — mirror the pattern in `TournamentResult.entityType`.
+### Anti-Pattern 4: Making Everything an Accordion
+
+**What people do:** Wrap every section of TournamentViewPage in an Accordion to "organize" the page.
+
+**Why it's wrong:** An accordion that defaults everything collapsed requires the user to expand each section before seeing any content. On a tournament day, the player needs to see their bracket immediately — not tap to expand it.
+
+**Do this instead:** Only collapse genuinely secondary content. The bracket (when IN_PROGRESS) is primary — never collapsed. Tournament logistics info is secondary — collapsed by default on mobile. Point preview is tertiary — collapsed. Player list depends on status (open when SCHEDULED, collapsed when IN_PROGRESS).
+
+---
+
+### Anti-Pattern 5: Assuming `navbar-toggler` Works Without Bootstrap JS
+
+**What people do:** Keep the existing `data-bs-toggle="collapse"` on the hamburger button and expect it to work.
+
+**Why it's wrong:** React Bootstrap recommends against mixing raw Bootstrap JavaScript with React components — the `data-bs-toggle` approach requires Bootstrap's JS bundle, which conflicts with React Bootstrap's component-based approach. The current `NavBar.jsx` uses `data-bs-toggle="collapse"` which may be the source of the known mobile nav bug.
+
+**Do this instead:** Use `Navbar.Toggle` from React Bootstrap. It integrates with the `Navbar.Offcanvas` component's state through React's component model, no Bootstrap JS needed.
 
 ---
 
 ## Scaling Considerations
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0-500 users (current target) | Monolith is correct. All services in same Express process. Synchronous service calls. PostgreSQL direct connection via Prisma. |
-| 500-5k users | First bottleneck: standings recalculation on every GET. Cache `GroupStanding` writes per round completion. Add database index on `Match(tournamentId, status)`. |
-| 5k+ users | Extract result confirmation notifications to a job queue (Bull/BullMQ) if notifications are added. Swiss pairing becomes CPU-bound; extract to worker thread at scale. |
+This milestone does not change scale characteristics. The frontend is a SPA served as static assets.
 
-### Scaling Priorities
-
-1. **First bottleneck:** Group standings computed on every GET request. Fix: cache computed standings in `GroupStanding` table after each match confirmation. Already included in Pattern 4.
-2. **Second bottleneck:** `checkAutoComplete()` count query on every match confirmation. Fix: fire-and-forget async pattern (already established in codebase with seeding score recalculation).
+| Scale | Consideration |
+|-------|---------------|
+| Current (0-200 concurrent mobile users) | CSS-only responsive is zero-cost. Bootstrap utilities add no runtime overhead. |
+| Bracket render on low-end phones | CSS transforms are GPU-accelerated. The bracket viewport already uses `will-change: transform`. No change needed. For very large brackets (128 players = 7 rounds), consider adding a round-count-based initial scale calculation. |
+| NavBar at high-role-count | The offcanvas approach handles any number of nav items gracefully — they scroll inside the drawer. The current flat list approach does not. |
 
 ---
 
 ## Integration Points
 
-### Internal Boundaries
+### Preserved API Contracts
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Result submission → Feature 008 points | Manual trigger via `POST /calculate-points` | Organizer triggers after COMPLETED. No automatic coupling. |
-| Result submission → Feature 011 knockout view | Match.result field update | KnockoutBracket reads Match.result; confirmation writes it. Works automatically. |
-| Group standings → Combined format advancement | Service-to-service call | `combinedFormatService` reads final group standings to build advancement bracket. |
-| Swiss pairing → Tournament.formatConfig | Config read | `swissPairingService` reads `SwissFormatConfig.rounds` to know when tournament is done. |
+All existing API endpoints remain unchanged. This milestone is frontend-only.
 
-### External Services
+| API Consumer | Existing | Change |
+|-------------|----------|--------|
+| `TournamentViewPage` → `tournamentViewService` | SWR hooks unchanged | None |
+| `FormatVisualization` → `useFormatStructure` | Lazy load unchanged | None — `forceExpand` prop triggers existing fetch |
+| `KnockoutBracket` → `useMatches` | SWR unchanged | None |
+| `MatchResultModal` → `matchService` | Unchanged | None |
 
-None required. Result submission is self-contained within the BATL backend. No email or push notifications in scope for this milestone.
+### Internal Component Boundary Changes
+
+| Boundary | Current | After v1.4 |
+|----------|---------|------------|
+| `TournamentViewPage` → `FormatVisualization` | `mutateTournament` prop only | Add `forceExpand={isInProgress}` prop |
+| `KnockoutBracket` → `useBracketNavigation` | Hook returns state + handlers | Add `setScale` action to hook return |
+| `TournamentViewPage` → `TournamentInfoPanel` | No props for collapse state | Add `defaultCollapsed={isMobile}` or use responsive Accordion wrapper in page |
+| `NavBar` → React Router | `onClick/navigate` | Switch to `Nav.Link as={NavLink}` for collapseOnSelect |
 
 ---
 
 ## Sources
 
-- Direct analysis of `backend/prisma/schema.prisma` (30+ models, existing Match/Tournament/Group/Bracket structure)
-- Direct analysis of `backend/src/services/tournamentService.js` (existing status management patterns, fire-and-forget async side effects)
-- Direct analysis of `backend/src/types/matchStatus.js` (existing transition guard pattern via `canTransitionTo()`)
-- Direct analysis of `backend/src/validation/formatConfigSchemas.js` (SwissFormatConfig: rounds 3-20, GroupFormatConfig: groupSize 2-8)
-- `.planning/codebase/ARCHITECTURE.md` (layer definitions, error handling, auth patterns)
-- `.planning/codebase/STRUCTURE.md` (file naming conventions, where to add new code)
-- `.planning/PROJECT.md` (constraints: immutable confirmed results, backward compatibility, touch-friendly UX)
+- Direct analysis of `frontend/src/components/NavBar.jsx` — confirmed `data-bs-toggle="collapse"` pattern (Bootstrap JS dependency, source of known mobile nav bug)
+- Direct analysis of `frontend/src/components/KnockoutBracket.jsx` + `KnockoutBracket.css` — confirmed existing touch handlers, `touch-action: pan-x pan-y`, 120px match height
+- Direct analysis of `frontend/src/hooks/useBracketNavigation.js` — confirmed pinch zoom exists but no `wheel` event handler
+- Direct analysis of `frontend/src/pages/TournamentViewPage.jsx` — confirmed flat, non-status-aware layout
+- Direct analysis of `frontend/src/components/TournamentInfoPanel.jsx` — confirmed custom Collapse with open-by-default
+- Direct analysis of `frontend/src/components/FormatVisualization.jsx` — confirmed always-manual expand, no auto-expand for IN_PROGRESS
+- [Bootstrap 5.3 Breakpoints](https://getbootstrap.com/docs/5.3/layout/breakpoints/)
+- [Bootstrap 5.3 Navbar](https://getbootstrap.com/docs/5.3/components/navbar/)
+- [Bootstrap 5.3 Offcanvas](https://getbootstrap.com/docs/5.3/components/offcanvas/)
+- [React Bootstrap Navbar docs](https://react-bootstrap.netlify.app/docs/components/navbar/)
+- [React Bootstrap Offcanvas docs](https://react-bootstrap.netlify.app/docs/components/offcanvas/)
+- [React Bootstrap Breakpoints](https://react-bootstrap.netlify.app/docs/layout/breakpoints/)
+- [LogRocket: Zoom, Pan, Pinch in React](https://blog.logrocket.com/adding-zoom-pan-pinch-react-web-apps/)
 
 ---
 
-*Architecture research for: BATL amateur tennis league — match results, state machines, group/Swiss pairing*
-*Researched: 2026-02-26*
+*Architecture research for: BATL v1.4 — mobile-first UI rework, React Bootstrap 2.10 / Bootstrap 5.3*
+*Researched: 2026-03-06*

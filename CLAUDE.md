@@ -140,6 +140,22 @@ This ensures QA can verify new features work correctly before deployment.
 
 <!-- MANUAL ADDITIONS START -->
 
+## Bracket View (CRITICAL — Read Before Modifying)
+
+**MANDATORY: Before touching ANY bracket view file, read `frontend/src/components/BRACKET-VIEW-GUIDE.md` in full.**
+
+This component has been through 5+ rounds of bug fixes where each fix risked reintroducing a previous bug. The guide documents all critical invariants, failed approaches, and a testing checklist that must be followed.
+
+**Files covered:** `KnockoutBracket.jsx`, `KnockoutBracket.css`, `useBracketNavigation.js`, `BracketMatch.jsx`, `BracketControls.jsx`, `BracketMyMatch.jsx`, `bracketUtils.js`, `bracketColors.js`
+
+**Key invariants (see guide for details):**
+- Viewport width must NEVER be derived from scaled dimensions (causes shrinking feedback loop)
+- `.bracket-viewport` must use `overflow: hidden` + `touch-action: none` (not `auto`/`pan-x`/`pan-y`)
+- Touch listeners must be imperative `addEventListener({ passive: false })`, NOT React props (React 19 passive issue)
+- Touch useEffect must depend on callback ref state, not ref object (conditional rendering timing)
+- Zoom must center on viewport midpoint with translate compensation (`transformOrigin: 0 0`)
+- Wheel zoom is intentionally removed — do not re-add
+
 ## Git Workflow
 
 **CRITICAL: Never commit directly to master.**

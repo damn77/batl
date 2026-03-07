@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --fix"
@@ -42,6 +43,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "vite": "^7.1.12"
+    "vite": "^7.1.12",
+    "vite-plugin-qrcode": "^0.3.0"
   }
 }

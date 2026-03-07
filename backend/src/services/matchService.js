@@ -1,11 +1,9 @@
 // T099: Match Service - Match management with rule snapshot on completion
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import * as ruleHistoryService from './ruleHistoryService.js';
 import * as matchRulesService from './matchRulesService.js';
 import * as pairRankingService from './pairRankingService.js'; // 006-doubles-pairs
-
-const prisma = new PrismaClient();
 
 /**
  * T099: Complete a match and capture rule snapshot

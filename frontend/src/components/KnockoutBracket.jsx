@@ -125,12 +125,15 @@ const KnockoutBracket = ({
 
   // Refs
   const containerRef = useRef(null);
-  const viewportRef = useRef(null);
+
+  // On mobile, default to 50% zoom so more of the bracket is visible
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const effectiveInitialScale = initialScale === 1.0 && isMobile ? 0.5 : initialScale;
 
   // Navigation hook (T030)
   const navigation = useBracketNavigation({
-    initialScale,
-    containerRef: viewportRef
+    initialScale: effectiveInitialScale,
+    roundCount: rounds?.length || 0
   });
 
   // Auth context — used for role check and participant gating
@@ -302,20 +305,19 @@ const KnockoutBracket = ({
               </div>
 
               {/* Zoomable/pannable viewport (T030) */}
+              {/* eslint-disable react-hooks/refs -- stable callbacks from useBracketNavigation hook, not raw ref reads */}
               <div
-                ref={viewportRef}
+                ref={navigation.setViewportRef}
                 className={viewportClasses}
                 onMouseDown={navigation.handleMouseDown}
                 onMouseMove={navigation.handleMouseMove}
                 onMouseUp={navigation.handleMouseUp}
-                onTouchStart={navigation.handleTouchStart}
-                onTouchMove={navigation.handleTouchMove}
-                onTouchEnd={navigation.handleTouchEnd}
               >
                 <div
                   className={viewportContentClasses}
                   style={navigation.containerStyle}
                 >
+                  {/* eslint-enable react-hooks/refs */}
                   <div className="bracket-container">
                     <div className="bracket-grid">
                       {matchesByRound.map(({ round, matches: roundMatches }) => (

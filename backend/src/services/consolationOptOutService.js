@@ -18,10 +18,8 @@
  *   - recordOptOut({ tournamentId, playerId, pairId, isOrganizer, submitterPlayerId })
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { advanceBracketSlot } from './tournamentLifecycleService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Helper to throw structured errors consumed by the controller.

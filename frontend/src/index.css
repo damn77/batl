@@ -1,0 +1,4 @@
+/* Offcanvas drawer animation — 150ms for snappy mobile feel */
+.offcanvas {
+  --bs-offcanvas-transition: transform 0.15s ease-in-out;
+}

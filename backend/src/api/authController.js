@@ -1,9 +1,7 @@
 import passport from '../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { logAudit, AuditActions } from '../services/auditService.js';
 import { registerPlayer } from '../services/userService.js';
-
-const prisma = new PrismaClient();
 
 // Login handler
 export const login = async (req, res, next) => {

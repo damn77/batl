@@ -457,8 +457,8 @@
 /* T029, T031: Zoom/pan viewport styles */
 .bracket-viewport {
   position: relative;
-  overflow: auto; /* Allow scrolling to see full bracket */
-  touch-action: pan-x pan-y; /* Allow touch scrolling */
+  overflow: hidden; /* JS pan/zoom handles all navigation */
+  touch-action: none; /* Prevent browser pan/zoom — JS handles it */
   user-select: none;
   max-height: 70vh;
   min-height: 300px;
@@ -545,13 +545,38 @@
   }
 
   .bracket-controls-wrapper {
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  /* 44px minimum tap targets for all bracket control buttons */
+  .bracket-controls .btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Ensure ButtonGroup buttons also get 44px height (ButtonGroup can override) */
+  .bracket-controls .btn-group .btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 1rem;
   }
 
   .bracket-controls {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    gap: 0.25rem;
+  }
+
+  /* 44px tap target for My Match button */
+  .bracket-my-match .btn {
+    min-height: 44px;
+    font-size: 1rem;
   }
 
   .bracket-my-match {

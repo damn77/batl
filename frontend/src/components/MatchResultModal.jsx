@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import { Modal, Button, ButtonGroup, Form, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { mutate as globalMutate } from 'swr';
 import { submitMatchResult, submitMatchResultDryRun } from '../services/matchService';
 import SetsScoreForm from './SetsScoreForm';
 import BigTiebreakForm from './BigTiebreakForm';
+import './MatchResultModal.css';
 
 /**
  * MatchResultModal — role-aware match result dialog.
@@ -288,7 +289,7 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
   const isSubmitBlockedByWinnerLock = !isOrganizer && isWinnerChanging;
 
   return (
-    <Modal show={!!match} onHide={onClose} centered size="lg">
+    <Modal show={!!match} onHide={onClose} centered size="lg" fullscreen="sm-down" className="match-result-modal">
       <Modal.Header closeButton>
         <Modal.Title>
           {isDoublesMatch ? (
@@ -369,7 +370,8 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
         ) : isOrganizer ? (
           /* Mode 3: Organizer editable — score or special outcome */
           <>
-            <div className="mb-3">
+            {/* Desktop: inline radios (>=576px) */}
+            <div className="mode-toggle-desktop d-none d-sm-block mb-3">
               <Form.Check
                 type="radio"
                 inline
@@ -388,6 +390,25 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                 checked={mode === 'special'}
                 onChange={() => setMode('special')}
               />
+            </div>
+            {/* Mobile: segmented ButtonGroup (<576px) */}
+            <div className="mode-toggle-mobile d-sm-none mb-3">
+              <ButtonGroup className="w-100">
+                <Button
+                  className="flex-fill"
+                  variant={mode === 'score' ? 'primary' : 'outline-primary'}
+                  onClick={() => setMode('score')}
+                >
+                  Enter score
+                </Button>
+                <Button
+                  className="flex-fill"
+                  variant={mode === 'special' ? 'primary' : 'outline-primary'}
+                  onClick={() => setMode('special')}
+                >
+                  Special outcome
+                </Button>
+              </ButtonGroup>
             </div>
 
             {mode === 'score' ? (
@@ -440,20 +461,32 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                     <Form.Label>Partial score (games played before retirement — optional)</Form.Label>
                     <div className="d-flex gap-2 align-items-center">
                       <Form.Control
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         placeholder={player1Name + ' games'}
                         value={partialScore.player1Games}
                         onChange={(e) => setPartialScore(prev => ({ ...prev, player1Games: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         style={{ maxWidth: '160px' }}
                       />
                       <span className="text-muted">-</span>
                       <Form.Control
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         placeholder={player2Name + ' games'}
                         value={partialScore.player2Games}
                         onChange={(e) => setPartialScore(prev => ({ ...prev, player2Games: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         style={{ maxWidth: '160px' }}
                       />
                     </div>
@@ -497,35 +530,43 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
 
       {!isReadOnly && (
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Cancel
-          </Button>
           {pendingWinnerChange ? (
-            <>
-              <Button variant="outline-secondary" onClick={() => setPendingWinnerChange(null)} disabled={submitting}>
-                Go Back
-              </Button>
-              <Button variant="danger" onClick={handleConfirmWinnerChange} disabled={submitting}>
+            <div className="confirmation-buttons d-flex flex-wrap gap-2 w-100">
+              <Button className="confirm-primary" variant="danger" onClick={handleConfirmWinnerChange} disabled={submitting}>
                 {submitting ? 'Saving...' : 'Confirm Change'}
               </Button>
-            </>
-          ) : pendingInvalidSubmit ? (
-            <>
-              <Button variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
-                Fix Scores
+              <Button className="confirm-secondary" variant="outline-secondary" onClick={() => setPendingWinnerChange(null)} disabled={submitting}>
+                Go Back
               </Button>
-              <Button variant="danger" onClick={handleConfirmInvalidSubmit} disabled={submitting}>
+              <Button className="confirm-secondary" variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+            </div>
+          ) : pendingInvalidSubmit ? (
+            <div className="confirmation-buttons d-flex flex-wrap gap-2 w-100">
+              <Button className="confirm-primary" variant="danger" onClick={handleConfirmInvalidSubmit} disabled={submitting}>
                 {submitting ? 'Saving...' : 'Submit Anyway'}
               </Button>
-            </>
+              <Button className="confirm-secondary" variant="outline-secondary" onClick={() => setPendingInvalidSubmit(null)} disabled={submitting}>
+                Fix Scores
+              </Button>
+              <Button className="confirm-secondary" variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              disabled={submitting || isSubmitBlockedByWinnerLock}
-            >
-              {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
-            </Button>
+            <>
+              <Button variant="secondary" onClick={onClose} disabled={submitting}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSubmit}
+                disabled={submitting || isSubmitBlockedByWinnerLock}
+              >
+                {submitting ? 'Saving...' : (isOrganizer ? 'Save Result' : 'Submit Result')}
+              </Button>
+            </>
           )}
         </Modal.Footer>
       )}

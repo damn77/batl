@@ -1,4 +1,5 @@
 // Language switcher component for i18n
+import { Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
 const languages = [
@@ -16,29 +17,26 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <div className="dropdown">
-      <button
-        className="btn btn-link nav-link dropdown-toggle text-white"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        style={{ textDecoration: 'none' }}
+    <Dropdown align="end" drop="down">
+      <Dropdown.Toggle
+        variant="link"
+        className="nav-link text-white p-0"
+        style={{ textDecoration: 'none', boxShadow: 'none' }}
       >
         {currentLang.flag} {currentLang.code.toUpperCase()}
-      </button>
-      <ul className="dropdown-menu dropdown-menu-end">
+      </Dropdown.Toggle>
+      <Dropdown.Menu style={{ transform: 'translateY(0)', top: '0', position: 'absolute' }}>
         {languages.map(lang => (
-          <li key={lang.code}>
-            <button
-              className={`dropdown-item ${lang.code === i18n.language ? 'active' : ''}`}
-              onClick={() => handleLanguageChange(lang.code)}
-            >
-              {lang.flag} {lang.label}
-            </button>
-          </li>
+          <Dropdown.Item
+            key={lang.code}
+            active={lang.code === i18n.language}
+            onClick={() => handleLanguageChange(lang.code)}
+          >
+            {lang.flag} {lang.label}
+          </Dropdown.Item>
         ))}
-      </ul>
-    </div>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 };
 

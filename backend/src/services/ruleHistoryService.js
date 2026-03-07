@@ -1,7 +1,5 @@
 // T093, T094: Rule History Service - Captures rule snapshots for completed matches
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 /**
  * T094: Capture a snapshot of the effective rules when a match completes

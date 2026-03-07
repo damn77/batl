@@ -86,3 +86,6 @@ desktop.ini
 # Claude Code temporary files/directories
 **/tmpclaude-*
 tmpclaude-*
+
+# Mobile testing screenshots
+mobile-test-proof/

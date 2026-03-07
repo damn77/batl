@@ -108,6 +108,12 @@ export default function BigTiebreakForm({
     return null;
   }
 
+  const handleNumericKeyDown = (e) => {
+    if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   function handleScoreChange(index, field, rawValue) {
     const updatedTiebreaks = tiebreaks.map((tb, i) => {
       if (i !== index) return tb;
@@ -150,13 +156,15 @@ export default function BigTiebreakForm({
               {/* Player 1 score */}
               <Col xs={maxTiebreaks > 1 ? 5 : 6}>
                 <Form.Control
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={tb.player1Score}
                   readOnly={isReadOnly}
                   disabled={isLocked && !disabled}
                   placeholder="0"
                   onChange={(e) => handleScoreChange(index, 'player1Score', e.target.value)}
+                  onKeyDown={handleNumericKeyDown}
                   aria-label={`Tiebreak ${tb.setNumber} ${player1Name} score`}
                   size="sm"
                 />
@@ -165,13 +173,15 @@ export default function BigTiebreakForm({
               {/* Player 2 score */}
               <Col xs={maxTiebreaks > 1 ? 5 : 6}>
                 <Form.Control
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={tb.player2Score}
                   readOnly={isReadOnly}
                   disabled={isLocked && !disabled}
                   placeholder="0"
                   onChange={(e) => handleScoreChange(index, 'player2Score', e.target.value)}
+                  onKeyDown={handleNumericKeyDown}
                   aria-label={`Tiebreak ${tb.setNumber} ${player2Name} score`}
                   size="sm"
                 />

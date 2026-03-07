@@ -31,6 +31,7 @@ import {
   assignPositionSchema
 } from '../validators/bracketPersistenceValidator.js';
 import { copyTournamentSchema } from '../validators/tournamentCopyValidator.js';
+import prisma from '../../lib/prisma.js';
 
 const router = express.Router();
 
@@ -179,9 +180,6 @@ router.get(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
-
       const config = await prisma.tournamentPointConfig.findUnique({
         where: { tournamentId: id }
       });
@@ -220,8 +218,6 @@ router.put(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
       const { validateTournamentPointConfig } = await import('../validators/tournamentPointValidators.js');
 
       // Validate input
@@ -275,8 +271,6 @@ router.post(
     try {
       const { id } = req.params;
       const { results } = req.body;
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
       const { awardPointsSinglesTournament, awardPointsDoublesTournament, deriveConsolationResults } = await import('../../services/pointCalculationService.js');
 
       if (!results || !Array.isArray(results) || results.length === 0) {

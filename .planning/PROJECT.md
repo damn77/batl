@@ -71,9 +71,11 @@ A complete tournament runs from registration to final standings without the orga
 
 ### Active
 
-(None yet — define in next milestone)
+<!-- v1.4: UI Rework & Mobile Design -->
 
-### Future (v1.3+)
+(Defined in REQUIREMENTS.md — see milestone requirements)
+
+### Future (v1.4+)
 
 - Group stage visualization and result entry (round-robin matches)
 - Swiss system pairing and result tracking
@@ -143,11 +145,21 @@ A complete tournament runs from registration to final standings without the orga
 | recalculateRankings outside Prisma transaction | Uses its own Prisma client internally — wrapping causes connection conflicts | ✓ Good — avoids deadlock |
 | Three-dot dropdown for tournament actions | Replaces multiple inline buttons per row | ✓ Good — cleaner UI, scalable for more actions |
 
+## Current Milestone: v1.4 UI Rework & Mobile Design
+
+**Goal:** Restructure the UI for mobile-first usage — bracket-centric tournament view, status-aware content visibility, app-wide responsive layout, full organizer mobile support, and light visual refresh.
+
+**Target features:**
+- Tournament view restructure: bracket hero when IN_PROGRESS, situational blocks collapse by status
+- App-wide mobile responsiveness pass across all key pages
+- Full organizer mobile: results, corrections, revert, manual draw on touch devices
+- Light visual refresh: spacing, typography, color improvements
+- Mobile navigation fix (known bug from tester)
+- Mobile development tooling for easier testing
+
 ## Current State
 
-v1.3 shipped. All 4 milestones complete (v1.0–v1.3). 18 phases across 4 milestones. Full tournament lifecycle operational: registration → seeded/manual draw → bracket progression → results → rankings → consolation brackets.
-
-**Next milestone:** Not yet planned. Run `/gsd:new-milestone` to define v1.4 scope.
+v1.3 shipped. All 4 milestones complete (v1.0–v1.3). 18 phases across 4 milestones. Full tournament lifecycle operational. v1.4 milestone started — UI rework and mobile design.
 
 ---
-*Last updated: 2026-03-06 after v1.3 milestone*
+*Last updated: 2026-03-06 after v1.4 milestone start*

@@ -1,0 +1,54 @@
+/* MatchResultModal — mobile-specific styles */
+
+@media (max-width: 575.98px) {
+  /* Sticky footer keeps Submit visible when iOS keyboard opens */
+  .match-result-modal .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    z-index: 1;
+    padding: 0.75rem;
+  }
+
+  .match-result-modal .modal-body {
+    overflow-y: auto;
+    padding-bottom: 1rem;
+  }
+
+  /* 44px tap targets for all inputs, selects, and footer buttons on mobile */
+  .match-result-modal .form-control {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .match-result-modal .form-select {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .match-result-modal .modal-footer .btn {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* Segmented ButtonGroup tap targets on mobile */
+  .match-result-modal .mode-toggle-mobile .btn {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* Confirmation buttons: primary full-width on top, secondaries side-by-side below */
+  .match-result-modal .confirmation-buttons {
+    flex-direction: column;
+  }
+
+  .match-result-modal .confirmation-buttons .confirm-primary {
+    width: 100%;
+    order: -1;
+  }
+
+  .match-result-modal .confirmation-buttons .confirm-secondary {
+    flex: 1;
+  }
+}
