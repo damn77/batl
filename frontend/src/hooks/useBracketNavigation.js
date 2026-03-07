@@ -41,6 +41,7 @@ export function useBracketNavigation({
   const pinchStartDistanceRef = useRef(0);
   const pinchStartScaleRef = useRef(1);
   const isDraggingRef = useRef(false);
+  const touchMovedRef = useRef(false);
   const scaleRef = useRef(initialScale);
   const translateRef = useRef({ x: 0, y: 0 });
 
@@ -179,12 +180,16 @@ export function useBracketNavigation({
     const el = viewportNode;
     if (!el) return;
 
+    const TAP_THRESHOLD = 10; // px — movement below this is a tap, not a drag
+
     const onTouchStart = (e) => {
       if (e.touches.length === 1) {
+        touchMovedRef.current = false;
         setIsDragging(true);
         dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         lastTranslateRef.current = { x: translateRef.current.x, y: translateRef.current.y };
       } else if (e.touches.length === 2) {
+        touchMovedRef.current = true; // pinch is never a tap
         const t1 = e.touches[0], t2 = e.touches[1];
         pinchStartDistanceRef.current = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
         pinchStartScaleRef.current = scaleRef.current;
@@ -196,6 +201,9 @@ export function useBracketNavigation({
       if (e.touches.length === 1 && isDraggingRef.current) {
         const deltaX = e.touches[0].clientX - dragStartRef.current.x;
         const deltaY = e.touches[0].clientY - dragStartRef.current.y;
+        if (Math.abs(deltaX) > TAP_THRESHOLD || Math.abs(deltaY) > TAP_THRESHOLD) {
+          touchMovedRef.current = true;
+        }
         setTranslateX(lastTranslateRef.current.x + deltaX);
         setTranslateY(lastTranslateRef.current.y + deltaY);
       } else if (e.touches.length === 2) {
@@ -207,7 +215,18 @@ export function useBracketNavigation({
       e.preventDefault();
     };
 
-    const onTouchEnd = () => { setIsDragging(false); };
+    const onTouchEnd = (e) => {
+      setIsDragging(false);
+      // If finger barely moved, it was a tap — synthesize click since
+      // preventDefault on touchstart suppresses the browser's native click.
+      if (!touchMovedRef.current && e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target) {
+          target.click();
+        }
+      }
+    };
 
     el.addEventListener('touchstart', onTouchStart, { passive: false });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
