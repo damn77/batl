@@ -140,7 +140,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Organizer opens a match on mobile, submits a result, and the result is saved without layout issues
   2. Organizer opens the result correction modal on mobile and it displays fullscreen with all controls reachable
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 24-01-PLAN.md — Responsive mode toggle (segmented ButtonGroup), stacked confirmation buttons on mobile
 
 ### Phase 25: App-Wide Responsive Pass
 **Goal**: Every key page in the app is usable at 375px viewport width with no horizontal overflow
@@ -184,6 +186,6 @@ Plans:
 | 20. Mobile Dev Tooling | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
-| 23. Bracket and Score Entry Mobile UX | 2/2 | Complete   | 2026-03-07 | - |
-| 24. Organizer Mobile Support | v1.4 | 0/TBD | Not started | - |
+| 23. Bracket and Score Entry Mobile UX | v1.4 | 2/2 | Complete | 2026-03-07 |
+| 24. Organizer Mobile Support | v1.4 | 0/1 | Not started | - |
 | 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
