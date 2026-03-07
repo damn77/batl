@@ -125,12 +125,11 @@ const KnockoutBracket = ({
 
   // Refs
   const containerRef = useRef(null);
-  const viewportRef = useRef(null);
 
   // Navigation hook (T030)
   const navigation = useBracketNavigation({
     initialScale,
-    containerRef: viewportRef
+    roundCount: rounds?.length || 0
   });
 
   // Auth context — used for role check and participant gating
@@ -303,7 +302,7 @@ const KnockoutBracket = ({
 
               {/* Zoomable/pannable viewport (T030) */}
               <div
-                ref={viewportRef}
+                ref={navigation.setViewportRef}
                 className={viewportClasses}
                 onMouseDown={navigation.handleMouseDown}
                 onMouseMove={navigation.handleMouseMove}
