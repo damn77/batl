@@ -130,6 +130,10 @@ const TournamentViewPage = () => {
                 // Already rendered by TournamentInfoPanel fragment above
                 return null;
               case 'format':
+                // Skip format accordion when hero bracket is already visible (IN_PROGRESS/COMPLETED)
+                if (tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') {
+                  return null;
+                }
                 return (
                   <Accordion.Item key={key} eventKey={key}>
                     <Accordion.Header>
