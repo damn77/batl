@@ -441,20 +441,32 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
                     <Form.Label>Partial score (games played before retirement — optional)</Form.Label>
                     <div className="d-flex gap-2 align-items-center">
                       <Form.Control
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         placeholder={player1Name + ' games'}
                         value={partialScore.player1Games}
                         onChange={(e) => setPartialScore(prev => ({ ...prev, player1Games: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         style={{ maxWidth: '160px' }}
                       />
                       <span className="text-muted">-</span>
                       <Form.Control
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         placeholder={player2Name + ' games'}
                         value={partialScore.player2Games}
                         onChange={(e) => setPartialScore(prev => ({ ...prev, player2Games: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         style={{ maxWidth: '160px' }}
                       />
                     </div>

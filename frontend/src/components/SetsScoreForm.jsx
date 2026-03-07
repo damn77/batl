@@ -92,6 +92,12 @@ export default function SetsScoreForm({
     return locked;
   }
 
+  const handleNumericKeyDown = (e) => {
+    if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete','Enter'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   function handleScoreChange(index, field, rawValue) {
     const updatedSets = sets.map((set, i) => {
       if (i !== index) return set;
@@ -133,14 +139,15 @@ export default function SetsScoreForm({
             {/* Player 1 score */}
             <Col xs={4}>
               <Form.Control
-                type="number"
-                min={0}
-                max={7}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={set.player1Score}
                 readOnly={isReadOnly}
                 disabled={isLocked && !disabled}
                 placeholder="0"
                 onChange={(e) => handleScoreChange(index, 'player1Score', e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 aria-label={`Set ${set.setNumber} ${player1Name} score`}
                 size="sm"
               />
@@ -149,14 +156,15 @@ export default function SetsScoreForm({
             {/* Player 2 score */}
             <Col xs={4}>
               <Form.Control
-                type="number"
-                min={0}
-                max={7}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={set.player2Score}
                 readOnly={isReadOnly}
                 disabled={isLocked && !disabled}
                 placeholder="0"
                 onChange={(e) => handleScoreChange(index, 'player2Score', e.target.value)}
+                onKeyDown={handleNumericKeyDown}
                 aria-label={`Set ${set.setNumber} ${player2Name} score`}
                 size="sm"
               />
@@ -166,14 +174,15 @@ export default function SetsScoreForm({
             <Col xs={3}>
               {showTiebreak ? (
                 <Form.Control
-                  type="number"
-                  min={0}
-                  max={99}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={set.tiebreakScore}
                   readOnly={isReadOnly}
                   disabled={isLocked && !disabled}
                   placeholder="e.g. 4"
                   onChange={(e) => handleScoreChange(index, 'tiebreakScore', e.target.value)}
+                  onKeyDown={handleNumericKeyDown}
                   aria-label={`Set ${set.setNumber} tiebreak loser's score`}
                   size="sm"
                 />
