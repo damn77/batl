@@ -5,7 +5,7 @@ milestone_name: UI Rework & Mobile Design
 status: planning
 stopped_at: Completed quick-5 (migrate PrismaClient instances)
 last_updated: "2026-03-07T08:53:38.878Z"
-last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
+last_activity: 2026-03-07 - Completed quick task 5: Migrate all PrismaClient instances to shared singleton
 progress:
   total_phases: 6
   completed_phases: 3
@@ -90,6 +90,12 @@ None.
 - [Phase 23]: Pinch-to-zoom decision gate — verify +/- button UX on real device before committing to react-zoom-pan-pinch
 - [Phase 23]: BYE row vertical whitespace on mobile — visibility:hidden wastes space; display:none may break connector lines
 - [Phase 24]: Manual draw mobile UX extent unknown — searchable select may suffice OR bottom-sheet picker needed (HIGH effort path)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 5 | Migrate all PrismaClient instances to shared singleton | 2026-03-07 | fb4b327 | [5-migrate-all-prismaclient-instances-to-sh](./quick/5-migrate-all-prismaclient-instances-to-sh/) |
 
 ## Session Continuity
 
