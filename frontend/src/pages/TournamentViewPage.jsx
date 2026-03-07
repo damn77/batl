@@ -1,19 +1,19 @@
 // T022-T038: Tournament View Page - Comprehensive tournament information display
 import { useState } from 'react';
-import { Container, Row, Col, Alert, Spinner, Breadcrumb, Button } from 'react-bootstrap';
+import { Container, Row, Col, Alert, Spinner, Breadcrumb, Button, Accordion } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import TournamentHeader from '../components/TournamentHeader';
 import TournamentInfoPanel from '../components/TournamentInfoPanel';
 import PlayerListPanel from '../components/PlayerListPanel';
-import OrganizerRegistrationPanel from '../components/OrganizerRegistrationPanel';
 import FormatVisualization from '../components/FormatVisualization';
 import PointPreviewPanel from '../components/PointPreviewPanel';
 import ConsolationOptOutPanel from '../components/ConsolationOptOutPanel';
 import { useTournament, useFormatStructure } from '../services/tournamentViewService';
 import { startTournament } from '../services/tournamentService';
 import { useAuth } from '../utils/AuthContext';
+import { buildSectionOrder, getDefaultActiveKeys } from '../utils/tournamentSectionOrder';
 
 /**
  * T022: TournamentViewPage - Main page component for tournament view
@@ -112,92 +112,123 @@ const TournamentViewPage = () => {
         )}
 
         {/* Tournament content */}
-        {tournament && (
-          <>
-            {/* T024: Tournament Header - Name, status badge, category badge, format badge */}
-            <TournamentHeader tournament={tournament} />
-
-            {/* Champion banner — shown when tournament is COMPLETED (LIFE-03) */}
-            {tournament.status === 'COMPLETED' && tournament.champion && (
-              <Alert variant="warning" className="mt-3 text-center fs-5">
-                Champion: <strong>{tournament.champion.name}</strong>
-              </Alert>
-            )}
-
-            {/* Start Tournament — ORGANIZER/ADMIN only, SCHEDULED tournaments only (LIFE-01, LIFE-02) */}
-            {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && tournament.status === 'SCHEDULED' && (
-              <Row className="mt-3">
-                <Col className="d-flex justify-content-end align-items-center gap-2">
-                  {startError && <Alert variant="danger" className="me-3 mb-0 py-2">{startError}</Alert>}
-                  {isManualDraw && hasBracket && (
-                    <span className="text-muted small">All positions must be filled before starting</span>
-                  )}
-                  <Button
-                    variant={isManualDraw ? 'outline-success' : 'success'}
-                    onClick={handleStartTournament}
-                  >
-                    Start Tournament
-                  </Button>
-                </Col>
-              </Row>
-            )}
-
-            {/* T026-T031: Tournament Info Panel - Two-column layout with all tournament details */}
-            <Row className="mt-4">
-              <Col>
-                <TournamentInfoPanel tournament={tournament} />
-              </Col>
-            </Row>
-
-            {/* T072: Format Visualization - Brackets, Groups, Swiss Rounds */}
-            <Row className="mt-4">
-              <Col>
-                <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
-              </Col>
-            </Row>
-
-            {/* Consolation Opt-Out Panel — directly below bracket section, MATCH_2 IN_PROGRESS only */}
-            {user &&
-              tournament.formatType === 'KNOCKOUT' &&
-              parsedFormatConfig.matchGuarantee === 'MATCH_2' &&
-              tournament.status === 'IN_PROGRESS' && (
-              <>
-                <hr className="mt-4 mb-0" />
-                <Row className="mt-3">
-                  <Col>
-                    <ConsolationOptOutPanel tournament={tournament} user={user} />
-                  </Col>
-                </Row>
-              </>
-            )}
-
-            {/* Organizer Registration Panel */}
-            {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
-              <Row className="mt-4">
-                <Col>
-                  <OrganizerRegistrationPanel
+        {tournament && (() => {
+          const renderSection = (key) => {
+            switch (key) {
+              case 'location-schedule':
+                // TournamentInfoPanel renders BOTH location-schedule and organizer-registration
+                // Accordion.Items as a fragment — render once here for the first key
+                return (
+                  <TournamentInfoPanel
+                    key="info-panel"
                     tournament={tournament}
+                    user={user}
                     onRegistrationComplete={() => window.location.reload()}
                   />
-                </Col>
-              </Row>
-            )}
+                );
+              case 'organizer-registration':
+                // Already rendered by TournamentInfoPanel fragment above
+                return null;
+              case 'format':
+                return (
+                  <Accordion.Item key={key} eventKey={key}>
+                    <Accordion.Header>
+                      {t('components.formatVisualization.formatTypes.' + (tournament.formatType?.toLowerCase() || 'unknown'))}
+                    </Accordion.Header>
+                    <Accordion.Body className="p-0">
+                      <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                );
+              case 'players':
+                return (
+                  <Accordion.Item key={key} eventKey={key}>
+                    <Accordion.Header>{t('tournament.sections.players', 'Players')}</Accordion.Header>
+                    <Accordion.Body className="p-0">
+                      <PlayerListPanel tournament={tournament} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                );
+              case 'points':
+                return (
+                  <Accordion.Item key={key} eventKey={key}>
+                    <Accordion.Header>{t('tournament.sections.points', 'Points')}</Accordion.Header>
+                    <Accordion.Body className="p-0">
+                      <PointPreviewPanel tournamentId={tournament.id} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                );
+              default:
+                return null;
+            }
+          };
 
-            {/* T052: Player List Panel */}
-            <Row className="mt-4">
-              <Col>
-                <PlayerListPanel tournament={tournament} />
-              </Col>
-            </Row>
+          return (
+            <>
+              {/* T024: Tournament Header - Name, status badge, category badge, format badge */}
+              <TournamentHeader tournament={tournament} />
 
-            {/* T066: Point Preview */}
-            <Row className="mt-4">
-              <Col>
-                <PointPreviewPanel tournamentId={tournament.id} />
-              </Col>
-            </Row>
-          </>
-        )}
+              {/* Champion banner — COMPLETED tournaments, rendered above everything else (LAYOUT-05) */}
+              {tournament.status === 'COMPLETED' && tournament.champion && (
+                <Alert variant="warning" className="mt-3 text-center fs-5">
+                  Champion: <strong>{tournament.champion.name}</strong>
+                </Alert>
+              )}
+
+              {/* Start Tournament — ORGANIZER/ADMIN only, SCHEDULED tournaments only (LIFE-01, LIFE-02) */}
+              {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && tournament.status === 'SCHEDULED' && (
+                <Row className="mt-3">
+                  <Col className="d-flex justify-content-end align-items-center gap-2">
+                    {startError && <Alert variant="danger" className="me-3 mb-0 py-2">{startError}</Alert>}
+                    {isManualDraw && hasBracket && (
+                      <span className="text-muted small">All positions must be filled before starting</span>
+                    )}
+                    <Button
+                      variant={isManualDraw ? 'outline-success' : 'success'}
+                      onClick={handleStartTournament}
+                    >
+                      Start Tournament
+                    </Button>
+                  </Col>
+                </Row>
+              )}
+
+              {/* Hero bracket — always visible (not collapsible) for IN_PROGRESS and COMPLETED (LAYOUT-01) */}
+              {(tournament.status === 'IN_PROGRESS' || tournament.status === 'COMPLETED') && (
+                <div className="mt-3">
+                  <FormatVisualization
+                    tournament={tournament}
+                    mutateTournament={mutateTournament}
+                    alwaysExpanded={true}
+                  />
+                </div>
+              )}
+
+              {/* Accordion for all secondary sections (LAYOUT-02, LAYOUT-03, LAYOUT-04) */}
+              <Accordion
+                alwaysOpen
+                flush
+                defaultActiveKey={getDefaultActiveKeys(tournament.status)}
+                className="mt-3"
+              >
+                {buildSectionOrder(tournament.status).map(key => renderSection(key))}
+
+                {/* ConsolationOptOut — appended for IN_PROGRESS KNOCKOUT MATCH_2 (LAYOUT-02) */}
+                {user &&
+                  tournament.formatType === 'KNOCKOUT' &&
+                  parsedFormatConfig.matchGuarantee === 'MATCH_2' &&
+                  tournament.status === 'IN_PROGRESS' && (
+                  <Accordion.Item eventKey="consolation-optout">
+                    <Accordion.Header>Consolation Opt-Out</Accordion.Header>
+                    <Accordion.Body>
+                      <ConsolationOptOutPanel tournament={tournament} user={user} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                )}
+              </Accordion>
+            </>
+          );
+        })()}
       </Container>
     </>
   );

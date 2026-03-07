@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { getRuleComplexityInfo } from '../services/tournamentViewService';
 import RuleComplexityIndicator from './RuleComplexityIndicator';
 import TournamentRulesModal from './TournamentRulesModal';
+import OrganizerRegistrationPanel from './OrganizerRegistrationPanel';
 
 // Compact flex-based info row — hides null/undefined/not-specified values
 const InfoRow = ({ label, value, link }) => {
@@ -28,7 +29,7 @@ const InfoRow = ({ label, value, link }) => {
  * FR-001: Display all general tournament information
  * FR-003: Display rule complexity indicator
  */
-const TournamentInfoPanel = ({ tournament }) => {
+const TournamentInfoPanel = ({ tournament, user, onRegistrationComplete }) => {
   const { t, i18n } = useTranslation();
   const [showRulesModal, setShowRulesModal] = useState(false);
 
@@ -261,6 +262,16 @@ const TournamentInfoPanel = ({ tournament }) => {
               <span>{t('tournament.actions.viewTournamentRules')}</span>
             </Button>
           </div>
+
+          {/* Organizer Registration Panel — role-gated, renders for ORGANIZER/ADMIN */}
+          {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
+            <div className="mt-3">
+              <OrganizerRegistrationPanel
+                tournament={tournament}
+                onRegistrationComplete={onRegistrationComplete}
+              />
+            </div>
+          )}
         </Accordion.Body>
       </Accordion.Item>
 
