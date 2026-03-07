@@ -257,10 +257,10 @@ export function useBracketNavigation({
     ? roundCount * ROUND_WIDTH + (roundCount - 1) * ROUND_GAP
     : 0;
 
-  const el = viewportNodeRef.current;
+  const el = viewportNodeRef.current; // eslint-disable-line react-hooks/refs -- reading clientWidth for layout sizing, not reactive state
   const vpWidth = el ? el.clientWidth : 0;
   // Content must be at least as wide as the viewport or the bracket's natural width
-  const contentWidth = Math.max(naturalWidth, vpWidth);
+  const contentWidth = Math.max(naturalWidth, vpWidth); // eslint-disable-line react-hooks/refs
 
   const containerStyle = {
     transform,

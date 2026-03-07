@@ -358,7 +358,7 @@ export async function clearConsolationRouting(tx, tournamentId, entityId, isDoub
  * @param {Object} completedMatch - The just-completed match record
  * @param {string} winnerId - ID of the winner (player or pair)
  */
-export async function checkBYEWinnerConsolationUpdate(tx, completedMatch, winnerId) {
+export async function checkBYEWinnerConsolationUpdate(tx, completedMatch, _winnerId) {
   // Only relevant for MAIN bracket matches
   const bracket = await tx.bracket.findUnique({
     where: { id: completedMatch.bracketId },
@@ -607,7 +607,7 @@ export async function isConsolationEligible(tx, tournamentId, playerId, pairId) 
  * @param {boolean} isOrganizer - Passed through for conditional logic
  * @returns {Promise<void>}
  */
-export async function routeLoserToConsolation(tx, completedMatch, winnerId, isOrganizer) {
+export async function routeLoserToConsolation(tx, completedMatch, _winnerId, _isOrganizer) {
   // Step 1: Verify this match belongs to the MAIN bracket
   const bracket = await tx.bracket.findUnique({
     where: { id: completedMatch.bracketId },

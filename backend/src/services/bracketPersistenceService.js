@@ -190,7 +190,7 @@ export async function generateBracket(tournamentId, options = {}) {
         playerCount,
         randomSeed
       );
-    } catch (seedingError) {
+    } catch (_seedingError) {
       // Fallback: if seeding fails for any reason (no rankings, service error),
       // create an empty bracket and let all players go through unseeded placement
       const templateResult = await getBracketByPlayerCount(playerCount);

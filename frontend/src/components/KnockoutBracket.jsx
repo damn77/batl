@@ -305,6 +305,7 @@ const KnockoutBracket = ({
               </div>
 
               {/* Zoomable/pannable viewport (T030) */}
+              {/* eslint-disable react-hooks/refs -- stable callbacks from useBracketNavigation hook, not raw ref reads */}
               <div
                 ref={navigation.setViewportRef}
                 className={viewportClasses}
@@ -316,6 +317,7 @@ const KnockoutBracket = ({
                   className={viewportContentClasses}
                   style={navigation.containerStyle}
                 >
+                  {/* eslint-enable react-hooks/refs */}
                   <div className="bracket-container">
                     <div className="bracket-grid">
                       {matchesByRound.map(({ round, matches: roundMatches }) => (
