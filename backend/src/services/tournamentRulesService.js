@@ -1,10 +1,8 @@
 // T019-T023: Tournament Rules Service - Format and rule management
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import { validateFormatConfig } from '../validation/formatConfigSchemas.js';
 import { validateScoringRules } from '../validation/scoringRulesSchemas.js';
-
-const prisma = new PrismaClient();
 
 /**
  * T019: Set tournament format type and format-specific configuration

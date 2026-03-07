@@ -14,9 +14,7 @@
  *   - checkAndCompleteTournament(tx, tournamentId, isOrganizer)
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 /**
  * Helper to throw structured errors consumed by the controller.

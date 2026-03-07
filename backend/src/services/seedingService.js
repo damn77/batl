@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import * as pairService from './pairService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Get seeding score for an entity in a category

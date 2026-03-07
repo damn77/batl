@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import { createConflictError } from '../middleware/errorHandler.js';
-
-const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
 
 // Find user by email

@@ -1,8 +1,6 @@
 // T020, T040-T041: Match Rules Service - Cascading rule resolution
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
-
-const prisma = new PrismaClient();
 
 /**
  * T040-T041: Get effective rules for a match (with cascade resolution)

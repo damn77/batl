@@ -1,9 +1,7 @@
 // Shared Tournament Service
 // Abstracts common logic for tournament operations (Singles & Doubles)
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 /**
  * Check tournament capacity and determine registration status

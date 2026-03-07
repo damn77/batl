@@ -1,10 +1,8 @@
 // Ranking Service - Tournament Ranking System (008-tournament-rankings)
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import { calculateRanks, getEntityNameFromEntry, calculateSeedingScore } from '../utils/rankingCalculator.js';
 import { getRankingTypesForCategory } from '../utils/categoryHelpers.js';
-
-const prisma = new PrismaClient();
 
 // ============================================
 // LEGACY FUNCTIONS REMOVED (Migration Complete)

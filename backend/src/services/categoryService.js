@@ -1,8 +1,6 @@
 // T020: Category Service - Business logic for category management
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
-
-const prisma = new PrismaClient();
 
 /**
  * T022: Generate category display name from type, age group, and gender

@@ -12,12 +12,10 @@
  * Requirements: DRAW-01 through DRAW-07
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import seedrandom from 'seedrandom';
 import { generateSeededBracket } from './seedingPlacementService.js';
 import { getBracketByPlayerCount } from './bracketService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Helper: create structured errors with a machine-readable code property.

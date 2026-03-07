@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { createConflictError } from '../middleware/errorHandler.js';
-
-const prisma = new PrismaClient();
 
 // Find player profile by ID
 export const findPlayerById = async (id, isPublic = false) => {

@@ -4,9 +4,7 @@
  * Feature: 008-tournament-rankings
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 // In-memory cache for point tables
 let pointTableCache = null;

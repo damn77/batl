@@ -1,9 +1,7 @@
 // T053-T060: Registration Service - Player eligibility validation and registration management
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import * as categoryService from './categoryService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * T055: Calculate player's age from birthDate

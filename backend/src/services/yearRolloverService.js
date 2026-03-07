@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import { createCategoryRankings } from './rankingService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * T067: Execute year rollover for a specific category or all categories

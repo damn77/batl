@@ -18,7 +18,7 @@
  *   - submitResult({ matchId, body, isOrganizer, submitterPlayerId, dryRun })
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { advanceBracketSlot, checkAndCompleteTournament } from './tournamentLifecycleService.js';
 import {
   routeLoserToConsolation,
@@ -27,8 +27,6 @@ import {
   cascadeClearMainBracket,
   cascadeClearConsolationDownstream
 } from './consolationEligibilityService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Helper to throw structured errors consumed by the controller.

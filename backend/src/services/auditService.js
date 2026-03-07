@@ -1,7 +1,5 @@
 import winston from 'winston';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 // Configure Winston logger
 const logger = winston.createLogger({

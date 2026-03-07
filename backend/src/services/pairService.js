@@ -1,12 +1,10 @@
 // Doubles Pair Service
 // Feature: 006-doubles-pairs
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { sortPlayerIds } from '../utils/pairHelpers.js';
 import { PairErrorCodes, createPairError } from '../utils/pairErrors.js';
 import { pairLogger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Calculate player's age from birthDate (calendar year only)

@@ -1,5 +1,5 @@
 // T037-T039: Tournament Service - Business logic for tournament management
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import createHttpError from 'http-errors';
 import * as categoryService from './categoryService.js';
 import * as registrationService from './registrationService.js';
@@ -9,8 +9,6 @@ import * as ruleComplexityService from './ruleComplexityService.js';
 import { getParticipantRange } from '../utils/participantRange.js';
 import { getPointTableForRange } from './pointTableService.js';
 import { recalculateRankings } from './rankingService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * T039: Validate category exists before creating tournament

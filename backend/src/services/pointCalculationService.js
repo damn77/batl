@@ -4,12 +4,10 @@
  * Feature: 008-tournament-rankings
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { getParticipantRange } from '../utils/participantRange.js';
 import { getPointsForRound } from './pointTableService.js';
 import { getRankingTypesForCategory } from '../utils/categoryHelpers.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Calculate points using placement-based formula
