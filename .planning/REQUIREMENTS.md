@@ -35,10 +35,10 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### Score Entry
 
-- [ ] **SCORE-01**: Match result modal displays fullscreen on mobile devices (sm-down)
-- [ ] **SCORE-02**: Score inputs show the correct numeric keyboard on iOS (inputMode="numeric")
-- [ ] **SCORE-03**: Modal submit button remains visible when the mobile keyboard is open
-- [ ] **SCORE-04**: Score input fields meet 44px minimum tap target height
+- [x] **SCORE-01**: Match result modal displays fullscreen on mobile devices (sm-down)
+- [x] **SCORE-02**: Score inputs show the correct numeric keyboard on iOS (inputMode="numeric")
+- [x] **SCORE-03**: Modal submit button remains visible when the mobile keyboard is open
+- [x] **SCORE-04**: Score input fields meet 44px minimum tap target height
 
 ### Organizer Mobile
 
@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRKT-02 | Phase 23 | Complete |
 | BRKT-03 | Phase 23 | Complete |
 | BRKT-04 | Phase 23 | Complete |
-| SCORE-01 | Phase 23 | Pending |
-| SCORE-02 | Phase 23 | Pending |
-| SCORE-03 | Phase 23 | Pending |
-| SCORE-04 | Phase 23 | Pending |
+| SCORE-01 | Phase 23 | Complete |
+| SCORE-02 | Phase 23 | Complete |
+| SCORE-03 | Phase 23 | Complete |
+| SCORE-04 | Phase 23 | Complete |
 | ORG-01 | Phase 24 | Pending |
 | ORG-02 | Phase 24 | Pending |
 | RESP-01 | Phase 25 | Pending |
