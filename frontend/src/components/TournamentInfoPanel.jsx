@@ -1,45 +1,36 @@
-// T026-T033: Tournament Info Panel Component - Two-column layout with all tournament details
+// T026-T033: Tournament Info Panel Component - Accordion items with compact layout
 import { useState } from 'react';
-import { Card, Row, Col, Badge, Button, Collapse } from 'react-bootstrap';
+import { Accordion, Badge, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getRuleComplexityInfo } from '../services/tournamentViewService';
 import RuleComplexityIndicator from './RuleComplexityIndicator';
 import TournamentRulesModal from './TournamentRulesModal';
 
-// Info row component for consistent formatting - defined outside to prevent recreation on each render
+// Compact flex-based info row — hides null/undefined/not-specified values
 const InfoRow = ({ label, value, link }) => {
-  if (value === null || value === undefined || value === 'Not specified') {
-    return null; // T031: Hide null/optional fields
-  }
-
+  if (value === null || value === undefined || value === 'Not specified') return null;
   return (
-    <Row className="mb-3">
-      <Col xs={5} className="text-muted">
-        <small>{label}:</small>
-      </Col>
-      <Col xs={7}>
-        {link ? (
-          <Link to={link} className="text-decoration-none">
-            {value}
-          </Link>
-        ) : (
-          <strong>{value}</strong>
-        )}
-      </Col>
-    </Row>
+    <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+      <span className="text-muted" style={{ fontSize: '0.8rem' }}>{label}</span>
+      <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+        {link ? <Link to={link} className="text-decoration-none">{value}</Link> : value}
+      </span>
+    </div>
   );
 };
 
 /**
- * TournamentInfoPanel - Displays all tournament information in organized sections
+ * TournamentInfoPanel - Renders two Accordion.Item elements for use inside a parent Accordion.
+ * eventKey="location-schedule" — Location & Schedule section
+ * eventKey="organizer-registration" — Organizer & Registration section
+ *
  * FR-001: Display all general tournament information
  * FR-003: Display rule complexity indicator
  */
 const TournamentInfoPanel = ({ tournament }) => {
   const { t, i18n } = useTranslation();
   const [showRulesModal, setShowRulesModal] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(true); // Collapsible state - open by default
 
   if (!tournament) return null;
 
@@ -100,245 +91,178 @@ const TournamentInfoPanel = ({ tournament }) => {
   const ruleComplexityInfo = getRuleComplexityInfo(tournament.ruleComplexity);
 
   return (
-    <Card className="border-0 shadow-sm">
-      <Card.Body className="p-4">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h4 className="mb-0">{t('tournament.title')}</h4>
-          <Button
-            variant="link"
-            onClick={() => setDetailsOpen(!detailsOpen)}
-            aria-controls="tournament-details-collapse"
-            aria-expanded={detailsOpen}
-            className="text-decoration-none p-0"
-          >
-            <span className="fs-5">{detailsOpen ? '▼' : '▶'}</span>
-          </Button>
-        </div>
+    <>
+      {/* First Accordion.Item: Location & Schedule */}
+      <Accordion.Item eventKey="location-schedule">
+        <Accordion.Header>{t('tournament.sections.locationSchedule')}</Accordion.Header>
+        <Accordion.Body className="px-3 py-2">
+          {/* Primary Location */}
+          {tournament.location && (
+            <>
+              <p className="small fw-bold text-muted mb-2 mt-1">{t('tournament.sections.primaryLocation')}</p>
+              <InfoRow label={t('tournament.labels.club')} value={tournament.location.clubName} />
+              <InfoRow label={t('tournament.labels.address')} value={tournament.location.address} />
+            </>
+          )}
 
-        {/* T034: Responsive two-column layout - Collapsible */}
-        <Collapse in={detailsOpen}>
-          <div id="tournament-details-collapse">
-            <Row>
-              {/* T027: Location & Schedule Column */}
-              <Col lg={6} className="mb-4 mb-lg-0">
-                <Card className="h-100 border">
-                  <Card.Header className="bg-light">
-                    <h5 className="mb-0">{t('tournament.sections.locationSchedule')}</h5>
-                  </Card.Header>
-                  <Card.Body>
-                    {/* Primary Location */}
-                    {tournament.location && (
-                      <>
-                        <h6 className="text-muted mb-3">{t('tournament.sections.primaryLocation')}</h6>
-                        <InfoRow label={t('tournament.labels.club')} value={tournament.location.clubName} />
-                        <InfoRow label={t('tournament.labels.address')} value={tournament.location.address} />
-                        <hr />
-                      </>
-                    )}
+          {/* Backup Location */}
+          {tournament.backupLocation && (
+            <>
+              <p className="small fw-bold text-muted mb-2 mt-3">
+                {t('tournament.sections.backupLocation')}{' '}
+                <Badge bg="warning" className="ms-2">
+                  {t('tournament.sections.weatherContingency')}
+                </Badge>
+              </p>
+              <InfoRow label={t('tournament.labels.club')} value={tournament.backupLocation.clubName} />
+              <InfoRow label={t('tournament.labels.address')} value={tournament.backupLocation.address} />
+            </>
+          )}
 
-                    {/* Backup Location */}
-                    {tournament.backupLocation && (
-                      <>
-                        <h6 className="text-muted mb-3">
-                          {t('tournament.sections.backupLocation')}{' '}
-                          <Badge bg="warning" className="ms-2">
-                            {t('tournament.sections.weatherContingency')}
-                          </Badge>
-                        </h6>
-                        <InfoRow label={t('tournament.labels.club')} value={tournament.backupLocation.clubName} />
-                        <InfoRow label={t('tournament.labels.address')} value={tournament.backupLocation.address} />
-                        <hr />
-                      </>
-                    )}
+          {/* Courts */}
+          <InfoRow
+            label={t('tournament.labels.courtsAvailable')}
+            value={tournament.courts ? t('tournament.values.courtsCount', { count: tournament.courts }) : null}
+          />
 
-                    {/* Courts */}
-                    <InfoRow
-                      label={t('tournament.labels.courtsAvailable')}
-                      value={tournament.courts ? t('tournament.values.courtsCount', { count: tournament.courts }) : null}
-                    />
+          {/* Tournament Dates */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.dates')}</p>
+          <InfoRow label={t('tournament.labels.startDate')} value={formatDate(tournament.startDate)} />
+          <InfoRow label={t('tournament.labels.endDate')} value={formatDate(tournament.endDate)} />
 
-                    {/* Tournament Dates */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.dates')}</h6>
-                    <InfoRow label={t('tournament.labels.startDate')} value={formatDate(tournament.startDate)} />
-                    <InfoRow label={t('tournament.labels.endDate')} value={formatDate(tournament.endDate)} />
+          {/* Registration Window */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.registrationWindow')}</p>
+          <InfoRow label={t('tournament.labels.opens')} value={formatDateTime(tournament.registrationOpenDate)} />
+          <InfoRow label={t('tournament.labels.closes')} value={formatDateTime(tournament.registrationCloseDate)} />
 
-                    {/* Registration Window */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.registrationWindow')}</h6>
-                    <InfoRow label={t('tournament.labels.opens')} value={formatDateTime(tournament.registrationOpenDate)} />
-                    <InfoRow label={t('tournament.labels.closes')} value={formatDateTime(tournament.registrationCloseDate)} />
+          {/* Timestamps */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.history')}</p>
+          <InfoRow label={t('tournament.labels.created')} value={formatDate(tournament.createdAt)} />
+          {tournament.lastStatusChange && (
+            <InfoRow label={t('tournament.labels.lastStatusChange')} value={formatDateTime(tournament.lastStatusChange)} />
+          )}
+        </Accordion.Body>
+      </Accordion.Item>
 
-                    {/* Timestamps */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.history')}</h6>
-                    <InfoRow label={t('tournament.labels.created')} value={formatDate(tournament.createdAt)} />
-                    {tournament.lastStatusChange && (
-                      <InfoRow label={t('tournament.labels.lastStatusChange')} value={formatDateTime(tournament.lastStatusChange)} />
-                    )}
-                  </Card.Body>
-                </Card>
-              </Col>
+      {/* Second Accordion.Item: Organizer & Registration */}
+      <Accordion.Item eventKey="organizer-registration">
+        <Accordion.Header>{t('tournament.sections.organizerRegistration')}</Accordion.Header>
+        <Accordion.Body className="px-3 py-2">
+          {/* Primary Organizer */}
+          {tournament.organizer && (
+            <>
+              <p className="small fw-bold text-muted mb-2 mt-1">{t('tournament.sections.primaryOrganizer')}</p>
+              <InfoRow label={t('tournament.labels.name')} value={tournament.organizer.name} />
+              <InfoRow label={t('tournament.labels.email')} value={tournament.organizer.email} />
+              <InfoRow label={t('tournament.labels.phone')} value={tournament.organizer.phone} />
+            </>
+          )}
 
-              {/* T028: Organizer & Registration Column */}
-              <Col lg={6}>
-                <Card className="h-100 border">
-                  <Card.Header className="bg-light">
-                    <h5 className="mb-0">{t('tournament.sections.organizerRegistration')}</h5>
-                  </Card.Header>
-                  <Card.Body>
-                    {/* Primary Organizer */}
-                    {tournament.organizer && (
-                      <>
-                        <h6 className="text-muted mb-3">{t('tournament.sections.primaryOrganizer')}</h6>
-                        <InfoRow label={t('tournament.labels.name')} value={tournament.organizer.name} />
-                        <InfoRow label={t('tournament.labels.email')} value={tournament.organizer.email} />
-                        <InfoRow label={t('tournament.labels.phone')} value={tournament.organizer.phone} />
-                        <hr />
-                      </>
-                    )}
+          {/* Deputy Organizer */}
+          {tournament.deputyOrganizer && (
+            <>
+              <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.deputyOrganizer')}</p>
+              <InfoRow label={t('tournament.labels.name')} value={tournament.deputyOrganizer.name} />
+              <InfoRow label={t('tournament.labels.email')} value={tournament.deputyOrganizer.email} />
+              <InfoRow label={t('tournament.labels.phone')} value={tournament.deputyOrganizer.phone} />
+            </>
+          )}
 
-                    {/* Deputy Organizer */}
-                    {tournament.deputyOrganizer && (
-                      <>
-                        <h6 className="text-muted mb-3">{t('tournament.sections.deputyOrganizer')}</h6>
-                        <InfoRow label={t('tournament.labels.name')} value={tournament.deputyOrganizer.name} />
-                        <InfoRow label={t('tournament.labels.email')} value={tournament.deputyOrganizer.email} />
-                        <InfoRow label={t('tournament.labels.phone')} value={tournament.deputyOrganizer.phone} />
-                        <hr />
-                      </>
-                    )}
-
-                    {/* Entry Fee & Prize */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.feesPrizes')}</h6>
-                    <Row className="mb-3">
-                      <Col xs={5} className="text-muted">
-                        <small>{t('tournament.labels.entryFee')}:</small>
-                      </Col>
-                      <Col xs={7}>
-                        <strong className={tournament.entryFee > 0 ? 'text-success' : ''}>
-                          {formatCurrency(tournament.entryFee)}
-                        </strong>
-                      </Col>
-                    </Row>
-
-                    {tournament.prizeDescription && (
-                      <Row className="mb-3">
-                        <Col xs={5} className="text-muted">
-                          <small>{t('tournament.labels.prizes')}:</small>
-                        </Col>
-                        <Col xs={7}>
-                          <strong>{tournament.prizeDescription}</strong>
-                        </Col>
-                      </Row>
-                    )}
-
-                    {/* T033: External Rules Link */}
-                    {tournament.rulesUrl && (
-                      <Row className="mb-3">
-                        <Col xs={5} className="text-muted">
-                          <small>{t('tournament.labels.rules')}:</small>
-                        </Col>
-                        <Col xs={7}>
-                          <a
-                            href={tournament.rulesUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-decoration-none"
-                          >
-                            {t('tournament.actions.viewExternalRules')} →
-                          </a>
-                        </Col>
-                      </Row>
-                    )}
-
-                    {/* Registration Information */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.registrationWindow')}</h6>
-                    <Row className="mb-3">
-                      <Col xs={5} className="text-muted">
-                        <small>{t('tournament.status')}:</small>
-                      </Col>
-                      <Col xs={7}>
-                        <Badge bg={registrationStatus.variant} className="px-2 py-1">
-                          {registrationStatus.status}
-                        </Badge>
-                      </Col>
-                    </Row>
-
-                    <Row className="mb-3">
-                      <Col xs={5} className="text-muted">
-                        <small>{t('tournament.labels.registered')}:</small>
-                      </Col>
-                      <Col xs={7}>
-                        <strong>
-                          {tournament.registrationCount || 0}
-                          {tournament.capacity && ` / ${tournament.capacity}`}
-                        </strong>
-                      </Col>
-                    </Row>
-
-                    {tournament.waitlistCount > 0 && (
-                      <Row className="mb-3">
-                        <Col xs={5} className="text-muted">
-                          <small>{t('tournament.labels.waitlist')}:</small>
-                        </Col>
-                        <Col xs={7}>
-                          <strong>{tournament.waitlistCount}</strong>
-                          {tournament.waitlistDisplayOrder && (
-                            <small className="text-muted ms-2">
-                              ({tournament.waitlistDisplayOrder === 'REGISTRATION_TIME' ? t('tournament.values.firstCome') : t('tournament.values.alphabetical')})
-                            </small>
-                          )}
-                        </Col>
-                      </Row>
-                    )}
-
-                    {tournament.minParticipants && (
-                      <InfoRow label={t('tournament.labels.minParticipants')} value={tournament.minParticipants} />
-                    )}
-
-                    {!tournament.capacity && (
-                      <Row className="mb-3">
-                        <Col xs={12}>
-                          <Badge bg="info" className="px-2 py-1">
-                            {t('tournament.values.unlimitedCapacity')}
-                          </Badge>
-                        </Col>
-                      </Row>
-                    )}
-
-                    {/* Rule Complexity Indicator */}
-                    <h6 className="text-muted mb-3 mt-4">{t('tournament.sections.rules')}</h6>
-                    <Row className="mb-3">
-                      <Col xs={5} className="text-muted">
-                        <small>{t('tournament.labels.complexity')}:</small>
-                      </Col>
-                      <Col xs={7}>
-                        <RuleComplexityIndicator complexity={tournament.ruleComplexity} />
-                        <div>
-                          <small className="text-muted">{ruleComplexityInfo.description}</small>
-                        </div>
-                      </Col>
-                    </Row>
-
-                    {/* T045: View Rules Button */}
-                    <Row className="mb-3">
-                      <Col xs={12}>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => setShowRulesModal(true)}
-                          className="w-100 d-flex align-items-center justify-content-center gap-2"
-                        >
-                          <span>📋</span>
-                          <span>{t('tournament.actions.viewTournamentRules')}</span>
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
+          {/* Entry Fee & Prize */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.feesPrizes')}</p>
+          <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+            <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.labels.entryFee')}</span>
+            <span className={`fw-semibold text-end ms-2${tournament.entryFee > 0 ? ' text-success' : ''}`} style={{ fontSize: '0.85rem' }}>
+              {formatCurrency(tournament.entryFee)}
+            </span>
           </div>
-        </Collapse>
-      </Card.Body>
+          <InfoRow label={t('tournament.labels.prizes')} value={tournament.prizeDescription} />
+
+          {/* T033: External Rules Link */}
+          {tournament.rulesUrl && (
+            <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+              <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.labels.rules')}</span>
+              <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+                <a
+                  href={tournament.rulesUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-decoration-none"
+                >
+                  {t('tournament.actions.viewExternalRules')} →
+                </a>
+              </span>
+            </div>
+          )}
+
+          {/* Registration Information */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.registrationWindow')}</p>
+          <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+            <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.status')}</span>
+            <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+              <Badge bg={registrationStatus.variant} className="px-2 py-1">
+                {registrationStatus.status}
+              </Badge>
+            </span>
+          </div>
+          <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+            <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.labels.registered')}</span>
+            <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+              {tournament.registrationCount || 0}
+              {tournament.capacity && ` / ${tournament.capacity}`}
+            </span>
+          </div>
+
+          {tournament.waitlistCount > 0 && (
+            <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+              <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.labels.waitlist')}</span>
+              <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+                {tournament.waitlistCount}
+                {tournament.waitlistDisplayOrder && (
+                  <small className="text-muted ms-2">
+                    ({tournament.waitlistDisplayOrder === 'REGISTRATION_TIME' ? t('tournament.values.firstCome') : t('tournament.values.alphabetical')})
+                  </small>
+                )}
+              </span>
+            </div>
+          )}
+
+          <InfoRow label={t('tournament.labels.minParticipants')} value={tournament.minParticipants} />
+
+          {!tournament.capacity && (
+            <div className="py-1">
+              <Badge bg="info" className="px-2 py-1">
+                {t('tournament.values.unlimitedCapacity')}
+              </Badge>
+            </div>
+          )}
+
+          {/* Rule Complexity Indicator */}
+          <p className="small fw-bold text-muted mb-2 mt-3">{t('tournament.sections.rules')}</p>
+          <div className="d-flex justify-content-between align-items-baseline py-1 border-bottom border-light">
+            <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('tournament.labels.complexity')}</span>
+            <span className="fw-semibold text-end ms-2" style={{ fontSize: '0.85rem' }}>
+              <RuleComplexityIndicator complexity={tournament.ruleComplexity} />
+              <div>
+                <small className="text-muted">{ruleComplexityInfo.description}</small>
+              </div>
+            </span>
+          </div>
+
+          {/* T045: View Rules Button */}
+          <div className="py-2 mt-1">
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => setShowRulesModal(true)}
+              className="w-100 d-flex align-items-center justify-content-center gap-2"
+            >
+              <span>📋</span>
+              <span>{t('tournament.actions.viewTournamentRules')}</span>
+            </Button>
+          </div>
+        </Accordion.Body>
+      </Accordion.Item>
 
       {/* T040: Tournament Rules Modal */}
       <TournamentRulesModal
@@ -346,7 +270,7 @@ const TournamentInfoPanel = ({ tournament }) => {
         onHide={() => setShowRulesModal(false)}
         tournament={tournament}
       />
-    </Card>
+    </>
   );
 };
 
