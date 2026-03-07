@@ -29,6 +29,7 @@ import {
 } from './api/routes/tournamentRulesRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 import { initializePointTableCache } from './services/pointTableService.js';
+import prisma from './lib/prisma.js';
 
 const app = express();
 
@@ -155,8 +156,11 @@ app.use(errorHandler);
 // Start server
 async function startServer() {
   try {
+    // Eagerly connect Prisma to avoid ECONNRESET on first request
+    await prisma.$connect();
+
     // Initialize point table cache on startup
-    console.log('🔄 Initializing point table cache...');
+    console.log('Initializing point table cache...');
     await initializePointTableCache();
 
     app.listen(PORT, () => {
