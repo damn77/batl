@@ -1,6 +1,5 @@
 // T072, T088-T091: Format Visualization Wrapper - Selects correct visualization with lazy loading
-import { useState } from 'react';
-import { Card, Button, Collapse, Alert, Spinner, Tab, Nav } from 'react-bootstrap';
+import { Alert, Spinner, Tab, Nav } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useFormatStructure, useMatches } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
@@ -18,17 +17,15 @@ import BracketGenerationSection from './BracketGenerationSection';
  *
  * @param {Object} tournament - Tournament object with formatType
  * @param {Function} mutateTournament - SWR mutate function for tournament data
- * @param {boolean} alwaysExpanded - When true, renders without toggle header and Collapse wrapper (hero mode)
  */
-const FormatVisualization = ({ tournament, mutateTournament, alwaysExpanded = false }) => {
+const FormatVisualization = ({ tournament, mutateTournament }) => {
   const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = useState(alwaysExpanded);
   const { user } = useAuth();
 
-  // T088: Lazy load format structure only when expanded (or always when alwaysExpanded)
+  // Always load format structure when component mounts (Accordion controls visibility)
   const { structure, isLoading, isError, mutate: mutateFormatStructure } = useFormatStructure(
     tournament?.id,
-    alwaysExpanded || isExpanded
+    true
   );
 
   // T050: Get current user's player profile ID for My Match feature
@@ -43,33 +40,18 @@ const FormatVisualization = ({ tournament, mutateTournament, alwaysExpanded = fa
   const { matches, mutate: mutateMatches } = useMatches(
     tournament?.id,
     {},
-    (alwaysExpanded || isExpanded) && hasBrackets
+    hasBrackets
   );
 
   if (!tournament) return null;
 
   const formatType = tournament.formatType;
 
-  // Format icons and labels
-  const formatInfo = {
-    GROUP: { icon: '👥', label: t('components.formatVisualization.formatTypes.group') },
-    KNOCKOUT: { icon: '🏆', label: t('components.formatVisualization.formatTypes.knockout') },
-    SWISS: { icon: '♟️', label: t('components.formatVisualization.formatTypes.swiss') },
-    COMBINED: { icon: '🎯', label: t('components.formatVisualization.formatTypes.combined') }
-  };
-
-  const info = formatInfo[formatType] || { icon: '❓', label: t('components.formatVisualization.formatTypes.unknown') };
-
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  };
-
   const sortedBrackets = structure?.brackets
     ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
     : [];
 
-  // Shared visualization content — avoids duplication between alwaysExpanded and toggle paths
-  const visualizationContent = (
+  return (
     <>
       {/* T090: Loading skeleton */}
       {isLoading && (
@@ -86,16 +68,6 @@ const FormatVisualization = ({ tournament, mutateTournament, alwaysExpanded = fa
           <p>
             {t('components.formatVisualization.errorMessage')}
           </p>
-          <hr />
-          <div className="d-flex justify-content-end">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => setIsExpanded(false)}
-            >
-              {t('components.formatVisualization.close')}
-            </Button>
-          </div>
         </Alert>
       )}
 
@@ -240,43 +212,6 @@ const FormatVisualization = ({ tournament, mutateTournament, alwaysExpanded = fa
         </Alert>
       )}
     </>
-  );
-
-  return (
-    <Card className="border-0 shadow-sm">
-      {!alwaysExpanded && (
-        <Card.Header className="bg-light">
-          <div className="d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">
-              <span className="me-2">{info.icon}</span>
-              {info.label}
-            </h5>
-            <Button
-              variant={isExpanded ? 'primary' : 'outline-primary'}
-              size="sm"
-              onClick={handleToggle}
-              aria-expanded={isExpanded}
-            >
-              {isExpanded ? `▼ ${t('components.formatVisualization.actions.collapse')}` : `▶ ${t('components.formatVisualization.actions.expand')}`}
-            </Button>
-          </div>
-        </Card.Header>
-      )}
-
-      {alwaysExpanded ? (
-        <Card.Body>
-          {visualizationContent}
-        </Card.Body>
-      ) : (
-        <Collapse in={isExpanded}>
-          <div>
-            <Card.Body>
-              {visualizationContent}
-            </Card.Body>
-          </div>
-        </Collapse>
-      )}
-    </Card>
   );
 };
 

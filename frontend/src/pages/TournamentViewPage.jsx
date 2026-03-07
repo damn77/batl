@@ -199,7 +199,6 @@ const TournamentViewPage = () => {
                   <FormatVisualization
                     tournament={tournament}
                     mutateTournament={mutateTournament}
-                    alwaysExpanded={true}
                   />
                 </div>
               )}
