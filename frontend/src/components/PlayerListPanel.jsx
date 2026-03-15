@@ -14,7 +14,7 @@ import { useAuth } from '../utils/AuthContext';
  *
  * @param {Object} tournament - Tournament object with formatType and waitlistDisplayOrder
  */
-const PlayerListPanel = ({ tournament }) => {
+const PlayerListPanel = ({ tournament, refreshKey }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
@@ -33,7 +33,7 @@ const PlayerListPanel = ({ tournament }) => {
     if (tournament?.id) {
       loadRegistrations();
     }
-  }, [tournament?.id]);
+  }, [tournament?.id, refreshKey]);
 
   const loadRegistrations = async () => {
     try {
