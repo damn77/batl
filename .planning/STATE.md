@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 Phase: 20 of 25 (Mobile Dev Tooling)
 Plan: — (not yet planned)
 Status: Ready to plan
-Last activity: 2026-03-15 - Completed quick task 7: Fix tournament page organizer registration
+Last activity: 2026-03-15 - Completed quick task 9: Fix login always failing on first attempt
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -120,9 +120,10 @@ None.
 | 6 | Fix mobile bracket touch drag with callback ref pattern | 2026-03-07 | 4b42a7e | [6-fix-mobile-bracket-drag-not-working-whil](./quick/6-fix-mobile-bracket-drag-not-working-whil/) |
 | 7 | Fix tournament page organizer registration panel (filter dropdown + soft-reload) | 2026-03-15 | 3c70bee | [7-fix-tournament-page-organizer-registrati](./quick/7-fix-tournament-page-organizer-registrati/) |
 | 8 | Fix Draw Generation player count not updating on registration changes | 2026-03-15 | abc4b6e | [8-fix-draw-generation-player-count-not-upd](./quick/8-fix-draw-generation-player-count-not-upd/) |
+| 9 | Fix login always failing on first attempt after server start | 2026-03-15 | 665c2d0 | [9-fix-login-always-failing-on-first-attemp](./quick/9-fix-login-always-failing-on-first-attemp/) |
 
 ## Session Continuity
 
 Last session: 2026-03-15T13:00:00Z
-Stopped at: Completed quick-8
+Stopped at: Completed quick-9
 Resume file: None
