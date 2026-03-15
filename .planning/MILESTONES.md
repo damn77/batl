@@ -1,5 +1,14 @@
 # Milestones
 
+## v1.4 UI Rework & Mobile Design (Shipped: 2026-03-15)
+
+**Phases completed:** 7 phases, 11 plans, 5 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v1.3 Manual Draw & QoL (Shipped: 2026-03-06)
 
 **Phases completed:** 7 phases, 12 plans
