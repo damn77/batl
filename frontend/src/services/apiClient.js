@@ -73,8 +73,13 @@ apiClient.interceptors.response.use(
 
       // Handle session expiration (401)
       if (status === 401) {
-        // Dispatch session expired event
-        window.dispatchEvent(new CustomEvent('session-expired'));
+        // Only dispatch session-expired for non-auth-check requests.
+        // The initial GET /auth/session on app load always returns 401
+        // when no session exists -- that is not a session expiration.
+        const isSessionCheck = error.config?.url?.endsWith('/auth/session') && error.config?.method === 'get';
+        if (!isSessionCheck) {
+          window.dispatchEvent(new CustomEvent('session-expired'));
+        }
       }
 
       // Handle forbidden (403)
