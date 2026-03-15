@@ -134,36 +134,36 @@ const PlayerPublicProfilePage = () => {
             </div>
           )}
 
-          <div className="mb-3">
+          <div className="mb-2">
             <label className="form-label text-muted">Name</label>
-            <p className="fs-5">{profile.name}</p>
+            <p className="fs-6">{profile.name}</p>
           </div>
 
           {isOwnProfile ? (
             <>
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="form-label text-muted">Email</label>
-                <p className="fs-5">{profile.email || <span className="text-muted">Not provided</span>}</p>
+                <p className="fs-6">{profile.email || <span className="text-muted">Not provided</span>}</p>
               </div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="form-label text-muted">Phone</label>
-                <p className="fs-5">{profile.phone || <span className="text-muted">Not provided</span>}</p>
+                <p className="fs-6">{profile.phone || <span className="text-muted">Not provided</span>}</p>
               </div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="form-label text-muted">Account Email</label>
-                <p className="fs-5">{user.email}</p>
+                <p className="fs-6">{user.email}</p>
               </div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="form-label text-muted">Date of Birth</label>
-                <p className="fs-5">
+                <p className="fs-6">
                   {profile.birthDate
                     ? new Date(profile.birthDate).toLocaleDateString()
                     : <span className="text-muted">Not provided ⚠️</span>}
                 </p>
               </div>
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="form-label text-muted">Gender</label>
-                <p className="fs-5">
+                <p className="fs-6">
                   {profile.gender
                     ? (profile.gender === 'MEN' ? 'Male' : 'Female')
                     : <span className="text-muted">Not provided ⚠️</span>}
@@ -174,9 +174,9 @@ const PlayerPublicProfilePage = () => {
               )}
             </>
           ) : (
-            <div className="mb-3">
+            <div className="mb-2">
               <label className="form-label text-muted">Linked account</label>
-              <p className="fs-5">{profile.hasAccount ? 'Yes' : 'No'}</p>
+              <p className="fs-6">{profile.hasAccount ? 'Yes' : 'No'}</p>
             </div>
           )}
         </Col>
@@ -262,7 +262,7 @@ const PlayerPublicProfilePage = () => {
             <div className="form-text">Required for gender-based tournament eligibility</div>
           </div>
 
-          <div className="d-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             <Button variant="primary" onClick={handleSave} disabled={saving}>
               {saving
                 ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />Saving...</>
@@ -292,7 +292,7 @@ const PlayerPublicProfilePage = () => {
 
         {!loading && !notFound && !error && profile && (
           <>
-            <h2 className="mb-4">{isOwnProfile ? 'My Profile' : profile.name}</h2>
+            <h2 className="mb-3 fs-4">{isOwnProfile ? 'My Profile' : profile.name}</h2>
 
             <Tab.Container defaultActiveKey="profile">
               <Nav variant="tabs" className="mb-3">
