@@ -118,7 +118,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 - v1.4 requirements: 28 total
-- Mapped to phases: 28
+- Satisfied: 20
+- Pending (Phase 25): 8
 - Unmapped: 0
 
 ---
