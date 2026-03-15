@@ -118,9 +118,10 @@ None.
 |---|-------------|------|--------|-----------|
 | 5 | Migrate all PrismaClient instances to shared singleton | 2026-03-07 | fb4b327 | [5-migrate-all-prismaclient-instances-to-sh](./quick/5-migrate-all-prismaclient-instances-to-sh/) |
 | 6 | Fix mobile bracket touch drag with callback ref pattern | 2026-03-07 | 4b42a7e | [6-fix-mobile-bracket-drag-not-working-whil](./quick/6-fix-mobile-bracket-drag-not-working-whil/) |
+| 7 | Fix tournament page organizer registration panel (filter dropdown + soft-reload) | 2026-03-15 | 3c70bee | [7-fix-tournament-page-organizer-registrati](./quick/7-fix-tournament-page-organizer-registrati/) |
 
 ## Session Continuity
 
-Last session: 2026-03-15T12:16:52.299Z
-Stopped at: Completed 26-01-PLAN.md
+Last session: 2026-03-15T12:50:43Z
+Stopped at: Completed quick-7
 Resume file: None
