@@ -74,6 +74,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
 - [x] **Phase 23: Bracket and Score Entry Mobile UX** — Touch-safe bracket navigation and fullscreen mobile score entry modal (completed 2026-03-07)
 - [x] **Phase 24: Organizer Mobile Support** — Result submission and correction fully usable on touch devices (completed 2026-03-07)
 - [x] **Phase 25: App-Wide Responsive Pass** — All key pages pass 375px viewport with column hiding, tap targets, and visual refresh (completed 2026-03-15)
+- [ ] **Phase 26: Player Profile Mobile Fix** — Apply mobile optimizations to live PlayerPublicProfilePage (gap closure for RESP-06)
 
 ## Phase Details
 
@@ -160,6 +161,17 @@ Plans:
 - [ ] 25-01-PLAN.md — Global app.css with design tokens, density overrides, 44px tap targets, overflow prevention
 - [ ] 25-02-PLAN.md — Tournament list cards, rankings column hiding, category rankings mobile fixes
 - [ ] 25-03-PLAN.md — Player profile accordion, organizer page cards, dashboard content replacement
+
+### Phase 26: Player Profile Mobile Fix
+**Goal**: Player profile page is fully usable on a 375px mobile viewport
+**Depends on**: Phase 25
+**Requirements**: RESP-06
+**Gap Closure**: Closes RESP-06 from v1.4 audit — changes were applied to dead PlayerProfilePage.jsx instead of live PlayerPublicProfilePage.jsx
+**Success Criteria** (what must be TRUE):
+  1. PlayerPublicProfilePage.jsx has accordion-collapsed tournament history section on mobile
+  2. Save/cancel buttons in edit mode stack or wrap properly on 375px viewport
+  3. Field spacing is tightened for mobile density
+**Plans**: 0 plans (to be planned)
 
 ## Progress
 

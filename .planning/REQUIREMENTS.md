@@ -52,7 +52,7 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 - [x] **RESP-03**: All interactive elements (buttons, links, form controls) meet 44px minimum tap target size
 - [x] **RESP-04**: Tournament list page is usable on mobile devices
 - [x] **RESP-05**: Category rankings page is usable on mobile devices
-- [x] **RESP-06**: Player profile page is usable on mobile devices
+- [ ] **RESP-06**: Player profile page is usable on mobile devices
 - [x] **RESP-07**: Organizer pages (dashboard, players, tournament setup) are usable on mobile devices
 - [x] **RESP-08**: Light visual refresh applied: consistent spacing, typography, and color improvements
 
@@ -112,14 +112,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESP-03 | Phase 25 | Complete |
 | RESP-04 | Phase 25 | Complete |
 | RESP-05 | Phase 25 | Complete |
-| RESP-06 | Phase 25 | Complete |
+| RESP-06 | Phase 26 | Pending |
 | RESP-07 | Phase 25 | Complete |
 | RESP-08 | Phase 25 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 28 total
-- Satisfied: 20
-- Pending (Phase 25): 8
+- Satisfied: 27
+- Pending (Phase 26): 1
 - Unmapped: 0
 
 ---
