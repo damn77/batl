@@ -141,7 +141,7 @@ const TournamentViewPage = () => {
                       {t('components.formatVisualization.formatTypes.' + (tournament.formatType?.toLowerCase() || 'unknown'))}
                     </Accordion.Header>
                     <Accordion.Body className="p-0">
-                      <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
+                      <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} registrationVersion={registrationVersion} />
                     </Accordion.Body>
                   </Accordion.Item>
                 );
@@ -204,6 +204,7 @@ const TournamentViewPage = () => {
                   <FormatVisualization
                     tournament={tournament}
                     mutateTournament={mutateTournament}
+                    registrationVersion={registrationVersion}
                   />
                 </div>
               )}

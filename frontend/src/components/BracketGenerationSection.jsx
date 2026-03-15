@@ -36,7 +36,8 @@ const BracketGenerationSection = ({
   mutateFormatStructure,
   mutateMatches,
   structure,
-  matches
+  matches,
+  registrationVersion
 }) => {
   // ----- Hooks -----
   const { showSuccess, showError } = useToast();
@@ -73,7 +74,7 @@ const BracketGenerationSection = ({
       .catch(() => {
         // non-critical — dropdowns degrade gracefully if empty
       });
-  }, [tournament?.id]);
+  }, [tournament?.id, registrationVersion]);
 
   // ----- Handlers -----
 

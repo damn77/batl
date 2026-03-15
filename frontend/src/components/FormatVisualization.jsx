@@ -18,7 +18,7 @@ import BracketGenerationSection from './BracketGenerationSection';
  * @param {Object} tournament - Tournament object with formatType
  * @param {Function} mutateTournament - SWR mutate function for tournament data
  */
-const FormatVisualization = ({ tournament, mutateTournament }) => {
+const FormatVisualization = ({ tournament, mutateTournament, registrationVersion }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
 
@@ -108,6 +108,7 @@ const FormatVisualization = ({ tournament, mutateTournament }) => {
                   mutateMatches={mutateMatches}
                   structure={structure}
                   matches={matches}
+                  registrationVersion={registrationVersion}
                 />
               ) : (
                 /* Everyone (incl. organizers for IN_PROGRESS/COMPLETED): bracket view */
