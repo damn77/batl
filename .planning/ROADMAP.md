@@ -130,8 +130,8 @@ Plans:
   6. The modal submit button remains visible and tappable when the iOS keyboard is open
 **Plans**: 2 plans
 Plans:
-- [ ] 23-01-PLAN.md — Add 44px mobile tap targets for bracket controls
-- [ ] 23-02-PLAN.md — Fullscreen score modal, sticky footer, numeric keyboard, 44px inputs
+- [x] 23-01-PLAN.md — Add 44px mobile tap targets for bracket controls
+- [x] 23-02-PLAN.md — Fullscreen score modal, sticky footer, numeric keyboard, 44px inputs
 
 ### Phase 24: Organizer Mobile Support
 **Goal**: Organizer can manage match results and corrections from a phone at courtside
@@ -142,7 +142,7 @@ Plans:
   2. Organizer opens the result correction modal on mobile and it displays fullscreen with all controls reachable
 **Plans**: 1 plan
 Plans:
-- [ ] 24-01-PLAN.md — Responsive mode toggle (segmented ButtonGroup), stacked confirmation buttons on mobile
+- [x] 24-01-PLAN.md — Responsive mode toggle (segmented ButtonGroup), stacked confirmation buttons on mobile
 
 ### Phase 25: App-Wide Responsive Pass
 **Goal**: Every key page in the app is usable at 375px viewport width with no horizontal overflow
@@ -155,7 +155,11 @@ Plans:
   4. Tournament list, category rankings, and player profile pages are each fully usable on a 375px screen
   5. Organizer dashboard, players page, and tournament setup pages are usable on mobile
   6. Spacing, typography, and color are consistent and improved across the app (light visual refresh)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 25-01-PLAN.md — Global app.css with design tokens, density overrides, 44px tap targets, overflow prevention
+- [ ] 25-02-PLAN.md — Tournament list cards, rankings column hiding, category rankings mobile fixes
+- [ ] 25-03-PLAN.md — Player profile accordion, organizer page cards, dashboard content replacement
 
 ## Progress
 
@@ -187,5 +191,5 @@ Plans:
 | 21. Navigation Fix | v1.4 | 1/1 | Complete | 2026-03-06 |
 | 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 2/2 | Complete | 2026-03-07 |
-| 24. Organizer Mobile Support | 1/1 | Complete    | 2026-03-07 | - |
-| 25. App-Wide Responsive Pass | v1.4 | 0/TBD | Not started | - |
+| 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
+| 25. App-Wide Responsive Pass | v1.4 | 0/3 | Not started | - |
