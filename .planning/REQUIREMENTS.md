@@ -47,14 +47,14 @@ Requirements for UI Rework & Mobile Design milestone. Each maps to roadmap phase
 
 ### App-Wide Responsive
 
-- [ ] **RESP-01**: No page exhibits horizontal overflow at 375px viewport width
+- [x] **RESP-01**: No page exhibits horizontal overflow at 375px viewport width
 - [ ] **RESP-02**: Data tables use column hiding on mobile to prevent overflow (rankings, player lists, tournament lists)
-- [ ] **RESP-03**: All interactive elements (buttons, links, form controls) meet 44px minimum tap target size
+- [x] **RESP-03**: All interactive elements (buttons, links, form controls) meet 44px minimum tap target size
 - [ ] **RESP-04**: Tournament list page is usable on mobile devices
 - [ ] **RESP-05**: Category rankings page is usable on mobile devices
 - [ ] **RESP-06**: Player profile page is usable on mobile devices
 - [ ] **RESP-07**: Organizer pages (dashboard, players, tournament setup) are usable on mobile devices
-- [ ] **RESP-08**: Light visual refresh applied: consistent spacing, typography, and color improvements
+- [x] **RESP-08**: Light visual refresh applied: consistent spacing, typography, and color improvements
 
 ## Future Requirements
 
@@ -107,14 +107,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCORE-04 | Phase 23 | Complete |
 | ORG-01 | Phase 24 | Complete |
 | ORG-02 | Phase 24 | Complete |
-| RESP-01 | Phase 25 | Pending |
+| RESP-01 | Phase 25 | Complete |
 | RESP-02 | Phase 25 | Pending |
-| RESP-03 | Phase 25 | Pending |
+| RESP-03 | Phase 25 | Complete |
 | RESP-04 | Phase 25 | Pending |
 | RESP-05 | Phase 25 | Pending |
 | RESP-06 | Phase 25 | Pending |
 | RESP-07 | Phase 25 | Pending |
-| RESP-08 | Phase 25 | Pending |
+| RESP-08 | Phase 25 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 28 total

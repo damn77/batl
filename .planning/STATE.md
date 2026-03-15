@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Phase 25 context gathered
-last_updated: "2026-03-15T09:12:06.464Z"
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-03-15T09:35:21.734Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 10
+  completed_plans: 8
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 23 P01 | 3min | 1 tasks | 1 files |
 | Phase 23 P02 | 2min | 2 tasks | 4 files |
 | Phase 24 P01 | 1min | 2 tasks | 2 files |
+| Phase 25-app-wide-responsive-pass P01 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Key architectural context for v1.4:
 - [Phase 23]: type=text inputMode=numeric pattern=[0-9]* for iOS integer-only keypad on score inputs
 - [Phase 23]: position: sticky on modal footer for iOS keyboard visibility, fullscreen=sm-down for mobile modal
 - [Phase 24]: Dual rendering (desktop radios + mobile ButtonGroup) via Bootstrap display utilities for responsive mode toggle
+- [Phase 25-01]: app.css imported after index.css in main.jsx so it wins the cascade without needing !important
+- [Phase 25-01]: Bootstrap CSS variable overrides in :root override card density app-wide without touching Bootstrap source
 
 ### Pending Todos
 
@@ -107,6 +110,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T09:12:06.461Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-app-wide-responsive-pass/25-CONTEXT.md
+Last session: 2026-03-15T09:35:21.732Z
+Stopped at: Completed 25-01-PLAN.md
+Resume file: None
