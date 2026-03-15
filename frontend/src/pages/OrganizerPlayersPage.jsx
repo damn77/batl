@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Pagination, Spinner, Alert, Form, Row, Col, InputGroup } from 'react-bootstrap';
+import { Container, Table, Button, Badge, Pagination, Spinner, Alert, Form, Row, Col, InputGroup, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
@@ -147,52 +147,85 @@ const OrganizerPlayersPage = () => {
               {searchQuery && ` (${t('pagination.filteredBy')} "${searchQuery}")`}
             </p>
 
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>{t('table.headers.name')}</th>
-                  <th>{t('table.headers.email')}</th>
-                  <th>{t('table.headers.phone')}</th>
-                  <th>{t('table.headers.accountStatus')}</th>
-                  <th>{t('table.headers.created')}</th>
-                  <th>{t('table.headers.actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.length === 0 ? (
+            {/* Desktop table */}
+            <div className="d-none d-sm-block">
+              <Table striped bordered hover responsive>
+                <thead>
                   <tr>
-                    <td colSpan="6" className="text-center text-muted">
-                      {searchQuery ? t('messages.noResultsFound') : t('messages.noPlayerProfilesYet')}
-                    </td>
+                    <th>{t('table.headers.name')}</th>
+                    <th>{t('table.headers.email')}</th>
+                    <th>{t('table.headers.phone')}</th>
+                    <th>{t('table.headers.accountStatus')}</th>
+                    <th>{t('table.headers.created')}</th>
+                    <th>{t('table.headers.actions')}</th>
                   </tr>
-                ) : (
-                  players.map((player) => (
-                    <tr key={player.id}>
-                      <td>{player.name}</td>
-                      <td>{player.email || <span className="text-muted">—</span>}</td>
-                      <td>{player.phone || <span className="text-muted">—</span>}</td>
-                      <td>
-                        {player.userId ? (
-                          <Badge bg="success">{t('status.hasAccount')}</Badge>
-                        ) : (
-                          <Badge bg="secondary">{t('status.noAccount')}</Badge>
-                        )}
-                      </td>
-                      <td>{formatDate(player.createdAt)}</td>
-                      <td>
-                        <Button
-                          variant="info"
-                          size="sm"
-                          onClick={() => handleViewPlayer(player.id)}
-                        >
-                          {t('common.view')}
-                        </Button>
+                </thead>
+                <tbody>
+                  {players.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="text-center text-muted">
+                        {searchQuery ? t('messages.noResultsFound') : t('messages.noPlayerProfilesYet')}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </Table>
+                  ) : (
+                    players.map((player) => (
+                      <tr key={player.id}>
+                        <td>{player.name}</td>
+                        <td>{player.email || <span className="text-muted">—</span>}</td>
+                        <td>{player.phone || <span className="text-muted">—</span>}</td>
+                        <td>
+                          {player.userId ? (
+                            <Badge bg="success">{t('status.hasAccount')}</Badge>
+                          ) : (
+                            <Badge bg="secondary">{t('status.noAccount')}</Badge>
+                          )}
+                        </td>
+                        <td>{formatDate(player.createdAt)}</td>
+                        <td>
+                          <Button
+                            variant="info"
+                            size="sm"
+                            onClick={() => handleViewPlayer(player.id)}
+                          >
+                            {t('common.view')}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="d-sm-none">
+              {players.length === 0 ? (
+                <p className="text-center text-muted">
+                  {searchQuery ? t('messages.noResultsFound') : t('messages.noPlayerProfilesYet')}
+                </p>
+              ) : (
+                players.map((player) => (
+                  <Card key={player.id} className="mb-2">
+                    <Card.Body className="py-2 px-3 d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>{player.name}</strong>
+                        <div className="small text-muted">{player.email || '-'}</div>
+                      </div>
+                      <div className="d-flex align-items-center gap-2">
+                        {player.userId ? (
+                          <Badge bg="success" className="me-1">{t('status.hasAccount')}</Badge>
+                        ) : (
+                          <Badge bg="secondary" className="me-1">{t('status.noAccount')}</Badge>
+                        )}
+                        <Button variant="outline-primary" size="sm" onClick={() => handleViewPlayer(player.id)}>
+                          {t('common.view')}
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))
+              )}
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
