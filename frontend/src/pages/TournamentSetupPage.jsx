@@ -389,97 +389,153 @@ const TournamentSetupPage = () => {
         ) : (
           <Card>
             <Card.Body>
-              <Table responsive hover>
-                <thead>
-                  <tr>
-                    <th>{t('table.headers.name')}</th>
-                    <th>{t('table.headers.category')}</th>
-                    <th>{t('table.headers.location')}</th>
-                    <th>{t('table.headers.dates')}</th>
-                    <th>{t('table.headers.players')}</th>
-                    <th>{t('table.headers.status')}</th>
-                    <th>{t('table.headers.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tournaments.map(tournament => (
-                    <tr key={tournament.id}>
-                      <td>
-                        <Link
-                          to={`/tournaments/${tournament.id}`}
-                          className="text-decoration-none fw-bold"
-                        >
-                          {tournament.name}
-                        </Link>
-                      </td>
-                      <td>{tournament.category?.name}</td>
-                      <td>
-                        <div>{tournament.clubName || '-'}</div>
-                        {tournament.address && <small className="text-muted">{tournament.address}</small>}
-                      </td>
-                      <td className="small">
-                        {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
-                      </td>
-                      <td>
-                        {tournament.registeredCount || 0} / {tournament.capacity || '∞'}
-                        {tournament.waitlistedCount > 0 && ` ${t('common.waitlistedCount', { count: tournament.waitlistedCount })}`}
-                      </td>
-                      <td>
-                        <Badge bg={STATUS_VARIANTS[tournament.status]}>
-                          {t(`tournament.statuses.${tournament.status}`)}
-                        </Badge>
-                      </td>
-                      <td>
-                        <Dropdown align="end">
-                          <Dropdown.Toggle variant="link" className="text-dark p-0 border-0" bsPrefix="p-0">
-                            &#8942;
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => handleEditClick(tournament)}>
-                              {t('buttons.edit')}
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}>
-                              {t('buttons.configureRules')}
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}>
-                              {t('buttons.configurePoints')}
-                            </Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item onClick={() => handleCopyClick(tournament)}>
-                              {t('buttons.copyTournament')}
-                            </Dropdown.Item>
-                            {tournament.category?.type === 'DOUBLES' && (
-                              <Dropdown.Item
-                                onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
-                                disabled={recalculatingCategory === tournament.categoryId}
-                              >
-                                {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
-                              </Dropdown.Item>
-                            )}
-                            {/* Revert — only when tournament has draw or is IN_PROGRESS */}
-                            {(tournament.status === 'IN_PROGRESS' ||
-                              (tournament.status === 'SCHEDULED' && tournament.registrationClosed)) && (
-                              <Dropdown.Item onClick={() => handleRevertClick(tournament)}>
-                                Revert to Scheduled
-                              </Dropdown.Item>
-                            )}
-                            <Dropdown.Divider />
-                            <Dropdown.Item className="text-danger" onClick={() => handleDeleteClick(tournament)}>
-                              Delete Tournament
-                            </Dropdown.Item>
-                          </Dropdown.Menu>
-                        </Dropdown>
-                      </td>
+              {/* Desktop table */}
+              <div className="d-none d-sm-block">
+                <Table responsive hover>
+                  <thead>
+                    <tr>
+                      <th>{t('table.headers.name')}</th>
+                      <th>{t('table.headers.category')}</th>
+                      <th>{t('table.headers.location')}</th>
+                      <th>{t('table.headers.dates')}</th>
+                      <th>{t('table.headers.players')}</th>
+                      <th>{t('table.headers.status')}</th>
+                      <th>{t('table.headers.actions')}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {tournaments.map(tournament => (
+                      <tr key={tournament.id}>
+                        <td>
+                          <Link
+                            to={`/tournaments/${tournament.id}`}
+                            className="text-decoration-none fw-bold"
+                          >
+                            {tournament.name}
+                          </Link>
+                        </td>
+                        <td>{tournament.category?.name}</td>
+                        <td>
+                          <div>{tournament.clubName || '-'}</div>
+                          {tournament.address && <small className="text-muted">{tournament.address}</small>}
+                        </td>
+                        <td className="small">
+                          {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
+                        </td>
+                        <td>
+                          {tournament.registeredCount || 0} / {tournament.capacity || '∞'}
+                          {tournament.waitlistedCount > 0 && ` ${t('common.waitlistedCount', { count: tournament.waitlistedCount })}`}
+                        </td>
+                        <td>
+                          <Badge bg={STATUS_VARIANTS[tournament.status]}>
+                            {t(`tournament.statuses.${tournament.status}`)}
+                          </Badge>
+                        </td>
+                        <td>
+                          <Dropdown align="end">
+                            <Dropdown.Toggle variant="link" className="text-dark p-0 border-0" bsPrefix="p-0">
+                              &#8942;
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item onClick={() => handleEditClick(tournament)}>
+                                {t('buttons.edit')}
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}>
+                                {t('buttons.configureRules')}
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}>
+                                {t('buttons.configurePoints')}
+                              </Dropdown.Item>
+                              <Dropdown.Divider />
+                              <Dropdown.Item onClick={() => handleCopyClick(tournament)}>
+                                {t('buttons.copyTournament')}
+                              </Dropdown.Item>
+                              {tournament.category?.type === 'DOUBLES' && (
+                                <Dropdown.Item
+                                  onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
+                                  disabled={recalculatingCategory === tournament.categoryId}
+                                >
+                                  {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
+                                </Dropdown.Item>
+                              )}
+                              {/* Revert — only when tournament has draw or is IN_PROGRESS */}
+                              {(tournament.status === 'IN_PROGRESS' ||
+                                (tournament.status === 'SCHEDULED' && tournament.registrationClosed)) && (
+                                <Dropdown.Item onClick={() => handleRevertClick(tournament)}>
+                                  Revert to Scheduled
+                                </Dropdown.Item>
+                              )}
+                              <Dropdown.Divider />
+                              <Dropdown.Item className="text-danger" onClick={() => handleDeleteClick(tournament)}>
+                                Delete Tournament
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+
+              {/* Mobile card list */}
+              <div className="d-sm-none">
+                {tournaments.map(tournament => (
+                  <Card key={tournament.id} className="mb-2 border">
+                    <Card.Body className="py-2 px-3">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <Link to={`/tournaments/${tournament.id}`} className="fw-bold text-decoration-none">
+                            {tournament.name}
+                          </Link>
+                          <div className="small text-muted">
+                            {tournament.category?.name} &middot; {formatDate(tournament.startDate)}
+                          </div>
+                        </div>
+                        <div className="d-flex align-items-center gap-2">
+                          <Badge bg={STATUS_VARIANTS[tournament.status]}>
+                            {t(`tournament.statuses.${tournament.status}`)}
+                          </Badge>
+                          <Dropdown align="end">
+                            <Dropdown.Toggle variant="link" className="text-dark p-0 border-0" bsPrefix="p-0">
+                              &#8942;
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item onClick={() => handleEditClick(tournament)}>{t('buttons.edit')}</Dropdown.Item>
+                              <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}>{t('buttons.configureRules')}</Dropdown.Item>
+                              <Dropdown.Item onClick={() => navigate(`/organizer/tournament/${tournament.id}/points`)}>{t('buttons.configurePoints')}</Dropdown.Item>
+                              <Dropdown.Divider />
+                              <Dropdown.Item onClick={() => handleCopyClick(tournament)}>{t('buttons.copyTournament')}</Dropdown.Item>
+                              {tournament.category?.type === 'DOUBLES' && (
+                                <Dropdown.Item
+                                  onClick={() => handleRecalculateSeeding(tournament.categoryId, tournament.category.name)}
+                                  disabled={recalculatingCategory === tournament.categoryId}
+                                >
+                                  {recalculatingCategory === tournament.categoryId ? t('common.recalculating') : t('buttons.recalcSeeding')}
+                                </Dropdown.Item>
+                              )}
+                              {(tournament.status === 'IN_PROGRESS' || (tournament.status === 'SCHEDULED' && tournament.registrationClosed)) && (
+                                <Dropdown.Item onClick={() => handleRevertClick(tournament)}>Revert to Scheduled</Dropdown.Item>
+                              )}
+                              <Dropdown.Divider />
+                              <Dropdown.Item className="text-danger" onClick={() => handleDeleteClick(tournament)}>Delete Tournament</Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                      </div>
+                      <div className="d-flex gap-2 mt-1 small text-muted">
+                        <span>{tournament.registeredCount || 0}/{tournament.capacity || '---'} players</span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))}
+              </div>
             </Card.Body>
           </Card>
         )}
 
         {/* Create Modal */}
-        <Modal show={showCreateModal} onHide={() => { setShowCreateModal(false); setCopySource(null); }} size="lg">
+        <Modal show={showCreateModal} onHide={() => { setShowCreateModal(false); setCopySource(null); }} size="lg" fullscreen="sm-down">
           <Modal.Header closeButton>
             <Modal.Title>{copySource ? t('modals.copyTournament.title') : t('modals.createTournament.title')}</Modal.Title>
           </Modal.Header>
@@ -626,7 +682,7 @@ const TournamentSetupPage = () => {
         </Modal>
 
         {/* Edit Modal */}
-        <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+        <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg" fullscreen="sm-down">
           <Modal.Header closeButton>
             <Modal.Title>{t('modals.editTournament.title')}</Modal.Title>
           </Modal.Header>

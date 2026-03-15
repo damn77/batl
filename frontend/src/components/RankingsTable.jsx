@@ -1,3 +1,4 @@
+import { useState, useEffect, useMemo } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel } from '@tanstack/react-table';
 import { Table, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -7,7 +8,14 @@ import { formatRank, getRankBadgeVariant } from '../services/rankingService';
 const RankingsTable = ({ data, onRowClick }) => {
     const { t } = useTranslation();
 
-    const columns = [
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
+    useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth < 576);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
+
+    const columns = useMemo(() => [
         {
             accessorKey: 'rank',
             header: t('table.headers.rank'),
@@ -55,11 +63,14 @@ const RankingsTable = ({ data, onRowClick }) => {
             header: t('table.headers.tournaments'),
             cell: info => info.getValue()
         }
-    ];
+    ], [t]);
+
+    const columnVisibility = isMobile ? { tournamentCount: false } : {};
 
     const table = useReactTable({
         data,
         columns,
+        state: { columnVisibility },
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });

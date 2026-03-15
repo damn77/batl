@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-03-07T10:30:33.396Z"
+stopped_at: Completed 26-01-PLAN.md
+last_updated: "2026-03-15T12:23:25.624Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 11
+  completed_plans: 11
   percent: 0
 ---
 
@@ -54,6 +54,10 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 23 P01 | 3min | 1 tasks | 1 files |
 | Phase 23 P02 | 2min | 2 tasks | 4 files |
 | Phase 24 P01 | 1min | 2 tasks | 2 files |
+| Phase 25-app-wide-responsive-pass P01 | 8min | 2 tasks | 2 files |
+| Phase 25-app-wide-responsive-pass P02 | 5min | 2 tasks | 3 files |
+| Phase 25-app-wide-responsive-pass P03 | 10min | 3 tasks | 5 files |
+| Phase 26-player-profile-mobile-fix P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -87,6 +91,16 @@ Key architectural context for v1.4:
 - [Phase 23]: type=text inputMode=numeric pattern=[0-9]* for iOS integer-only keypad on score inputs
 - [Phase 23]: position: sticky on modal footer for iOS keyboard visibility, fullscreen=sm-down for mobile modal
 - [Phase 24]: Dual rendering (desktop radios + mobile ButtonGroup) via Bootstrap display utilities for responsive mode toggle
+- [Phase 25-01]: app.css imported after index.css in main.jsx so it wins the cascade without needing !important
+- [Phase 25-01]: Bootstrap CSS variable overrides in :root override card density app-wide without touching Bootstrap source
+- [Phase 25-02]: TanStack columnVisibility state (not CSS) hides tournamentCount on mobile; useMemo on columns with [t] dependency prevents table reinitialization
+- [Phase 25-02]: Dual-render pattern: d-none d-sm-block table + d-sm-none card list for public list pages on mobile
+- [Phase 25-02]: CategoryRankingsPage year selector uses className=w-auto with flex-wrap gap-2 container to prevent overflow at 375px
+- [Phase 25-03]: Accordion for tournament history (collapsed by default) reduces visual height on mobile
+- [Phase 25-03]: d-none d-sm-block / d-sm-none dual render pattern for table/card switching — pure Bootstrap
+- [Phase 25-03]: fullscreen=sm-down on large modals — forms are unusable on 375px without it
+- [Phase 25-03]: Dashboards rewritten as quick-link grids — prototype content removed entirely
+- [Phase 26-player-profile-mobile-fix]: Applied mobile fixes to PlayerPublicProfilePage (live /players/:id route), not PlayerProfilePage (dead file) — closes RESP-06 gap from phase 25-03 misdirect
 
 ### Pending Todos
 
@@ -107,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T10:28:23.192Z
-Stopped at: Completed 24-01-PLAN.md
+Last session: 2026-03-15T12:16:52.299Z
+Stopped at: Completed 26-01-PLAN.md
 Resume file: None

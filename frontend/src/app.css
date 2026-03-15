@@ -1,0 +1,123 @@
+/* ============================================================
+   BATL App Global Stylesheet
+   Load order: after bootstrap.min.css and index.css
+   Override Bootstrap defaults via CSS cascade (no !important needed)
+   ============================================================ */
+
+/* ============================================================
+   1. DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Spacing scale — tighter than Bootstrap defaults */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 0.75rem;   /* 12px */
+  --spacing-lg: 1rem;      /* 16px */
+  --spacing-xl: 1.5rem;    /* 24px */
+
+  /* Typography */
+  --font-size-sm: 0.8125rem;   /* 13px */
+  --font-size-base: 0.9375rem; /* 15px */
+  --font-size-lg: 1.0625rem;   /* 17px */
+
+  /* Color tokens */
+  --color-muted: #6c757d;
+  --color-surface: #f8f9fa;
+  --color-border: #dee2e6;
+}
+
+/* ============================================================
+   2. BOOTSTRAP CSS VARIABLE OVERRIDES — tighter density globally
+   ============================================================ */
+:root {
+  --bs-card-spacer-y: 0.75rem;
+  --bs-card-spacer-x: 0.75rem;
+  --bs-card-cap-padding-y: 0.5rem;
+  --bs-card-cap-padding-x: 0.75rem;
+}
+
+body {
+  font-size: var(--font-size-base);
+  overflow-x: hidden;
+}
+
+/* Tighter card margins */
+.card {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Prevent containers from causing horizontal scroll */
+.container,
+.container-fluid {
+  max-width: 100%;
+}
+
+/* ============================================================
+   3. OVERFLOW PREVENTION
+   ============================================================ */
+table {
+  width: 100%;
+}
+
+/* ============================================================
+   4. GLOBAL 44PX TAP TARGETS — mobile only
+   ============================================================ */
+@media (max-width: 575.98px) {
+  .btn {
+    min-height: 44px;
+  }
+
+  /* Reset btn-group children so the group itself is 44px, not each stacked button */
+  .btn-group .btn,
+  .btn-group-vertical .btn {
+    min-height: unset;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .list-group-item-action {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-link {
+    min-height: 44px;
+  }
+
+  .page-link {
+    min-height: 44px;
+  }
+}
+
+/* ============================================================
+   5. MOBILE DENSITY ADJUSTMENTS
+   ============================================================ */
+@media (max-width: 575.98px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Tighter horizontal padding on mobile — Bootstrap default is 16px */
+  .container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  /* Tighter card body on mobile */
+  .card-body {
+    padding: var(--spacing-sm);
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../utils/AuthContext';
-import { Alert, Spinner } from 'react-bootstrap';
+import { Alert, Spinner, Accordion } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
 import apiClient from '../services/apiClient';
 
@@ -300,7 +300,7 @@ const PlayerProfilePage = () => {
                     <div className="form-text">Required for gender-based tournament eligibility</div>
                   </div>
 
-                  <div className="d-flex gap-2">
+                  <div className="d-flex flex-wrap gap-2">
                     <button
                       className="btn btn-primary"
                       onClick={handleSave}
@@ -327,29 +327,29 @@ const PlayerProfilePage = () => {
               ) : (
                 // View mode
                 <div>
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Name</label>
-                    <p className="fs-5">{profile.name}</p>
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Name</label>
+                    <p className="mb-0">{profile.name}</p>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Email</label>
-                    <p className="fs-5">{profile.email || <span className="text-muted">Not provided</span>}</p>
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Email</label>
+                    <p className="mb-0">{profile.email || <span className="text-muted">Not provided</span>}</p>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Phone</label>
-                    <p className="fs-5">{profile.phone || <span className="text-muted">Not provided</span>}</p>
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Phone</label>
+                    <p className="mb-0">{profile.phone || <span className="text-muted">Not provided</span>}</p>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Account Email</label>
-                    <p className="fs-5">{user.email}</p>
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Account Email</label>
+                    <p className="mb-0">{user.email}</p>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Date of Birth</label>
-                    <p className="fs-5">
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Date of Birth</label>
+                    <p className="mb-0">
                       {profile.birthDate ? (
                         <span>{new Date(profile.birthDate).toLocaleDateString()}</span>
                       ) : (
@@ -358,9 +358,9 @@ const PlayerProfilePage = () => {
                     </p>
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label text-muted">Gender</label>
-                    <p className="fs-5">
+                  <div className="mb-2">
+                    <label className="form-label text-muted small mb-0">Gender</label>
+                    <p className="mb-0">
                       {profile.gender ? (
                         <span>{profile.gender === 'MEN' ? 'Male' : 'Female'}</span>
                       ) : (
@@ -381,16 +381,16 @@ const PlayerProfilePage = () => {
           </div>
 
           {/* Tournament History Placeholder */}
-          <div className="card shadow mt-4">
-            <div className="card-header">
-              <h4 className="mb-0">Tournament History</h4>
-            </div>
-            <div className="card-body">
-              <p className="text-muted">
-                Your tournament participation history will appear here once tournament management features are implemented.
-              </p>
-            </div>
-          </div>
+          <Accordion className="mt-3">
+            <Accordion.Item eventKey="tournament-history">
+              <Accordion.Header>Tournament History</Accordion.Header>
+              <Accordion.Body>
+                <p className="text-muted mb-0">
+                  Your tournament participation history will appear here once tournament management features are implemented.
+                </p>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
         </div>
       </div>
     </div>

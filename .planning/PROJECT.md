@@ -2,9 +2,9 @@
 
 ## What This Is
 
-BATL is a web application for managing amateur tennis league tournaments end-to-end. Organizers create and run tournaments (registration, seeded draws, results), and players self-report match results, view their standings, and track their match history — replacing the WhatsApp groups and spreadsheets that amateur leagues currently depend on.
+BATL is a mobile-first web application for managing amateur tennis league tournaments end-to-end. Organizers create and run tournaments (registration, seeded draws, results) from their phone at courtside, and players self-report match results, view their standings, and track their match history — replacing the WhatsApp groups and spreadsheets that amateur leagues currently depend on.
 
-The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee), ensuring every player gets at least 2 real matches with automated loser routing, bracket progression, and consolation point awards. As of v1.3, organizers can also manually assign players to bracket positions, copy tournament configurations, delete/revert tournaments, and admin users have full organizer parity.
+The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee), ensuring every player gets at least 2 real matches with automated loser routing, bracket progression, and consolation point awards. As of v1.3, organizers can also manually assign players to bracket positions, copy tournament configurations, delete/revert tournaments, and admin users have full organizer parity. As of v1.4, the entire UI is mobile-responsive with bracket-first tournament views, touch-friendly score entry, and app-wide 375px viewport support.
 
 ## Core Value
 
@@ -69,13 +69,21 @@ A complete tournament runs from registration to final standings without the orga
 - ✓ Admin access parity with organizer role — v1.3 (ADMIN-01–02)
 - ✓ Bracket view UX fixes (scroll behavior, doubles modal) — v1.3 (UX-01–02)
 
-### Active
-
 <!-- v1.4: UI Rework & Mobile Design -->
 
-(Defined in REQUIREMENTS.md — see milestone requirements)
+- ✓ Mobile dev tooling: QR code access for real-device testing — v1.4 (TOOL-01, TOOL-02)
+- ✓ Mobile navigation: Offcanvas drawer with auto-close and role-gated links — v1.4 (NAV-01–03)
+- ✓ Tournament view: bracket-first hero zone with status-driven accordion layout — v1.4 (LAYOUT-01–05)
+- ✓ Bracket mobile UX: auto-scale, touch panning, 44px tap targets — v1.4 (BRKT-01–04)
+- ✓ Score entry mobile UX: fullscreen modal, iOS numeric keypad, sticky footer — v1.4 (SCORE-01–04)
+- ✓ Organizer mobile support: segmented mode toggle, stacked confirmation buttons — v1.4 (ORG-01–02)
+- ✓ App-wide responsive: overflow prevention, column hiding, card layouts, dashboard quick links — v1.4 (RESP-01–08)
 
-### Future (v1.4+)
+### Active
+
+(No active milestone — run `/gsd:new-milestone` to start next)
+
+### Future (v1.5+)
 
 - Group stage visualization and result entry (round-robin matches)
 - Swiss system pairing and result tracking
@@ -89,7 +97,7 @@ A complete tournament runs from registration to final standings without the orga
 ### Out of Scope
 
 - Real-time live scoring — results entered after matches, not during — adds complexity with no v1 payoff
-- Mobile app — web-first; responsive web covers mobile use cases
+- Native mobile app — responsive web covers mobile use cases (validated by v1.4)
 - Push/email notifications — in-app only for now
 - Chat or messaging — WhatsApp replacement via structured app content, not chat
 - External calendar integration — not a priority for league management
@@ -104,7 +112,8 @@ A complete tournament runs from registration to final standings without the orga
 - **v1.1 shipped 2026-03-03** — consolation brackets with MATCH_2 guarantee, loser routing, opt-out, result entry, cascade recalculation, and consolation point awards
 - **v1.2 shipped 2026-03-04** — real league data seeding with 34 players, 18 mixed doubles pairs, realistic rankings, all scripts referencing real players and ProSet
 - **v1.3 shipped 2026-03-06** — manual bracket draw, tournament copy/delete/revert, admin access parity, integration fixes
-- **15 features delivered** (001–011 + v1.0–v1.3 milestone phases); ~43,500 LOC; architecture is stable and well-tested
+- **v1.4 shipped 2026-03-15** — mobile-first UI rework: Offcanvas navigation, bracket-first tournament view, touch-friendly score entry, app-wide responsive layout across all pages
+- **15 features delivered** (001–011 + v1.0–v1.4 milestone phases); ~22,300 LOC frontend, architecture is stable and well-tested
 - Organizer and player roles are both active users of the app; admin manages configuration
 - Scoring is format-dependent: sets (e.g. 6:4, 7:5), match-level (e.g. 7:5), or tiebreak-only depending on tournament rules
 - Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — targeted for v1.2+
@@ -144,22 +153,16 @@ A complete tournament runs from registration to final standings without the orga
 | ADMIN superuser bypass in ProtectedRoute | Single early-exit grants all organizer access | ✓ Good — clean RBAC model |
 | recalculateRankings outside Prisma transaction | Uses its own Prisma client internally — wrapping causes connection conflicts | ✓ Good — avoids deadlock |
 | Three-dot dropdown for tournament actions | Replaces multiple inline buttons per row | ✓ Good — cleaner UI, scalable for more actions |
-
-## Current Milestone: v1.4 UI Rework & Mobile Design
-
-**Goal:** Restructure the UI for mobile-first usage — bracket-centric tournament view, status-aware content visibility, app-wide responsive layout, full organizer mobile support, and light visual refresh.
-
-**Target features:**
-- Tournament view restructure: bracket hero when IN_PROGRESS, situational blocks collapse by status
-- App-wide mobile responsiveness pass across all key pages
-- Full organizer mobile: results, corrections, revert, manual draw on touch devices
-- Light visual refresh: spacing, typography, color improvements
-- Mobile navigation fix (known bug from tester)
-- Mobile development tooling for easier testing
+| React Bootstrap Offcanvas for mobile nav | Replaced broken Bootstrap JS hamburger with React-controlled drawer | ✓ Good — no Bootstrap JS dependency, auto-close on navigate |
+| Status-driven accordion layout for tournament view | Bracket as hero for IN_PROGRESS, collapsed secondary sections | ✓ Good — reduces scroll on mobile, information hierarchy |
+| Dual-render table/card pattern for responsive lists | `d-sm-none` cards + `d-none d-sm-block` tables | ✓ Good — clean breakpoint switch, no JS viewport detection needed |
+| Global app.css with CSS custom properties | Design tokens for spacing, typography, density overrides | ✓ Good — consistent styling, single source of truth |
+| inputMode="numeric" over type="number" for score inputs | iOS shows integer-only keypad without spinner buttons | ✓ Good — mobile-specific UX improvement |
+| PlayerProfilePage merged into PlayerPublicProfilePage | Dead file found during audit — responsive changes applied to wrong file, caught by integration checker | ⚠️ Revisit — gap closure phase 26 fixed it |
 
 ## Current State
 
-v1.3 shipped. All 4 milestones complete (v1.0–v1.3). 18 phases across 4 milestones. Full tournament lifecycle operational. v1.4 milestone started — UI rework and mobile design.
+v1.4 shipped. All 5 milestones complete (v1.0–v1.4). 26 phases across 5 milestones. Full tournament lifecycle operational with mobile-first UI. All pages usable at 375px viewport.
 
 ---
-*Last updated: 2026-03-06 after v1.4 milestone start*
+*Last updated: 2026-03-15 after v1.4 milestone*

@@ -141,10 +141,10 @@ const MatchHistoryTab = ({ playerId }) => {
   return (
     <div>
       {/* Category filter */}
-      <div className="d-flex justify-content-end align-items-center mb-3">
+      <div className="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-3">
         <Form.Label className="me-2 mb-0">Filter by category:</Form.Label>
         <Form.Select
-          style={{ width: 'auto', minWidth: '180px' }}
+          style={{ width: 'auto', maxWidth: '100%' }}
           value={categoryId || ''}
           onChange={handleCategoryChange}
           aria-label="Filter by category"
@@ -186,10 +186,10 @@ const MatchHistoryTab = ({ playerId }) => {
                 <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('tournamentName')}>
                   Tournament{sortIndicator('tournamentName')}
                 </th>
-                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('completedAt')}>
+                <th className="d-none d-sm-table-cell" style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('completedAt')}>
                   Date{sortIndicator('completedAt')}
                 </th>
-                <th>Category</th>
+                <th className="d-none d-sm-table-cell">Category</th>
                 <th>Opponent</th>
                 <th>Score</th>
                 <th>Result</th>
@@ -201,8 +201,8 @@ const MatchHistoryTab = ({ playerId }) => {
                   <td>
                     <Link to={`/tournaments/${match.tournamentId}`}>{match.tournamentName}</Link>
                   </td>
-                  <td>{match.completedAt ? new Date(match.completedAt).toLocaleDateString() : '-'}</td>
-                  <td>{match.category?.name || '-'}</td>
+                  <td className="d-none d-sm-table-cell">{match.completedAt ? new Date(match.completedAt).toLocaleDateString() : '-'}</td>
+                  <td className="d-none d-sm-table-cell">{match.category?.name || '-'}</td>
                   <td>{match.opponentName || '-'}</td>
                   <td>{match.score}</td>
                   <td>{renderResult(match.outcome)}</td>

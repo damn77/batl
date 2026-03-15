@@ -1,8 +1,8 @@
 // Phase 3 - navigation enabler: Completed tournaments list
 // Route: /tournaments (public)
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Container, Table, Spinner, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { Container, Table, Spinner, Alert, Card, Badge } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
 import { listTournaments } from '../services/tournamentService';
 
@@ -10,6 +10,7 @@ const TournamentsListPage = () => {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -61,32 +62,63 @@ const TournamentsListPage = () => {
         )}
 
         {!loading && !error && tournaments.length > 0 && (
-          <Table hover responsive>
-            <thead>
-              <tr>
-                <th>Tournament</th>
-                <th>Category</th>
-                <th>End Date</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Desktop (sm+): table layout */}
+            <div className="d-none d-sm-block">
+              <Table hover responsive>
+                <thead>
+                  <tr>
+                    <th>Tournament</th>
+                    <th>Category</th>
+                    <th>End Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tournaments.map((tournament) => (
+                    <tr key={tournament.id}>
+                      <td>
+                        <Link to={`/tournaments/${tournament.id}`}>
+                          {tournament.name}
+                        </Link>
+                      </td>
+                      <td>{tournament.category?.name || '-'}</td>
+                      <td>
+                        {tournament.endDate
+                          ? new Date(tournament.endDate).toLocaleDateString()
+                          : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+
+            {/* Mobile (xs): card layout */}
+            <div className="d-sm-none">
               {tournaments.map((tournament) => (
-                <tr key={tournament.id}>
-                  <td>
-                    <Link to={`/tournaments/${tournament.id}`}>
-                      {tournament.name}
-                    </Link>
-                  </td>
-                  <td>{tournament.category?.name || '-'}</td>
-                  <td>
-                    {tournament.endDate
-                      ? new Date(tournament.endDate).toLocaleDateString()
-                      : '-'}
-                  </td>
-                </tr>
+                <Card
+                  key={tournament.id}
+                  className="mb-2"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/tournaments/${tournament.id}`)}
+                >
+                  <Card.Body className="py-2 px-3">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <strong>{tournament.name}</strong>
+                      <Badge bg="secondary" className="ms-2">
+                        {tournament.category?.name || '-'}
+                      </Badge>
+                    </div>
+                    <div className="text-muted small mt-1">
+                      {tournament.endDate
+                        ? new Date(tournament.endDate).toLocaleDateString()
+                        : '-'}
+                    </div>
+                  </Card.Body>
+                </Card>
               ))}
-            </tbody>
-          </Table>
+            </div>
+          </>
         )}
       </Container>
     </>

@@ -140,10 +140,10 @@ const CategoryRankingsPage = () => {
 
           <Col md={9}>
             {selectedCategory && (
-              <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <h3 className="m-0">{selectedCategory.name}</h3>
                 <Form.Select
-                  style={{ width: 'auto' }}
+                  className="w-auto"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 >

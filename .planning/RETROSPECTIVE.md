@@ -199,6 +199,56 @@
 
 ---
 
+## Milestone: v1.4 — UI Rework & Mobile Design
+
+**Shipped:** 2026-03-15
+**Phases:** 7 | **Plans:** 11 | **Timeline:** 10 days (2026-03-06 → 2026-03-15)
+
+### What Was Built
+
+- Mobile dev tooling with QR code access for real-device testing (`npm run dev:mobile`)
+- React Bootstrap Offcanvas drawer navigation replacing broken Bootstrap JS hamburger menu
+- Bracket-first tournament view with status-driven accordion layout (hero zone for IN_PROGRESS)
+- Touch-friendly bracket controls (44px tap targets) and fullscreen score entry modal with iOS numeric keypad
+- Organizer courtside result entry with segmented mode toggle and stacked confirmation buttons
+- App-wide responsive pass: global CSS tokens, dual-render card/table layouts, dashboard quick links, column hiding
+- Player profile mobile fix (gap closure for dead-file bug)
+
+### What Worked
+
+- **Dual-render card/table pattern**: Using Bootstrap `d-sm-none`/`d-none d-sm-block` for mobile cards vs desktop tables is clean, requires no JS viewport detection, and was reused across 4 pages
+- **Global app.css as Wave 1 foundation**: Creating design tokens and tap target rules first meant Wave 2 pages could consume them immediately without duplication
+- **Integration checker caught dead-file bug**: Phase 25-03 applied responsive changes to `PlayerProfilePage.jsx` (dead code) instead of `PlayerPublicProfilePage.jsx` (live route) — the integration checker's route-tracing identified this before shipping
+- **Small gap closure phase**: Phase 26 was a 1-plan, 2-task fix that closed the RESP-06 gap cleanly in under 5 minutes of execution
+
+### What Was Inefficient
+
+- **Dead file not caught during planning**: The planner and researcher didn't flag that `PlayerProfilePage.jsx` was unreachable. The integration checker (post-execution audit) caught it — but catching it at plan time would have saved a gap closure phase
+- **Stale audit file**: The milestone audit was written before Phase 26 closed the gap, leaving `gaps_found` status in the file even though all requirements were satisfied — required understanding the audit was stale rather than current
+- **SUMMARY frontmatter gaps**: Phase 25-03's SUMMARY had empty `requirements_completed` array (should have listed RESP-06, RESP-07) — recurring issue from v1.2
+
+### Patterns Established
+
+- **CSS custom property design tokens**: `:root` variables for spacing, font size, and color — all responsive rules reference tokens instead of hardcoded values
+- **44px minimum tap target rule**: Global media query at 575.98px applies `min-height: 44px` to all interactive elements — applied once in app.css, no per-component rules needed
+- **`fullscreen="sm-down"` for mobile modals**: React Bootstrap Modal prop that makes modals fullscreen below 576px — used on score entry and tournament setup modals
+- **Column visibility via TanStack state**: `columnVisibility` state object passed to `useReactTable` — cleaner than CSS hiding for table columns
+
+### Key Lessons
+
+1. **Verify file routing before planning changes** — check that the target file is actually imported/routed before planning modifications to it. `grep -r "import.*FileName" src/` catches dead files.
+2. **SUMMARY frontmatter `requirements_completed` must be populated at execution time** — this is the 3rd milestone where missing frontmatter caused audit friction. Should be enforced by executor agents.
+3. **CSS/responsive changes inherently require human verification** — every phase in v1.4 had `human_needed` or `passed` verification status. For UI milestones, plan for manual testing as part of the workflow.
+4. **Integration checkers should run during planning, not just auditing** — catching the dead-file bug during `/gsd:plan-phase 25` would have prevented the entire Phase 26 gap closure cycle.
+
+### Cost Observations
+
+- Model: mixed opus/sonnet (orchestration on opus, execution/verification on sonnet)
+- Sessions: ~5 sessions across 10 days (with calendar gaps)
+- Notable: UI-only milestone — no backend changes, no new API endpoints, no database migrations. Fastest category of changes once patterns are established.
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Phases | Plans | Timeline | Notes |
@@ -207,3 +257,4 @@
 | v1.1 Consolation Brackets | 8 | 15 | 4 days | 5 audit iterations; doubles integration hardening |
 | v1.2 Data Seeding Update | 3 | 5 | 1 day | Data-only; 1 audit, 1 gap closure phase |
 | v1.3 Manual Draw & QoL | 7 | 12 | 2 days | Multi-feature QoL; 1 audit, 2 gap closure phases |
+| v1.4 UI Rework & Mobile Design | 7 | 11 | 10 days | Frontend-only; 1 audit, 1 gap closure phase |
