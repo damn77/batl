@@ -1,5 +1,5 @@
 // Organizer Registration Panel - Allow organizers to register players/pairs for tournaments
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Spinner, Modal, Badge } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../utils/AuthContext';
@@ -116,6 +116,57 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
         }
     };
 
+    // Filter entities: exclude already-registered players/pairs and ineligible players
+    const filteredEntities = useMemo(() => {
+        const category = tournament?.category;
+        if (!category) return entities;
+
+        if (isDoubles) {
+            // For pairs: only filter by registration status
+            const registeredPairIds = new Set(
+                registrations
+                    .filter((r) => r.status !== 'WITHDRAWN')
+                    .map((r) => r.pairId || r.pair?.id)
+                    .filter(Boolean)
+            );
+            return entities.filter((entity) => !registeredPairIds.has(entity.id));
+        } else {
+            // For singles: filter by registration status AND category eligibility
+            const registeredPlayerIds = new Set(
+                registrations
+                    .filter((r) => r.status !== 'WITHDRAWN')
+                    .map((r) => r.playerId || r.player?.id)
+                    .filter(Boolean)
+            );
+
+            const currentYear = new Date().getFullYear();
+            const minAge =
+                category.ageGroup === 'ALL_AGES' || !category.ageGroup
+                    ? null
+                    : parseInt(category.ageGroup.match(/AGE_(\d+)/)?.[1]);
+
+            return entities.filter((entity) => {
+                // Exclude already-registered players
+                if (registeredPlayerIds.has(entity.id)) return false;
+
+                // Age eligibility check
+                if (minAge) {
+                    if (!entity.birthDate) return false;
+                    const playerAge = currentYear - new Date(entity.birthDate).getFullYear();
+                    if (playerAge < minAge) return false;
+                }
+
+                // Gender eligibility check
+                if (category.gender && category.gender !== 'MIXED') {
+                    if (!entity.gender) return false;
+                    if (entity.gender !== category.gender) return false;
+                }
+
+                return true;
+            });
+        }
+    }, [entities, registrations, tournament?.category, isDoubles]);
+
     if (!isOrganizer) {
         return null;
     }
@@ -141,7 +192,7 @@ const OrganizerRegistrationPanel = ({ tournament, onRegistrationComplete }) => {
                     </div>
 
                     <RegistrationForm
-                        entities={entities}
+                        entities={filteredEntities}
                         selectedId={selectedId}
                         onSelect={setSelectedId}
                         onSubmit={handleRegister}
