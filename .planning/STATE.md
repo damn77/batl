@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
-stopped_at: Completed 25-02-PLAN.md
-last_updated: "2026-03-15T09:38:28.461Z"
+stopped_at: Completed 25-03-PLAN.md
+last_updated: "2026-03-15T09:39:27.629Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 24 P01 | 1min | 2 tasks | 2 files |
 | Phase 25-app-wide-responsive-pass P01 | 8min | 2 tasks | 2 files |
 | Phase 25-app-wide-responsive-pass P02 | 5min | 2 tasks | 3 files |
+| Phase 25-app-wide-responsive-pass P03 | 10min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,10 @@ Key architectural context for v1.4:
 - [Phase 25-02]: TanStack columnVisibility state (not CSS) hides tournamentCount on mobile; useMemo on columns with [t] dependency prevents table reinitialization
 - [Phase 25-02]: Dual-render pattern: d-none d-sm-block table + d-sm-none card list for public list pages on mobile
 - [Phase 25-02]: CategoryRankingsPage year selector uses className=w-auto with flex-wrap gap-2 container to prevent overflow at 375px
+- [Phase 25-03]: Accordion for tournament history (collapsed by default) reduces visual height on mobile
+- [Phase 25-03]: d-none d-sm-block / d-sm-none dual render pattern for table/card switching — pure Bootstrap
+- [Phase 25-03]: fullscreen=sm-down on large modals — forms are unusable on 375px without it
+- [Phase 25-03]: Dashboards rewritten as quick-link grids — prototype content removed entirely
 
 ### Pending Todos
 
@@ -114,6 +119,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T09:38:28.458Z
-Stopped at: Completed 25-02-PLAN.md
+Last session: 2026-03-15T09:39:27.626Z
+Stopped at: Completed 25-03-PLAN.md
 Resume file: None

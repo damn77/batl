@@ -73,7 +73,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details.
 - [x] **Phase 22: Tournament View Layout** — Status-aware section ordering with bracket as hero for IN_PROGRESS tournaments (completed 2026-03-07)
 - [x] **Phase 23: Bracket and Score Entry Mobile UX** — Touch-safe bracket navigation and fullscreen mobile score entry modal (completed 2026-03-07)
 - [x] **Phase 24: Organizer Mobile Support** — Result submission and correction fully usable on touch devices (completed 2026-03-07)
-- [ ] **Phase 25: App-Wide Responsive Pass** — All key pages pass 375px viewport with column hiding, tap targets, and visual refresh
+- [x] **Phase 25: App-Wide Responsive Pass** — All key pages pass 375px viewport with column hiding, tap targets, and visual refresh (completed 2026-03-15)
 
 ## Phase Details
 
@@ -192,4 +192,4 @@ Plans:
 | 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
-| 25. App-Wide Responsive Pass | 2/3 | In Progress|  | - |
+| 25. App-Wide Responsive Pass | 3/3 | Complete   | 2026-03-15 | - |
