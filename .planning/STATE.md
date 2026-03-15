@@ -5,7 +5,7 @@ milestone_name: UI Rework & Mobile Design
 status: planning
 stopped_at: Completed 26-01-PLAN.md
 last_updated: "2026-03-15T12:23:25.624Z"
-last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
+last_activity: 2026-03-15 - Completed quick task 7: Fix tournament page organizer registration
 progress:
   total_phases: 7
   completed_phases: 7
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 Phase: 20 of 25 (Mobile Dev Tooling)
 Plan: — (not yet planned)
 Status: Ready to plan
-Last activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
+Last activity: 2026-03-15 - Completed quick task 7: Fix tournament page organizer registration
 
 Progress: [░░░░░░░░░░] 0%
 
