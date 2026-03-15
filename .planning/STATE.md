@@ -4,7 +4,7 @@ milestone: v1.4
 milestone_name: UI Rework & Mobile Design
 status: planning
 stopped_at: Completed 25-03-PLAN.md
-last_updated: "2026-03-15T09:39:27.629Z"
+last_updated: "2026-03-15T11:09:39.958Z"
 last_activity: 2026-03-06 — Roadmap created, 6 phases defined, 28/28 requirements mapped
 progress:
   total_phases: 6
