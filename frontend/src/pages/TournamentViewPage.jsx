@@ -39,6 +39,7 @@ const TournamentViewPage = () => {
   const hasBracket = !!(formatStructure?.brackets?.length > 0);
 
   const [startError, setStartError] = useState(null);
+  const [registrationVersion, setRegistrationVersion] = useState(0);
 
   // formatConfig arrives as a JSON string from the API — parse it once here
   const parsedFormatConfig = (() => {
@@ -123,7 +124,7 @@ const TournamentViewPage = () => {
                     key="info-panel"
                     tournament={tournament}
                     user={user}
-                    onRegistrationComplete={() => window.location.reload()}
+                    onRegistrationComplete={() => { mutateTournament(); setRegistrationVersion((v) => v + 1); }}
                   />
                 );
               case 'organizer-registration':
@@ -140,7 +141,7 @@ const TournamentViewPage = () => {
                       {t('components.formatVisualization.formatTypes.' + (tournament.formatType?.toLowerCase() || 'unknown'))}
                     </Accordion.Header>
                     <Accordion.Body className="p-0">
-                      <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} />
+                      <FormatVisualization tournament={tournament} mutateTournament={mutateTournament} registrationVersion={registrationVersion} />
                     </Accordion.Body>
                   </Accordion.Item>
                 );
@@ -149,7 +150,7 @@ const TournamentViewPage = () => {
                   <Accordion.Item key={key} eventKey={key}>
                     <Accordion.Header>{t('tournament.sections.players', 'Players')}</Accordion.Header>
                     <Accordion.Body className="p-0">
-                      <PlayerListPanel tournament={tournament} />
+                      <PlayerListPanel tournament={tournament} refreshKey={registrationVersion} />
                     </Accordion.Body>
                   </Accordion.Item>
                 );
@@ -203,6 +204,7 @@ const TournamentViewPage = () => {
                   <FormatVisualization
                     tournament={tournament}
                     mutateTournament={mutateTournament}
+                    registrationVersion={registrationVersion}
                   />
                 </div>
               )}

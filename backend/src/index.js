@@ -4,6 +4,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import session from 'express-session';
 import FileStore from 'session-file-store';
+import { readdir, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import passport from './middleware/auth.js';
 import authRoutes from './api/routes/authRoutes.js';
 import userRoutes from './api/routes/userRoutes.js';
@@ -105,8 +107,7 @@ app.get('/api/health', (req, res) => {
 app.use(session({
   store: new SessionFileStore({
     path: './sessions',
-    ttl: 1800, // 30 minutes
-    retries: 0
+    ttl: 1800 // 30 minutes
   }),
   secret: process.env.SESSION_SECRET || 'change-this-secret',
   resave: false,
@@ -158,6 +159,20 @@ async function startServer() {
   try {
     // Eagerly connect Prisma to avoid ECONNRESET on first request
     await prisma.$connect();
+
+    // Clean stale session files from previous server runs
+    const sessionsDir = './sessions';
+    try {
+      const files = await readdir(sessionsDir);
+      await Promise.all(files.map(f => unlink(join(sessionsDir, f))));
+      if (files.length > 0) {
+        console.log(`Cleared ${files.length} stale session file(s)`);
+      }
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        console.warn('Warning: Could not clean session directory:', err.message);
+      }
+    }
 
     // Initialize point table cache on startup
     console.log('Initializing point table cache...');
