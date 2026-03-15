@@ -5,7 +5,7 @@ milestone_name: UI Rework & Mobile Design
 status: planning
 stopped_at: Completed 26-01-PLAN.md
 last_updated: "2026-03-15T12:23:25.624Z"
-last_activity: 2026-03-15 - Completed quick task 7: Fix tournament page organizer registration
+last_activity: 2026-03-15 - Completed quick task 8: Fix Draw Generation player count not updating
 progress:
   total_phases: 7
   completed_phases: 7
@@ -119,9 +119,10 @@ None.
 | 5 | Migrate all PrismaClient instances to shared singleton | 2026-03-07 | fb4b327 | [5-migrate-all-prismaclient-instances-to-sh](./quick/5-migrate-all-prismaclient-instances-to-sh/) |
 | 6 | Fix mobile bracket touch drag with callback ref pattern | 2026-03-07 | 4b42a7e | [6-fix-mobile-bracket-drag-not-working-whil](./quick/6-fix-mobile-bracket-drag-not-working-whil/) |
 | 7 | Fix tournament page organizer registration panel (filter dropdown + soft-reload) | 2026-03-15 | 3c70bee | [7-fix-tournament-page-organizer-registrati](./quick/7-fix-tournament-page-organizer-registrati/) |
+| 8 | Fix Draw Generation player count not updating on registration changes | 2026-03-15 | abc4b6e | [8-fix-draw-generation-player-count-not-upd](./quick/8-fix-draw-generation-player-count-not-upd/) |
 
 ## Session Continuity
 
-Last session: 2026-03-15T12:50:43Z
-Stopped at: Completed quick-7
+Last session: 2026-03-15T13:00:00Z
+Stopped at: Completed quick-8
 Resume file: None
