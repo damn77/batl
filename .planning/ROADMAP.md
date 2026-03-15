@@ -6,7 +6,7 @@
 - ✅ **v1.1 Consolation Brackets** — Phases 4, 5, 5.1, 5.2, 6, 6.1, 7, 8 (shipped 2026-03-03)
 - ✅ **v1.2 Data Seeding Update** — Phases 9, 10, 11 (shipped 2026-03-04)
 - ✅ **v1.3 Manual Draw & QoL** — Phases 12, 13, 14, 15, 16, 17, 18 (shipped 2026-03-06)
-- 🚧 **v1.4 UI Rework & Mobile Design** — Phases 20–25 (in progress)
+- 🚧 **v1.4 UI Rework & Mobile Design** — Phases 20–26 (in progress)
 
 ## Phases
 
@@ -158,9 +158,9 @@ Plans:
   6. Spacing, typography, and color are consistent and improved across the app (light visual refresh)
 **Plans**: 3 plans
 Plans:
-- [ ] 25-01-PLAN.md — Global app.css with design tokens, density overrides, 44px tap targets, overflow prevention
-- [ ] 25-02-PLAN.md — Tournament list cards, rankings column hiding, category rankings mobile fixes
-- [ ] 25-03-PLAN.md — Player profile accordion, organizer page cards, dashboard content replacement
+- [x] 25-01-PLAN.md — Global app.css with design tokens, density overrides, 44px tap targets, overflow prevention
+- [x] 25-02-PLAN.md — Tournament list cards, rankings column hiding, category rankings mobile fixes
+- [x] 25-03-PLAN.md — Player profile accordion, organizer page cards, dashboard content replacement
 
 ### Phase 26: Player Profile Mobile Fix
 **Goal**: Player profile page is fully usable on a 375px mobile viewport
@@ -168,10 +168,12 @@ Plans:
 **Requirements**: RESP-06
 **Gap Closure**: Closes RESP-06 from v1.4 audit — changes were applied to dead PlayerProfilePage.jsx instead of live PlayerPublicProfilePage.jsx
 **Success Criteria** (what must be TRUE):
-  1. PlayerPublicProfilePage.jsx has accordion-collapsed tournament history section on mobile
+  1. PlayerPublicProfilePage.jsx view-mode fields use tighter spacing for mobile density
   2. Save/cancel buttons in edit mode stack or wrap properly on 375px viewport
-  3. Field spacing is tightened for mobile density
-**Plans**: 0 plans (to be planned)
+  3. Match history table hides non-essential columns on mobile
+**Plans**: 1 plan
+Plans:
+- [ ] 26-01-PLAN.md — Mobile-optimize PlayerPublicProfilePage and MatchHistoryTab
 
 ## Progress
 
@@ -204,4 +206,5 @@ Plans:
 | 22. Tournament View Layout | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 23. Bracket and Score Entry Mobile UX | v1.4 | 2/2 | Complete | 2026-03-07 |
 | 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
-| 25. App-Wide Responsive Pass | 3/3 | Complete    | 2026-03-15 | - |
+| 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
+| 26. Player Profile Mobile Fix | v1.4 | 0/1 | Planned | - |
