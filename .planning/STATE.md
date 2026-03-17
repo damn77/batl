@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Phase 28 context gathered
-last_updated: "2026-03-17T14:40:20.753Z"
+stopped_at: Phase 28 UI-SPEC approved
+last_updated: "2026-03-17T14:59:01.950Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
@@ -82,6 +82,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T14:40:20.750Z
-Stopped at: Phase 28 context gathered
-Resume file: .planning/phases/28-group-match-play-and-visualization/28-CONTEXT.md
+Last session: 2026-03-17T14:59:01.947Z
+Stopped at: Phase 28 UI-SPEC approved
+Resume file: .planning/phases/28-group-match-play-and-visualization/28-UI-SPEC.md
