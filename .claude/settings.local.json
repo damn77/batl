@@ -25,7 +25,13 @@
       "Bash(if [ -f \"D:\\Workspace\\BATL\\specs\\008-tournament-rankings\\quickstart.md\" ])",
       "Bash(then echo \"quickstart.md exists\")",
       "Bash(else echo \"quickstart.md not found\")",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(powershell.exe -NoProfile -Command 'Get-Command pwsh -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source; if \\($?\\) { pwsh --version }')",
+      "Bash(winget install:*)",
+      "Bash(powershell.exe -NoProfile -Command \"winget install Microsoft.PowerShell --accept-source-agreements --accept-package-agreements\")",
+      "Bash(powershell.exe -NoProfile -Command \"& { Get-Command winget.exe -ErrorAction SilentlyContinue; [Environment]::GetEnvironmentVariable\\('LOCALAPPDATA'\\) + '\\\\Microsoft\\\\WindowsApps\\\\winget.exe' | ForEach-Object { Test-Path $_ } }\")",
+      "Bash(powershell.exe -NoProfile -Command \"choco install powershell-core -y\")",
+      "Bash(powershell.exe -NoProfile -Command \"Get-Command pwsh.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")"
     ],
     "deny": [],
     "ask": []
