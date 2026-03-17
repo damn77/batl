@@ -651,13 +651,13 @@ export async function getGroupStandings(groupId) {
       groupParticipants: {
         include: {
           player: {
-            select: { id: true, firstName: true, lastName: true }
+            select: { id: true, name: true }
           },
           pair: {
             select: {
               id: true,
-              player1: { select: { id: true, firstName: true, lastName: true } },
-              player2: { select: { id: true, firstName: true, lastName: true } }
+              player1: { select: { id: true, name: true } },
+              player2: { select: { id: true, name: true } }
             }
           }
         }
@@ -672,14 +672,9 @@ export async function getGroupStandings(groupId) {
   // Build entity list from participants
   const entities = group.groupParticipants.map(gp => {
     if (gp.pair) {
-      const p1Name = `${gp.pair.player1.firstName} ${gp.pair.player1.lastName}`.trim();
-      const p2Name = `${gp.pair.player2.firstName} ${gp.pair.player2.lastName}`.trim();
-      return { id: gp.pair.id, name: `${p1Name} / ${p2Name}` };
+      return { id: gp.pair.id, name: `${gp.pair.player1.name} / ${gp.pair.player2.name}` };
     } else if (gp.player) {
-      return {
-        id: gp.player.id,
-        name: `${gp.player.firstName} ${gp.player.lastName}`.trim()
-      };
+      return { id: gp.player.id, name: gp.player.name };
     }
     return null;
   }).filter(Boolean);

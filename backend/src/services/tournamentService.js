@@ -1213,7 +1213,8 @@ export async function revertTournament(id) {
   // SCHEDULED with no draw cannot be reverted
   if (tournament.status === 'SCHEDULED') {
     const bracketCount = await prisma.bracket.count({ where: { tournamentId: id } });
-    if (bracketCount === 0) {
+    const groupCount = await prisma.group.count({ where: { tournamentId: id } });
+    if (bracketCount === 0 && groupCount === 0) {
       throw createHttpError(409, 'Tournament has no draw to revert', {
         code: 'NO_DRAW_TO_REVERT'
       });
@@ -1225,6 +1226,14 @@ export async function revertTournament(id) {
     await tx.match.deleteMany({ where: { tournamentId: id } });
     await tx.round.deleteMany({ where: { tournamentId: id } });
     await tx.bracket.deleteMany({ where: { tournamentId: id } });
+    // Delete group data (GROUP/COMBINED formats) — participants cascade from group delete
+    const groups = await tx.group.findMany({ where: { tournamentId: id }, select: { id: true } });
+    if (groups.length > 0) {
+      const groupIds = groups.map(g => g.id);
+      await tx.groupTieResolution.deleteMany({ where: { groupId: { in: groupIds } } });
+      await tx.groupParticipant.deleteMany({ where: { groupId: { in: groupIds } } });
+      await tx.group.deleteMany({ where: { tournamentId: id } });
+    }
     return tx.tournament.update({
       where: { id },
       data: { status: 'SCHEDULED', registrationClosed: false }
