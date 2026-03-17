@@ -41,10 +41,11 @@ Declared values from `frontend/src/App.css` — project-established tokens:
 | 2xl | 32px | Major section breaks (not tokenized; use Bootstrap `mb-4`) |
 | 3xl | 48px | Page-level spacing (not tokenized; use Bootstrap `py-5`) |
 
-Exceptions:
-- Match row tap target: 44px minimum height on mobile (< 576px) — enforced globally by `App.css` `.list-group-item-action` and `btn` rules. Apply `style={{ minHeight: '44px' }}` directly on clickable `<tr>` elements since table rows are not covered by the global rule.
-- Progress bar height: 4px (thin indicator under accordion header — not from spacing scale; hardcoded `style={{ height: '4px' }}`).
-- Accordion header progress bar margin-top: 6px (visual breathing room between group name and bar — not from spacing scale; hardcoded).
+Exceptions (values outside the standard set of 4, 8, 16, 24, 32, 48, 64):
+
+- `--spacing-md: 12px` — inherited App.css token from Phase 1 design system; used for card body padding only; not introduced by this phase.
+- `44px` tap target — locked in CONTEXT.md; iOS/Android accessibility minimum (WCAG 2.5.5); not a layout spacing token. Applied as `style={{ minHeight: '44px' }}` on clickable `<tr>` elements.
+- Progress bar height: 4px — thin indicator under accordion header; hardcoded `style={{ height: '4px' }}`; not a spacing token.
 
 Source: `frontend/src/App.css`, `CONTEXT.md` Mobile responsiveness decisions, `RESEARCH.md` Pattern 1 and Pattern 4
 
@@ -175,7 +176,7 @@ Source: `RESEARCH.md` Pattern 1, Pattern 2, Pattern 5; `CONTEXT.md` decisions
 - 0% (no matches completed): empty bar, `now={0}`, `variant="success"`
 - Partial: fills proportionally, `now={completionPct}`, `variant="success"`
 - 100% (all matches completed): full green bar
-- `style={{ height: '4px', marginTop: '6px' }}` inside accordion header
+- `style={{ height: '4px', marginTop: '4px' }}` inside accordion header — `4px` uses `--spacing-xs` for visual breathing room between group name and bar
 
 ### Group Completion Banner (COMBINED only)
 
