@@ -53,6 +53,8 @@ Exceptions:
 
 **Source:** `app.css` `:root` tokens applied globally. Do not deviate.
 
+**Note on scale gaps:** Body (15px) and section heading (17px) are 2px apart. This tight spacing is intentional — inherited from project tokens in `app.css`, not introduced by this phase.
+
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 15px (`--font-size-base: 0.9375rem`) | 400 (regular) | 1.5 (Bootstrap default) |
@@ -88,7 +90,7 @@ Mobile overrides (auto-applied by `app.css` at `<= 575.98px`):
 - `danger` — Error states, revert confirmation
 - `info` — Advancement preview informational callout, secondary bracket optional note
 
-**Never use accent/primary for:** outline buttons, secondary actions, cancel/dismiss buttons (use `outline-secondary`), badges (use `secondary` or `primary` bg based on context).
+**Never use accent/primary for:** outline buttons, secondary actions, dismiss buttons (use `outline-secondary`), badges (use `secondary` or `primary` bg based on context).
 
 ---
 
@@ -154,7 +156,7 @@ All new components for this phase:
 
 | State | Visual |
 |-------|--------|
-| Revert button clicked | Confirmation `Modal` — title "Revert Advancement", body "This will delete all knockout brackets and unlock group results for editing." Footer: "Cancel" `variant="outline-secondary"` + "Revert Advancement" `variant="danger"` |
+| Revert button clicked | Confirmation `Modal` — title "Revert Advancement", body "This will delete all knockout brackets and unlock group results for editing." Footer: "Keep Brackets" `variant="outline-secondary"` + "Revert Advancement" `variant="danger"` |
 | Reverting | "Revert Advancement" button shows `Spinner`, disabled |
 | Revert success | Modal closes, page returns to group-complete banner state |
 | Revert error | `Alert variant="danger"` inside modal footer |
@@ -183,9 +185,11 @@ All new components for this phase:
 | Generating state | "Generating..." (button text while spinner shows) |
 | Revert modal title | "Revert Advancement" |
 | Revert modal body | "This will delete all knockout brackets and unlock group results for editing." |
+| Revert modal dismiss button | "Keep Brackets" |
 | Revert confirmation button | "Revert Advancement" |
 | Revert blocked tooltip | "Cannot revert — knockout match results exist." |
 | Revert available notice | "Undo advancement to edit group results." |
+| Preview modal dismiss button | "Close Preview" |
 | Config field — main bracket | "Players advancing to main bracket (Top N)" |
 | Config field — secondary bracket | "Players advancing to secondary bracket (Next M)" |
 | Config hint — secondary optional | "Optional. Leave blank to skip secondary bracket." |
@@ -239,7 +243,7 @@ Modal size="lg" (fullscreen="sm-down" for mobile)
 │       "Main Bracket: {N} players ({B} byes). Secondary Bracket: {M} players ({B} byes)."
 ├── Modal.Footer:
 │   ├── [Error Alert if generation fails]
-│   ├── "Cancel" — Button outline-secondary
+│   ├── "Close Preview" — Button outline-secondary
 │   └── "Confirm & Generate Brackets" — Button primary, full-width on mobile
 ```
 
