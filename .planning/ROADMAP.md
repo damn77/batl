@@ -136,7 +136,11 @@ Plans:
   4. Organizer can manually resolve a 3-way deadlock via a UI prompt
   5. Tiebreaker criterion label appears in standings when points alone don't separate players
   6. Doubles pairs display correctly as "Player A / Player B" in standings
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 29-01-PLAN.md — Schema migration (GroupTieResolution) + tiebreaker service with unit tests
+- [ ] 29-02-PLAN.md — API layer (controller, routes, validators) + integration tests
+- [ ] 29-03-PLAN.md — Frontend GroupStandingsTable rewrite with SWR hook, tiebreaker badges, manual resolution UI
 
 ### Phase 30: Combined Format Advancement
 **Goal**: Group-to-knockout advancement with seeded bracket generation and spillover selection for odd groups
