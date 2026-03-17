@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Completed 28-01-PLAN.md
-last_updated: "2026-03-17T15:24:54.244Z"
+stopped_at: Completed 28-03-PLAN.md
+last_updated: "2026-03-17T15:31:00.000Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 ## Current Position
 
 Phase: 28 of 31 (Group Match Play and Visualization)
-Plan: 01 complete
+Plan: 03 complete
 Status: In progress
-Last activity: 2026-03-17 — Phase 28 Plan 01 complete (Wave 0 tests, COMBINED guard, doubles pairs)
+Last activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 27 P03 | 3m | 3 tasks | 3 files |
 | Phase 28 P01 | 3m | 2 tasks | 4 files |
 | Phase 28-group-match-play-and-visualization P02 | 2min | 1 tasks | 1 files |
+| Phase 28-group-match-play-and-visualization P03 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,10 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 28 P01]: COMBINED guard queries tournament.findUnique inside incompleteCount===0 block — no extra query cost on partial completions
 - [Phase 28 P01]: bracket.findFirst (not findMany) used in COMBINED guard — only need existence check
 - [Phase 28 P01]: getFormatStructure GROUP/COMBINED emit both players[] and pairs[] — empty arrays for inapplicable type, no nullable undefined
+- [Phase 28 P03]: ExpandableSection replaced with Accordion in GROUP/COMBINED format sections — React Bootstrap Accordion provides better UX
+- [Phase 28 P03]: allMatches passed as prop to CombinedFormatDisplay from FormatVisualization to avoid re-fetch
+- [Phase 28 P03]: Generate Knockout Bracket button is a no-op (window.scrollTo) with TODO for Phase 30 wiring
+- [Phase 28 P03]: MatchResultModal groupId guard skips dry-run for group matches (no bracket cascade exists)
 
 ### Pending Todos
 
@@ -89,6 +94,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T15:24:54.241Z
-Stopped at: Completed 28-02-PLAN.md
+Last session: 2026-03-17T15:31:00.000Z
+Stopped at: Completed 28-03-PLAN.md
 Resume file: None
