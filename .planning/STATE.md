@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 29-01-PLAN.md
-last_updated: "2026-03-17T18:47:57.481Z"
+stopped_at: Completed 29-02-PLAN.md
+last_updated: "2026-03-17T18:53:01.978Z"
 last_activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 28-group-match-play-and-visualization P02 | 2min | 1 tasks | 1 files |
 | Phase 28-group-match-play-and-visualization P03 | 3min | 3 tasks | 3 files |
 | Phase 29-group-standings-and-tiebreakers P01 | 6min | 2 tasks | 3 files |
+| Phase 29-group-standings-and-tiebreakers P02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 29-01]: GroupTieResolution model uses groupId @unique — one override per group; resultSnapshotAt for stale detection with strict > comparison
 - [Phase 29-01]: H2H cycle detection uses Kahn's algorithm: if all entities in subset have in-degree >= 1, it is cyclic — fall through to set diff
 - [Phase 29-01]: sortWithTiebreakers passes empty matches (no H2H); computeGroupStandings passes full matches — callers should use computeGroupStandings for H2H to work
+- [Phase 29]: GET standings is public; POST/DELETE override require isAuthenticated+authorize('update','Tournament')
+- [Phase 29]: deleteMany used in deleteOverride to safely handle missing override record (avoids P2025)
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T18:47:57.477Z
-Stopped at: Completed 29-01-PLAN.md
+Last session: 2026-03-17T18:53:01.975Z
+Stopped at: Completed 29-02-PLAN.md
 Resume file: None
