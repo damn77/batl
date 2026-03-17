@@ -197,7 +197,7 @@ Plans:
 | 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
 | 27. Group Formation | 3/3 | Complete    | 2026-03-17 | - |
-| 28. Group Match Play and Visualization | v1.5 | 0/3 | Not started | - |
+| 28. Group Match Play and Visualization | 1/3 | In Progress|  | - |
 | 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |

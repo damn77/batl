@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Phase 28 UI-SPEC approved
-last_updated: "2026-03-17T14:59:01.950Z"
+stopped_at: Completed 28-02-PLAN.md
+last_updated: "2026-03-17T15:24:54.244Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 0
 ---
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 27 P01 | 6m | 2 tasks | 4 files |
 | Phase 27 P02 | 4m | 2 tasks | 6 files |
 | Phase 27 P03 | 3m | 3 tasks | 3 files |
+| Phase 28-group-match-play-and-visualization P02 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 27]: swapGroupParticipants deletes all bracketId=null rounds for tournament before regenerating (safe: group rounds are isolated)
 - [Phase 27]: State C organizer swap: Player B dropdown filters out Player A's group to enforce cross-group swap client-side
 - [Phase 27]: COMBINED format organizer routing: no-groups shows GroupDrawGenerationSection only; with groups shows both stacked
+- [Phase 28]: Match rows always fetched (shouldFetch=true); visibility controlled by showMatches state initialized from tournamentStatus prop
+- [Phase 28]: Entity abstraction (entities array) in GroupStandingsTable unifies singles/doubles standings calculation
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T14:59:01.947Z
-Stopped at: Phase 28 UI-SPEC approved
-Resume file: .planning/phases/28-group-match-play-and-visualization/28-UI-SPEC.md
+Last session: 2026-03-17T15:24:54.241Z
+Stopped at: Completed 28-02-PLAN.md
+Resume file: None
