@@ -29,21 +29,23 @@ created: 2026-03-18
 
 ## Spacing Scale
 
-Declared values (must be multiples of 4, sourced from `app.css` `:root` tokens):
+Declared values (must be multiples of 4, standard set: 4, 8, 16, 24, 32, 48, 64):
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px (`--spacing-xs: 0.25rem`) | Icon gaps, inline badge padding |
 | sm | 8px (`--spacing-sm: 0.5rem`) | Compact element spacing, tight card body |
-| md | 12px (`--spacing-md: 0.75rem`) | Default card spacer, section padding |
 | lg | 16px (`--spacing-lg: 1rem`) | Default element spacing, container gaps |
 | xl | 24px (`--spacing-xl: 1.5rem`) | Major section breaks |
 
 Exceptions:
 
-- Touch targets on mobile: `min-height: 44px` for all interactive elements (global rule in `app.css` for `<= 575.98px`)
-- Group stage accordion vertical gap: `mb-5` (Bootstrap `3rem` / 48px) separates group section from knockout section — preserve from `CombinedFormatDisplay.jsx`
-- Bracket card vertical gaps: `gap-4` (Bootstrap `1.5rem` / 24px) between stacked brackets — preserve from `CombinedFormatDisplay.jsx`
+| Token | Value | Justification |
+|-------|-------|---------------|
+| `--spacing-md` | 12px (0.75rem) | Pre-existing project token from `app.css` used in card body padding; 12px is a multiple of 4 but outside the standard set. Retained for codebase consistency — do not redefine. |
+| Touch targets (mobile) | min-height 44px | Global rule in `app.css` for `<= 575.98px` — all interactive elements |
+| Group-to-knockout gap | 48px (`mb-5`, Bootstrap 3rem) | Preserves existing visual separation between group stage accordion and knockout section in `CombinedFormatDisplay.jsx` |
+| Bracket card vertical gap | 24px (`gap-4`, Bootstrap 1.5rem) | Preserves existing stacking gap between multiple brackets in `CombinedFormatDisplay.jsx` |
 
 ---
 
@@ -152,8 +154,8 @@ All new components for this phase:
 
 | State | Visual |
 |-------|--------|
-| Revert button clicked | Confirmation `Modal` — title "Revert Advancement", body "This will delete all knockout brackets and unlock group results. This cannot be undone if results were entered." Footer: "Cancel" `variant="outline-secondary"` + "Revert" `variant="danger"` |
-| Reverting | "Revert" button shows `Spinner`, disabled |
+| Revert button clicked | Confirmation `Modal` — title "Revert Advancement", body "This will delete all knockout brackets and unlock group results for editing." Footer: "Cancel" `variant="outline-secondary"` + "Revert Advancement" `variant="danger"` |
+| Reverting | "Revert Advancement" button shows `Spinner`, disabled |
 | Revert success | Modal closes, page returns to group-complete banner state |
 | Revert error | `Alert variant="danger"` inside modal footer |
 
@@ -181,7 +183,7 @@ All new components for this phase:
 | Generating state | "Generating..." (button text while spinner shows) |
 | Revert modal title | "Revert Advancement" |
 | Revert modal body | "This will delete all knockout brackets and unlock group results for editing." |
-| Revert confirmation button | "Revert" |
+| Revert confirmation button | "Revert Advancement" |
 | Revert blocked tooltip | "Cannot revert — knockout match results exist." |
 | Revert available notice | "Undo advancement to edit group results." |
 | Config field — main bracket | "Players advancing to main bracket (Top N)" |
