@@ -2,6 +2,19 @@
 
 Auto-generated from all feature plans. Last updated: 2026-01-14
 
+## Context7 — Live Documentation Fetching
+
+When researching or planning frontend/UI tasks, use the Context7 MCP tools (`mcp__context7__resolve_library_id` then `mcp__context7__get_library_docs`) to fetch current documentation for the project's key libraries:
+- **react-bootstrap** — UI component library (primary)
+- **@tanstack/react-table** — Data table component
+- **react-i18next** / **i18next** — Internationalization
+- **react-datepicker** — Date input component
+- **swr** — Client-side data fetching/caching
+- **prisma** — ORM (backend)
+- **joi** — Request validation (backend)
+
+This ensures plans reference accurate, version-specific APIs rather than stale training data.
+
 ## Active Technologies
 - Node.js 20+ (ES Modules) (002-category-system)
 - SQLite via Prisma ORM (development/production-ready) (002-category-system)
