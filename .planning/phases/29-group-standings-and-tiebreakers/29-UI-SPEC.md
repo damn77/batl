@@ -42,6 +42,7 @@ Declared values (pulled from `frontend/src/app.css` `:root` tokens):
 | xl | 24px (`--spacing-xl: 1.5rem`) | Section breaks between group stage and knockout phase |
 
 Exceptions:
+- `--spacing-md: 12px` — inherited App.css token from Phase 1 design system; pre-existing project constant not introduced by this phase.
 - Match row tap targets: minimum 44px height (from `app.css` global mobile rule)
 - Resolve-tie button touch target: minimum 44px height on mobile (same rule applies)
 - Tiebreaker tooltip trigger area: no minimum — tooltip is supplementary, not primary action
@@ -84,6 +85,8 @@ Bootstrap 5.3 semantic color tokens; no hex overrides for this phase.
 Accent reserved for:
 - "Resolve Tie" primary action button (the only organizer CTA that unblocks advancement)
 - Active tiebreaker criterion badge on position cells (draws attention to why the rank exists)
+
+**Primary focal point:** The tie alert banner (`Alert variant="warning"`) above the affected group's standings rows. This is the first element that draws organizer attention when manual intervention is required.
 
 **Source:** `app.css` `--color-surface`, `--color-border`. Bootstrap semantic variants used consistently throughout existing group components.
 
@@ -161,7 +164,7 @@ Triggered by "Resolve tie" button. Shows a compact modal with dropdown selectors
 - Validation: All positions must have a unique selection before "Save" is enabled
 
 **Footer:**
-- "Cancel" (variant="outline-secondary") — closes modal, no change
+- "Keep Standings" (variant="outline-secondary") — closes modal, no change
 - "Save Resolution" (variant="primary") — posts override to API, closes modal
 
 **Mobile:** Modal uses `fullscreen="sm-down"` for usability at 375px — consistent with `MatchResultModal` pattern.
@@ -194,7 +197,7 @@ Triggered by "Resolve tie" button. Shows a compact modal with dropdown selectors
 | Tie banner body | "All tiebreaker criteria exhausted." |
 | Manual resolution modal title | "Resolve Tie — Group [name]" |
 | Manual resolution save button | "Save Resolution" |
-| Manual resolution cancel | "Cancel" |
+| Manual resolution cancel | "Keep Standings" |
 | Stale override warning | "Match result changed. Manual tie resolution for this group may be outdated." |
 | Stale dismiss action | "Dismiss" |
 | Stale re-resolve action | "Re-resolve" |
@@ -206,7 +209,7 @@ Triggered by "Resolve tie" button. Shows a compact modal with dropdown selectors
 | Position badge text | "H2H", "Set diff", "Game diff", "Fewest games", "Manual" |
 | Table column legend | "P = Played, W = Wins, L = Losses, S +/- = Set differential, G +/- = Game differential" |
 
-Destructive actions: **none** in this phase. Manual resolution is additive/override, not destructive. No confirmation required beyond the modal's own Save/Cancel.
+Destructive actions: **none** in this phase. Manual resolution is additive/override, not destructive. No confirmation required beyond the modal's own Save/Keep Standings.
 
 ---
 
