@@ -84,7 +84,7 @@ See `.planning/milestones/v1.4-ROADMAP.md` for full phase details.
 
 **Milestone Goal:** Implement group stage tournaments (round-robin) and combined format (groups → knockout brackets) with configurable advancement rules, group formation via seeded snake draft, standings with multi-level tiebreakers, and full singles/doubles support.
 
-- [ ] **Phase 27: Group Formation** — Schema migration, snake draft seeding, round-robin schedule generation, group draw UI
+- [x] **Phase 27: Group Formation** — Schema migration, snake draft seeding, round-robin schedule generation, group draw UI (completed 2026-03-17)
 - [ ] **Phase 28: Group Match Play and Visualization** — Group result entry, lifecycle guards, group standings display on tournament page
 - [ ] **Phase 29: Group Standings and Tiebreakers** — 6-level tiebreaker chain, cyclic lock detection, manual resolution, head-to-head display
 - [ ] **Phase 30: Combined Format Advancement** — Group-to-knockout advancement, spillover selection, advancement config UI, bracket generation from groups
@@ -192,7 +192,7 @@ Plans:
 | 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
 | 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
-| 27. Group Formation | 2/3 | In Progress|  | - |
+| 27. Group Formation | 3/3 | Complete   | 2026-03-17 | - |
 | 28. Group Match Play and Visualization | v1.5 | 0/TBD | Not started | - |
 | 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
