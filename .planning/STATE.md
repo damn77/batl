@@ -101,6 +101,7 @@ None.
 | 7 | Fix tournament page organizer registration panel (filter dropdown + soft-reload) | 2026-03-15 | 3c70bee | [7-fix-tournament-page-organizer-registrati](./quick/7-fix-tournament-page-organizer-registrati/) |
 | 8 | Fix Draw Generation player count not updating on registration changes | 2026-03-15 | abc4b6e | [8-fix-draw-generation-player-count-not-upd](./quick/8-fix-draw-generation-player-count-not-upd/) |
 | 9 | Fix login always failing on first attempt after server start | 2026-03-15 | 665c2d0 | [9-fix-login-always-failing-on-first-attemp](./quick/9-fix-login-always-failing-on-first-attemp/) |
+| s51 | Add format column to tournament list (desktop table + mobile badge) | 2026-03-17 | f23b145 | [260317-s51-add-format-type-to-the-tournament-list-a](./quick/260317-s51-add-format-type-to-the-tournament-list-a/) |
 
 ## Session Continuity
 
