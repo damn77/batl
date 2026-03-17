@@ -81,13 +81,13 @@ A complete tournament runs from registration to final standings without the orga
 
 ### Active
 
-(No active milestone — run `/gsd:new-milestone` to start next)
+<!-- v1.5: Group & Combined Tournaments -->
 
-### Future (v1.5+)
+(Defined in REQUIREMENTS.md — see milestone requirements)
 
-- Group stage visualization and result entry (round-robin matches)
+### Future (v1.6+)
+
 - Swiss system pairing and result tracking
-- Combined format: group stage → knockout bracket with automatic advancement
 - MATCH_1 / UNTIL_PLACEMENT guarantee levels
 - Player statistics: win/loss record per category per season, head-to-head view
 - Organizer dashboard with active tournaments, pending result confirmations
@@ -160,9 +160,22 @@ A complete tournament runs from registration to final standings without the orga
 | inputMode="numeric" over type="number" for score inputs | iOS shows integer-only keypad without spinner buttons | ✓ Good — mobile-specific UX improvement |
 | PlayerProfilePage merged into PlayerPublicProfilePage | Dead file found during audit — responsive changes applied to wrong file, caught by integration checker | ⚠️ Revisit — gap closure phase 26 fixed it |
 
+## Current Milestone: v1.5 Group & Combined Tournaments
+
+**Goal:** Implement group stage tournaments (round-robin) and combined format (groups → knockout brackets) with configurable advancement rules, group formation via seeded snake draft, and full singles/doubles support.
+
+**Target features:**
+- Group stage: round-robin matches within groups, result entry, standings with multi-level tiebreakers
+- Group formation: configurable seeded rounds (snake draft by ranking) + random fill, balanced group validation
+- Group visualization: standings tables, match grids, result entry (extending existing UX patterns)
+- Combined format: groups feeding into one or more knockout brackets with position-based advancement
+- Advancement configuration UI: organizer defines which group positions go to which knockout bracket, including "best of N" logic for odd-group spillover
+- Points: group placement points for non-advancing players, knockout points supersede for advancing players
+- Singles/doubles: all group and combined functionality works for both players and pairs
+
 ## Current State
 
-v1.4 shipped. All 5 milestones complete (v1.0–v1.4). 26 phases across 5 milestones. Full tournament lifecycle operational with mobile-first UI. All pages usable at 375px viewport.
+v1.4 shipped. All 5 milestones complete (v1.0–v1.4). 26 phases across 5 milestones. Full tournament lifecycle operational with mobile-first UI. v1.5 milestone started — group and combined tournaments.
 
 ---
-*Last updated: 2026-03-15 after v1.4 milestone*
+*Last updated: 2026-03-15 after v1.5 milestone start*

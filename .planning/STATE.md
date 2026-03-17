@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: UI Rework & Mobile Design
+milestone: v1.5
+milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Completed 26-01-PLAN.md
-last_updated: "2026-03-15T12:23:25.624Z"
-last_activity: 2026-03-15 - Completed quick task 9: Fix login always failing on first attempt after server start
+stopped_at: null
+last_updated: "2026-03-15"
+last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 11
-  completed_plans: 11
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-06)
+See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** v1.4 UI Rework & Mobile Design — Phase 20 (Mobile Dev Tooling)
+**Current focus:** v1.5 Group & Combined Tournaments — Phase 27 (Group Formation)
 
 ## Current Position
 
-Phase: 20 of 25 (Mobile Dev Tooling)
+Phase: 27 of 31 (Group Formation)
 Plan: — (not yet planned)
 Status: Ready to plan
-Last activity: 2026-03-15 - Completed quick task 9: Fix login always failing on first attempt
+Last activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,61 +46,12 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
-| Phase 20-mobile-dev-tooling P01 | 30min | 3 tasks | 4 files |
-| Phase 21-navigation-fix P01 | 2min | 1 tasks | 4 files |
-| Phase 21-navigation-fix P01 | 45min | 2 tasks | 5 files |
-| Phase 22-tournament-view-layout P01 | 3min | 2 tasks | 3 files |
-| Phase 22-tournament-view-layout P02 | multi-session | 2 tasks | 1 files |
-| Phase 23 P01 | 3min | 1 tasks | 1 files |
-| Phase 23 P02 | 2min | 2 tasks | 4 files |
-| Phase 24 P01 | 1min | 2 tasks | 2 files |
-| Phase 25-app-wide-responsive-pass P01 | 8min | 2 tasks | 2 files |
-| Phase 25-app-wide-responsive-pass P02 | 5min | 2 tasks | 3 files |
-| Phase 25-app-wide-responsive-pass P03 | 10min | 3 tasks | 5 files |
-| Phase 26-player-profile-mobile-fix P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
 ### Decisions
 
-All v1.3 decisions archived to PROJECT.md Key Decisions table.
-
-Key architectural context for v1.4:
-- Frontend-only milestone — no backend API changes, Express/Prisma untouched
-- Primary stack additions: vite-plugin-qrcode (dev dep only), no production library changes in v1.4 core
-- react-zoom-pan-pinch deferred to v1.4.x pending real-device validation of +/- button UX
-- NavBar fix: replace data-bs-toggle plain nav with React Bootstrap Navbar.Offcanvas (collapseOnSelect)
-- Tournament view restructure: buildSectionOrder(status, role) function, Accordion for collapsible secondary sections
-- Bracket touch fix: imperative addEventListener({passive: false}) on DOM node — React registers touch as passive by default
-- Score entry fix: type="text" inputMode="numeric" on score fields (type="number" shows decimal keypad on iOS)
-- Phase ordering rationale: tooling → nav → layout → bracket/score → organizer → responsive sweep
-- [Phase 20]: vite-plugin-qrcode added unconditionally to plugins; --host CLI flag drives QR activation, not server.host config
-- [Phase 20-mobile-dev-tooling]: VITE_API_URL commented out in .env.development so Vite proxy handles /api requests from mobile devices — mobile cannot resolve localhost to dev machine
-- [Phase 20-mobile-dev-tooling]: vite-plugin-qrcode added unconditionally; --host CLI flag in dev:mobile script activates network binding and QR output without affecting regular dev script
-- [Phase 21-navigation-fix]: Accordion placed as sibling to Nav so Accordion.Header clicks don't trigger collapseOnSelect and close the drawer
-- [Phase 21-navigation-fix]: Desktop ADMIN links rendered in a separate d-none d-lg-flex Nav; Accordion only shows on mobile (d-lg-none)
-- [Phase 21-navigation-fix]: Desktop controls moved outside Navbar.Offcanvas into container-fluid d-none d-lg-flex to fix desktop layout regression
-- [Phase 21-navigation-fix]: LanguageSwitcher: drop=down + position:absolute to prevent dropdown clipping inside Offcanvas overflow context
-- [Phase 21-navigation-fix]: CORS whitelist extended with 192.168.x.x LAN IP pattern for mobile dev testing (development only)
-- [Phase 22-01]: TournamentInfoPanel renders Accordion.Item children (not a full Accordion) — parent TournamentViewPage owns the Accordion wrapper
-- [Phase 22-01]: COMPLETED status section order puts points/players first so rankings are prominent after tournament ends
-- [Phase 22-01]: alwaysExpanded prop on FormatVisualization enables hero bracket rendering without toggle header or Collapse wrapper
-- [Phase 22-02]: Organizer & Registration accordion collapsed by default for ALL statuses — avoids visual noise on first load, user-verified at checkpoint
-- [Phase 22-02]: renderSection switch pattern maps string section keys to Accordion.Items; TournamentInfoPanel fragment renders both location-schedule and organizer-registration items, skip key deduplication via null return
-- [Phase 23]: CSS-only 44px tap targets at 576px breakpoint; horizontal row layout for bracket controls on mobile
-- [Phase 23]: type=text inputMode=numeric pattern=[0-9]* for iOS integer-only keypad on score inputs
-- [Phase 23]: position: sticky on modal footer for iOS keyboard visibility, fullscreen=sm-down for mobile modal
-- [Phase 24]: Dual rendering (desktop radios + mobile ButtonGroup) via Bootstrap display utilities for responsive mode toggle
-- [Phase 25-01]: app.css imported after index.css in main.jsx so it wins the cascade without needing !important
-- [Phase 25-01]: Bootstrap CSS variable overrides in :root override card density app-wide without touching Bootstrap source
-- [Phase 25-02]: TanStack columnVisibility state (not CSS) hides tournamentCount on mobile; useMemo on columns with [t] dependency prevents table reinitialization
-- [Phase 25-02]: Dual-render pattern: d-none d-sm-block table + d-sm-none card list for public list pages on mobile
-- [Phase 25-02]: CategoryRankingsPage year selector uses className=w-auto with flex-wrap gap-2 container to prevent overflow at 375px
-- [Phase 25-03]: Accordion for tournament history (collapsed by default) reduces visual height on mobile
-- [Phase 25-03]: d-none d-sm-block / d-sm-none dual render pattern for table/card switching — pure Bootstrap
-- [Phase 25-03]: fullscreen=sm-down on large modals — forms are unusable on 375px without it
-- [Phase 25-03]: Dashboards rewritten as quick-link grids — prototype content removed entirely
-- [Phase 26-player-profile-mobile-fix]: Applied mobile fixes to PlayerPublicProfilePage (live /players/:id route), not PlayerProfilePage (dead file) — closes RESP-06 gap from phase 25-03 misdirect
+All v1.4 decisions archived to PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
@@ -108,9 +59,7 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 23]: Pinch-to-zoom decision gate — verify +/- button UX on real device before committing to react-zoom-pan-pinch
-- [Phase 23]: BYE row vertical whitespace on mobile — visibility:hidden wastes space; display:none may break connector lines
-- [Phase 24]: Manual draw mobile UX extent unknown — searchable select may suffice OR bottom-sheet picker needed (HIGH effort path)
+None.
 
 ### Quick Tasks Completed
 
@@ -124,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15T13:00:00Z
-Stopped at: Completed quick-9
+Last session: 2026-03-15
+Stopped at: null
 Resume file: None
