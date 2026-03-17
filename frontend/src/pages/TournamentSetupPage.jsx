@@ -269,6 +269,11 @@ const TournamentSetupPage = () => {
     }
   };
 
+  const formatLabel = (formatType) => {
+    const key = formatType?.toLowerCase();
+    return key ? t(`tournament.formats.${key}`) : '-';
+  };
+
   const isPastDate = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -396,6 +401,7 @@ const TournamentSetupPage = () => {
                     <tr>
                       <th>{t('table.headers.name')}</th>
                       <th>{t('table.headers.category')}</th>
+                      <th>{t('table.headers.format')}</th>
                       <th>{t('table.headers.location')}</th>
                       <th>{t('table.headers.dates')}</th>
                       <th>{t('table.headers.players')}</th>
@@ -415,6 +421,7 @@ const TournamentSetupPage = () => {
                           </Link>
                         </td>
                         <td>{tournament.category?.name}</td>
+                        <td>{formatLabel(tournament.formatType)}</td>
                         <td>
                           <div>{tournament.clubName || '-'}</div>
                           {tournament.address && <small className="text-muted">{tournament.address}</small>}
@@ -489,7 +496,7 @@ const TournamentSetupPage = () => {
                             {tournament.name}
                           </Link>
                           <div className="small text-muted">
-                            {tournament.category?.name} &middot; {formatDate(tournament.startDate)}
+                            {tournament.category?.name} &middot; {formatLabel(tournament.formatType)} &middot; {formatDate(tournament.startDate)}
                           </div>
                         </div>
                         <div className="d-flex align-items-center gap-2">
