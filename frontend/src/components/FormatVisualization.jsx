@@ -9,6 +9,7 @@ import SwissRoundPairings from './SwissRoundPairings';
 import CombinedFormatDisplay from './CombinedFormatDisplay';
 import ExpandableSection from './ExpandableSection';
 import BracketGenerationSection from './BracketGenerationSection';
+import GroupDrawGenerationSection from './GroupDrawGenerationSection';
 
 /**
  * FormatVisualization - Main wrapper that selects correct visualization based on formatType
@@ -76,23 +77,39 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
         <>
           {formatType === 'GROUP' && (
             <div className="d-flex flex-column gap-4">
-              {structure.groups?.map(group => (
-                <ExpandableSection
-                  key={group.id}
-                  title={group.name || `Group ${group.groupNumber}`}
-                  badge={<span className="badge bg-secondary">{t('components.formatVisualization.playersCount', { count: group.players?.length || 0 })}</span>}
-                  defaultExpanded={false}
-                >
-                  <GroupStandingsTable
-                    tournamentId={tournament.id}
-                    group={group}
-                  />
-                </ExpandableSection>
-              ))}
-              {(!structure.groups || structure.groups.length === 0) && (
-                <Alert variant="info">
-                  {t('components.formatVisualization.emptyStates.noGroups')}
-                </Alert>
+              {isOrganizerOrAdmin && (tournament.status === 'SCHEDULED' || (tournament.status === 'IN_PROGRESS' && !(structure?.groups?.length > 0))) ? (
+                /* Organizer/Admin SCHEDULED or IN_PROGRESS-without-groups: full draw workflow */
+                <GroupDrawGenerationSection
+                  tournament={tournament}
+                  mutateTournament={mutateTournament}
+                  mutateFormatStructure={mutateFormatStructure}
+                  mutateMatches={mutateMatches}
+                  structure={structure}
+                  matches={matches}
+                  registrationVersion={registrationVersion}
+                />
+              ) : (
+                /* Everyone else (or organizer for IN_PROGRESS/COMPLETED with groups): group standings view */
+                <>
+                  {structure.groups?.map(group => (
+                    <ExpandableSection
+                      key={group.id}
+                      title={group.name || `Group ${group.groupNumber}`}
+                      badge={<span className="badge bg-secondary">{t('components.formatVisualization.playersCount', { count: group.players?.length || 0 })}</span>}
+                      defaultExpanded={false}
+                    >
+                      <GroupStandingsTable
+                        tournamentId={tournament.id}
+                        group={group}
+                      />
+                    </ExpandableSection>
+                  ))}
+                  {(!structure.groups || structure.groups.length === 0) && (
+                    <Alert variant="info">
+                      {t('components.formatVisualization.emptyStates.noGroups')}
+                    </Alert>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -185,12 +202,47 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
           )}
 
           {formatType === 'COMBINED' && (
-            <CombinedFormatDisplay
-              tournamentId={tournament.id}
-              groups={structure.groups || []}
-              brackets={structure.brackets || []}
-              rounds={structure.rounds || []}
-            />
+            <div className="d-flex flex-column gap-4">
+              {isOrganizerOrAdmin && tournament.status === 'SCHEDULED' && !(structure?.groups?.length > 0) ? (
+                /* Organizer SCHEDULED without groups: group draw generation first */
+                <GroupDrawGenerationSection
+                  tournament={tournament}
+                  mutateTournament={mutateTournament}
+                  mutateFormatStructure={mutateFormatStructure}
+                  mutateMatches={mutateMatches}
+                  structure={structure}
+                  matches={matches}
+                  registrationVersion={registrationVersion}
+                />
+              ) : isOrganizerOrAdmin && tournament.status === 'SCHEDULED' && structure?.groups?.length > 0 ? (
+                /* Organizer SCHEDULED with groups generated: draw section (swap/regenerate) + combined view */
+                <>
+                  <GroupDrawGenerationSection
+                    tournament={tournament}
+                    mutateTournament={mutateTournament}
+                    mutateFormatStructure={mutateFormatStructure}
+                    mutateMatches={mutateMatches}
+                    structure={structure}
+                    matches={matches}
+                    registrationVersion={registrationVersion}
+                  />
+                  <CombinedFormatDisplay
+                    tournamentId={tournament.id}
+                    groups={structure.groups || []}
+                    brackets={structure.brackets || []}
+                    rounds={structure.rounds || []}
+                  />
+                </>
+              ) : (
+                /* Everyone else: combined format display */
+                <CombinedFormatDisplay
+                  tournamentId={tournament.id}
+                  groups={structure.groups || []}
+                  brackets={structure.brackets || []}
+                  rounds={structure.rounds || []}
+                />
+              )}
+            </div>
           )}
 
           {!['GROUP', 'KNOCKOUT', 'SWISS', 'COMBINED'].includes(formatType) && (
