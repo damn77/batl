@@ -1,34 +1,75 @@
 // T075-T077: Group Standings Table Component - Displays group standings and matches
+// Plan 28-02: Extended with differential columns, clickable match rows, doubles support,
+// status-based match visibility, and mobile responsive column hiding.
 import { useState, useMemo } from 'react';
 import { Table, Alert, Spinner } from 'react-bootstrap';
 import { useMatches } from '../services/tournamentViewService';
+import MatchResultModal from './MatchResultModal';
 import MatchResultDisplay from './MatchResultDisplay';
 
 /**
- * GroupStandingsTable - Displays group standings with wins/losses/points and matches
- * T076: Implements standings calculation (wins, losses, points, head-to-head sorting)
- * T077: Displays matches within group
+ * GroupStandingsTable - Displays group standings with wins/losses/points/differentials and matches
  *
  * @param {string} tournamentId - Tournament UUID
- * @param {Object} group - Group object with id, name, and players
+ * @param {Object} group - Group object with id, name, groupNumber, players, pairs
+ * @param {boolean} isOrganizer - Whether current user is organizer/admin
+ * @param {string|null} currentUserPlayerId - Current user's player profile ID (for participant check)
+ * @param {Object|null} scoringRules - { formatType, winningSets, winningTiebreaks }
+ * @param {string} tournamentStatus - Tournament status string (IN_PROGRESS, COMPLETED, etc.)
  */
-const GroupStandingsTable = ({ tournamentId, group }) => {
-  const [showMatches, setShowMatches] = useState(false);
-
-  // T088-T089: Lazy load matches only when needed
-  const { matches, isLoading, isError } = useMatches(
+const GroupStandingsTable = ({
+  tournamentId,
+  group,
+  isOrganizer = false,
+  currentUserPlayerId = null,
+  scoringRules = null,
+  tournamentStatus = 'SCHEDULED'
+}) => {
+  // Always fetch matches (no toggle gate on fetch)
+  const { matches, isLoading, isError, mutate: mutateMatches } = useMatches(
     tournamentId,
     { groupId: group.id },
-    showMatches
+    true // always fetch
   );
 
-  // T076: Calculate standings from matches
+  // MatchResultModal state
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
+  // Match rows visibility: expanded for IN_PROGRESS, collapsed for COMPLETED
+  // Per CONTEXT.md locked decision: "Matches section defaults to expanded when tournament is IN_PROGRESS;
+  // collapsed for completed tournaments."
+  const [showMatches, setShowMatches] = useState(tournamentStatus === 'IN_PROGRESS');
+
+  // Client-side participant check helper
+  function isMatchParticipant(match, playerId) {
+    if (!playerId) return false;
+    if (match.player1?.id === playerId || match.player2?.id === playerId) return true;
+    const members = [
+      match.pair1?.player1?.id, match.pair1?.player2?.id,
+      match.pair2?.player1?.id, match.pair2?.player2?.id
+    ];
+    return members.includes(playerId);
+  }
+
+  // Doubles detection and entity list
+  const isDoubles = (group.pairs?.length > 0);
+  const entities = isDoubles
+    ? (group.pairs || []).map(pair => ({
+        id: pair.id,
+        name: `${pair.player1?.name || '?'} / ${pair.player2?.name || '?'}`
+      }))
+    : (group.players || []).map(player => ({
+        id: player.id,
+        name: player.name
+      }));
+
+  // Calculate standings from matches
   const standings = useMemo(() => {
     if (!matches || matches.length === 0) {
-      // No matches yet - return players with zero stats
-      return (group.players || []).map((player, index) => ({
+      // No matches yet - return entities with zero stats
+      return entities.map((entity, index) => ({
         position: index + 1,
-        player,
+        entity,
         played: 0,
         wins: 0,
         losses: 0,
@@ -36,15 +77,17 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
         setsLost: 0,
         gamesWon: 0,
         gamesLost: 0,
+        setDiff: 0,
+        gameDiff: 0,
         points: 0
       }));
     }
 
-    // Initialize player stats
-    const playerStats = new Map();
-    (group.players || []).forEach(player => {
-      playerStats.set(player.id, {
-        player,
+    // Initialize entity stats map
+    const entityStats = new Map();
+    entities.forEach(entity => {
+      entityStats.set(entity.id, {
+        entity,
         played: 0,
         wins: 0,
         losses: 0,
@@ -60,14 +103,15 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
     matches.forEach(match => {
       if (match.status !== 'COMPLETED' || !match.matchResult) return;
 
-      const player1Id = match.player1?.id;
-      const player2Id = match.player2?.id;
+      // Support both singles (player1/player2) and doubles (pair1/pair2)
+      const id1 = isDoubles ? match.pair1?.id : match.player1?.id;
+      const id2 = isDoubles ? match.pair2?.id : match.player2?.id;
       const result = match.matchResult;
 
-      if (!player1Id || !player2Id) return;
+      if (!id1 || !id2) return;
 
-      const stats1 = playerStats.get(player1Id);
-      const stats2 = playerStats.get(player2Id);
+      const stats1 = entityStats.get(id1);
+      const stats2 = entityStats.get(id2);
 
       if (!stats1 || !stats2) return;
 
@@ -98,7 +142,7 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
       stats2.gamesWon += games2;
       stats2.gamesLost += games1;
 
-      // Determine winner and update wins/losses
+      // Determine winner and update wins/losses/points
       if (result.winner === 'PLAYER1') {
         stats1.wins++;
         stats1.points += 2; // 2 points for win
@@ -115,18 +159,20 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
     });
 
     // Convert to array and sort
-    const standingsArray = Array.from(playerStats.values());
+    const standingsArray = Array.from(entityStats.values());
 
-    // Sort by: 1) Points, 2) Wins, 3) Head-to-head (TODO), 4) Set difference, 5) Game difference
+    // Calculate differential columns
+    standingsArray.forEach(stats => {
+      stats.setDiff = stats.setsWon - stats.setsLost;
+      stats.gameDiff = stats.gamesWon - stats.gamesLost;
+    });
+
+    // Sort by: 1) Points, 2) Wins, 3) Set difference, 4) Game difference
     standingsArray.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       if (b.wins !== a.wins) return b.wins - a.wins;
-      const aSetDiff = a.setsWon - a.setsLost;
-      const bSetDiff = b.setsWon - b.setsLost;
-      if (bSetDiff !== aSetDiff) return bSetDiff - aSetDiff;
-      const aGameDiff = a.gamesWon - a.gamesLost;
-      const bGameDiff = b.gamesWon - b.gamesLost;
-      return bGameDiff - aGameDiff;
+      if (b.setDiff !== a.setDiff) return b.setDiff - a.setDiff;
+      return b.gameDiff - a.gameDiff;
     });
 
     // Add position
@@ -135,54 +181,39 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
     });
 
     return standingsArray;
-  }, [matches, group.players]);
+  }, [matches, entities, isDoubles]);
 
   return (
     <div>
-      <h5 className="mb-3">{group.name || `Group ${group.groupNumber}`}</h5>
-
       {/* Standings Table */}
-      <div className="table-responsive mb-4">
+      <div className="table-responsive mb-3">
         <Table striped hover size="sm">
           <thead className="table-light">
             <tr>
-              <th style={{ width: '50px' }}>#</th>
+              <th style={{ width: '40px' }}>#</th>
               <th>Player</th>
               <th className="text-center">P</th>
               <th className="text-center">W</th>
               <th className="text-center">L</th>
-              <th className="text-center">Sets</th>
-              <th className="text-center">Games</th>
+              <th className="text-center d-none d-sm-table-cell">Sets W-L</th>
+              <th className="text-center">S +/-</th>
+              <th className="text-center d-none d-sm-table-cell">Games W-L</th>
+              <th className="text-center">G +/-</th>
               <th className="text-center">Pts</th>
             </tr>
           </thead>
           <tbody>
             {standings.map((stats) => (
-              <tr key={stats.player.id}>
+              <tr key={stats.entity.id}>
                 <td className="fw-bold">{stats.position}</td>
-                <td>
-                  <strong>{stats.player.name}</strong>
-                  {stats.position === 1 && <span className="ms-2">🥇</span>}
-                  {stats.position === 2 && <span className="ms-2">🥈</span>}
-                  {stats.position === 3 && <span className="ms-2">🥉</span>}
-                </td>
+                <td><strong>{stats.entity.name}</strong></td>
                 <td className="text-center">{stats.played}</td>
                 <td className="text-center">{stats.wins}</td>
                 <td className="text-center">{stats.losses}</td>
-                <td className="text-center">
-                  {stats.setsWon}-{stats.setsLost}
-                  <small className="text-muted ms-1">
-                    ({stats.setsWon - stats.setsLost > 0 ? '+' : ''}
-                    {stats.setsWon - stats.setsLost})
-                  </small>
-                </td>
-                <td className="text-center">
-                  {stats.gamesWon}-{stats.gamesLost}
-                  <small className="text-muted ms-1">
-                    ({stats.gamesWon - stats.gamesLost > 0 ? '+' : ''}
-                    {stats.gamesWon - stats.gamesLost})
-                  </small>
-                </td>
+                <td className="text-center d-none d-sm-table-cell">{stats.setsWon}-{stats.setsLost}</td>
+                <td className="text-center">{stats.setDiff > 0 ? '+' : ''}{stats.setDiff}</td>
+                <td className="text-center d-none d-sm-table-cell">{stats.gamesWon}-{stats.gamesLost}</td>
+                <td className="text-center">{stats.gameDiff > 0 ? '+' : ''}{stats.gameDiff}</td>
                 <td className="text-center fw-bold">{stats.points}</td>
               </tr>
             ))}
@@ -193,46 +224,73 @@ const GroupStandingsTable = ({ tournamentId, group }) => {
         </small>
       </div>
 
-      {/* T077: Matches Section */}
-      <div className="mt-4">
-        <button
-          className="btn btn-outline-secondary btn-sm mb-3"
-          onClick={() => setShowMatches(!showMatches)}
-        >
-          {showMatches ? '▼' : '▶'} {showMatches ? 'Hide' : 'Show'} Matches
-        </button>
+      {/* Matches Section */}
+      <div className="mt-3">
+        {matches && matches.length > 0 && (
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <small className="text-muted fw-bold">
+              Matches ({matches.filter(m => m.status === 'COMPLETED').length}/{matches.length})
+            </small>
+            <button
+              className="btn btn-link btn-sm p-0 text-decoration-none"
+              onClick={() => setShowMatches(prev => !prev)}
+            >
+              <small>{showMatches ? 'Hide' : 'Show'}</small>
+            </button>
+          </div>
+        )}
 
-        {showMatches && (
-          <>
-            {isLoading && (
-              <div className="text-center py-3">
-                <Spinner animation="border" size="sm" />
-                <p className="text-muted small mt-2">Loading matches...</p>
-              </div>
-            )}
-
-            {isError && (
-              <Alert variant="danger">
-                Failed to load matches. Please try again.
-              </Alert>
-            )}
-
-            {matches && matches.length > 0 && (
-              <div className="d-flex flex-column gap-2">
-                {matches.map((match) => (
-                  <MatchResultDisplay key={match.id} match={match} />
-                ))}
-              </div>
-            )}
-
-            {matches && matches.length === 0 && (
-              <Alert variant="info">
-                No matches scheduled yet for this group.
-              </Alert>
-            )}
-          </>
+        {isLoading && (
+          <div className="text-center py-3">
+            <Spinner animation="border" size="sm" />
+            <p className="text-muted small mt-2">Loading matches...</p>
+          </div>
+        )}
+        {isError && (
+          <Alert variant="danger">Failed to load matches. Please try again.</Alert>
+        )}
+        {showMatches && matches && matches.length > 0 && (
+          <div className="d-flex flex-column gap-1">
+            {matches.map(match => {
+              const isDoublesMatch = !!(match.pair1 || match.pair2);
+              const p1Name = isDoublesMatch
+                ? `${match.pair1?.player1?.name || '?'} / ${match.pair1?.player2?.name || '?'}`
+                : (match.player1?.name || 'TBD');
+              const p2Name = isDoublesMatch
+                ? `${match.pair2?.player1?.name || '?'} / ${match.pair2?.player2?.name || '?'}`
+                : (match.player2?.name || 'TBD');
+              return (
+                <div
+                  key={match.id}
+                  onClick={() => setSelectedMatch(match)}
+                  style={{ cursor: 'pointer', minHeight: '44px' }}
+                  className="d-flex align-items-center gap-2 px-2 py-1 rounded border-bottom"
+                >
+                  <MatchResultDisplay match={match} compact />
+                  {match.status === 'SCHEDULED' && (
+                    <span className="small">{p1Name} vs {p2Name}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {matches && matches.length === 0 && (
+          <Alert variant="info">No matches scheduled yet for this group.</Alert>
         )}
       </div>
+
+      {/* MatchResultModal — opens when a match row is tapped */}
+      {selectedMatch && (
+        <MatchResultModal
+          match={selectedMatch}
+          onClose={() => setSelectedMatch(null)}
+          isOrganizer={isOrganizer}
+          isParticipant={isMatchParticipant(selectedMatch, currentUserPlayerId)}
+          scoringRules={scoringRules}
+          mutate={mutateMatches}
+        />
+      )}
     </div>
   );
 };
