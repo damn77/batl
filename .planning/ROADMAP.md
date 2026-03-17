@@ -102,7 +102,11 @@ See `.planning/milestones/v1.4-ROADMAP.md` for full phase details.
   3. After generating, each group has correct snake-draft player distribution and complete round-robin fixture list
   4. Doubles tournament generates group assignments using pairs with no FK errors
   5. Organizer can manually override player-to-group assignments and regenerate the draw
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 27-01-PLAN.md — Schema migration + groupPersistenceService (snake draft, circle method, atomic generation)
+- [ ] 27-02-PLAN.md — API layer (controller, routes, validators) + integration tests + swap endpoint
+- [ ] 27-03-PLAN.md — Frontend GroupDrawGenerationSection + FormatVisualization wiring
 
 ### Phase 28: Group Match Play and Visualization
 **Goal**: Players enter group match results and the tournament page shows groups with fixtures and standings
@@ -188,7 +192,7 @@ See `.planning/milestones/v1.4-ROADMAP.md` for full phase details.
 | 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
 | 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
-| 27. Group Formation | v1.5 | 0/TBD | Not started | - |
+| 27. Group Formation | v1.5 | 0/3 | Not started | - |
 | 28. Group Match Play and Visualization | v1.5 | 0/TBD | Not started | - |
 | 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
