@@ -117,15 +117,17 @@ describe('fillUnseeded', () => {
   });
 
   test('different seeds produce different results (probabilistic)', () => {
-    const groups1 = makeGroups([0, 0, 0]);
-    const groups2 = makeGroups([0, 0, 0]);
-    fillUnseeded(groups1, [...unseededPlayers], 'seed-aaa');
-    fillUnseeded(groups2, [...unseededPlayers], 'seed-zzz');
+    // Use a larger array to make collision probability negligible
+    const manyPlayers = Array.from({ length: 10 }, (_, i) => ({ entityId: `u${i + 1}` }));
+    const groups1 = makeGroups([0, 0]);
+    const groups2 = makeGroups([0, 0]);
+    fillUnseeded(groups1, [...manyPlayers], 'alpha-seed-123');
+    fillUnseeded(groups2, [...manyPlayers], 'omega-seed-987');
     const result1 = groups1.map(g => g.map(p => p.entityId)).flat();
     const result2 = groups2.map(g => g.map(p => p.entityId)).flat();
-    // Both contain same elements (all 6 unseeded players)
-    expect(result1.sort()).toEqual(result2.sort());
-    // But at least one ordering differs
+    // Both contain same elements (all 10 unseeded players)
+    expect([...result1].sort()).toEqual([...result2].sort());
+    // But at least one ordering differs (10! = 3.6M arrangements — collision probability negligible)
     expect(result1).not.toEqual(result2);
   });
 
