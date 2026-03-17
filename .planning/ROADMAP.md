@@ -202,6 +202,6 @@ Plans:
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
 | 27. Group Formation | 3/3 | Complete    | 2026-03-17 | - |
 | 28. Group Match Play and Visualization | 3/3 | Complete    | 2026-03-17 | - |
-| 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
+| 29. Group Standings and Tiebreakers | 1/3 | In Progress|  | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |

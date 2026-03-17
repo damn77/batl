@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Phase 29 UI-SPEC approved
-last_updated: "2026-03-17T16:52:36.645Z"
+stopped_at: Completed 29-01-PLAN.md
+last_updated: "2026-03-17T18:47:57.481Z"
 last_activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 28 P01 | 3m | 2 tasks | 4 files |
 | Phase 28-group-match-play-and-visualization P02 | 2min | 1 tasks | 1 files |
 | Phase 28-group-match-play-and-visualization P03 | 3min | 3 tasks | 3 files |
+| Phase 29-group-standings-and-tiebreakers P01 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 28 P03]: allMatches passed as prop to CombinedFormatDisplay from FormatVisualization to avoid re-fetch
 - [Phase 28 P03]: Generate Knockout Bracket button is a no-op (window.scrollTo) with TODO for Phase 30 wiring
 - [Phase 28 P03]: MatchResultModal groupId guard skips dry-run for group matches (no bracket cascade exists)
+- [Phase 29-01]: GroupTieResolution model uses groupId @unique — one override per group; resultSnapshotAt for stale detection with strict > comparison
+- [Phase 29-01]: H2H cycle detection uses Kahn's algorithm: if all entities in subset have in-degree >= 1, it is cyclic — fall through to set diff
+- [Phase 29-01]: sortWithTiebreakers passes empty matches (no H2H); computeGroupStandings passes full matches — callers should use computeGroupStandings for H2H to work
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T16:52:36.643Z
-Stopped at: Phase 29 UI-SPEC approved
-Resume file: .planning/phases/29-group-standings-and-tiebreakers/29-UI-SPEC.md
+Last session: 2026-03-17T18:47:57.477Z
+Stopped at: Completed 29-01-PLAN.md
+Resume file: None
