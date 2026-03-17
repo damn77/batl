@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 29-02-PLAN.md
-last_updated: "2026-03-17T18:53:01.978Z"
+stopped_at: "Completed 29-03-PLAN.md (checkpoint pending: human-verify Task 3)"
+last_updated: "2026-03-17T18:57:15.618Z"
 last_activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 28-group-match-play-and-visualization P03 | 3min | 3 tasks | 3 files |
 | Phase 29-group-standings-and-tiebreakers P01 | 6min | 2 tasks | 3 files |
 | Phase 29-group-standings-and-tiebreakers P02 | 3min | 2 tasks | 5 files |
+| Phase 29-group-standings-and-tiebreakers P03 | 6min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 29-01]: sortWithTiebreakers passes empty matches (no H2H); computeGroupStandings passes full matches — callers should use computeGroupStandings for H2H to work
 - [Phase 29]: GET standings is public; POST/DELETE override require isAuthenticated+authorize('update','Tournament')
 - [Phase 29]: deleteMany used in deleteOverride to safely handle missing override record (avoids P2025)
+- [Phase 29-03]: GroupStandingsTable is now a pure renderer — client-side useMemo standings computation removed, all standings data backend-authoritative via useGroupStandings SWR hook
+- [Phase 29-03]: dedupingInterval=5000 for standings SWR hook (vs 30000 for matches) — standings change with each match result during active group play
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T18:53:01.975Z
-Stopped at: Completed 29-02-PLAN.md
+Last session: 2026-03-17T18:57:15.615Z
+Stopped at: Completed 29-03-PLAN.md (checkpoint pending: human-verify Task 3)
 Resume file: None
