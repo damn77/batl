@@ -325,6 +325,23 @@ export async function checkAndCompleteTournament(tx, tournamentId, isOrganizer) 
   });
 
   if (incompleteCount === 0) {
+    // COMBINED format guard: if no knockout bracket exists, group stage is done
+    // but tournament must stay IN_PROGRESS until knockout is generated and played
+    const tournament = await tx.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { formatType: true }
+    });
+
+    if (tournament?.formatType === 'COMBINED') {
+      const knockoutBracket = await tx.bracket.findFirst({
+        where: { tournamentId },
+        select: { id: true }
+      });
+      if (!knockoutBracket) {
+        return; // Group stage complete but knockout not yet generated -- stay IN_PROGRESS
+      }
+    }
+
     await tx.tournament.update({
       where: { id: tournamentId },
       data: {

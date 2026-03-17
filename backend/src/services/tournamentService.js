@@ -620,7 +620,7 @@ export async function getFormatStructure(id) {
       break;
 
     case 'GROUP':
-      // Fetch groups with participants
+      // Fetch groups with participants (singles and doubles support)
       result.groups = await prisma.group.findMany({
         where: { tournamentId: id },
         include: {
@@ -631,6 +631,13 @@ export async function getFormatStructure(id) {
                   id: true,
                   name: true
                 }
+              },
+              pair: {
+                select: {
+                  id: true,
+                  player1: { select: { id: true, name: true } },
+                  player2: { select: { id: true, name: true } }
+                }
               }
             },
             orderBy: { seedPosition: 'asc' }
@@ -639,10 +646,11 @@ export async function getFormatStructure(id) {
         orderBy: { groupNumber: 'asc' }
       });
 
-      // Transform groupParticipants to players array for frontend
+      // Transform groupParticipants to players/pairs arrays for frontend
       result.groups = result.groups.map(group => ({
         ...group,
-        players: group.groupParticipants?.map(gp => gp.player) || []
+        players: group.groupParticipants?.filter(gp => gp.player).map(gp => gp.player) || [],
+        pairs: group.groupParticipants?.filter(gp => gp.pair).map(gp => gp.pair) || []
       }));
       break;
 
@@ -692,7 +700,7 @@ export async function getFormatStructure(id) {
     }
 
     case 'COMBINED':
-      // Fetch groups, brackets, and rounds
+      // Fetch groups, brackets, and rounds (singles and doubles support)
       result.groups = await prisma.group.findMany({
         where: { tournamentId: id },
         include: {
@@ -703,6 +711,13 @@ export async function getFormatStructure(id) {
                   id: true,
                   name: true
                 }
+              },
+              pair: {
+                select: {
+                  id: true,
+                  player1: { select: { id: true, name: true } },
+                  player2: { select: { id: true, name: true } }
+                }
               }
             },
             orderBy: { seedPosition: 'asc' }
@@ -711,10 +726,11 @@ export async function getFormatStructure(id) {
         orderBy: { groupNumber: 'asc' }
       });
 
-      // Transform groupParticipants to players array for frontend
+      // Transform groupParticipants to players/pairs arrays for frontend
       result.groups = result.groups.map(group => ({
         ...group,
-        players: group.groupParticipants?.map(gp => gp.player) || []
+        players: group.groupParticipants?.filter(gp => gp.player).map(gp => gp.player) || [],
+        pairs: group.groupParticipants?.filter(gp => gp.pair).map(gp => gp.pair) || []
       }));
 
       result.brackets = await prisma.bracket.findMany({
