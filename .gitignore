@@ -86,6 +86,11 @@ desktop.ini
 # Claude Code temporary files/directories
 **/tmpclaude-*
 tmpclaude-*
+.claude/worktrees/
+
+# Skills installer (other runtimes - symlinks to .agents/)
+.agent/
+skills-lock.json
 
 # Mobile testing screenshots
 mobile-test-proof/
