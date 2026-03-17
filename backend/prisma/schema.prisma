@@ -442,6 +442,7 @@ model Group {
   tournament        Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   matches           Match[]
   groupParticipants GroupParticipant[]
+  tieResolution     GroupTieResolution?
 
   // Constraints
   @@unique([tournamentId, groupNumber])
@@ -560,6 +561,19 @@ model GroupParticipant {
   @@index([groupId])
   @@index([playerId])
   @@index([pairId])
+}
+
+model GroupTieResolution {
+  id               String   @id @default(uuid())
+  groupId          String   @unique // One override per group
+  positions        String   // JSON: [{ entityId: string, position: number }]
+  resultSnapshotAt DateTime // Latest match completedAt when override was saved
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
 }
 
 // Doubles Pair Management Models (006-doubles-pairs)
