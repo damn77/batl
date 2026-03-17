@@ -4,8 +4,8 @@ milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
 stopped_at: "Completed 29-03-PLAN.md (checkpoint pending: human-verify Task 3)"
-last_updated: "2026-03-17T18:57:15.618Z"
-last_activity: 2026-03-17 — Completed quick task s51: Add format type to tournament list column
+last_updated: "2026-03-17T19:38:46.522Z"
+last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 5
   completed_phases: 3
