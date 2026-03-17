@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-03-17T14:02:53.524Z"
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-03-17T14:09:02.429Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 27 P01 | 6m | 2 tasks | 4 files |
+| Phase 27 P02 | 4m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Progress: [░░░░░░░░░░] 0%
 All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 27]: Used prisma db push + migrate resolve instead of migrate dev due to migration history drift in dev environment
 - [Phase 27]: Round records created per group independently (bracketId null) — group rounds are not shared across groups
+- [Phase 27]: Used isAuthenticated+authorize(CASL) pattern for auth middleware — not requireAuth+requireRole (these don't exist in codebase)
+- [Phase 27]: swapGroupParticipants deletes all bracketId=null rounds for tournament before regenerating (safe: group rounds are isolated)
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T14:02:47.396Z
-Stopped at: Completed 27-01-PLAN.md
+Last session: 2026-03-17T14:09:02.426Z
+Stopped at: Completed 27-02-PLAN.md
 Resume file: None
