@@ -5,7 +5,7 @@ milestone_name: Group & Combined Tournaments
 status: executing
 stopped_at: "Completed 29-03-PLAN.md (checkpoint pending: human-verify Task 3)"
 last_updated: "2026-03-17T18:57:15.618Z"
-last_activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
+last_activity: 2026-03-17 — Completed quick task s51: Add format type to tournament list column
 progress:
   total_phases: 5
   completed_phases: 3
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 Phase: 28 of 31 (Group Match Play and Visualization)
 Plan: 03 complete
 Status: In progress
-Last activity: 2026-03-17 — Phase 28 Plan 03 complete (Accordion layout, CombinedFormatDisplay rewrite, dry-run skip)
+Last activity: 2026-03-17 — Completed quick task s51: Add format type to tournament list column
 
 Progress: [░░░░░░░░░░] 0%
 
