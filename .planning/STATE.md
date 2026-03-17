@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Completed 28-02-PLAN.md
+stopped_at: Completed 28-01-PLAN.md
 last_updated: "2026-03-17T15:24:54.244Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 ## Current Position
 
-Phase: 27 of 31 (Group Formation)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
+Phase: 28 of 31 (Group Match Play and Visualization)
+Plan: 01 complete
+Status: In progress
+Last activity: 2026-03-17 — Phase 28 Plan 01 complete (Wave 0 tests, COMBINED guard, doubles pairs)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 27 P01 | 6m | 2 tasks | 4 files |
 | Phase 27 P02 | 4m | 2 tasks | 6 files |
 | Phase 27 P03 | 3m | 3 tasks | 3 files |
+| Phase 28 P01 | 3m | 2 tasks | 4 files |
 | Phase 28-group-match-play-and-visualization P02 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
@@ -64,6 +65,9 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 27]: COMBINED format organizer routing: no-groups shows GroupDrawGenerationSection only; with groups shows both stacked
 - [Phase 28]: Match rows always fetched (shouldFetch=true); visibility controlled by showMatches state initialized from tournamentStatus prop
 - [Phase 28]: Entity abstraction (entities array) in GroupStandingsTable unifies singles/doubles standings calculation
+- [Phase 28 P01]: COMBINED guard queries tournament.findUnique inside incompleteCount===0 block — no extra query cost on partial completions
+- [Phase 28 P01]: bracket.findFirst (not findMany) used in COMBINED guard — only need existence check
+- [Phase 28 P01]: getFormatStructure GROUP/COMBINED emit both players[] and pairs[] — empty arrays for inapplicable type, no nullable undefined
 
 ### Pending Todos
 
