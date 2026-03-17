@@ -192,7 +192,7 @@ Plans:
 | 24. Organizer Mobile Support | v1.4 | 1/1 | Complete | 2026-03-07 |
 | 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
-| 27. Group Formation | 3/3 | Complete   | 2026-03-17 | - |
+| 27. Group Formation | 3/3 | Complete    | 2026-03-17 | - |
 | 28. Group Match Play and Visualization | v1.5 | 0/TBD | Not started | - |
 | 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |

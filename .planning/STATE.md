@@ -4,7 +4,7 @@ milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
 stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-03-17T14:14:55.227Z"
+last_updated: "2026-03-17T14:19:33.566Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
