@@ -119,7 +119,11 @@ Plans:
   4. Tournament page shows all groups with fixture list, standings table, and completion progress per group
   5. COMBINED tournament with all group matches complete stays IN_PROGRESS (not auto-COMPLETED)
   6. Group visualization is responsive at 375px viewport
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 28-01-PLAN.md — Backend lifecycle guard (COMBINED format) + getFormatStructure doubles pair include
+- [ ] 28-02-PLAN.md — GroupStandingsTable rewrite (differential columns, clickable match rows, doubles, mobile)
+- [ ] 28-03-PLAN.md — FormatVisualization Accordion wiring + CombinedFormatDisplay banner + MatchResultModal dry-run skip
 
 ### Phase 29: Group Standings and Tiebreakers
 **Goal**: Authoritative 6-level tiebreaker chain with cyclic lock detection and manual organizer resolution
@@ -193,7 +197,7 @@ Plans:
 | 25. App-Wide Responsive Pass | v1.4 | 3/3 | Complete | 2026-03-15 |
 | 26. Player Profile Mobile Fix | v1.4 | 1/1 | Complete | 2026-03-15 |
 | 27. Group Formation | 3/3 | Complete    | 2026-03-17 | - |
-| 28. Group Match Play and Visualization | v1.5 | 0/TBD | Not started | - |
+| 28. Group Match Play and Visualization | v1.5 | 0/3 | Not started | - |
 | 29. Group Standings and Tiebreakers | v1.5 | 0/TBD | Not started | - |
 | 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
