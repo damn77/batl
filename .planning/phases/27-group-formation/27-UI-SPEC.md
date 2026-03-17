@@ -52,14 +52,16 @@ Exceptions:
 
 Follows the exact patterns in `BracketGenerationSection.jsx` and `GroupStandingsTable.jsx`.
 
+Two weights only: 400 regular (body and labels) and 600 semibold (all headings and form labels).
+
 | Role | Size | Weight | Line Height | Bootstrap |
 |------|------|--------|-------------|-----------|
 | Body | 16px (browser default, 1rem) | 400 regular | 1.5 | default `<p>` |
 | Label / helper | 14px (0.875rem) | 400 regular | 1.4 | `<small>` or `className="text-muted small"` |
 | Subsection heading | 16px (1rem) | 600 semibold | 1.2 | `<h6 className="fw-semibold">` |
-| Card section heading | 20px (1.25rem) | 500 medium | 1.2 | `<h5 className="mb-0">` inside `Card.Header` |
+| Card section heading | 20px (1.25rem) | 600 semibold | 1.2 | `<h5 className="mb-0 fw-semibold">` inside `Card.Header` |
 
-No display-size typography needed for this phase. Group names use h5 card headers. Input labels use fw-semibold h6.
+No display-size typography needed for this phase. Group names use h5 card headers with `fw-semibold` applied explicitly (Bootstrap's default h5 weight of 500 is overridden). Input labels use fw-semibold h6.
 
 ---
 
@@ -84,6 +86,8 @@ Accent (primary) reserved for: Generate Group Draw button, Close Registration bu
 ## Component Inventory
 
 All components are extensions or reuses of existing project components. No new design primitives.
+
+**Primary visual anchor across all states:** the `size="lg"` `variant="primary"` action button — the only element styled with accent color — serves as the focal point guiding organizer attention to the next required action.
 
 ### New Component: GroupDrawGenerationSection
 
@@ -189,12 +193,12 @@ Seed position display in option text: "Seed 3 · Alice Smith (Group A)" — form
 **Regenerate Group Draw modal** — mirrors knockout regenerate modal exactly:
 - Title: "Regenerate Group Draw"
 - Body: "Regenerating the draw will permanently delete all groups, player assignments, and scheduled matches. Continue?"
-- Buttons: `variant="secondary"` Cancel, `variant="danger"` Regenerate
+- Buttons: `variant="secondary"` "Keep Current Draw", `variant="danger"` "Regenerate"
 
 **Revert to Scheduled modal** — reuse identical copy from knockout:
 - Title: "Revert to Scheduled"
 - Body: existing tournament-name paragraph + bulleted consequences list + "Registrations will be preserved." muted note
-- Buttons: `variant="secondary"` Cancel, `variant="warning"` Revert to Scheduled
+- Buttons: `variant="secondary"` "Keep Groups", `variant="warning"` "Revert to Scheduled"
 
 ---
 
@@ -208,12 +212,14 @@ Seed position display in option text: "Seed 3 · Alice Smith (Group A)" — form
 | Success after generation | "Group draw completed. {N} groups created." (Alert variant="success", auto-dismisses after 5s) |
 | Empty state heading (State A) | "Draw Generation" |
 | Empty state body (State A) | "Registration is currently open. Close registration to lock the player list before generating the draw." |
-| Empty state body (State B, no players) | "No players registered yet." (fst-italic, text-muted, inside ListGroup area) |
+| Empty state body (State B, no players) | "No players have registered yet. Players can be registered from the tournament registration page." (fst-italic, text-muted, inside ListGroup area) |
 | Group size preview | "{N} groups: {X} of {size1} players, {Y} of {size2} players" |
 | Seeded rounds helper | "Number of rounds to fill using snake draft placement by ranking. 0 = fully random draw." |
 | Minimum players warning | "At least 4 players are required to generate a draw." (text-warning small, below button) |
 | Swap section intro | "Select one player from each group to swap. Group sizes remain balanced automatically." |
+| Regenerate modal dismiss | "Keep Current Draw" (variant="secondary" — names what is preserved on cancel) |
 | Regenerate modal body | "Regenerating the draw will permanently delete all groups, player assignments, and scheduled matches. Continue?" |
+| Revert modal dismiss | "Keep Groups" (variant="secondary" — names what is preserved on cancel) |
 | Revert modal body | "This will: Delete all groups, matches, and player assignments. Reopen player registration. Registrations will be preserved." |
 | Error state (generation failure) | "Failed to generate draw. {server message or 'Please try again.'}" — Alert variant="danger" dismissible |
 | Error state (swap failure) | "Failed to swap players. {server message or 'Please try again.'}" — Alert variant="danger" dismissible |
