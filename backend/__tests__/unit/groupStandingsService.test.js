@@ -341,15 +341,41 @@ describe('sortWithTiebreakers', () => {
 
 describe('computeGroupStandings — H2H tiebreaker', () => {
   it('resolves 2-player tie via H2H when direct result available', () => {
-    const entities = [makePlayer('A', 'Alice'), makePlayer('B', 'Bob')];
+    // 3-player group: A and B both have 1 win (A beat B; C beat A; B beat C is NOT possible
+    // without creating a cycle). Use: A beats B, C beats A, C beats B → A and B tied at 0
+    // Actually: need A and B tied on wins with A having beaten B in H2H
+    // Setup: A beats B (H2H); C beats A; C beats B → A=1W, B=0W, C=2W — not tied
+    //
+    // Better: 3 players, A=1W (beat B), B=1W (beat C), C=1W (beat A) would be a cycle.
+    // Instead: 4-player group where A and B both have 1 win but different opponents,
+    // AND A beat B directly.
+    // A beats B, A loses to C; B loses to C; D not relevant
+    // → A=1W(beat B), B=0W, C=2W... still not tied between A and B.
+    //
+    // Simplest correct scenario:
+    // A and B both beat C but lost to each other... wait, A beats B means B lost to A.
+    // For A and B to be tied on wins: A wins some match NOT against B, B wins some match NOT against A,
+    // AND A also beat B (so B has an extra loss but same win count if they each win vs someone else)
+    // E.g.: 4 players A, B, C, D
+    //   A beats B (H2H), A beats C
+    //   B beats C, B beats D
+    //   → A=2W, B=2W — tied! and A beat B in H2H
+    const entities = [
+      makePlayer('A', 'Alice'), makePlayer('B', 'Bob'),
+      makePlayer('C', 'Carol'), makePlayer('D', 'Dave')
+    ];
     const matches = [
-      // A beats B in their H2H
-      makeMatch({ id: 'm1', player1Id: 'A', player2Id: 'B', winner: 'PLAYER1' }),
-      // Additional matches to create tie (both have 1 win from other group member)
-      // but for simplicity: just the H2H where A wins
+      makeMatch({ id: 'm1', player1Id: 'A', player2Id: 'B', winner: 'PLAYER1',
+        sets: [{ setNumber: 1, player1Score: 6, player2Score: 4 }] }), // A beats B
+      makeMatch({ id: 'm2', player1Id: 'A', player2Id: 'C', winner: 'PLAYER1',
+        sets: [{ setNumber: 1, player1Score: 6, player2Score: 4 }] }), // A beats C
+      makeMatch({ id: 'm3', player1Id: 'B', player2Id: 'C', winner: 'PLAYER1',
+        sets: [{ setNumber: 1, player1Score: 6, player2Score: 4 }] }), // B beats C
+      makeMatch({ id: 'm4', player1Id: 'B', player2Id: 'D', winner: 'PLAYER1',
+        sets: [{ setNumber: 1, player1Score: 6, player2Score: 4 }] })  // B beats D
     ];
 
-    // Both tied on wins — but A beat B directly
+    // A=2W (beat B, C), B=2W (beat C, D), tied. A beat B in H2H → A wins
     const { standings } = computeGroupStandings(entities, matches, null);
     expect(standings[0].entity.id).toBe('A');
     expect(standings[0].tiebreakerCriterion).toBe('H2H');
