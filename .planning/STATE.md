@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: planning
-stopped_at: Phase 27 context gathered
-last_updated: "2026-03-17T13:12:08.352Z"
+stopped_at: Completed 27-01-PLAN.md
+last_updated: "2026-03-17T14:02:53.524Z"
 last_activity: 2026-03-15 — Roadmap created, 5 phases defined, 40/40 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -46,12 +46,15 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 *Updated after each plan completion*
+| Phase 27 P01 | 6m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 All v1.4 decisions archived to PROJECT.md Key Decisions table.
+- [Phase 27]: Used prisma db push + migrate resolve instead of migrate dev due to migration history drift in dev environment
+- [Phase 27]: Round records created per group independently (bracketId null) — group rounds are not shared across groups
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T13:12:08.350Z
-Stopped at: Phase 27 context gathered
-Resume file: .planning/phases/27-group-formation/27-CONTEXT.md
+Last session: 2026-03-17T14:02:47.396Z
+Stopped at: Completed 27-01-PLAN.md
+Resume file: None
