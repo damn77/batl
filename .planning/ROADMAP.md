@@ -153,7 +153,12 @@ Plans:
   4. Spillover slots filled by best remaining players across groups using cross-group ranking
   5. Generated knockout bracket(s) use existing bracket generation and seeding infrastructure
   6. Post-advancement: group results locked, knockout bracket active, combined tournament completes only when all brackets finish
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 30-01-PLAN.md — Schema migration (SECONDARY enum) + advancementService (waterfall, bracket gen, revert)
+- [ ] 30-02-PLAN.md — API layer (controller, routes, validators) + route registration
+- [ ] 30-03-PLAN.md — CombinedConfigPanel advancement fields + frontend API service
+- [ ] 30-04-PLAN.md — CombinedFormatDisplay wiring, AdvancementPreviewModal, revert panel, SECONDARY bracket display
 
 ### Phase 31: Points Integration and Group-Only Format
 **Goal**: Group placement points for non-advancing players, knockout supersede for advancing, GROUP-only tournament end-to-end
@@ -203,5 +208,5 @@ Plans:
 | 27. Group Formation | 3/3 | Complete    | 2026-03-17 | - |
 | 28. Group Match Play and Visualization | 3/3 | Complete    | 2026-03-17 | - |
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
-| 30. Combined Format Advancement | v1.5 | 0/TBD | Not started | - |
+| 30. Combined Format Advancement | v1.5 | 0/4 | Not started | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
