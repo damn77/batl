@@ -92,6 +92,7 @@ enum BracketType {
   MAIN
   CONSOLATION
   PLACEMENT
+  SECONDARY // Phase 30: secondary combined-format bracket
 }
 
 enum MatchGuaranteeType {
