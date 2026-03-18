@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 30-01-PLAN.md
-last_updated: "2026-03-18T00:14:03.311Z"
+stopped_at: Completed 30-03-PLAN.md
+last_updated: "2026-03-18T00:17:30.304Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 29-group-standings-and-tiebreakers P03 | 6min | 2 tasks | 2 files |
 | Phase 30-combined-format-advancement P02 | 8min | 2 tasks | 6 files |
 | Phase 30-combined-format-advancement P01 | 11min | 2 tasks | 5 files |
+| Phase 30-combined-format-advancement P03 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 30]: crossGroupRank uses 5-level tiebreaker (wins/setDiff/gameDiff/totalGames/name) — H2H skipped for cross-group ranking
 - [Phase 30]: SECONDARY added to BracketType enum (not CONSOLATION reuse) to prevent incorrect lifecycle/display branching
 - [Phase 30]: Multi-bracket lifecycle guard uses bracket.count instead of findFirst for clarity
+- [Phase 30]: advancementService URL paths use /v1/... (not /api/v1/...) — apiClient baseURL is already /api, consistent with all other services
+- [Phase 30]: CombinedConfigPanel value shape extended to { groupSize, advancePerGroup, mainBracketSize, secondaryBracketSize }; isPowerOfTwo validation removed
 
 ### Pending Todos
 
@@ -112,6 +115,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T00:14:03.308Z
-Stopped at: Completed 30-01-PLAN.md
+Last session: 2026-03-18T00:17:30.301Z
+Stopped at: Completed 30-03-PLAN.md
 Resume file: None
