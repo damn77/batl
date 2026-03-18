@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Phase 30 context gathered
-last_updated: "2026-03-17T23:09:00.414Z"
+stopped_at: Completed 30-02-PLAN.md
+last_updated: "2026-03-18T00:04:48.478Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 10
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 29-group-standings-and-tiebreakers P01 | 6min | 2 tasks | 3 files |
 | Phase 29-group-standings-and-tiebreakers P02 | 3min | 2 tasks | 5 files |
 | Phase 29-group-standings-and-tiebreakers P03 | 6min | 2 tasks | 2 files |
+| Phase 30-combined-format-advancement P02 | 8min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 29]: deleteMany used in deleteOverride to safely handle missing override record (avoids P2025)
 - [Phase 29-03]: GroupStandingsTable is now a pure renderer — client-side useMemo standings computation removed, all standings data backend-authoritative via useGroupStandings SWR hook
 - [Phase 29-03]: dedupingInterval=5000 for standings SWR hook (vs 30000 for matches) — standings change with each match result during active group play
+- [Phase 30]: ADV-04: FORMAT_CHANGE_NOT_ALLOWED in tournamentRulesService already locks mainBracketSize/secondaryBracketSize — no additional guard needed in advancement controller
+- [Phase 30]: advancementService.js stub created as placeholder for Plan 01; stub throws NOT_IMPLEMENTED for all methods so integration tests can mock it
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:09:00.412Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-combined-format-advancement/30-CONTEXT.md
+Last session: 2026-03-18T00:04:48.475Z
+Stopped at: Completed 30-02-PLAN.md
+Resume file: None
