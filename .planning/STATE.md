@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 30-02-PLAN.md
-last_updated: "2026-03-18T00:04:48.478Z"
+stopped_at: Completed 30-01-PLAN.md
+last_updated: "2026-03-18T00:14:03.311Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 29-group-standings-and-tiebreakers P02 | 3min | 2 tasks | 5 files |
 | Phase 29-group-standings-and-tiebreakers P03 | 6min | 2 tasks | 2 files |
 | Phase 30-combined-format-advancement P02 | 8min | 2 tasks | 6 files |
+| Phase 30-combined-format-advancement P01 | 11min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 29-03]: dedupingInterval=5000 for standings SWR hook (vs 30000 for matches) — standings change with each match result during active group play
 - [Phase 30]: ADV-04: FORMAT_CHANGE_NOT_ALLOWED in tournamentRulesService already locks mainBracketSize/secondaryBracketSize — no additional guard needed in advancement controller
 - [Phase 30]: advancementService.js stub created as placeholder for Plan 01; stub throws NOT_IMPLEMENTED for all methods so integration tests can mock it
+- [Phase 30]: crossGroupRank uses 5-level tiebreaker (wins/setDiff/gameDiff/totalGames/name) — H2H skipped for cross-group ranking
+- [Phase 30]: SECONDARY added to BracketType enum (not CONSOLATION reuse) to prevent incorrect lifecycle/display branching
+- [Phase 30]: Multi-bracket lifecycle guard uses bracket.count instead of findFirst for clarity
 
 ### Pending Todos
 
@@ -108,6 +112,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T00:04:48.475Z
-Stopped at: Completed 30-02-PLAN.md
+Last session: 2026-03-18T00:14:03.308Z
+Stopped at: Completed 30-01-PLAN.md
 Resume file: None
