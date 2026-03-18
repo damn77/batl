@@ -333,13 +333,17 @@ export async function checkAndCompleteTournament(tx, tournamentId, isOrganizer) 
     });
 
     if (tournament?.formatType === 'COMBINED') {
-      const knockoutBracket = await tx.bracket.findFirst({
-        where: { tournamentId },
-        select: { id: true }
+      // Phase 30: multi-bracket completion guard
+      // Count all brackets for this tournament (may include MAIN + SECONDARY)
+      const bracketCount = await tx.bracket.count({
+        where: { tournamentId }
       });
-      if (!knockoutBracket) {
+      if (bracketCount === 0) {
         return; // Group stage complete but knockout not yet generated -- stay IN_PROGRESS
       }
+      // If any brackets exist, the existing incompleteCount check (above) already
+      // ensures all non-BYE matches across ALL brackets are complete before reaching here.
+      // No additional per-bracket check needed.
     }
 
     await tx.tournament.update({
