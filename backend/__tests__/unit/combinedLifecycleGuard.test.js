@@ -7,7 +7,8 @@
  * when all group matches are done (no knockout bracket exists yet), while GROUP
  * tournaments and COMBINED tournaments with a bracket DO complete normally.
  *
- * Status: RED (guard not yet implemented — will turn GREEN after Task 2)
+ * Phase 30 update: guard now uses bracket.count instead of bracket.findFirst
+ * (supports multi-bracket: MAIN + SECONDARY).
  */
 import { jest } from '@jest/globals';
 
@@ -35,9 +36,9 @@ const { checkAndCompleteTournament } = await import(
  * @param {Object} opts
  * @param {number} opts.incompleteCount - Return value of tx.match.count
  * @param {string|null} opts.formatType - Tournament formatType ('GROUP', 'COMBINED', etc.)
- * @param {Object|null} opts.bracket - Bracket object returned by tx.bracket.findFirst (null if none)
+ * @param {number} opts.bracketCount - Return value of tx.bracket.count (0 = none, 1+ = exists)
  */
-function buildTx({ incompleteCount, formatType, bracket }) {
+function buildTx({ incompleteCount, formatType, bracketCount = 0 }) {
   return {
     match: {
       count: jest.fn().mockResolvedValue(incompleteCount)
@@ -49,7 +50,7 @@ function buildTx({ incompleteCount, formatType, bracket }) {
       update: jest.fn().mockResolvedValue({ id: 'tournament-1', status: 'COMPLETED' })
     },
     bracket: {
-      findFirst: jest.fn().mockResolvedValue(bracket)
+      count: jest.fn().mockResolvedValue(bracketCount)
     }
   };
 }
@@ -67,7 +68,7 @@ describe('checkAndCompleteTournament — COMBINED format guard', () => {
 
   it('should NOT complete COMBINED tournament when all group matches done and no bracket exists', async () => {
     // Setup: COMBINED format, all matches completed (incompleteCount=0), no bracket record
-    const tx = buildTx({ incompleteCount: 0, formatType: 'COMBINED', bracket: null });
+    const tx = buildTx({ incompleteCount: 0, formatType: 'COMBINED', bracketCount: 0 });
 
     await checkAndCompleteTournament(tx, TOURNAMENT_ID, true /* isOrganizer */);
 
@@ -77,10 +78,9 @@ describe('checkAndCompleteTournament — COMBINED format guard', () => {
       select: { formatType: true }
     });
 
-    // bracket.findFirst should be called to check for knockout bracket
-    expect(tx.bracket.findFirst).toHaveBeenCalledWith({
-      where: { tournamentId: TOURNAMENT_ID },
-      select: { id: true }
+    // bracket.count should be called to check for knockout bracket(s)
+    expect(tx.bracket.count).toHaveBeenCalledWith({
+      where: { tournamentId: TOURNAMENT_ID }
     });
 
     // tournament.update must NOT be called — stays IN_PROGRESS
@@ -88,11 +88,11 @@ describe('checkAndCompleteTournament — COMBINED format guard', () => {
   });
 
   it('should complete COMBINED tournament when all matches done AND bracket exists', async () => {
-    // Setup: COMBINED format, all matches completed, knockout bracket exists
+    // Setup: COMBINED format, all matches completed, knockout bracket(s) exist
     const tx = buildTx({
       incompleteCount: 0,
       formatType: 'COMBINED',
-      bracket: { id: 'bracket-uuid-1' }
+      bracketCount: 1
     });
 
     await checkAndCompleteTournament(tx, TOURNAMENT_ID, true /* isOrganizer */);
@@ -107,7 +107,7 @@ describe('checkAndCompleteTournament — COMBINED format guard', () => {
   it('should complete GROUP tournament when all matches done (no guard fires)', async () => {
     // Setup: GROUP format, all matches completed
     // The COMBINED guard only fires for COMBINED format — GROUP should complete normally
-    const tx = buildTx({ incompleteCount: 0, formatType: 'GROUP', bracket: null });
+    const tx = buildTx({ incompleteCount: 0, formatType: 'GROUP', bracketCount: 0 });
 
     await checkAndCompleteTournament(tx, TOURNAMENT_ID, true /* isOrganizer */);
 
@@ -117,22 +117,22 @@ describe('checkAndCompleteTournament — COMBINED format guard', () => {
       data: expect.objectContaining({ status: 'COMPLETED' })
     });
 
-    // bracket.findFirst should NOT be called for GROUP format
-    expect(tx.bracket.findFirst).not.toHaveBeenCalled();
+    // bracket.count should NOT be called for GROUP format
+    expect(tx.bracket.count).not.toHaveBeenCalled();
   });
 
   it('should NOT complete tournament when incomplete matches remain', async () => {
     // Setup: Any format, some matches still incomplete
-    const tx = buildTx({ incompleteCount: 3, formatType: 'COMBINED', bracket: null });
+    const tx = buildTx({ incompleteCount: 3, formatType: 'COMBINED', bracketCount: 0 });
 
     await checkAndCompleteTournament(tx, TOURNAMENT_ID, true /* isOrganizer */);
 
     // tournament.update must NOT be called
     expect(tx.tournament.update).not.toHaveBeenCalled();
 
-    // tournament.findUnique and bracket.findFirst should NOT be called
+    // tournament.findUnique and bracket.count should NOT be called
     // (we short-circuit before them when incompleteCount > 0)
     expect(tx.tournament.findUnique).not.toHaveBeenCalled();
-    expect(tx.bracket.findFirst).not.toHaveBeenCalled();
+    expect(tx.bracket.count).not.toHaveBeenCalled();
   });
 });
