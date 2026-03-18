@@ -69,7 +69,10 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
   const formatType = tournament.formatType;
 
   const sortedBrackets = structure?.brackets
-    ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
+    ? [...structure.brackets].sort((a, b) => {
+        const order = { MAIN: 0, SECONDARY: 1, CONSOLATION: 2, PLACEMENT: 3 };
+        return (order[a.bracketType] ?? 99) - (order[b.bracketType] ?? 99);
+      })
     : [];
 
   return (
@@ -200,7 +203,7 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
                               eventKey={bracket.id}
                               style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0' } : undefined}
                             >
-                              {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
+                              {bracket.name || bracket.placementRange || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : bracket.bracketType === 'SECONDARY' ? 'Secondary Bracket' : 'Main Bracket')}
                             </Nav.Link>
                           </Nav.Item>
                         ))}

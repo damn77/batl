@@ -1,7 +1,11 @@
 // T087: Combined Format Display Component - Orchestrates Group Stage + Knockout Phase
-import { Alert, Badge, Button, Accordion, ProgressBar } from 'react-bootstrap';
+// Phase 30-04: Wired with advancement flow (preview modal, post-advancement layout, revert panel)
+import { useState } from 'react';
+import { Alert, Badge, Button, Accordion, ProgressBar, Spinner, Modal } from 'react-bootstrap';
 import GroupStandingsTable from './GroupStandingsTable';
 import KnockoutBracket from './KnockoutBracket';
+import AdvancementPreviewModal from './AdvancementPreviewModal';
+import { getAdvancementPreview, revertAdvancement } from '../services/advancementService';
 
 /**
  * CombinedFormatDisplay - Displays both group stage and knockout phase
@@ -30,8 +34,24 @@ const CombinedFormatDisplay = ({
   groupsComplete = false,
   allMatches = null,
 }) => {
+  // Advancement preview state
+  const [previewData, setPreviewData] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState(null);
+
+  // Revert state
+  const [showRevertModal, setShowRevertModal] = useState(false);
+  const [reverting, setReverting] = useState(false);
+  const [revertError, setRevertError] = useState(null);
+
   // Separate rounds by phase (knockout rounds for bracket display)
   const knockoutRounds = rounds?.filter(r => r.phase === 'KNOCKOUT') || [];
+
+  // Determine advancement state
+  const hasBrackets = brackets && brackets.length > 0;
+  const hasKnockoutResults = hasBrackets &&
+    (allMatches?.some(m => m.bracketId && m.status === 'COMPLETED') || false);
 
   // Compute completion percentage for a single group
   const computeGroupCompletionPct = (matchesArray, groupId) => {
@@ -42,23 +62,70 @@ const CombinedFormatDisplay = ({
     return Math.round((completed / groupMatches.length) * 100);
   };
 
+  // Handle "Generate Knockout Bracket" button click — load preview, open modal
+  const handleGenerateClick = async () => {
+    setLoadingPreview(true);
+    setPreviewError(null);
+    try {
+      const preview = await getAdvancementPreview(tournamentId);
+      setPreviewData(preview);
+      setShowPreview(true);
+    } catch (err) {
+      setPreviewError(err.message || 'Could not load advancement preview. Please try again.');
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  // Handle revert confirmation
+  const handleRevert = async () => {
+    setReverting(true);
+    setRevertError(null);
+    try {
+      await revertAdvancement(tournamentId);
+      setShowRevertModal(false);
+      window.location.reload();
+    } catch (err) {
+      setRevertError(err.message || 'Revert failed. Please try again.');
+    } finally {
+      setReverting(false);
+    }
+  };
+
+  // Handle advancement complete — reload page to show brackets
+  const handleAdvancementComplete = () => {
+    window.location.reload();
+  };
+
   return (
     <div>
       {/* Group completion banner — organizer sees this when all group matches done and no bracket */}
-      {isOrganizer && groupsComplete && brackets && brackets.length === 0 && (
-        <Alert variant="success" className="d-flex justify-content-between align-items-center mb-4">
-          <span><strong>Group stage complete</strong> — Ready to generate knockout bracket</span>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              // TODO: Phase 30 — wire to advancement/bracket generation flow
-              window.scrollTo(0, 0);
-            }}
-          >
-            Generate Knockout Bracket
-          </Button>
-        </Alert>
+      {isOrganizer && groupsComplete && !hasBrackets && (
+        <>
+          {previewError && (
+            <Alert variant="danger" className="mb-4">
+              <small>{previewError}</small>
+            </Alert>
+          )}
+          <Alert variant="success" className="d-flex justify-content-between align-items-center mb-4">
+            <span><strong>Group stage complete</strong> — Ready to generate knockout bracket</span>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleGenerateClick}
+              disabled={loadingPreview}
+            >
+              {loadingPreview ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                  Loading...
+                </>
+              ) : (
+                'Generate Knockout Bracket'
+              )}
+            </Button>
+          </Alert>
+        </>
       )}
 
       {/* Group Stage Section */}
@@ -69,7 +136,7 @@ const CombinedFormatDisplay = ({
         </div>
 
         {groups && groups.length > 0 ? (
-          <Accordion defaultActiveKey={tournament?.status === 'IN_PROGRESS' ? groups[0]?.id : null}>
+          <Accordion defaultActiveKey={hasBrackets ? null : (tournament?.status === 'IN_PROGRESS' ? groups[0]?.id : null)}>
             {groups.map(group => (
               <Accordion.Item key={group.id} eventKey={group.id}>
                 <Accordion.Header>
@@ -81,6 +148,7 @@ const CombinedFormatDisplay = ({
                           ? `${group.pairs.length} pairs`
                           : `${group.players?.length || 0} players`}
                       </span>
+                      {hasBrackets && <Badge bg="secondary">Read-only</Badge>}
                     </div>
                     <ProgressBar
                       now={computeGroupCompletionPct(allMatches, group.id)}
@@ -114,21 +182,25 @@ const CombinedFormatDisplay = ({
           {brackets && <Badge bg="primary">{brackets.length} bracket(s)</Badge>}
         </div>
 
-        {brackets && brackets.length > 0 ? (
+        {hasBrackets ? (
           <div className="d-flex flex-column gap-4">
             {brackets.map(bracket => {
               const bracketRounds = knockoutRounds.filter(r => r.bracketId === bracket.id);
               return (
-                <KnockoutBracket
-                  key={bracket.id}
-                  tournamentId={tournamentId}
-                  bracket={bracket}
-                  rounds={bracketRounds}
-                  currentUserPlayerId={currentUserPlayerId}
-                  tournamentStatus={tournament?.status}
-                  isDoubles={tournament?.category?.type === 'DOUBLES'}
-                  scoringRules={scoringRules}
-                />
+                <div key={bracket.id}>
+                  <h6 className="fw-bold mb-2">
+                    {bracket.placementRange || (bracket.bracketType === 'SECONDARY' ? 'Secondary Bracket' : 'Main Bracket')}
+                  </h6>
+                  <KnockoutBracket
+                    tournamentId={tournamentId}
+                    bracket={bracket}
+                    rounds={bracketRounds}
+                    currentUserPlayerId={currentUserPlayerId}
+                    tournamentStatus={tournament?.status}
+                    isDoubles={tournament?.category?.type === 'DOUBLES'}
+                    scoringRules={scoringRules}
+                  />
+                </div>
               );
             })}
           </div>
@@ -138,6 +210,56 @@ const CombinedFormatDisplay = ({
           </Alert>
         )}
       </div>
+
+      {/* Revert panel — visible when brackets exist and no knockout match results yet */}
+      {isOrganizer && hasBrackets && !hasKnockoutResults && (
+        <Alert variant="warning" className="mt-4 d-flex justify-content-between align-items-center">
+          <span>Undo advancement to edit group results.</span>
+          <Button variant="outline-danger" size="sm" onClick={() => setShowRevertModal(true)}>
+            Revert Advancement
+          </Button>
+        </Alert>
+      )}
+
+      {/* Revert confirmation modal */}
+      <Modal show={showRevertModal} onHide={() => setShowRevertModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Revert Advancement</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          This will delete all knockout brackets and unlock group results for editing.
+        </Modal.Body>
+        <Modal.Footer>
+          {revertError && (
+            <Alert variant="danger" className="w-100 mb-2">
+              <small>{revertError}</small>
+            </Alert>
+          )}
+          <Button variant="outline-secondary" onClick={() => setShowRevertModal(false)} disabled={reverting}>
+            Keep Brackets
+          </Button>
+          <Button variant="danger" onClick={handleRevert} disabled={reverting}>
+            {reverting ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" className="me-2" />
+                Reverting...
+              </>
+            ) : (
+              'Revert Advancement'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Advancement Preview Modal */}
+      <AdvancementPreviewModal
+        show={showPreview}
+        onHide={() => setShowPreview(false)}
+        preview={previewData}
+        tournamentId={tournamentId}
+        onAdvancementComplete={handleAdvancementComplete}
+        isDoubles={tournament?.category?.type === 'DOUBLES'}
+      />
     </div>
   );
 };
