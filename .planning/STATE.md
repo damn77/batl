@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Phase 30.1 UI-SPEC approved
-last_updated: "2026-03-28T17:52:21.744Z"
+stopped_at: Completed 30.1-01-PLAN.md
+last_updated: "2026-03-28T18:14:06.489Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 15
+  completed_plans: 14
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 30-combined-format-advancement P03 | 1min | 2 tasks | 2 files |
 | Phase 30-combined-format-advancement P04 | 2min | 2 tasks | 3 files |
 | Phase 30-combined-format-advancement P04 | 45min | 3 tasks | 9 files |
+| Phase 30.1-group-standings-cross-table-with-match-results-grid P01 | 1min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 30]: CombinedFormatDisplay uses window.location.reload() after advancement/revert — simplest approach to refresh format structure without SWR cache invalidation
 - [Phase 30]: CombinedFormatDisplay uses window.location.reload() after advancement/revert — simplest approach to refresh format structure without SWR cache invalidation
 - [Phase 30]: Multi-bracket My Match works via each KnockoutBracket independently running findMyMatch on its own matches — player appears in exactly one bracket, no cross-bracket search needed
+- [Phase 30.1]: matchLookup stores symmetric references so perspective determined at render time by rowEntity.id comparison
+- [Phase 30.1]: buildInitialsMap detects ' / ' separator for doubles pairs, numeric suffix for collision handling
 
 ### Roadmap Evolution
 
@@ -124,6 +127,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:52:21.741Z
-Stopped at: Phase 30.1 UI-SPEC approved
-Resume file: .planning/phases/30.1-group-standings-cross-table-with-match-results-grid/30.1-UI-SPEC.md
+Last session: 2026-03-28T18:14:06.486Z
+Stopped at: Completed 30.1-01-PLAN.md
+Resume file: None
