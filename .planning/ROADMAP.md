@@ -226,5 +226,5 @@ Plans:
 | 28. Group Match Play and Visualization | 3/3 | Complete    | 2026-03-17 | - |
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
 | 30. Combined Format Advancement | 4/4 | Complete   | 2026-03-28 | - |
-| 30.1. Group Standings Cross-Table | 2/2 | Complete   | 2026-03-28 | - |
+| 30.1. Group Standings Cross-Table | 2/2 | Complete    | 2026-03-28 | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
