@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Phase 30.1 context gathered
-last_updated: "2026-03-28T17:36:41.310Z"
+stopped_at: Phase 30.1 UI-SPEC approved
+last_updated: "2026-03-28T17:52:21.744Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 6
@@ -124,6 +124,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:36:41.307Z
-Stopped at: Phase 30.1 context gathered
-Resume file: .planning/phases/30.1-group-standings-cross-table-with-match-results-grid/30.1-CONTEXT.md
+Last session: 2026-03-28T17:52:21.741Z
+Stopped at: Phase 30.1 UI-SPEC approved
+Resume file: .planning/phases/30.1-group-standings-cross-table-with-match-results-grid/30.1-UI-SPEC.md
