@@ -48,6 +48,16 @@ const CombinedFormatDisplay = ({
   // Knockout rounds are those belonging to a bracket (have bracketId)
   const knockoutRounds = rounds?.filter(r => r.bracketId) || [];
 
+  // Parse advancement config from tournament.formatConfig for advancement badge display
+  const parsedConfig = typeof tournament?.formatConfig === 'string'
+    ? JSON.parse(tournament.formatConfig)
+    : tournament?.formatConfig || {};
+  const advancePerGroup = parsedConfig.advancePerGroup || 0;
+  const advancePerGroupSecondary = parsedConfig.advancePerGroupSecondary || 0;
+  const advancementConfig = advancePerGroup > 0
+    ? { advancePerGroup, advancePerGroupSecondary }
+    : null;
+
   // Determine advancement state
   const hasBrackets = brackets && brackets.length > 0;
   const hasKnockoutResults = hasBrackets &&
@@ -165,6 +175,7 @@ const CombinedFormatDisplay = ({
                     currentUserPlayerId={currentUserPlayerId}
                     scoringRules={scoringRules}
                     tournamentStatus={tournament?.status}
+                    advancementConfig={advancementConfig}
                   />
                 </Accordion.Body>
               </Accordion.Item>

@@ -6,7 +6,7 @@
 // manual resolution UI, and stale override warning.
 // Plan 30.1-02: Restructured with responsive tabbed layout, CrossTable integration,
 // and bidirectional cross-highlighting between cross-table cells and match list rows.
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Tab, Nav, Table, Alert, Spinner, Badge, Button, Modal, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useMatches, useGroupStandings, saveGroupTieOverride } from '../services/tournamentViewService';
 import MatchResultModal from './MatchResultModal';
@@ -22,6 +22,7 @@ import CrossTable from './CrossTable';
  * @param {string|null} currentUserPlayerId - Current user's player profile ID (for participant check)
  * @param {Object|null} scoringRules - { formatType, winningSets, winningTiebreaks }
  * @param {string} tournamentStatus - Tournament status string (IN_PROGRESS, COMPLETED, etc.)
+ * @param {Object|null} advancementConfig - { advancePerGroup: number, advancePerGroupSecondary: number } for advancement badge display
  */
 const GroupStandingsTable = ({
   tournamentId,
@@ -29,7 +30,8 @@ const GroupStandingsTable = ({
   isOrganizer = false,
   currentUserPlayerId = null,
   scoringRules = null,
-  tournamentStatus = 'SCHEDULED'
+  tournamentStatus = 'SCHEDULED',
+  advancementConfig = null
 }) => {
   // Always fetch matches (no toggle gate on fetch)
   const { matches, isLoading: matchesLoading, isError: matchesError, mutate: mutateMatches } = useMatches(
@@ -56,6 +58,24 @@ const GroupStandingsTable = ({
   const [resolveSaving, setResolveSaving] = useState(false);
   const [resolveError, setResolveError] = useState(null);
   const [staleDismissed, setStaleDismissed] = useState(false);
+
+  // Compute advancementMap from standings + advancementConfig
+  // Only populated when all group matches are in terminal state
+  const advancementMap = useMemo(() => {
+    if (!advancementConfig || !standings || standings.length === 0) return {};
+    const allComplete = matches && matches.length > 0 &&
+      matches.every(m => m.status === 'COMPLETED' || m.status === 'CANCELLED');
+    if (!allComplete) return {};
+    const map = {};
+    for (const entry of standings) {
+      if (entry.position <= advancementConfig.advancePerGroup) {
+        map[entry.entity.id] = 'MAIN';
+      } else if (entry.position <= advancementConfig.advancePerGroup + (advancementConfig.advancePerGroupSecondary || 0)) {
+        map[entry.entity.id] = 'SECONDARY';
+      }
+    }
+    return map;
+  }, [advancementConfig, standings, matches]);
 
   // Client-side participant check helper
   function isMatchParticipant(match, playerId) {
@@ -189,7 +209,15 @@ const GroupStandingsTable = ({
                       )}
                     </div>
                   </td>
-                  <td><strong>{stats.entity.name}</strong></td>
+                  <td>
+                    <strong>{stats.entity.name}</strong>
+                    {advancementMap[stats.entity.id] === 'MAIN' && (
+                      <Badge bg="primary" className="ms-1" style={{ fontSize: '10px' }}>Main</Badge>
+                    )}
+                    {advancementMap[stats.entity.id] === 'SECONDARY' && (
+                      <Badge bg="secondary" className="ms-1" style={{ fontSize: '10px' }}>Secondary</Badge>
+                    )}
+                  </td>
                   <td className="text-center">{stats.played}</td>
                   <td className="text-center">{stats.wins}</td>
                   <td className="text-center">{stats.losses}</td>
