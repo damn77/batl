@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 30.1-02-PLAN.md
-last_updated: "2026-03-28T22:29:36.735Z"
+stopped_at: Phase 31 context gathered
+last_updated: "2026-03-28T22:57:59.788Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  total_phases: 13
+  completed_phases: 12
+  total_plans: 26
+  completed_plans: 26
   percent: 0
 ---
 
@@ -35,6 +35,7 @@ Progress: [░░░░░░░░░░] 0%
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0 (this milestone)
 - Average duration: —
 - Total execution time: —
@@ -68,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 ### Decisions
 
 All v1.4 decisions archived to PROJECT.md Key Decisions table.
+
 - [Phase 27]: Used prisma db push + migrate resolve instead of migrate dev due to migration history drift in dev environment
 - [Phase 27]: Round records created per group independently (bracketId null) — group rounds are not shared across groups
 - [Phase 27]: Used isAuthenticated+authorize(CASL) pattern for auth middleware — not requireAuth+requireRole (these don't exist in codebase)
@@ -130,6 +132,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T19:55:10.080Z
-Stopped at: Completed 30.1-02-PLAN.md
-Resume file: None
+Last session: 2026-03-28T22:57:59.784Z
+Stopped at: Phase 31 context gathered
+Resume file: .planning/phases/31-points-integration-and-group-only-format/31-CONTEXT.md
