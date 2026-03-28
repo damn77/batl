@@ -171,7 +171,7 @@ Plans:
   3. Desktop shows 2-tab layout (Results/Standings) with match list always below; mobile shows 3-tab layout
   4. Cross-highlighting links cross-table cells and match list rows bidirectionally on desktop
   5. Single-set and BIG_TIEBREAK matches display game score (6-4) not set count (1-0)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 30.1-01-PLAN.md — CrossTable component (N x N grid, score rendering, initials, cell interactions)
@@ -226,5 +226,5 @@ Plans:
 | 28. Group Match Play and Visualization | 3/3 | Complete    | 2026-03-17 | - |
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
 | 30. Combined Format Advancement | 4/4 | Complete   | 2026-03-28 | - |
-| 30.1. Group Standings Cross-Table | 1/2 | In Progress|  | - |
+| 30.1. Group Standings Cross-Table | 2/2 | Complete   | 2026-03-28 | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
