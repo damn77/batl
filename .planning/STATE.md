@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Completed 30-04-PLAN.md — Phase 30 complete
-last_updated: "2026-03-28T13:43:07.437Z"
+stopped_at: Phase 30.1 context gathered
+last_updated: "2026-03-28T17:36:41.310Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 4
   total_plans: 13
   completed_plans: 13
@@ -99,6 +99,10 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 30]: CombinedFormatDisplay uses window.location.reload() after advancement/revert — simplest approach to refresh format structure without SWR cache invalidation
 - [Phase 30]: Multi-bracket My Match works via each KnockoutBracket independently running findMyMatch on its own matches — player appears in exactly one bracket, no cross-bracket search needed
 
+### Roadmap Evolution
+
+- Phase 30.1 inserted after Phase 30: Group Standings Cross-Table with Match Results Grid (URGENT)
+
 ### Pending Todos
 
 None.
@@ -120,6 +124,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T13:43:07.434Z
-Stopped at: Completed 30-04-PLAN.md — Phase 30 complete
-Resume file: None
+Last session: 2026-03-28T17:36:41.307Z
+Stopped at: Phase 30.1 context gathered
+Resume file: .planning/phases/30.1-group-standings-cross-table-with-match-results-grid/30.1-CONTEXT.md
