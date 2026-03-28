@@ -187,7 +187,11 @@ Plans:
   3. GROUP-only tournament awards group placement points to all participants on completion
   4. GROUP-only tournament page shows group section only (no bracket section)
   5. Advancement status is visible on group standings (which players have advanced)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md — Backend point calculation extension (deriveGroupResults, awardGroupPoints, tier offsets, route handler)
+- [ ] 31-02-PLAN.md — Frontend advancement badges on GroupStandingsTable + Calculate Points button on TournamentPointConfigPage
 
 ## Progress
 
@@ -227,4 +231,4 @@ Plans:
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
 | 30. Combined Format Advancement | 4/4 | Complete   | 2026-03-28 | - |
 | 30.1. Group Standings Cross-Table | 2/2 | Complete    | 2026-03-28 | - |
-| 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
+| 31. Points Integration and Group-Only Format | v1.5 | 0/2 | Not started | - |
