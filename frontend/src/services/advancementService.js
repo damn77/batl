@@ -12,7 +12,7 @@ import apiClient from './apiClient';
  */
 export async function getAdvancementPreview(tournamentId) {
   const response = await apiClient.get(`/v1/tournaments/${tournamentId}/advancement/preview`);
-  return response.data;
+  return response.data.data;
 }
 
 /**
@@ -22,7 +22,7 @@ export async function getAdvancementPreview(tournamentId) {
  */
 export async function confirmAdvancement(tournamentId) {
   const response = await apiClient.post(`/v1/tournaments/${tournamentId}/advancement`);
-  return response.data;
+  return response.data.data;
 }
 
 /**
@@ -32,5 +32,5 @@ export async function confirmAdvancement(tournamentId) {
  */
 export async function revertAdvancement(tournamentId) {
   const response = await apiClient.delete(`/v1/tournaments/${tournamentId}/advancement`);
-  return response.data;
+  return response.data.data;
 }

@@ -61,12 +61,6 @@ const TournamentFormatSelector = ({ value, onChange, disabled }) => {
     onChange(newType, defaultConfig);
   };
 
-  const handleConfigChange = (field, value) => {
-    const newConfig = { ...formatConfig, [field]: value };
-    setFormatConfig(newConfig);
-    onChange(formatType, newConfig);
-  };
-
   return (
     <Card>
       <Card.Header>
@@ -92,45 +86,6 @@ const TournamentFormatSelector = ({ value, onChange, disabled }) => {
             })}
           </Form.Text>
         </Form.Group>
-
-        {/* Group/Combined-specific config */}
-        {(formatType === 'GROUP' || formatType === 'COMBINED') && (
-          <Form.Group className="mb-3">
-            <Form.Label>{t('tournamentFormat.labels.groupSize')}</Form.Label>
-            <Form.Select
-              value={formatConfig.groupSize}
-              onChange={(e) => handleConfigChange('groupSize', parseInt(e.target.value))}
-              disabled={disabled}
-            >
-              {[2, 3, 4, 5, 6, 7, 8].map((size) => (
-                <option key={size} value={size}>
-                  {t('tournamentFormat.values.playersPerGroup', { count: size })}
-                </option>
-              ))}
-            </Form.Select>
-            <Form.Text className="text-muted">
-              {t('tournamentFormat.selector.groupsSizeHelp', { size: formatConfig.groupSize, sizeMinusOne: formatConfig.groupSize - 1 })}
-            </Form.Text>
-          </Form.Group>
-        )}
-
-        {/* Swiss-specific config */}
-        {formatType === 'SWISS' && (
-          <Form.Group className="mb-3">
-            <Form.Label>{t('tournamentFormat.labels.numberOfRounds')}</Form.Label>
-            <Form.Control
-              type="number"
-              min="3"
-              max="20"
-              value={formatConfig.rounds}
-              onChange={(e) => handleConfigChange('rounds', parseInt(e.target.value))}
-              disabled={disabled}
-            />
-            <Form.Text className="text-muted">
-              {t('tournamentFormat.selector.minRoundsHelp')}
-            </Form.Text>
-          </Form.Group>
-        )}
 
         {disabled && (
           <Alert variant="warning" className="mb-0 mt-3">

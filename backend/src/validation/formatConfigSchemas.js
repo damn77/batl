@@ -30,7 +30,13 @@ export const SwissFormatConfigSchema = z.object({
 export const CombinedFormatConfigSchema = z.object({
   formatType: z.literal(FormatType.COMBINED),
   groupSize: z.number().int().min(2).max(8),
-  advancePerGroup: z.number().int().min(1).max(7),
+  advancementMode: z.enum(['perGroup', 'perBracket']).optional().default('perGroup'),
+  // perGroup mode fields
+  advancePerGroup: z.number().int().min(1).max(8).optional(),
+  advancePerGroupSecondary: z.number().int().min(0).max(7).optional(),
+  // perBracket mode fields (also derived in perGroup mode)
+  mainBracketSize: z.number().int().min(4).max(128).optional(),
+  secondaryBracketSize: z.number().int().min(0).max(128).optional(),
   // Legacy field - may still be present in old data
   advancementRules: z.array(
     z.object({

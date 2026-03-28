@@ -328,7 +328,12 @@ export async function generateGroupDraw(tournamentId, options = {}) {
   let groups;
   if (seededRounds > 0) {
     const seedCount = seededRounds * groupCount;
-    const seededPlayers = await getSeededPlayers(tournament.categoryId, seedCount);
+    const allSeededPlayers = await getSeededPlayers(tournament.categoryId, seedCount);
+
+    // Filter to only players actually registered for this tournament
+    const registeredIds = new Set(allEntities.map(e => e.entityId));
+    const seededPlayers = allSeededPlayers.filter(p => registeredIds.has(p.entityId));
+
     groups = snakeDraft(seededPlayers, groupCount, seededRounds);
 
     // Determine which entities are NOT seeded

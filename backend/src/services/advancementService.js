@@ -238,15 +238,22 @@ export async function computeAdvancementPreview(tournamentId) {
   let parsedConfig = {};
   if (tournament.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_) {} }
 
-  const mainN = parsedConfig.mainBracketSize || 0;
-  const secondaryM = parsedConfig.secondaryBracketSize || 0;
-  if (!mainN || mainN < 4) throw makeError('INVALID_CONFIG', 'mainBracketSize must be at least 4');
-
   const existingBracket = await prisma.bracket.findFirst({ where: { tournamentId }, select: { id: true } });
   if (existingBracket) throw makeError('ALREADY_ADVANCED', 'Tournament already has knockout brackets');
 
   const groups = await prisma.group.findMany({ where: { tournamentId }, orderBy: { groupNumber: 'asc' } });
   if (groups.length === 0) throw makeError('NO_GROUPS', 'Tournament has no groups');
+
+  // Derive bracket sizes: perGroup mode calculates from advancePerGroup × group count
+  let mainN = parsedConfig.mainBracketSize || 0;
+  let secondaryM = parsedConfig.secondaryBracketSize || 0;
+
+  if (parsedConfig.advancementMode === 'perGroup' && parsedConfig.advancePerGroup && groups.length > 0) {
+    mainN = parsedConfig.advancePerGroup * groups.length;
+    secondaryM = (parsedConfig.advancePerGroupSecondary || 0) * groups.length;
+  }
+
+  if (!mainN || mainN < 4) throw makeError('INVALID_CONFIG', 'mainBracketSize must be at least 4');
 
   const allGroupStandings = await Promise.all(
     groups.map(async (group) => {

@@ -10,8 +10,9 @@
  *
  * Follows the exact same patterns as BracketGenerationSection.jsx.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button, Alert, Spinner, Modal, Form, Badge, ListGroup, Card, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import GroupStandingsTable from './GroupStandingsTable';
 import ExpandableSection from './ExpandableSection';
 import { generateGroupDraw, swapGroupParticipants } from '../services/groupDrawService';
@@ -43,6 +44,15 @@ const GroupDrawGenerationSection = ({
 }) => {
   // ----- Hooks -----
   const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
+
+  // ----- Parse format config -----
+  const formatConfig = useMemo(() => {
+    const raw = tournament?.formatConfig;
+    if (!raw) return {};
+    if (typeof raw === 'object') return raw;
+    try { return JSON.parse(raw); } catch { return {}; }
+  }, [tournament?.formatConfig]);
 
   // ----- State -----
   const [groupCount, setGroupCount] = useState('');
@@ -64,11 +74,11 @@ const GroupDrawGenerationSection = ({
   const hasGroups = !!(structure?.groups && structure.groups.length > 0);
   const playerCount = registeredPlayers.length;
 
-  // ----- Load registered players -----
+  // ----- Load registered players (REGISTERED status only — matches what backend draw uses) -----
   useEffect(() => {
     if (!tournament?.id) return;
     apiClient
-      .get(`/tournaments/${tournament.id}/registrations`)
+      .get(`/tournaments/${tournament.id}/registrations?status=REGISTERED`)
       .then(r => {
         setRegisteredPlayers(r.data.data?.registrations || []);
       })
@@ -99,16 +109,17 @@ const GroupDrawGenerationSection = ({
     }
   }, [tournament?.id, mutateTournament]);
 
-  const handleGenerateDraw = useCallback(async () => {
+  const handleGenerateDraw = useCallback(async (overrideGroupCount) => {
+    const effectiveGroupCount = overrideGroupCount != null ? overrideGroupCount : parseInt(groupCount);
     setGenerating(true);
     setError(null);
     setSuccessMessage(null);
     try {
       const result = await generateGroupDraw(tournament.id, {
-        groupCount: parseInt(groupCount),
+        groupCount: effectiveGroupCount,
         seededRounds: parseInt(seededRounds) || 0
       });
-      const groupsCreated = result?.groups?.length || parseInt(groupCount);
+      const groupsCreated = result?.groups?.length || effectiveGroupCount;
       setSuccessMessage(`Group draw completed. ${groupsCreated} groups created.`);
       if (mutateFormatStructure) await mutateFormatStructure();
       if (mutateMatches) await mutateMatches();
@@ -178,29 +189,6 @@ const GroupDrawGenerationSection = ({
   // ----- Render guards -----
   if (!tournament) return null;
   if (tournament.status === 'COMPLETED' || tournament.status === 'CANCELLED') return null;
-
-  // ----- Group size preview computation -----
-  const parsedGroupCount = parseInt(groupCount);
-  const showGroupPreview = parsedGroupCount >= 2 && playerCount >= 4 && !isNaN(parsedGroupCount);
-  let groupPreviewText = '';
-  if (showGroupPreview) {
-    const baseSize = Math.floor(playerCount / parsedGroupCount);
-    const extras = playerCount % parsedGroupCount;
-    const unit = isDoubles ? 'pairs' : 'players';
-    if (extras > 0) {
-      groupPreviewText = `${parsedGroupCount} groups: ${extras} of ${baseSize + 1} ${unit}, ${parsedGroupCount - extras} of ${baseSize} ${unit}`;
-    } else {
-      groupPreviewText = `${parsedGroupCount} groups: ${parsedGroupCount} of ${baseSize} ${unit}`;
-    }
-  }
-
-  // ----- Generate button disabled logic -----
-  const generateDisabled =
-    playerCount < 4 ||
-    !parsedGroupCount ||
-    parsedGroupCount < 2 ||
-    parsedGroupCount > Math.floor(playerCount / 2) ||
-    generating;
 
   // ----- Participant list for swap dropdowns (State C) -----
   const allParticipants = (structure?.groups || []).flatMap(group =>
@@ -315,6 +303,29 @@ const GroupDrawGenerationSection = ({
 
   // ----- STATE B: Registration closed, no groups yet -----
   if (!hasGroups) {
+    // Auto-derive group count from format config
+    // Use ceil so groups stay close to target size (e.g., 11 players / 3 per group → 4 groups of ~3)
+    const configGroupSize = parseInt(formatConfig.groupSize) || 0;
+    const autoGroupCount = configGroupSize >= 2 && playerCount >= 4
+      ? Math.ceil(playerCount / configGroupSize)
+      : 0;
+    const autoBaseSize = autoGroupCount > 0 ? Math.floor(playerCount / autoGroupCount) : 0;
+    const autoExtras = autoGroupCount > 0 ? playerCount % autoGroupCount : 0;
+    const unit = isDoubles ? 'pairs' : 'players';
+
+    // Format config summary items
+    const configSummary = [];
+    if (configGroupSize) configSummary.push(`Group size: ${configGroupSize} ${unit}`);
+    if (formatConfig.advancementMode === 'perBracket') {
+      if (formatConfig.mainBracketSize) configSummary.push(`Main bracket: ${formatConfig.mainBracketSize} ${unit}`);
+      if (formatConfig.secondaryBracketSize) configSummary.push(`Secondary bracket: ${formatConfig.secondaryBracketSize} ${unit}`);
+    } else if (formatConfig.advancePerGroup) {
+      configSummary.push(`Advance per group: Top ${formatConfig.advancePerGroup}`);
+      if (formatConfig.advancePerGroupSecondary) configSummary.push(`Secondary per group: Next ${formatConfig.advancePerGroupSecondary}`);
+    }
+
+    const generateReady = autoGroupCount >= 2 && playerCount >= 4;
+
     return (
       <Card className="border-0 shadow-sm mb-4">
         <Card.Header className="bg-light">
@@ -335,63 +346,53 @@ const GroupDrawGenerationSection = ({
             </Alert>
           )}
 
-          {/* Registered player/pair list */}
+          {/* Registered player count + format config summary */}
           <div className="mb-4">
-            <h6 className="fw-semibold mb-2">
-              {isDoubles ? 'Registered Pairs' : 'Registered Players'} ({playerCount})
-            </h6>
-            {playerCount === 0 ? (
-              <p className="fst-italic text-muted">
-                No players have registered yet. Players can be registered from the tournament registration page.
-              </p>
-            ) : (
-              <ListGroup variant="flush" className="border rounded">
-                {registeredPlayers.map((reg, idx) => {
-                  const displayName = isDoubles
-                    ? `${reg.pair?.player1?.firstName || '?'} ${reg.pair?.player1?.lastName || ''} & ${reg.pair?.player2?.firstName || '?'} ${reg.pair?.player2?.lastName || ''}`.trim()
-                    : `${reg.player?.firstName || reg.player?.name || 'Unknown'}`;
-                  return (
-                    <ListGroup.Item key={reg?.id || idx} className="py-2 px-3">
-                      <span className="text-muted me-2" style={{ minWidth: '2rem', display: 'inline-block' }}>
-                        {idx + 1}.
-                      </span>
-                      {displayName}
-                    </ListGroup.Item>
-                  );
-                })}
-              </ListGroup>
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <div>
+                <h6 className="fw-semibold mb-1">
+                  <strong>{playerCount}</strong> {isDoubles ? 'pair' : 'player'}{playerCount !== 1 ? 's' : ''} registered
+                </h6>
+                {configSummary.length > 0 && (
+                  <div className="text-muted small">
+                    {configSummary.join(' · ')}
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={() => navigate(`/organizer/tournament/${tournament.id}/rules`)}
+              >
+                Update Rules
+              </Button>
+            </div>
+
+            {/* Auto-computed group preview */}
+            {generateReady && (
+              <Alert variant="info" className="py-2 mb-0">
+                <small>
+                  {autoExtras > 0
+                    ? `${autoGroupCount} groups: ${autoExtras} of ${autoBaseSize + 1} ${unit}, ${autoGroupCount - autoExtras} of ${autoBaseSize} ${unit}`
+                    : `${autoGroupCount} groups of ${autoBaseSize} ${unit}`
+                  }
+                </small>
+              </Alert>
+            )}
+
+            {!configGroupSize && (
+              <Alert variant="warning" className="py-2 mb-0">
+                <small>Group size is not configured. Update the tournament rules before generating the draw.</small>
+              </Alert>
             )}
           </div>
-
-          {/* Group configuration form */}
-          <Form.Group className="mb-4">
-            <Form.Label className="fw-semibold">Number of Groups</Form.Label>
-            <Form.Control
-              type="number"
-              min="2"
-              max={Math.floor(playerCount / 2) || 2}
-              value={groupCount}
-              onChange={e => setGroupCount(e.target.value)}
-              style={{ maxWidth: '120px' }}
-            />
-            <Form.Text className="text-muted">
-              Enter the number of groups. Group sizes are calculated automatically.
-            </Form.Text>
-          </Form.Group>
-
-          {/* Group size preview */}
-          {showGroupPreview && (
-            <Alert variant="info" className="py-2">
-              <small>{groupPreviewText}</small>
-            </Alert>
-          )}
 
           <Form.Group className="mb-4">
             <Form.Label className="fw-semibold">Seeded Rounds</Form.Label>
             <Form.Control
               type="number"
               min="0"
-              max={parsedGroupCount || 0}
+              max={autoGroupCount || 0}
               value={seededRounds}
               onChange={e => setSeededRounds(e.target.value)}
               style={{ maxWidth: '120px' }}
@@ -404,8 +405,8 @@ const GroupDrawGenerationSection = ({
           <Button
             variant="primary"
             size="lg"
-            onClick={handleGenerateDraw}
-            disabled={generateDisabled}
+            onClick={() => handleGenerateDraw(autoGroupCount)}
+            disabled={!generateReady || generating}
           >
             {generating ? (
               <>
@@ -417,9 +418,9 @@ const GroupDrawGenerationSection = ({
             )}
           </Button>
 
-          {playerCount < 4 && (
+          {playerCount < 4 && playerCount > 0 && (
             <p className="text-warning mt-2 mb-0">
-              <small>At least 4 players are required to generate a draw.</small>
+              <small>At least 4 {unit} are required to generate a draw.</small>
             </p>
           )}
         </Card.Body>

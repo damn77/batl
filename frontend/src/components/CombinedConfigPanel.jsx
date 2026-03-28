@@ -1,23 +1,74 @@
 // T066: Combined format configuration panel
-import { useState, useEffect } from 'react';
-import { Form, Alert, Row, Col } from 'react-bootstrap';
+import { useState, useEffect, useMemo } from 'react';
+import { Form, Alert, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap';
 import { validateGroups } from '../services/tournamentRulesService';
 
 /**
  * CombinedConfigPanel - Configuration for combined group-stage + knockout tournaments
  *
- * @param {Object} value - Current configuration { groupSize, advancePerGroup, mainBracketSize, secondaryBracketSize }
+ * Two advancement modes:
+ * - "perGroup": Organizer sets how many players advance per group (main + optional secondary)
+ * - "perBracket": Organizer sets total players per bracket directly
+ *
+ * Both modes produce mainBracketSize/secondaryBracketSize in formatConfig for the backend waterfall algorithm.
+ *
+ * @param {Object} value - Current configuration
  * @param {Function} onChange - Callback when configuration changes
  * @param {boolean} disabled - Whether the form is disabled (e.g. tournament IN_PROGRESS)
  * @param {number} playerCount - Current number of registered players
  */
-function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onChange, disabled = false, playerCount = 0 }) {
+function CombinedConfigPanel({ value = { groupSize: 4, advancementMode: 'perGroup', advancePerGroup: 2 }, onChange, disabled = false, playerCount = 0 }) {
   const [validation, setValidation] = useState(null);
   const [validating, setValidating] = useState(false);
+  const [numGroups, setNumGroups] = useState(0);
 
+  const mode = value.advancementMode || 'perGroup';
+
+  // Compute group count whenever groupSize or playerCount changes
   useEffect(() => {
-    const validateCombinedFormat = async () => {
-      if (!value.groupSize || !value.advancePerGroup || !playerCount || playerCount === 0) {
+    const fetchGroups = async () => {
+      if (!value.groupSize || !playerCount || playerCount === 0) {
+        setNumGroups(0);
+        return;
+      }
+      try {
+        const groupValidation = await validateGroups(playerCount, value.groupSize);
+        if (groupValidation.success && groupValidation.data.valid) {
+          setNumGroups(groupValidation.data.groups);
+        } else {
+          setNumGroups(0);
+        }
+      } catch {
+        setNumGroups(0);
+      }
+    };
+    fetchGroups();
+  }, [value.groupSize, playerCount]);
+
+  // In perGroup mode, derive mainBracketSize/secondaryBracketSize from per-group values
+  useEffect(() => {
+    if (mode !== 'perGroup' || !numGroups || !value.advancePerGroup) return;
+
+    const derivedMain = value.advancePerGroup * numGroups;
+    const derivedSecondary = (value.advancePerGroupSecondary || 0) * numGroups;
+
+    const needsUpdate =
+      value.mainBracketSize !== derivedMain ||
+      value.secondaryBracketSize !== (derivedSecondary || '');
+
+    if (needsUpdate) {
+      onChange({
+        ...value,
+        mainBracketSize: derivedMain,
+        secondaryBracketSize: derivedSecondary || ''
+      });
+    }
+  }, [mode, numGroups, value.advancePerGroup, value.advancePerGroupSecondary]);
+
+  // Validation effect
+  useEffect(() => {
+    const validateConfig = async () => {
+      if (!value.groupSize || !playerCount || playerCount === 0) {
         setValidation(null);
         return;
       }
@@ -25,9 +76,7 @@ function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onC
       try {
         setValidating(true);
 
-        // First validate group division
         const groupValidation = await validateGroups(playerCount, value.groupSize);
-
         if (!groupValidation.success || !groupValidation.data.valid) {
           setValidation({
             valid: false,
@@ -36,27 +85,74 @@ function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onC
           return;
         }
 
-        // Calculate total groups from group validation
         const totalGroups = groupValidation.data.groups;
 
-        // Validate mainBracketSize if provided
-        const mainSize = parseInt(value.mainBracketSize) || 0;
-        const secondarySize = parseInt(value.secondaryBracketSize) || 0;
+        if (mode === 'perGroup') {
+          if (!value.advancePerGroup) {
+            setValidation(null);
+            return;
+          }
 
-        if (mainSize > 0) {
-          if (mainSize < 4 || mainSize > 128) {
+          const mainAdvancing = value.advancePerGroup * totalGroups;
+          const secondaryAdvancing = (value.advancePerGroupSecondary || 0) * totalGroups;
+          const totalAdvancing = mainAdvancing + secondaryAdvancing;
+
+          if (totalAdvancing > playerCount) {
             setValidation({
               valid: false,
-              message: `Main bracket size must be between 4 and 128 players.`
+              message: `Cannot advance ${totalAdvancing} players — only ${playerCount} registered.`
             });
             return;
           }
 
-          if (secondarySize > 0 && (secondarySize < 4 || secondarySize > 128)) {
+          const eliminated = playerCount - totalAdvancing;
+
+          if (mainAdvancing < 4) {
             setValidation({
               valid: false,
-              message: `Secondary bracket size must be between 4 and 128 players.`
+              message: `Main bracket needs at least 4 players. Currently: ${value.advancePerGroup} per group × ${totalGroups} groups = ${mainAdvancing}.`
             });
+            return;
+          }
+
+          if (secondaryAdvancing > 0) {
+            if (secondaryAdvancing < 4) {
+              setValidation({
+                valid: false,
+                message: `Secondary bracket needs at least 4 players. Currently: ${value.advancePerGroupSecondary} per group × ${totalGroups} groups = ${secondaryAdvancing}.`
+              });
+              return;
+            }
+            setValidation({
+              valid: true,
+              message: `${playerCount} players → ${totalGroups} groups → ${mainAdvancing} to main, ${secondaryAdvancing} to secondary, ${eliminated} eliminated`
+            });
+          } else {
+            setValidation({
+              valid: true,
+              message: `${playerCount} players → ${totalGroups} groups → ${mainAdvancing} advance to knockout, ${eliminated} eliminated`
+            });
+          }
+        } else {
+          // perBracket mode
+          const mainSize = parseInt(value.mainBracketSize) || 0;
+          const secondarySize = parseInt(value.secondaryBracketSize) || 0;
+
+          if (!mainSize) {
+            setValidation({
+              valid: false,
+              message: `${playerCount} players → ${totalGroups} groups of ${value.groupSize}. Enter advancement counts below.`
+            });
+            return;
+          }
+
+          if (mainSize < 4 || mainSize > 128) {
+            setValidation({ valid: false, message: 'Main bracket size must be between 4 and 128 players.' });
+            return;
+          }
+
+          if (secondarySize > 0 && (secondarySize < 4 || secondarySize > 128)) {
+            setValidation({ valid: false, message: 'Secondary bracket size must be between 4 and 128 players.' });
             return;
           }
 
@@ -64,12 +160,12 @@ function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onC
           if (totalAdvancing > playerCount) {
             setValidation({
               valid: false,
-              message: `Cannot advance ${totalAdvancing} players — only ${playerCount} players registered.`
+              message: `Cannot advance ${totalAdvancing} players — only ${playerCount} registered.`
             });
             return;
           }
 
-          const eliminated = playerCount - mainSize - secondarySize;
+          const eliminated = playerCount - totalAdvancing;
 
           if (secondarySize > 0) {
             setValidation({
@@ -82,39 +178,44 @@ function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onC
               message: `${playerCount} players → ${totalGroups} groups → ${mainSize} advance to knockout, ${eliminated} eliminated`
             });
           }
-        } else {
-          // mainBracketSize not yet entered — just show group info
-          setValidation({
-            valid: false,
-            message: `${playerCount} players → ${totalGroups} groups of ${value.groupSize}. Enter advancement counts above.`
-          });
         }
       } catch (err) {
         console.error('Combined format validation error:', err);
-        setValidation({
-          valid: false,
-          message: 'Failed to validate combined format configuration'
-        });
+        setValidation({ valid: false, message: 'Failed to validate combined format configuration' });
       } finally {
         setValidating(false);
       }
     };
 
-    // Debounce validation
-    const timer = setTimeout(validateCombinedFormat, 500);
+    const timer = setTimeout(validateConfig, 500);
     return () => clearTimeout(timer);
-  }, [value.groupSize, value.advancePerGroup, value.mainBracketSize, value.secondaryBracketSize, playerCount]);
+  }, [value.groupSize, value.advancePerGroup, value.advancePerGroupSecondary, value.mainBracketSize, value.secondaryBracketSize, value.advancementMode, playerCount]);
 
   const handleChange = (field, fieldValue) => {
-    if (field === 'mainBracketSize' || field === 'secondaryBracketSize') {
-      onChange({ ...value, [field]: parseInt(fieldValue) || '' });
-    } else {
-      onChange({ ...value, [field]: parseInt(fieldValue) || '' });
-    }
+    onChange({ ...value, [field]: parseInt(fieldValue) || '' });
   };
+
+  const handleModeChange = (newMode) => {
+    // Clear mode-specific fields when switching
+    const updated = { ...value, advancementMode: newMode };
+    if (newMode === 'perGroup') {
+      delete updated.mainBracketSize;
+      delete updated.secondaryBracketSize;
+    } else {
+      delete updated.advancePerGroup;
+      delete updated.advancePerGroupSecondary;
+    }
+    onChange(updated);
+  };
+
+  // Max advancePerGroup options: for secondary, can't exceed groupSize minus main advance count
+  const maxSecondaryPerGroup = value.groupSize
+    ? value.groupSize - (value.advancePerGroup || 0)
+    : 0;
 
   return (
     <div>
+      {/* Group Size — always shown */}
       <Row>
         <Col md={6}>
           <Form.Group className="mb-3">
@@ -133,63 +234,132 @@ function CombinedConfigPanel({ value = { groupSize: 4, advancePerGroup: 2 }, onC
             </Form.Select>
           </Form.Group>
         </Col>
+      </Row>
 
-        <Col md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Players Advancing per Group</Form.Label>
-            <Form.Select
-              value={value.advancePerGroup || ''}
-              onChange={(e) => handleChange('advancePerGroup', e.target.value)}
-              disabled={disabled || !value.groupSize}
+      {/* Advancement Mode Toggle */}
+      <Form.Group className="mb-3">
+        <Form.Label>Advancement Mode</Form.Label>
+        <div>
+          <ButtonGroup>
+            <ToggleButton
+              id="mode-perGroup"
+              type="radio"
+              variant={mode === 'perGroup' ? 'primary' : 'outline-primary'}
+              value="perGroup"
+              checked={mode === 'perGroup'}
+              onChange={() => handleModeChange('perGroup')}
+              disabled={disabled}
+              size="sm"
             >
-              <option value="">Select...</option>
-              {value.groupSize >= 3 && <option value="1">Top 1 player</option>}
-              {value.groupSize >= 4 && <option value="2">Top 2 players</option>}
-              {value.groupSize >= 5 && <option value="3">Top 3 players</option>}
-              {value.groupSize >= 6 && <option value="4">Top 4 players</option>}
-            </Form.Select>
-          </Form.Group>
-        </Col>
-      </Row>
+              Per Group
+            </ToggleButton>
+            <ToggleButton
+              id="mode-perBracket"
+              type="radio"
+              variant={mode === 'perBracket' ? 'primary' : 'outline-primary'}
+              value="perBracket"
+              checked={mode === 'perBracket'}
+              onChange={() => handleModeChange('perBracket')}
+              disabled={disabled}
+              size="sm"
+            >
+              Per Bracket
+            </ToggleButton>
+          </ButtonGroup>
+          <Form.Text className="text-muted ms-2">
+            {mode === 'perGroup'
+              ? 'Set how many players advance from each group'
+              : 'Set total number of players per bracket'}
+          </Form.Text>
+        </div>
+      </Form.Group>
 
-      <Row className="mt-3">
-        <Col md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Players advancing to main bracket (Top N)</Form.Label>
-            <Form.Control
-              type="number"
-              min={4}
-              max={128}
-              value={value.mainBracketSize || ''}
-              onChange={(e) => handleChange('mainBracketSize', e.target.value)}
-              disabled={disabled}
-              placeholder="e.g. 8"
-            />
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Players advancing to secondary bracket (Next M)</Form.Label>
-            <Form.Control
-              type="number"
-              min={0}
-              max={128}
-              value={value.secondaryBracketSize || ''}
-              onChange={(e) => handleChange('secondaryBracketSize', e.target.value)}
-              disabled={disabled}
-              placeholder="Optional"
-            />
-            <Form.Text className="text-muted">
-              Optional. Leave blank to skip secondary bracket.
-            </Form.Text>
-          </Form.Group>
-        </Col>
-      </Row>
+      {/* Per Group Mode */}
+      {mode === 'perGroup' && (
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Advancing to main bracket (per group)</Form.Label>
+              <Form.Select
+                value={value.advancePerGroup || ''}
+                onChange={(e) => handleChange('advancePerGroup', e.target.value)}
+                disabled={disabled || !value.groupSize}
+              >
+                <option value="">Select...</option>
+                {value.groupSize && Array.from({ length: value.groupSize }, (_, i) => i + 1).map(n => (
+                  <option key={n} value={n}>
+                    {n === parseInt(value.groupSize) ? `All ${n} players (seeding only)` : `Top ${n} player${n > 1 ? 's' : ''}`}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Advancing to secondary bracket (per group)</Form.Label>
+              <Form.Select
+                value={value.advancePerGroupSecondary || ''}
+                onChange={(e) => handleChange('advancePerGroupSecondary', e.target.value)}
+                disabled={disabled || !value.groupSize || !value.advancePerGroup}
+              >
+                <option value="">None (no secondary bracket)</option>
+                {maxSecondaryPerGroup > 0 && Array.from({ length: maxSecondaryPerGroup }, (_, i) => i + 1).map(n => (
+                  <option key={n} value={n}>
+                    {`Next ${n} player${n > 1 ? 's' : ''}`}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-muted">
+                Optional. Players ranked below main bracket cutoff.
+              </Form.Text>
+            </Form.Group>
+          </Col>
+        </Row>
+      )}
+
+      {/* Per Bracket Mode */}
+      {mode === 'perBracket' && (
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Players advancing to main bracket (Top N)</Form.Label>
+              <Form.Control
+                type="number"
+                min={4}
+                max={128}
+                value={value.mainBracketSize || ''}
+                onChange={(e) => handleChange('mainBracketSize', e.target.value)}
+                disabled={disabled}
+                placeholder="e.g. 8"
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Players advancing to secondary bracket (Next M)</Form.Label>
+              <Form.Control
+                type="number"
+                min={0}
+                max={128}
+                value={value.secondaryBracketSize || ''}
+                onChange={(e) => handleChange('secondaryBracketSize', e.target.value)}
+                disabled={disabled}
+                placeholder="Optional"
+              />
+              <Form.Text className="text-muted">
+                Optional. Leave blank to skip secondary bracket.
+              </Form.Text>
+            </Form.Group>
+          </Col>
+        </Row>
+      )}
 
       <Alert variant="info" className="mb-3">
         <small>
           <strong>Combined Format:</strong> Tournament starts with a group stage where players are divided into groups.
-          Top players from each group advance to a single-elimination knockout stage.
+          {mode === 'perGroup'
+            ? ' Top players from each group advance to knockout brackets. The system calculates total bracket sizes automatically.'
+            : ' The system distributes the specified number of players across brackets using cross-group ranking.'}
         </small>
       </Alert>
 

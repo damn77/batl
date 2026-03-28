@@ -7,7 +7,7 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
   const { t } = useTranslation();
   const [scoringRules, setScoringRules] = useState(value || {
     formatType: 'SETS',
-    winningSets: 2,
+    winningSets: 1,
     advantageRule: 'ADVANTAGE',
     tiebreakTrigger: '6-6'
   });
@@ -26,7 +26,7 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
       case 'SETS':
         defaultRules = {
           formatType: 'SETS',
-          winningSets: 2,
+          winningSets: 1,
           advantageRule: 'ADVANTAGE',
           tiebreakTrigger: '6-6'
         };
@@ -46,7 +46,7 @@ const MatchScoringRulesForm = ({ value, onChange, disabled }) => {
       case 'MIXED':
         defaultRules = {
           formatType: 'MIXED',
-          winningSets: 2,
+          winningSets: 1,
           advantageRule: 'ADVANTAGE',
           tiebreakTrigger: '6-6',
           finalSetTiebreak: 'BIG'

@@ -45,8 +45,8 @@ const CombinedFormatDisplay = ({
   const [reverting, setReverting] = useState(false);
   const [revertError, setRevertError] = useState(null);
 
-  // Separate rounds by phase (knockout rounds for bracket display)
-  const knockoutRounds = rounds?.filter(r => r.phase === 'KNOCKOUT') || [];
+  // Knockout rounds are those belonging to a bracket (have bracketId)
+  const knockoutRounds = rounds?.filter(r => r.bracketId) || [];
 
   // Determine advancement state
   const hasBrackets = brackets && brackets.length > 0;
