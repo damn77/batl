@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: Phase 31 context gathered
-last_updated: "2026-03-28T22:57:59.788Z"
-last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-03-28T23:47:04.991Z"
+last_activity: 2026-03-28
 progress:
   total_phases: 13
   completed_phases: 12
-  total_plans: 26
-  completed_plans: 26
+  total_plans: 28
+  completed_plans: 27
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** A complete tournament runs from registration to final standings without the organizer touching a spreadsheet or a WhatsApp group
-**Current focus:** v1.5 Group & Combined Tournaments — Phase 27 (Group Formation)
+**Current focus:** Phase 31 — points-integration-and-group-only-format
 
 ## Current Position
 
-Phase: 28 of 31 (Group Match Play and Visualization)
-Plan: 03 complete
-Status: In progress
-Last activity: 2026-03-17 — Completed quick task s51: Add format type to tournament list column
+Phase: 31 (points-integration-and-group-only-format) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-03-28
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 30-combined-format-advancement P04 | 45min | 3 tasks | 9 files |
 | Phase 30.1-group-standings-cross-table-with-match-results-grid P01 | 1min | 1 tasks | 2 files |
 | Phase 30.1-group-standings-cross-table-with-match-results-grid P02 | 60min | 2 tasks | 1 files |
+| Phase 31 P01 | 8m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 30.1]: buildInitialsMap detects ' / ' separator for doubles pairs, numeric suffix for collision handling
 - [Phase 30.1]: crossTableEntities derived from match participants (not group.players) — group roster and match participants can diverge; match participants are authoritative for the cross-table
 - [Phase 30.1]: DB player ordering in MatchResultModal accepted — modal shows players in DB creation order, not row-player-first; scores and result submission correct regardless; user confirmed acceptable
+- [Phase 31]: Group placement points use group.groupSize (not total registrations) as participantCount per D-02
+- [Phase 31]: computeTierOffsets: secondaryOffset = maxGroupPoints+1, mainOffset = maxSecondaryPoints+1 (D-07)
+- [Phase 31]: GROUP auto-completion requires no tournamentLifecycleService change — COMBINED guard only fires for COMBINED (D-08 already satisfied)
 
 ### Roadmap Evolution
 
@@ -132,6 +136,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T22:57:59.784Z
-Stopped at: Phase 31 context gathered
-Resume file: .planning/phases/31-points-integration-and-group-only-format/31-CONTEXT.md
+Last session: 2026-03-28T23:47:04.988Z
+Stopped at: Completed 31-01-PLAN.md
+Resume file: None
