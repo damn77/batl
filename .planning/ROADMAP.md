@@ -88,7 +88,7 @@ See `.planning/milestones/v1.4-ROADMAP.md` for full phase details.
 - [x] **Phase 28: Group Match Play and Visualization** — Group result entry, lifecycle guards, group standings display on tournament page (completed 2026-03-17)
 - [x] **Phase 29: Group Standings and Tiebreakers** — 6-level tiebreaker chain, cyclic lock detection, manual resolution, head-to-head display (completed 2026-03-17)
 - [x] **Phase 30: Combined Format Advancement** — Group-to-knockout advancement, spillover selection, advancement config UI, bracket generation from groups (completed 2026-03-18)
-- [ ] **Phase 31: Points Integration and Group-Only Format** — Group placement points, knockout point supersede, GROUP-only tournament end-to-end
+- [x] **Phase 31: Points Integration and Group-Only Format** — Group placement points, knockout point supersede, GROUP-only tournament end-to-end (completed 2026-03-28)
 
 ## Phase Details (v1.5)
 
@@ -191,7 +191,7 @@ Plans:
 
 Plans:
 - [x] 31-01-PLAN.md — Backend point calculation extension (deriveGroupResults, awardGroupPoints, tier offsets, route handler)
-- [ ] 31-02-PLAN.md — Frontend advancement badges on GroupStandingsTable + Calculate Points button on TournamentPointConfigPage
+- [x] 31-02-PLAN.md — Frontend advancement badges on GroupStandingsTable + Calculate Points button on TournamentPointConfigPage
 
 ## Progress
 
@@ -231,4 +231,4 @@ Plans:
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
 | 30. Combined Format Advancement | 4/4 | Complete   | 2026-03-28 | - |
 | 30.1. Group Standings Cross-Table | 2/2 | Complete    | 2026-03-28 | - |
-| 31. Points Integration and Group-Only Format | v1.5 | 1/2 | In Progress|  |
+| 31. Points Integration and Group-Only Format | v1.5 | 2/2 | Complete   | 2026-03-28 |

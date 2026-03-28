@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
-status: executing
-stopped_at: Completed 31-01-PLAN.md
-last_updated: "2026-03-28T23:47:04.991Z"
+status: verifying
+stopped_at: Completed 31-02-PLAN.md
+last_updated: "2026-03-28T23:51:29.970Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 13
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 28
-  completed_plans: 27
+  completed_plans: 28
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 Phase: 31 (points-integration-and-group-only-format) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-03-28
 
 Progress: [░░░░░░░░░░] 0%
@@ -64,6 +64,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 30.1-group-standings-cross-table-with-match-results-grid P01 | 1min | 1 tasks | 2 files |
 | Phase 30.1-group-standings-cross-table-with-match-results-grid P02 | 60min | 2 tasks | 1 files |
 | Phase 31 P01 | 8m | 2 tasks | 4 files |
+| Phase 31-points-integration-and-group-only-format P02 | 15m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 31]: Group placement points use group.groupSize (not total registrations) as participantCount per D-02
 - [Phase 31]: computeTierOffsets: secondaryOffset = maxGroupPoints+1, mainOffset = maxSecondaryPoints+1 (D-07)
 - [Phase 31]: GROUP auto-completion requires no tournamentLifecycleService change — COMBINED guard only fires for COMBINED (D-08 already satisfied)
+- [Phase 31-02]: advancementMap computed via useMemo in GroupStandingsTable from standings + advancementConfig + matches terminal state
+- [Phase 31-02]: calculateTournamentPoints sends empty body for GROUP/COMBINED (null results param), preserving backward compat with KNOCKOUT
 
 ### Roadmap Evolution
 
@@ -136,6 +139,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:47:04.988Z
-Stopped at: Completed 31-01-PLAN.md
+Last session: 2026-03-28T23:51:29.967Z
+Stopped at: Completed 31-02-PLAN.md
 Resume file: None
