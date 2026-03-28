@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Card, Form, Button, Alert, Spinner, Row, Col, Badge } from 'react-bootstrap';
+import { Container, Card, Form, Button, Alert, Spinner, Row, Col, Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
+import apiClient from '../services/apiClient';
 import {
     getTournamentById,
     getTournamentPointConfig,
     updateTournamentPointConfig,
+    calculateTournamentPoints,
     POINT_CALCULATION_METHODS,
     TOURNAMENT_STATUS
 } from '../services/tournamentService';
@@ -27,6 +29,13 @@ const TournamentPointConfigPage = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
 
+    // Calculate Points state
+    const [calculating, setCalculating] = useState(false);
+    const [calcError, setCalcError] = useState(null);
+    const [calcSuccess, setCalcSuccess] = useState(null);
+    const [unresolvedGroups, setUnresolvedGroups] = useState([]);
+    const [tiesLoading, setTiesLoading] = useState(false);
+
     useEffect(() => {
         loadData();
     }, [id]);
@@ -44,6 +53,30 @@ const TournamentPointConfigPage = () => {
                 multiplicativeValue: configData.multiplicativeValue,
                 doublePointsEnabled: configData.doublePointsEnabled
             });
+
+            // For GROUP/COMBINED tournaments, check for unresolved ties to guard Calculate Points
+            if (tournamentData.formatType === 'GROUP' || tournamentData.formatType === 'COMBINED') {
+                setTiesLoading(true);
+                try {
+                    const structureRes = await apiClient.get(`/v1/tournaments/${id}/format-structure`);
+                    const structure = structureRes.data?.data || structureRes.data;
+                    if (structure?.groups) {
+                        const unresolved = [];
+                        for (const group of structure.groups) {
+                            const standingsRes = await apiClient.get(`/v1/tournaments/${id}/groups/${group.id}/standings`);
+                            const standingsData = standingsRes.data?.data || standingsRes.data;
+                            if (standingsData?.unresolvedTies?.length > 0) {
+                                unresolved.push(group.name || `Group ${group.groupNumber}`);
+                            }
+                        }
+                        setUnresolvedGroups(unresolved);
+                    }
+                } catch (_err) {
+                    // Non-critical — button will still be available, backend blocks if ties exist
+                } finally {
+                    setTiesLoading(false);
+                }
+            }
         } catch (_err) {
             setError(t('errors.failedToLoad', { resource: t('common.configuration') }));
         } finally {
@@ -64,6 +97,31 @@ const TournamentPointConfigPage = () => {
             setError(err.message || t('errors.failedToSave'));
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleCalculatePoints = async () => {
+        try {
+            setCalculating(true);
+            setCalcError(null);
+            setCalcSuccess(null);
+
+            // Both GROUP and COMBINED: send empty body (null results)
+            // Backend auto-derives group results from standings AND knockout
+            // results from bracket match records. No client-side results needed.
+            await calculateTournamentPoints(id, null);
+
+            setCalcSuccess('Points calculated and awarded successfully.');
+        } catch (err) {
+            if (err.code === 'UNRESOLVED_TIES') {
+                setCalcError(err.message);
+                // Refresh unresolved groups list
+                await loadData();
+            } else {
+                setCalcError(err.message || 'Could not calculate points.');
+            }
+        } finally {
+            setCalculating(false);
         }
     };
 
@@ -112,6 +170,62 @@ const TournamentPointConfigPage = () => {
                     <Alert variant="info">
                         {t('alerts.pointConfigReadOnly', { status: t(`tournament.statuses.${tournament.status}`) })}
                     </Alert>
+                )}
+
+                {/* Calculate Points Section — shown for COMPLETED GROUP/COMBINED tournaments */}
+                {tournament.status === TOURNAMENT_STATUS.COMPLETED &&
+                 (tournament.formatType === 'GROUP' || tournament.formatType === 'COMBINED') && (
+                    <Card className="mb-4">
+                        <Card.Header><h5 className="mb-0">Calculate Points</h5></Card.Header>
+                        <Card.Body>
+                            {calcSuccess && (
+                                <Alert variant="success" dismissible onClose={() => setCalcSuccess(null)}>
+                                    {calcSuccess}
+                                </Alert>
+                            )}
+                            {calcError && (
+                                <Alert variant="danger" dismissible onClose={() => setCalcError(null)}>
+                                    {calcError}
+                                </Alert>
+                            )}
+
+                            {unresolvedGroups.length > 0 && (
+                                <Alert variant="danger">
+                                    Groups {unresolvedGroups.join(', ')} have unresolved tied positions.
+                                    Open each group&apos;s standings and use &apos;Resolve Tie&apos; before calculating points.
+                                </Alert>
+                            )}
+
+                            {tiesLoading ? (
+                                <Spinner animation="border" size="sm" />
+                            ) : (
+                                <OverlayTrigger
+                                    overlay={
+                                        unresolvedGroups.length > 0
+                                            ? <Tooltip>Resolve all group tiebreakers first</Tooltip>
+                                            : <></>
+                                    }
+                                >
+                                    <span>
+                                        <Button
+                                            variant="primary"
+                                            disabled={calculating || unresolvedGroups.length > 0}
+                                            onClick={handleCalculatePoints}
+                                        >
+                                            {calculating ? (
+                                                <>
+                                                    <Spinner as="span" size="sm" animation="border" className="me-2" />
+                                                    Calculating...
+                                                </>
+                                            ) : (
+                                                'Calculate Points'
+                                            )}
+                                        </Button>
+                                    </span>
+                                </OverlayTrigger>
+                            )}
+                        </Card.Body>
+                    </Card>
                 )}
 
                 <Card>
