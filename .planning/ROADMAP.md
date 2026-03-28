@@ -160,6 +160,23 @@ Plans:
 - [ ] 30-03-PLAN.md — CombinedConfigPanel advancement fields + frontend API service
 - [ ] 30-04-PLAN.md — CombinedFormatDisplay wiring, AdvancementPreviewModal, revert panel, SECONDARY bracket display
 
+### Phase 30.1: Group Standings Cross-Table with Match Results Grid (INSERTED)
+
+**Goal:** Add cross-table (matrix) showing head-to-head match results to GroupStandingsTable, with cell-click result entry, tabbed navigation, and bidirectional cross-highlighting between cells and match list rows
+**Requirements**: CROSS-01, CROSS-02, CROSS-03, CROSS-04, CROSS-05, CROSS-06, CROSS-07, CROSS-08, CROSS-09, CROSS-10
+**Depends on:** Phase 30
+**Success Criteria** (what must be TRUE):
+  1. Cross-table renders N x N grid with player initials as column headers and perspective-correct scores
+  2. Clicking a cross-table cell opens MatchResultModal for result entry or viewing
+  3. Desktop shows 2-tab layout (Results/Standings) with match list always below; mobile shows 3-tab layout
+  4. Cross-highlighting links cross-table cells and match list rows bidirectionally on desktop
+  5. Single-set and BIG_TIEBREAK matches display game score (6-4) not set count (1-0)
+**Plans:** 2 plans
+
+Plans:
+- [ ] 30.1-01-PLAN.md — CrossTable component (N x N grid, score rendering, initials, cell interactions)
+- [ ] 30.1-02-PLAN.md — GroupStandingsTable restructure (tabbed layout, CrossTable integration, cross-highlighting)
+
 ### Phase 31: Points Integration and Group-Only Format
 **Goal**: Group placement points for non-advancing players, knockout supersede for advancing, GROUP-only tournament end-to-end
 **Depends on**: Phase 30
@@ -209,4 +226,5 @@ Plans:
 | 28. Group Match Play and Visualization | 3/3 | Complete    | 2026-03-17 | - |
 | 29. Group Standings and Tiebreakers | 3/3 | Complete    | 2026-03-17 | - |
 | 30. Combined Format Advancement | 4/4 | Complete   | 2026-03-28 | - |
+| 30.1. Group Standings Cross-Table | v1.5 | 0/2 | Planning | - |
 | 31. Points Integration and Group-Only Format | v1.5 | 0/TBD | Not started | - |
