@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: executing
-stopped_at: "Checkpoint: 30-04 Task 3 — awaiting human-verify of advancement flow"
-last_updated: "2026-03-18T00:21:08.986Z"
+stopped_at: Completed 30-04-PLAN.md — Phase 30 complete
+last_updated: "2026-03-28T13:43:07.437Z"
 last_activity: "2026-03-17 — Completed quick task s51: Add format type to tournament list column"
 progress:
   total_phases: 5
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 30-combined-format-advancement P01 | 11min | 2 tasks | 5 files |
 | Phase 30-combined-format-advancement P03 | 1min | 2 tasks | 2 files |
 | Phase 30-combined-format-advancement P04 | 2min | 2 tasks | 3 files |
+| Phase 30-combined-format-advancement P04 | 45min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ All v1.4 decisions archived to PROJECT.md Key Decisions table.
 - [Phase 30]: advancementService URL paths use /v1/... (not /api/v1/...) — apiClient baseURL is already /api, consistent with all other services
 - [Phase 30]: CombinedConfigPanel value shape extended to { groupSize, advancePerGroup, mainBracketSize, secondaryBracketSize }; isPowerOfTwo validation removed
 - [Phase 30]: CombinedFormatDisplay uses window.location.reload() after advancement/revert — simplest approach to refresh format structure without SWR cache invalidation
+- [Phase 30]: CombinedFormatDisplay uses window.location.reload() after advancement/revert — simplest approach to refresh format structure without SWR cache invalidation
+- [Phase 30]: Multi-bracket My Match works via each KnockoutBracket independently running findMyMatch on its own matches — player appears in exactly one bracket, no cross-bracket search needed
 
 ### Pending Todos
 
@@ -117,6 +120,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-18T00:21:08.983Z
-Stopped at: Checkpoint: 30-04 Task 3 — awaiting human-verify of advancement flow
+Last session: 2026-03-28T13:43:07.434Z
+Stopped at: Completed 30-04-PLAN.md — Phase 30 complete
 Resume file: None
