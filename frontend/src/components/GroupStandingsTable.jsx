@@ -6,7 +6,7 @@
 // manual resolution UI, and stale override warning.
 // Plan 30.1-02: Restructured with responsive tabbed layout, CrossTable integration,
 // and bidirectional cross-highlighting between cross-table cells and match list rows.
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Tab, Nav, Table, Alert, Spinner, Badge, Button, Modal, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useMatches, useGroupStandings, saveGroupTieOverride } from '../services/tournamentViewService';
 import MatchResultModal from './MatchResultModal';
@@ -79,6 +79,30 @@ const GroupStandingsTable = ({
         id: player.id,
         name: player.name
       }));
+
+  // Cross-table entities: derive from match participants to handle roster/match mismatches.
+  // When group roster and match participants diverge (e.g., after draw modifications),
+  // the cross-table must show the actual players who have matches assigned.
+  const crossTableEntities = useMemo(() => {
+    if (!matches || matches.length === 0) return entities;
+    const entityMap = new Map();
+    for (const match of matches) {
+      if (isDoubles) {
+        if (match.pair1) entityMap.set(match.pair1.id, {
+          id: match.pair1.id,
+          name: `${match.pair1.player1?.name || '?'} / ${match.pair1.player2?.name || '?'}`
+        });
+        if (match.pair2) entityMap.set(match.pair2.id, {
+          id: match.pair2.id,
+          name: `${match.pair2.player1?.name || '?'} / ${match.pair2.player2?.name || '?'}`
+        });
+      } else {
+        if (match.player1) entityMap.set(match.player1.id, { id: match.player1.id, name: match.player1.name });
+        if (match.player2) entityMap.set(match.player2.id, { id: match.player2.id, name: match.player2.name });
+      }
+    }
+    return Array.from(entityMap.values());
+  }, [matches, entities, isDoubles]);
 
   // Manual resolution modal helpers
   const openResolveModal = (tie) => {
@@ -354,7 +378,7 @@ const GroupStandingsTable = ({
           <Tab.Content>
             <Tab.Pane eventKey="results">
               <CrossTable
-                entities={entities}
+                entities={crossTableEntities}
                 matches={matches}
                 isDoubles={isDoubles}
                 scoringRules={scoringRules}
@@ -390,7 +414,7 @@ const GroupStandingsTable = ({
           <Tab.Content>
             <Tab.Pane eventKey="results">
               <CrossTable
-                entities={entities}
+                entities={crossTableEntities}
                 matches={matches}
                 isDoubles={isDoubles}
                 scoringRules={scoringRules}
