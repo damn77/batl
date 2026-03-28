@@ -52,10 +52,13 @@ From `frontend/src/app.css` `:root` tokens and Bootstrap 5.3 defaults:
 |------|------|--------|-------------|
 | Body | 15px (`--font-size-base: 0.9375rem`) | 400 (regular) | 1.5 |
 | Label / Small | 13px (`--font-size-sm: 0.8125rem`) | 400 (regular) | 1.4 |
-| Subheading | 17px (`--font-size-lg: 1.0625rem`) | 600 (semibold) | 1.3 |
+| Subheading | 17px (`--font-size-lg: 1.0625rem`) | 700 (bold) | 1.3 |
 | Heading | 20px (h3 mobile: 1.1rem ≈ 17.6px; desktop: Bootstrap h3 ≈ 20px) | 700 (bold) | 1.2 |
 
-Badge text for advancement pills: 10px (`font-size: '10px'`), consistent with existing tiebreaker badges in `GroupStandingsTable.jsx` line 184.
+Formal type scale: 4 sizes (13/15/17/20px), 2 weights (400/700).
+
+Component-local style exception (not part of the formal type scale):
+- AdvancementBadge text: `fontSize: '10px'` — applied inline on the React Bootstrap `<Badge>` element only, consistent with the existing tiebreaker badge at `GroupStandingsTable.jsx` line 184. This is a component-level override, not a type scale token.
 
 Source: app.css tokens + existing component patterns.
 
@@ -93,7 +96,7 @@ Source: app.css color tokens + GroupStandingsTable.jsx badge patterns + Tourname
 - React Bootstrap `<Badge>` component
 - Main bracket: `bg="primary"` — label "Main"
 - Secondary bracket: `bg="secondary"` — label "Secondary"
-- Style: `fontSize: '10px'`, `ms-1` (4px left margin from player name)
+- Style: `fontSize: '10px'` (component-local override — see Typography section), `ms-1` (4px left margin from player name)
 - Placement: immediately after player name text in the standings `<td>`, same cell
 - Appears only when group matches are all complete (all group matches in terminal state)
 - Non-advancing players: no badge rendered (absence is the signal — D-13)
@@ -112,6 +115,7 @@ Source: D-12, D-13, D-15 from CONTEXT.md; badge pattern from existing `tiebreake
 - "Calculate Points" button: disabled with tooltip when unresolved ties exist
 - Disabled state copy: "Resolve all tied positions before calculating points"
 - On GROUP-only tournament: button visible (same UX as knockout — D-10)
+- Blocked state visual hierarchy: the Bootstrap `danger` alert is the primary focal point (high-contrast red, full-width, descriptive message); the disabled button + tooltip is the secondary affordance (button grayed out, tooltip appears on hover/focus)
 - Error alert (Bootstrap `danger` variant): "Cannot calculate points — [N] group(s) have unresolved tied positions. Use the standings tiebreaker resolution tool first."
 
 **FormatVisualization.jsx**
@@ -139,6 +143,7 @@ Projection logic (D-14): derived client-side from `standings.position` + `format
 - `OverlayTrigger` with `Tooltip`: "Resolve all group tiebreakers first"
 - Alert `variant="danger"` below button with specific message listing which groups have unresolved ties
 - Error text pattern: "Groups [Group A, Group B] have unresolved tied positions. Open each group's standings and use 'Resolve Tie' before calculating points."
+- Visual anchor: the `danger` alert is the primary focal point; the disabled button + tooltip is secondary
 
 ### Calculate Points — Success State
 
@@ -170,7 +175,7 @@ Source: CONTEXT.md (D-10, D-11 block condition); error handling pattern from CLA
 | Viewport | Advancement Badge |
 |----------|------------------|
 | Desktop (≥576px) | Inline after player name, same table cell |
-| Mobile (<576px) | Same — badge is small (10px), fits in narrow cells |
+| Mobile (<576px) | Same — badge uses component-local 10px override, fits in narrow cells |
 
 No new responsive breakpoints introduced. Existing GroupStandingsTable responsive pattern (`d-none d-sm-table-cell` for set/game detail columns) is unchanged.
 
@@ -193,7 +198,7 @@ No third-party registries. All components are React Bootstrap 2.10 built-ins or 
 |--------|---------------|
 | CONTEXT.md (31-CONTEXT.md) | 15 (D-01 through D-15) |
 | app.css design tokens | 8 (spacing xs–xl, font-size-sm/base/lg, color tokens) |
-| GroupStandingsTable.jsx patterns | 3 (badge size 10px, tiebreaker badge pattern, entity name cell) |
+| GroupStandingsTable.jsx patterns | 3 (badge size 10px component exception, tiebreaker badge pattern, entity name cell) |
 | RegistrationStatusBadge.jsx patterns | 1 (Badge component usage) |
 | REQUIREMENTS.md (v1.4) | 5 (PTS-01–04, GVIEW-05) |
 | User input | 0 (all answered by upstream) |
