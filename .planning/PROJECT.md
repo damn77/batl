@@ -175,7 +175,7 @@ A complete tournament runs from registration to final standings without the orga
 
 ## Current State
 
-v1.4 shipped. All 5 milestones complete (v1.0–v1.4). 26 phases across 5 milestones. Full tournament lifecycle operational with mobile-first UI. v1.5 milestone started — group and combined tournaments.
+v1.5 complete. All 6 milestones shipped (v1.0–v1.5). 31 phases across 6 milestones. Full tournament lifecycle operational with mobile-first UI, group stage round-robin, combined format (groups → knockout brackets), advancement rules, group placement points, and cross-table match visualization.
 
 ---
-*Last updated: 2026-03-15 after v1.5 milestone start*
+*Last updated: 2026-03-29 after Phase 31 completion (v1.5 final phase)*
