@@ -43,6 +43,16 @@
   "hooks": {
     "PostToolUse": [
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$command\" | grep -q 'git push' && bash scripts/check-ci.sh 2>&1 || true",
+            "timeout": 30
+          }
+        ]
+      },
+      {
         "matcher": "Write",
         "hooks": [
           {

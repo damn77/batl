@@ -169,6 +169,16 @@ This component has been through 5+ rounds of bug fixes where each fix risked rei
 - Zoom must center on viewport midpoint with translate compensation (`transformOrigin: 0 0`)
 - Wheel zoom is intentionally removed — do not re-add
 
+## CI Pipeline Checks
+
+**Before creating a pull request** (via `gh pr create` or any shipping workflow):
+1. Run `bash scripts/check-ci.sh` to check the CI pipeline status
+2. If CI is failing (exit code 1), DO NOT create the PR — fix the issue first
+3. If CI is in progress, wait and re-check before proceeding
+4. Only create the PR when CI passes or no runs exist yet
+
+This check also runs automatically after every `git push` via a PostToolUse hook.
+
 ## Git Workflow
 
 **CRITICAL: Never commit directly to master.**
