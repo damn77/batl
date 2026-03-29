@@ -390,7 +390,7 @@ router.post(
         const secondaryBracketSize = advancedToSecondary.size;
         const offsets = computeTierOffsets(largestGroupSize, pointConfig, secondaryBracketSize);
 
-        let allAwarded = [];
+        const allAwarded = [];
 
         // Award group placement points to non-advancing players (no offset)
         if (nonAdvancingGroupResults.length > 0) {

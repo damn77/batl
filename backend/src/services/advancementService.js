@@ -236,7 +236,7 @@ export async function computeAdvancementPreview(tournamentId) {
   if (tournament.status !== 'IN_PROGRESS') throw makeError('NOT_IN_PROGRESS', 'Tournament must be IN_PROGRESS to advance');
 
   let parsedConfig = {};
-  if (tournament.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_) {} }
+  if (tournament.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_e) { /* malformed JSON fallback */ } }
 
   const existingBracket = await prisma.bracket.findFirst({ where: { tournamentId }, select: { id: true } });
   if (existingBracket) throw makeError('ALREADY_ADVANCED', 'Tournament already has knockout brackets');
@@ -295,7 +295,7 @@ export async function confirmAdvancement(tournamentId) {
     const lockedAt = new Date().toISOString();
     await tx.group.updateMany({ where: { tournamentId }, data: { advancementCriteria: JSON.stringify({ locked: true, lockedAt }) } });
     let parsedConfig = {};
-    if (tournament.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_) {} }
+    if (tournament.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_e) { /* malformed JSON fallback */ } }
     parsedConfig.advancedAt = lockedAt;
     await tx.tournament.update({ where: { id: tournamentId }, data: { formatConfig: JSON.stringify(parsedConfig) } });
     return { mainResult, secondaryResult };
@@ -321,7 +321,7 @@ export async function revertAdvancement(tournamentId) {
     await tx.group.updateMany({ where: { tournamentId }, data: { advancementCriteria: null } });
     const tournament = await tx.tournament.findUnique({ where: { id: tournamentId }, select: { formatConfig: true } });
     let parsedConfig = {};
-    if (tournament?.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_) {} }
+    if (tournament?.formatConfig) { try { parsedConfig = JSON.parse(tournament.formatConfig); } catch (_e) { /* malformed JSON fallback */ } }
     delete parsedConfig.advancedAt;
     await tx.tournament.update({ where: { id: tournamentId }, data: { formatConfig: JSON.stringify(parsedConfig) } });
   });

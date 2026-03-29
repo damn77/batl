@@ -202,7 +202,7 @@ function resolveTiedGroup(tiedGroup, startPos, allMatches, overrideParsed, resul
     return;
   }
 
-  const endPos = startPos + tiedGroup.length - 1;
+  const _endPos = startPos + tiedGroup.length - 1;
   const subsetIds = tiedGroup.map(e => e.entity.id);
 
   // ── Level 2: Head-to-head mini-table ──
@@ -580,7 +580,6 @@ export function computeGroupStandings(entities, matches, override) {
 
   // Sort by wins descending first
   const sortedByWins = [...statsArray].sort((a, b) => b.wins - a.wins);
-  const winGroups = groupByKey(sortedByWins, e => e.wins);
 
   // Initialize metadata
   const entries = sortedByWins.map(s => ({
