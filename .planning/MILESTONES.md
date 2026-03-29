@@ -1,10 +1,33 @@
 # Milestones
 
+## v1.5 Group & Combined Tournaments (Shipped: 2026-03-29)
+
+**Phases completed:** 6 phases (27–31, 30.1), 17 plans
+**Timeline:** 14 days (2026-03-15 → 2026-03-29)
+**Commits:** 126
+
+**Delivered:** Group stage tournaments (round-robin) and combined format (groups → knockout brackets) with configurable advancement rules, group formation via seeded snake draft, standings with multi-level tiebreakers, cross-table match visualization, and group placement points.
+
+**Key accomplishments:**
+
+- Group formation with snake-draft seeding, round-robin schedule generation, and manual swap UI
+- Group match play with result entry, lifecycle guards, accordion visualization, and doubles support
+- 6-level tiebreaker chain with Kahn's cycle detection, manual organizer resolution, and stale override warnings
+- Combined format advancement: waterfall service, 5-level cross-group ranking, atomic SECONDARY bracket generation
+- N×N head-to-head cross-table with perspective-correct scores, bidirectional cross-highlighting, and tabbed responsive layout
+- Group placement points with knockout supersede for advancing players, GROUP-only tournament end-to-end
+
+**Requirements:** 53/53 v1.5 requirements complete (GFORM-01–07, GPLAY-01–05, GVIEW-01–05, GSTAND-01–06, COMB-01–09, ADV-01–04, PTS-01–04, CROSS-01–10)
+**Audit:** Passed — 1 non-critical integration gap (deleteGroupTieOverride dead code)
+
+---
+
 ## v1.4 UI Rework & Mobile Design (Shipped: 2026-03-15)
 
 **Phases completed:** 7 phases, 11 plans, 5 tasks
 
 **Key accomplishments:**
+
 - (none recorded)
 
 ---
@@ -19,6 +42,7 @@
 **Delivered:** Manual bracket draw for organizer-controlled player placement, tournament copy/delete/revert lifecycle actions, admin access parity with organizer role, and integration bug fixes for format filtering and player count guards.
 
 **Key accomplishments:**
+
 - Manual bracket draw — empty bracket generation with position-by-position player assignment via dropdowns and start-gate validation
 - Tournament copy — one-click duplication of tournament config (category, rules, format, location, capacity) into new SCHEDULED tournament
 - Tournament deletion with cascading cleanup (registrations, draw, results) and ranking recalculation for completed tournaments
@@ -41,6 +65,7 @@
 **Delivered:** Real league data seeding — all seed scripts now populate 34 real BATL players with linked accounts, 18 mixed doubles pairs, realistic ranking data, and the ProSet location, replacing all prototype placeholder values.
 
 **Key accomplishments:**
+
 - Seeded 34 real BATL league players (18 male, 16 female) with linked user accounts (ADMIN + ORGANIZER)
 - Created 18 mixed doubles pairs in Mixed Doubles Open category with zero-point rankings
 - Consolidated all locations to "ProSet" and removed 4 generic placeholder locations
@@ -62,6 +87,7 @@
 **Delivered:** Consolation bracket system — MATCH_2 tournaments guarantee every player at least 2 real matches via auto-generated consolation brackets, loser routing, bracket progression, result entry with cascade recalculation, and consolation point awards.
 
 **Key accomplishments:**
+
 - Match Guarantee configuration (MATCH_2) with consolation bracket auto-generation at draw time (mirror draw)
 - Automatic loser routing to consolation with real-match counting (BYE/walkover exclusion)
 - Consolation bracket progression, opt-out (self-service + organizer), and tournament completion gating
@@ -83,6 +109,7 @@
 **Delivered:** Full tournament execution loop — players submit format-aware match results, organizer starts the tournament, knockout bracket advances automatically, and match history is publicly visible on player profiles.
 
 **Key accomplishments:**
+
 - Format-aware match result submission (sets, tiebreak, special outcomes) with organizer-lock preventing player edits after organizer writes
 - Seeded bracket draw generation — close registration, generate atomically, swap slots, save Bracket/Round/Match DB records
 - Tournament lifecycle engine — start tournament (SCHEDULED→IN_PROGRESS), auto-advance knockout winners, auto-complete on final match
@@ -92,4 +119,3 @@
 **Requirements:** 19/19 v1 requirements complete (MATCH-01–05, DRAW-01–08, LIFE-01–04, STATS-01–02)
 
 ---
-
