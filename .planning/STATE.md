@@ -56,9 +56,10 @@ None.
 | 8 | Fix Draw Generation player count not updating on registration changes | 2026-03-15 | abc4b6e | [8-fix-draw-generation-player-count-not-upd](./quick/8-fix-draw-generation-player-count-not-upd/) |
 | 9 | Fix login always failing on first attempt after server start | 2026-03-15 | 665c2d0 | [9-fix-login-always-failing-on-first-attemp](./quick/9-fix-login-always-failing-on-first-attemp/) |
 | s51 | Add format column to tournament list (desktop table + mobile badge) | 2026-03-17 | f23b145 | [260317-s51-add-format-type-to-the-tournament-list-a](./quick/260317-s51-add-format-type-to-the-tournament-list-a/) |
+| 260329-4s4 | Add CI pipeline status checking (post-push hook + pre-PR gate) | 2026-03-29 | 3c7fa2d | [260329-4s4-add-github-mcp-server-for-pipeline-statu](./quick/260329-4s4-add-github-mcp-server-for-pipeline-statu/) |
 
 ## Session Continuity
 
 Last session: 2026-03-29
-Stopped at: Milestone v1.5 archived
+Stopped at: Quick task 260329-4s4 complete
 Resume file: None
