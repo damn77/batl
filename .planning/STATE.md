@@ -4,8 +4,8 @@ milestone: v1.5
 milestone_name: Group & Combined Tournaments
 status: verifying
 stopped_at: Completed 31-02-PLAN.md
-last_updated: "2026-03-28T23:51:29.970Z"
-last_activity: 2026-03-28
+last_updated: "2026-03-29T00:01:34.773Z"
+last_activity: 2026-03-29
 progress:
   total_phases: 13
   completed_phases: 13
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 ## Current Position
 
-Phase: 31 (points-integration-and-group-only-format) — EXECUTING
-Plan: 2 of 2
+Phase: 31
+Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-03-28
+Last activity: 2026-03-29
 
 Progress: [░░░░░░░░░░] 0%
 
