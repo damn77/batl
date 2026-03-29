@@ -27,7 +27,7 @@ const TournamentRulesSetupPage = () => {
   });
   const [scoringRules, setScoringRules] = useState({
     formatType: 'SETS',
-    winningSets: 2,
+    winningSets: 1,
     advantageRule: 'ADVANTAGE',
     tiebreakTrigger: '6-6'
   });
@@ -130,6 +130,7 @@ const TournamentRulesSetupPage = () => {
       if (response.success) {
         setSuccess(t('messages.formatSavedSuccess'));
         setTimeout(() => setSuccess(''), 3000);
+        return true;
       }
     } catch (err) {
       const errorMsg = err.message || t('errors.failedToSaveTournamentFormat');
@@ -142,6 +143,7 @@ const TournamentRulesSetupPage = () => {
     } finally {
       setSaving(false);
     }
+    return false;
   };
 
   const handleSaveScoringRules = async (skipWarning = false) => {
@@ -166,19 +168,25 @@ const TournamentRulesSetupPage = () => {
       if (response.success) {
         setSuccess(t('messages.scoringRulesSavedSuccess'));
         setTimeout(() => setSuccess(''), 3000);
+        return true;
       }
     } catch (err) {
       setError(err.message || t('errors.failedToSaveScoringRules'));
     } finally {
       setSaving(false);
     }
+    return false;
   };
 
   const handleSaveAll = async () => {
+    let formatOk = true;
     if (!hasMatches) {
-      await handleSaveFormat();
+      formatOk = await handleSaveFormat();
     }
-    await handleSaveScoringRules();
+    const rulesOk = await handleSaveScoringRules();
+    if (formatOk && rulesOk) {
+      navigate('/organizer/tournaments');
+    }
   };
 
   // T102-T103: Modal confirmation handlers

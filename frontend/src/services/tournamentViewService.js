@@ -242,6 +242,70 @@ export const useMatches = (id, filters = {}, shouldFetch = false, refreshKey = 0
 };
 
 /**
+ * Get group standings with tiebreaker metadata
+ * @param {string} tournamentId - Tournament UUID
+ * @param {string} groupId - Group UUID
+ * @returns {Promise} Standings data
+ */
+export const getGroupStandings = async (tournamentId, groupId) => {
+  const response = await apiClient.get(`/v1/tournaments/${tournamentId}/groups/${groupId}/standings`);
+  return response.data.data;
+};
+
+/**
+ * Save manual tie resolution override
+ * @param {string} tournamentId - Tournament UUID
+ * @param {string} groupId - Group UUID
+ * @param {Array} positions - [{ entityId, position }]
+ * @returns {Promise} Updated standings data
+ */
+export const saveGroupTieOverride = async (tournamentId, groupId, positions) => {
+  const response = await apiClient.post(`/v1/tournaments/${tournamentId}/groups/${groupId}/standings/override`, { positions });
+  return response.data.data;
+};
+
+/**
+ * Delete manual tie resolution override
+ * @param {string} tournamentId - Tournament UUID
+ * @param {string} groupId - Group UUID
+ * @returns {Promise} Recalculated standings data
+ */
+export const deleteGroupTieOverride = async (tournamentId, groupId) => {
+  const response = await apiClient.delete(`/v1/tournaments/${tournamentId}/groups/${groupId}/standings/override`);
+  return response.data.data;
+};
+
+/**
+ * SWR hook for group standings with tiebreaker metadata
+ * @param {string} tournamentId - Tournament UUID
+ * @param {string} groupId - Group UUID
+ * @param {boolean} shouldFetch - Only fetch when true
+ * @returns {Object} { standings, unresolvedTies, hasManualOverride, overrideIsStale, isLoading, isError, mutate }
+ */
+export const useGroupStandings = (tournamentId, groupId, shouldFetch = true) => {
+  const { data, error, mutate } = useSWR(
+    tournamentId && groupId && shouldFetch
+      ? `/tournaments/${tournamentId}/groups/${groupId}/standings`
+      : null,
+    () => getGroupStandings(tournamentId, groupId),
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000
+    }
+  );
+  return {
+    standings: data?.standings ?? [],
+    unresolvedTies: data?.unresolvedTies ?? [],
+    hasManualOverride: data?.hasManualOverride ?? false,
+    overrideIsStale: data?.overrideIsStale ?? false,
+    isLoading: !error && !data && shouldFetch,
+    isError: error,
+    mutate
+  };
+};
+
+/**
  * Revert a tournament to SCHEDULED — deletes draw and reopens registration (REVERT-01)
  * @param {string} id - Tournament UUID
  * @returns {Promise} Updated tournament

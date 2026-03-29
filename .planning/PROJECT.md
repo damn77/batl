@@ -4,7 +4,7 @@
 
 BATL is a mobile-first web application for managing amateur tennis league tournaments end-to-end. Organizers create and run tournaments (registration, seeded draws, results) from their phone at courtside, and players self-report match results, view their standings, and track their match history — replacing the WhatsApp groups and spreadsheets that amateur leagues currently depend on.
 
-The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee), ensuring every player gets at least 2 real matches with automated loser routing, bracket progression, and consolation point awards. As of v1.3, organizers can also manually assign players to bracket positions, copy tournament configurations, delete/revert tournaments, and admin users have full organizer parity. As of v1.4, the entire UI is mobile-responsive with bracket-first tournament views, touch-friendly score entry, and app-wide 375px viewport support.
+The league is organized by **categories** (gender × age group × tournament type: singles/doubles). Tournaments belong to a category; points accumulate across tournaments within a season (calendar year) into per-category rankings. As of v1.1, knockout tournaments support consolation brackets (MATCH_2 guarantee). As of v1.3, organizers can manually draw, copy, delete, and revert tournaments. As of v1.4, the entire UI is mobile-responsive. As of v1.5, tournaments support GROUP (round-robin) and COMBINED (groups → knockout brackets) formats with snake-draft group formation, 6-level tiebreakers, cross-table match visualization, configurable advancement rules, and group placement points.
 
 ## Core Value
 
@@ -79,11 +79,21 @@ A complete tournament runs from registration to final standings without the orga
 - ✓ Organizer mobile support: segmented mode toggle, stacked confirmation buttons — v1.4 (ORG-01–02)
 - ✓ App-wide responsive: overflow prevention, column hiding, card layouts, dashboard quick links — v1.4 (RESP-01–08)
 
-### Active
-
 <!-- v1.5: Group & Combined Tournaments -->
 
-(Defined in REQUIREMENTS.md — see milestone requirements)
+- ✓ Group formation with snake-draft seeding and balanced group validation — v1.5 (GFORM-01–07)
+- ✓ Round-robin schedule generation with circle method — v1.5 (GPLAY-01–05)
+- ✓ Group match result entry with lifecycle guards and format rule compliance — v1.5 (GPLAY-01–05)
+- ✓ Group visualization with standings tables, match grids, and completion progress — v1.5 (GVIEW-01–05)
+- ✓ 6-level tiebreaker chain with head-to-head, cycle detection, manual resolution — v1.5 (GSTAND-01–06)
+- ✓ Combined format: group-to-knockout advancement with spillover selection — v1.5 (COMB-01–09, ADV-01–04)
+- ✓ Cross-table N×N match results grid with bidirectional cross-highlighting — v1.5 (CROSS-01–10)
+- ✓ Group placement points with knockout supersede for advancing players — v1.5 (PTS-01–04)
+- ✓ GROUP-only tournament end-to-end lifecycle — v1.5 (GVIEW-05)
+
+### Active
+
+(No active requirements — next milestone not yet planned)
 
 ### Future (v1.6+)
 
@@ -113,10 +123,11 @@ A complete tournament runs from registration to final standings without the orga
 - **v1.2 shipped 2026-03-04** — real league data seeding with 34 players, 18 mixed doubles pairs, realistic rankings, all scripts referencing real players and ProSet
 - **v1.3 shipped 2026-03-06** — manual bracket draw, tournament copy/delete/revert, admin access parity, integration fixes
 - **v1.4 shipped 2026-03-15** — mobile-first UI rework: Offcanvas navigation, bracket-first tournament view, touch-friendly score entry, app-wide responsive layout across all pages
-- **15 features delivered** (001–011 + v1.0–v1.4 milestone phases); ~22,300 LOC frontend, architecture is stable and well-tested
+- **v1.5 shipped 2026-03-29** — GROUP and COMBINED tournament formats: snake-draft group formation, round-robin matches, 6-level tiebreakers with cycle detection, combined format advancement (groups → knockout), cross-table visualization, group placement points
+- **6 milestones delivered** (v1.0–v1.5), 31 phases; architecture is stable and well-tested
 - Organizer and player roles are both active users of the app; admin manages configuration
 - Scoring is format-dependent: sets (e.g. 6:4, 7:5), match-level (e.g. 7:5), or tiebreak-only depending on tournament rules
-- Group, Swiss, and Combined tournament formats have DB support but no result entry or visualization yet — targeted for v1.2+
+- All three tournament formats operational: KNOCKOUT (with consolation), GROUP (round-robin), COMBINED (groups → knockout brackets)
 - Match result resubmission supports cascade-clear with dry-run verification and winner-lock for non-organizers
 
 ## Constraints
@@ -159,23 +170,18 @@ A complete tournament runs from registration to final standings without the orga
 | Global app.css with CSS custom properties | Design tokens for spacing, typography, density overrides | ✓ Good — consistent styling, single source of truth |
 | inputMode="numeric" over type="number" for score inputs | iOS shows integer-only keypad without spinner buttons | ✓ Good — mobile-specific UX improvement |
 | PlayerProfilePage merged into PlayerPublicProfilePage | Dead file found during audit — responsive changes applied to wrong file, caught by integration checker | ⚠️ Revisit — gap closure phase 26 fixed it |
-
-## Current Milestone: v1.5 Group & Combined Tournaments
-
-**Goal:** Implement group stage tournaments (round-robin) and combined format (groups → knockout brackets) with configurable advancement rules, group formation via seeded snake draft, and full singles/doubles support.
-
-**Target features:**
-- Group stage: round-robin matches within groups, result entry, standings with multi-level tiebreakers
-- Group formation: configurable seeded rounds (snake draft by ranking) + random fill, balanced group validation
-- Group visualization: standings tables, match grids, result entry (extending existing UX patterns)
-- Combined format: groups feeding into one or more knockout brackets with position-based advancement
-- Advancement configuration UI: organizer defines which group positions go to which knockout bracket, including "best of N" logic for odd-group spillover
-- Points: group placement points for non-advancing players, knockout points supersede for advancing players
-- Singles/doubles: all group and combined functionality works for both players and pairs
+| Snake-draft group formation with circle-method scheduling | Round-robin needs balanced groups + complete fixture generation in one atomic operation | ✓ Good — reliable group generation |
+| 6-level tiebreaker with Kahn's algorithm for cycle detection | H2H creates circular locks (A>B>C>A); need deterministic fallthrough | ✓ Good — no non-deterministic ordering |
+| SECONDARY BracketType enum (not CONSOLATION reuse) | Advancement brackets have different lifecycle/display rules than consolation | ✓ Good — clean separation of concerns |
+| window.location.reload() after advancement/revert | SWR cache invalidation too complex for format structure changes | ⚠️ Revisit — works but inelegant |
+| Cross-table entities derived from match participants, not group roster | Match participants are authoritative; roster can diverge | ✓ Good — correct data source |
+| Group placement points use groupSize as participantCount | Each group awards points independently based on its own size | ✓ Good — fair per-group scoring |
 
 ## Current State
 
-v1.4 shipped. All 5 milestones complete (v1.0–v1.4). 26 phases across 5 milestones. Full tournament lifecycle operational with mobile-first UI. v1.5 milestone started — group and combined tournaments.
+v1.5 shipped. All 6 milestones delivered (v1.0–v1.5). 31 phases across 6 milestones. Full tournament lifecycle operational: KNOCKOUT (with consolation/MATCH_2), GROUP (round-robin with tiebreakers), and COMBINED (groups → knockout brackets with advancement). Mobile-first UI, cross-table match visualization, group placement points.
+
+Next milestone not yet planned.
 
 ---
-*Last updated: 2026-03-15 after v1.5 milestone start*
+*Last updated: 2026-03-29 after v1.5 milestone completion*

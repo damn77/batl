@@ -116,11 +116,12 @@ export const updateTournamentPointConfig = async (id, config) => {
 /**
  * Calculate and award points for a completed tournament
  * @param {string} id - Tournament UUID
- * @param {Object} results - { results: [{ playerId/pairId, placement, finalRoundReached }] }
+ * @param {Object|null} results - { results: [...] } for KNOCKOUT, or null for GROUP/COMBINED (backend auto-derives)
  * @returns {Promise} Calculation result summary
  */
-export const calculateTournamentPoints = async (id, results) => {
-  const response = await apiClient.post(`/v1/tournaments/${id}/calculate-points`, results);
+export const calculateTournamentPoints = async (id, results = null) => {
+  const body = results ? { results } : {};
+  const response = await apiClient.post(`/v1/tournaments/${id}/calculate-points`, body);
   return response.data.data;
 };
 

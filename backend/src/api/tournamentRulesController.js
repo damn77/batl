@@ -40,14 +40,35 @@ export async function updateTournamentFormat(req, res, next) {
           }
         });
       }
-      if (formatType === 'COMBINED' && (!formatConfig.groupSize || !formatConfig.advancePerGroup)) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: 'INVALID_FORMAT_CONFIG',
-            message: 'Group size and advance per group are required for COMBINED format'
-          }
-        });
+      if (formatType === 'COMBINED') {
+        if (!formatConfig.groupSize) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_FORMAT_CONFIG',
+              message: 'Group size is required for COMBINED format'
+            }
+          });
+        }
+        const advMode = formatConfig.advancementMode || 'perGroup';
+        if (advMode === 'perGroup' && !formatConfig.advancePerGroup) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_FORMAT_CONFIG',
+              message: 'Advance per group is required when using per-group advancement mode'
+            }
+          });
+        }
+        if (advMode === 'perBracket' && !formatConfig.mainBracketSize) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_FORMAT_CONFIG',
+              message: 'Main bracket size is required when using per-bracket advancement mode'
+            }
+          });
+        }
       }
     }
 

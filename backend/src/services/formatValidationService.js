@@ -52,7 +52,7 @@ export function canDivideIntoGroups(playerCount, groupSize) {
  * @returns {Object} Validation result { valid: boolean, message: string, knockoutPlayers: number }
  */
 export function validateAdvancementRules(formatConfig, playerCount) {
-  const { formatType, groupSize, advancePerGroup } = formatConfig;
+  const { formatType, groupSize, advancementMode = 'perGroup' } = formatConfig;
 
   if (formatType !== 'COMBINED') {
     return {
@@ -62,10 +62,10 @@ export function validateAdvancementRules(formatConfig, playerCount) {
     };
   }
 
-  if (!groupSize || !advancePerGroup) {
+  if (!groupSize) {
     return {
       valid: false,
-      message: 'Group size and advance per group are required for COMBINED format',
+      message: 'Group size is required for COMBINED format',
       knockoutPlayers: 0
     };
   }
@@ -80,11 +80,68 @@ export function validateAdvancementRules(formatConfig, playerCount) {
     };
   }
 
-  // Validate advancement count
-  if (advancePerGroup >= groupSize) {
+  const totalGroups = groupValidation.groups;
+
+  if (advancementMode === 'perBracket') {
+    // Per-bracket mode: validate mainBracketSize and optional secondaryBracketSize
+    const mainSize = formatConfig.mainBracketSize || 0;
+    const secondarySize = formatConfig.secondaryBracketSize || 0;
+
+    if (!mainSize || mainSize < 4) {
+      return {
+        valid: false,
+        message: 'Main bracket size must be at least 4 players',
+        knockoutPlayers: 0
+      };
+    }
+
+    if (mainSize > 128) {
+      return {
+        valid: false,
+        message: 'Main bracket size cannot exceed 128 players',
+        knockoutPlayers: 0
+      };
+    }
+
+    if (secondarySize > 0 && secondarySize < 4) {
+      return {
+        valid: false,
+        message: 'Secondary bracket size must be at least 4 players',
+        knockoutPlayers: 0
+      };
+    }
+
+    const totalAdvancing = mainSize + secondarySize;
+    if (totalAdvancing > playerCount) {
+      return {
+        valid: false,
+        message: `Cannot advance ${totalAdvancing} players — only ${playerCount} registered`,
+        knockoutPlayers: 0
+      };
+    }
+
+    return {
+      valid: true,
+      message: `${playerCount} players → ${totalGroups} groups of ${groupSize} → ${mainSize} to main${secondarySize ? `, ${secondarySize} to secondary` : ''} knockout`,
+      knockoutPlayers: mainSize + secondarySize
+    };
+  }
+
+  // perGroup mode: validate advancePerGroup
+  const { advancePerGroup } = formatConfig;
+
+  if (!advancePerGroup) {
     return {
       valid: false,
-      message: `Cannot advance ${advancePerGroup} players from a group of ${groupSize}. Advance count must be less than group size.`,
+      message: 'Advance per group is required for per-group advancement mode',
+      knockoutPlayers: 0
+    };
+  }
+
+  if (advancePerGroup > groupSize) {
+    return {
+      valid: false,
+      message: `Cannot advance ${advancePerGroup} players from a group of ${groupSize}. Advance count must not exceed group size.`,
       knockoutPlayers: 0
     };
   }
@@ -97,23 +154,30 @@ export function validateAdvancementRules(formatConfig, playerCount) {
     };
   }
 
-  const totalGroups = groupValidation.groups;
-  const knockoutPlayers = totalGroups * advancePerGroup;
+  const mainAdvancing = totalGroups * advancePerGroup;
+  const secondaryPerGroup = formatConfig.advancePerGroupSecondary || 0;
+  const secondaryAdvancing = totalGroups * secondaryPerGroup;
+  const knockoutPlayers = mainAdvancing + secondaryAdvancing;
 
-  // Validate that knockout players is a power of 2 (for single-elimination knockout)
-  const isPowerOfTwo = (n) => n > 0 && (n & (n - 1)) === 0;
-
-  if (!isPowerOfTwo(knockoutPlayers)) {
+  if (mainAdvancing < 4) {
     return {
       valid: false,
-      message: `Advancement rules result in ${knockoutPlayers} players for knockout stage, which is not a power of 2 (required for single-elimination). Adjust group size or advance count.`,
-      knockoutPlayers
+      message: `Main bracket needs at least 4 players. Currently: ${advancePerGroup} per group × ${totalGroups} groups = ${mainAdvancing}.`,
+      knockoutPlayers: 0
+    };
+  }
+
+  if (secondaryAdvancing > 0 && secondaryAdvancing < 4) {
+    return {
+      valid: false,
+      message: `Secondary bracket needs at least 4 players. Currently: ${secondaryPerGroup} per group × ${totalGroups} groups = ${secondaryAdvancing}.`,
+      knockoutPlayers: 0
     };
   }
 
   return {
     valid: true,
-    message: `${playerCount} players → ${totalGroups} groups of ${groupSize} → ${knockoutPlayers} players advance to knockout`,
+    message: `${playerCount} players → ${totalGroups} groups of ${groupSize} → ${mainAdvancing} to main${secondaryAdvancing ? `, ${secondaryAdvancing} to secondary` : ''} knockout`,
     knockoutPlayers
   };
 }

@@ -1,238 +1,506 @@
 // T075-T077: Group Standings Table Component - Displays group standings and matches
+// Plan 28-02: Extended with differential columns, clickable match rows, doubles support,
+// status-based match visibility, and mobile responsive column hiding.
+// Plan 29-03: Rewritten to consume backend-computed standings via SWR hook, removed
+// client-side computation, added tiebreaker criterion badges, tied-position ranges,
+// manual resolution UI, and stale override warning.
+// Plan 30.1-02: Restructured with responsive tabbed layout, CrossTable integration,
+// and bidirectional cross-highlighting between cross-table cells and match list rows.
 import { useState, useMemo } from 'react';
-import { Table, Alert, Spinner } from 'react-bootstrap';
-import { useMatches } from '../services/tournamentViewService';
+import { Tab, Nav, Table, Alert, Spinner, Badge, Button, Modal, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useMatches, useGroupStandings, saveGroupTieOverride } from '../services/tournamentViewService';
+import MatchResultModal from './MatchResultModal';
 import MatchResultDisplay from './MatchResultDisplay';
+import CrossTable from './CrossTable';
 
 /**
- * GroupStandingsTable - Displays group standings with wins/losses/points and matches
- * T076: Implements standings calculation (wins, losses, points, head-to-head sorting)
- * T077: Displays matches within group
+ * GroupStandingsTable - Displays group standings with wins/losses/differentials and matches
  *
  * @param {string} tournamentId - Tournament UUID
- * @param {Object} group - Group object with id, name, and players
+ * @param {Object} group - Group object with id, name, groupNumber, players, pairs
+ * @param {boolean} isOrganizer - Whether current user is organizer/admin
+ * @param {string|null} currentUserPlayerId - Current user's player profile ID (for participant check)
+ * @param {Object|null} scoringRules - { formatType, winningSets, winningTiebreaks }
+ * @param {string} tournamentStatus - Tournament status string (IN_PROGRESS, COMPLETED, etc.)
+ * @param {Object|null} advancementConfig - { advancePerGroup: number, advancePerGroupSecondary: number } for advancement badge display
  */
-const GroupStandingsTable = ({ tournamentId, group }) => {
-  const [showMatches, setShowMatches] = useState(false);
-
-  // T088-T089: Lazy load matches only when needed
-  const { matches, isLoading, isError } = useMatches(
+const GroupStandingsTable = ({
+  tournamentId,
+  group,
+  isOrganizer = false,
+  currentUserPlayerId = null,
+  scoringRules = null,
+  tournamentStatus = 'SCHEDULED',
+  advancementConfig = null
+}) => {
+  // Always fetch matches (no toggle gate on fetch)
+  const { matches, isLoading: matchesLoading, isError: matchesError, mutate: mutateMatches } = useMatches(
     tournamentId,
     { groupId: group.id },
-    showMatches
+    true // always fetch
   );
 
-  // T076: Calculate standings from matches
-  const standings = useMemo(() => {
-    if (!matches || matches.length === 0) {
-      // No matches yet - return players with zero stats
-      return (group.players || []).map((player, index) => ({
-        position: index + 1,
-        player,
-        played: 0,
-        wins: 0,
-        losses: 0,
-        setsWon: 0,
-        setsLost: 0,
-        gamesWon: 0,
-        gamesLost: 0,
-        points: 0
-      }));
-    }
+  // Fetch backend-computed standings with tiebreaker metadata
+  const {
+    standings, unresolvedTies, hasManualOverride, overrideIsStale,
+    isLoading: standingsLoading, isError: standingsError, mutate: mutateStandings
+  } = useGroupStandings(tournamentId, group.id, true);
 
-    // Initialize player stats
-    const playerStats = new Map();
-    (group.players || []).forEach(player => {
-      playerStats.set(player.id, {
-        player,
-        played: 0,
-        wins: 0,
-        losses: 0,
-        setsWon: 0,
-        setsLost: 0,
-        gamesWon: 0,
-        gamesLost: 0,
-        points: 0
-      });
-    });
+  // MatchResultModal state
+  const [selectedMatch, setSelectedMatch] = useState(null);
 
-    // Calculate stats from completed matches
-    matches.forEach(match => {
-      if (match.status !== 'COMPLETED' || !match.matchResult) return;
+  // Cross-highlighting state — matchId being hovered
+  const [highlightedMatchId, setHighlightedMatchId] = useState(null);
 
-      const player1Id = match.player1?.id;
-      const player2Id = match.player2?.id;
-      const result = match.matchResult;
+  // Manual resolution modal state
+  const [showResolveModal, setShowResolveModal] = useState(false);
+  const [resolvePositions, setResolvePositions] = useState({});
+  const [resolveSaving, setResolveSaving] = useState(false);
+  const [resolveError, setResolveError] = useState(null);
+  const [staleDismissed, setStaleDismissed] = useState(false);
 
-      if (!player1Id || !player2Id) return;
-
-      const stats1 = playerStats.get(player1Id);
-      const stats2 = playerStats.get(player2Id);
-
-      if (!stats1 || !stats2) return;
-
-      // Update played count
-      stats1.played++;
-      stats2.played++;
-
-      // Calculate set scores
-      const sets = result.sets || [];
-      let sets1 = 0, sets2 = 0;
-      let games1 = 0, games2 = 0;
-
-      sets.forEach(set => {
-        if (set.player1Score > set.player2Score) sets1++;
-        else sets2++;
-        games1 += set.player1Score;
-        games2 += set.player2Score;
-      });
-
-      // Update stats
-      stats1.setsWon += sets1;
-      stats1.setsLost += sets2;
-      stats1.gamesWon += games1;
-      stats1.gamesLost += games2;
-
-      stats2.setsWon += sets2;
-      stats2.setsLost += sets1;
-      stats2.gamesWon += games2;
-      stats2.gamesLost += games1;
-
-      // Determine winner and update wins/losses
-      if (result.winner === 'PLAYER1') {
-        stats1.wins++;
-        stats1.points += 2; // 2 points for win
-        stats2.losses++;
-      } else if (result.winner === 'PLAYER2') {
-        stats2.wins++;
-        stats2.points += 2; // 2 points for win
-        stats1.losses++;
-      } else {
-        // Draw (if supported)
-        stats1.points += 1;
-        stats2.points += 1;
+  // Compute advancementMap from standings + advancementConfig
+  // Only populated when all group matches are in terminal state
+  const advancementMap = useMemo(() => {
+    if (!advancementConfig || !standings || standings.length === 0) return {};
+    const allComplete = matches && matches.length > 0 &&
+      matches.every(m => m.status === 'COMPLETED' || m.status === 'CANCELLED');
+    if (!allComplete) return {};
+    const map = {};
+    for (const entry of standings) {
+      if (entry.position <= advancementConfig.advancePerGroup) {
+        map[entry.entity.id] = 'MAIN';
+      } else if (entry.position <= advancementConfig.advancePerGroup + (advancementConfig.advancePerGroupSecondary || 0)) {
+        map[entry.entity.id] = 'SECONDARY';
       }
-    });
+    }
+    return map;
+  }, [advancementConfig, standings, matches]);
 
-    // Convert to array and sort
-    const standingsArray = Array.from(playerStats.values());
+  // Client-side participant check helper
+  function isMatchParticipant(match, playerId) {
+    if (!playerId) return false;
+    if (match.player1?.id === playerId || match.player2?.id === playerId) return true;
+    const members = [
+      match.pair1?.player1?.id, match.pair1?.player2?.id,
+      match.pair2?.player1?.id, match.pair2?.player2?.id
+    ];
+    return members.includes(playerId);
+  }
 
-    // Sort by: 1) Points, 2) Wins, 3) Head-to-head (TODO), 4) Set difference, 5) Game difference
-    standingsArray.sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
-      if (b.wins !== a.wins) return b.wins - a.wins;
-      const aSetDiff = a.setsWon - a.setsLost;
-      const bSetDiff = b.setsWon - b.setsLost;
-      if (bSetDiff !== aSetDiff) return bSetDiff - aSetDiff;
-      const aGameDiff = a.gamesWon - a.gamesLost;
-      const bGameDiff = b.gamesWon - b.gamesLost;
-      return bGameDiff - aGameDiff;
-    });
+  // Doubles detection and entity list (needed for modal position labels)
+  const isDoubles = (group.pairs?.length > 0);
+  const entities = isDoubles
+    ? (group.pairs || []).map(pair => ({
+        id: pair.id,
+        name: `${pair.player1?.name || '?'} / ${pair.player2?.name || '?'}`
+      }))
+    : (group.players || []).map(player => ({
+        id: player.id,
+        name: player.name
+      }));
 
-    // Add position
-    standingsArray.forEach((stats, index) => {
-      stats.position = index + 1;
-    });
+  // Manual resolution modal helpers
+  const openResolveModal = (tie) => {
+    const initial = {};
+    tie.entityIds.forEach(id => { initial[id] = ''; });
+    setResolvePositions(initial);
+    setResolveError(null);
+    setShowResolveModal(true);
+  };
 
-    return standingsArray;
-  }, [matches, group.players]);
+  const handleSaveResolution = async () => {
+    setResolveSaving(true);
+    setResolveError(null);
+    try {
+      const positions = Object.entries(resolvePositions).map(([entityId, pos]) => ({
+        entityId,
+        position: parseInt(pos, 10)
+      }));
+      await saveGroupTieOverride(tournamentId, group.id, positions);
+      await mutateStandings();
+      setShowResolveModal(false);
+      setStaleDismissed(false);
+    } catch (err) {
+      setResolveError(err.message || 'Could not save tie resolution. Please try again.');
+    } finally {
+      setResolveSaving(false);
+    }
+  };
+
+  // Check if all positions assigned uniquely
+  const allPositionsAssigned = Object.values(resolvePositions).every(v => v !== '') &&
+    new Set(Object.values(resolvePositions)).size === Object.keys(resolvePositions).length;
+
+  // Map tiebreaker criterion code to full label for tooltip
+  const getCriterionLabel = (criterion) => {
+    switch (criterion) {
+      case 'H2H': return 'Head-to-head';
+      case 'Set diff': return 'Set differential';
+      case 'Game diff': return 'Game differential';
+      case 'Fewest games': return 'Fewest total games';
+      case 'Manual': return 'Manual (organizer)';
+      default: return criterion;
+    }
+  };
+
+  // Handle cross-table cell click — open MatchResultModal with the clicked match
+  const handleCellClick = (match) => {
+    if (match) {
+      setSelectedMatch(match);
+    }
+  };
+
+  // Standings content (rendered in both desktop and mobile Standings tab)
+  const standingsContent = (
+    <div className="table-responsive mb-3">
+      {standingsLoading && (
+        <div className="text-center py-3">
+          <Spinner animation="border" size="sm" />
+          <p className="text-muted small mt-2">Loading standings...</p>
+        </div>
+      )}
+      {standingsError && (
+        <Alert variant="danger">Failed to load standings. Please try again.</Alert>
+      )}
+      {!standingsLoading && !standingsError && (
+        <>
+          <Table striped hover size="sm">
+            <thead className="table-light">
+              <tr>
+                <th style={{ width: '40px' }}>#</th>
+                <th>Player</th>
+                <th className="text-center">P</th>
+                <th className="text-center">W</th>
+                <th className="text-center">L</th>
+                <th className="text-center d-none d-sm-table-cell">Sets W-L</th>
+                <th className="text-center">S +/-</th>
+                <th className="text-center d-none d-sm-table-cell">Games W-L</th>
+                <th className="text-center">G +/-</th>
+              </tr>
+            </thead>
+            <tbody>
+              {standings.map((stats) => (
+                <tr key={stats.entity.id}>
+                  <td style={{ width: '40px' }}>
+                    <div style={{ width: '40px' }}>
+                      <span className={stats.tiedRange ? '' : 'fw-bold'}>
+                        {stats.tiedRange || stats.position}
+                      </span>
+                      {stats.tiebreakerCriterion && (
+                        <OverlayTrigger
+                          placement="right"
+                          trigger={['hover', 'focus', 'click']}
+                          overlay={
+                            <Tooltip>
+                              Resolved by: {getCriterionLabel(stats.tiebreakerCriterion)}
+                            </Tooltip>
+                          }
+                        >
+                          <Badge
+                            bg={stats.tiebreakerCriterion === 'Manual' ? 'warning' : 'secondary'}
+                            text={stats.tiebreakerCriterion === 'Manual' ? 'dark' : undefined}
+                            className="d-block"
+                            style={{ fontSize: '10px', cursor: 'help' }}
+                          >
+                            {stats.tiebreakerCriterion}
+                          </Badge>
+                        </OverlayTrigger>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <strong>{stats.entity.name}</strong>
+                    {advancementMap[stats.entity.id] === 'MAIN' && (
+                      <Badge bg="primary" className="ms-1" style={{ fontSize: '10px' }}>Main</Badge>
+                    )}
+                    {advancementMap[stats.entity.id] === 'SECONDARY' && (
+                      <Badge bg="secondary" className="ms-1" style={{ fontSize: '10px' }}>Secondary</Badge>
+                    )}
+                  </td>
+                  <td className="text-center">{stats.played}</td>
+                  <td className="text-center">{stats.wins}</td>
+                  <td className="text-center">{stats.losses}</td>
+                  <td className="text-center d-none d-sm-table-cell">{stats.setsWon}-{stats.setsLost}</td>
+                  <td className="text-center">{stats.setDiff > 0 ? '+' : ''}{stats.setDiff}</td>
+                  <td className="text-center d-none d-sm-table-cell">{stats.gamesWon}-{stats.gamesLost}</td>
+                  <td className="text-center">{stats.gameDiff > 0 ? '+' : ''}{stats.gameDiff}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <small className="text-muted">
+            P = Played, W = Wins, L = Losses, S +/- = Set differential, G +/- = Game differential
+          </small>
+        </>
+      )}
+    </div>
+  );
+
+  // Match list content (desktop: rendered below tabs, always visible; mobile: rendered in Matches tab)
+  // Desktop version includes cross-highlighting handlers; mobile version does not (touch devices)
+  const matchListContentDesktop = (
+    <div className="mt-3">
+      {matches && matches.length > 0 && (
+        <div className="mb-2">
+          <small className="text-muted fw-bold">
+            Matches ({matches.filter(m => m.status === 'COMPLETED').length}/{matches.length})
+          </small>
+        </div>
+      )}
+      {matchesLoading && (
+        <div className="text-center py-3">
+          <Spinner animation="border" size="sm" />
+          <p className="text-muted small mt-2">Loading matches...</p>
+        </div>
+      )}
+      {matchesError && (
+        <Alert variant="danger">Failed to load matches. Please try again.</Alert>
+      )}
+      {matches && matches.length > 0 && (
+        <div className="d-flex flex-column gap-1">
+          {matches.map(match => {
+            const isDoublesMatch = !!(match.pair1 || match.pair2);
+            const p1Name = isDoublesMatch
+              ? `${match.pair1?.player1?.name || '?'} / ${match.pair1?.player2?.name || '?'}`
+              : (match.player1?.name || 'TBD');
+            const p2Name = isDoublesMatch
+              ? `${match.pair2?.player1?.name || '?'} / ${match.pair2?.player2?.name || '?'}`
+              : (match.player2?.name || 'TBD');
+            const isHighlighted = highlightedMatchId === match.id;
+            return (
+              <div
+                key={match.id}
+                onClick={() => setSelectedMatch(match)}
+                onMouseEnter={() => setHighlightedMatchId(match.id)}
+                onMouseLeave={() => setHighlightedMatchId(null)}
+                style={{ cursor: 'pointer', minHeight: '44px' }}
+                className={`d-flex align-items-center gap-2 px-2 py-1 rounded border-bottom${isHighlighted ? ' cross-highlight' : ''}`}
+              >
+                <MatchResultDisplay match={match} compact />
+                {match.status === 'SCHEDULED' && (
+                  <span className="small">{p1Name} vs {p2Name}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {matches && matches.length === 0 && (
+        <Alert variant="info">No matches scheduled yet for this group.</Alert>
+      )}
+    </div>
+  );
+
+  // Mobile match list — same content but without hover handlers (touch devices don't use hover)
+  const matchListContentMobile = (
+    <div className="mt-3">
+      {matches && matches.length > 0 && (
+        <div className="mb-2">
+          <small className="text-muted fw-bold">
+            Matches ({matches.filter(m => m.status === 'COMPLETED').length}/{matches.length})
+          </small>
+        </div>
+      )}
+      {matchesLoading && (
+        <div className="text-center py-3">
+          <Spinner animation="border" size="sm" />
+          <p className="text-muted small mt-2">Loading matches...</p>
+        </div>
+      )}
+      {matchesError && (
+        <Alert variant="danger">Failed to load matches. Please try again.</Alert>
+      )}
+      {matches && matches.length > 0 && (
+        <div className="d-flex flex-column gap-1">
+          {matches.map(match => {
+            const isDoublesMatch = !!(match.pair1 || match.pair2);
+            const p1Name = isDoublesMatch
+              ? `${match.pair1?.player1?.name || '?'} / ${match.pair1?.player2?.name || '?'}`
+              : (match.player1?.name || 'TBD');
+            const p2Name = isDoublesMatch
+              ? `${match.pair2?.player1?.name || '?'} / ${match.pair2?.player2?.name || '?'}`
+              : (match.player2?.name || 'TBD');
+            return (
+              <div
+                key={match.id}
+                onClick={() => setSelectedMatch(match)}
+                style={{ cursor: 'pointer', minHeight: '44px' }}
+                className="d-flex align-items-center gap-2 px-2 py-1 rounded border-bottom"
+              >
+                <MatchResultDisplay match={match} compact />
+                {match.status === 'SCHEDULED' && (
+                  <span className="small">{p1Name} vs {p2Name}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {matches && matches.length === 0 && (
+        <Alert variant="info">No matches scheduled yet for this group.</Alert>
+      )}
+    </div>
+  );
 
   return (
     <div>
-      <h5 className="mb-3">{group.name || `Group ${group.groupNumber}`}</h5>
+      {/* Stale override warning (organizer only) */}
+      {isOrganizer && hasManualOverride && overrideIsStale && !staleDismissed && (
+        <Alert variant="warning" className="mb-2 d-flex align-items-center justify-content-between">
+          <span>Match result changed. Manual tie resolution for this group may be outdated.</span>
+          <div className="d-flex gap-2">
+            <Button variant="outline-secondary" size="sm" onClick={() => setStaleDismissed(true)}>Dismiss</Button>
+            <Button variant="primary" size="sm" onClick={() => setShowResolveModal(true)}>Re-resolve</Button>
+          </div>
+        </Alert>
+      )}
 
-      {/* Standings Table */}
-      <div className="table-responsive mb-4">
-        <Table striped hover size="sm">
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: '50px' }}>#</th>
-              <th>Player</th>
-              <th className="text-center">P</th>
-              <th className="text-center">W</th>
-              <th className="text-center">L</th>
-              <th className="text-center">Sets</th>
-              <th className="text-center">Games</th>
-              <th className="text-center">Pts</th>
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map((stats) => (
-              <tr key={stats.player.id}>
-                <td className="fw-bold">{stats.position}</td>
-                <td>
-                  <strong>{stats.player.name}</strong>
-                  {stats.position === 1 && <span className="ms-2">🥇</span>}
-                  {stats.position === 2 && <span className="ms-2">🥈</span>}
-                  {stats.position === 3 && <span className="ms-2">🥉</span>}
-                </td>
-                <td className="text-center">{stats.played}</td>
-                <td className="text-center">{stats.wins}</td>
-                <td className="text-center">{stats.losses}</td>
-                <td className="text-center">
-                  {stats.setsWon}-{stats.setsLost}
-                  <small className="text-muted ms-1">
-                    ({stats.setsWon - stats.setsLost > 0 ? '+' : ''}
-                    {stats.setsWon - stats.setsLost})
-                  </small>
-                </td>
-                <td className="text-center">
-                  {stats.gamesWon}-{stats.gamesLost}
-                  <small className="text-muted ms-1">
-                    ({stats.gamesWon - stats.gamesLost > 0 ? '+' : ''}
-                    {stats.gamesWon - stats.gamesLost})
-                  </small>
-                </td>
-                <td className="text-center fw-bold">{stats.points}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-        <small className="text-muted">
-          P = Played, W = Wins, L = Losses, Pts = Points (2 for win)
-        </small>
+      {/* Unresolved tie alert banners (organizer only) */}
+      {isOrganizer && unresolvedTies.length > 0 && unresolvedTies.map((tie, i) => (
+        <Alert key={i} variant="warning" className="mb-2 d-flex align-items-center justify-content-between">
+          <div>
+            <strong>Tie at positions {tie.range}</strong> — All tiebreaker criteria exhausted.
+          </div>
+          <Button variant="primary" size="sm" onClick={() => openResolveModal(tie)}>
+            Resolve tie
+          </Button>
+        </Alert>
+      ))}
+
+      {/* Desktop layout: 2 tabs (Results/Standings) + match list always below (visible at sm+) */}
+      <div className="d-none d-sm-block">
+        <Tab.Container defaultActiveKey="results" onSelect={() => setHighlightedMatchId(null)}>
+          <Nav variant="tabs" className="mb-2">
+            <Nav.Item>
+              <Nav.Link eventKey="results">Results</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="standings">Standings</Nav.Link>
+            </Nav.Item>
+          </Nav>
+          <Tab.Content>
+            <Tab.Pane eventKey="results">
+              <CrossTable
+                entities={entities}
+                matches={matches}
+                isDoubles={isDoubles}
+                scoringRules={scoringRules}
+                highlightedMatchId={highlightedMatchId}
+                onCellHover={(matchId) => setHighlightedMatchId(matchId)}
+                onCellLeave={() => setHighlightedMatchId(null)}
+                onCellClick={handleCellClick}
+              />
+            </Tab.Pane>
+            <Tab.Pane eventKey="standings">
+              {standingsContent}
+            </Tab.Pane>
+          </Tab.Content>
+        </Tab.Container>
+        {/* Match list always visible below tabs on desktop */}
+        {matchListContentDesktop}
       </div>
 
-      {/* T077: Matches Section */}
-      <div className="mt-4">
-        <button
-          className="btn btn-outline-secondary btn-sm mb-3"
-          onClick={() => setShowMatches(!showMatches)}
-        >
-          {showMatches ? '▼' : '▶'} {showMatches ? 'Hide' : 'Show'} Matches
-        </button>
-
-        {showMatches && (
-          <>
-            {isLoading && (
-              <div className="text-center py-3">
-                <Spinner animation="border" size="sm" />
-                <p className="text-muted small mt-2">Loading matches...</p>
-              </div>
-            )}
-
-            {isError && (
-              <Alert variant="danger">
-                Failed to load matches. Please try again.
-              </Alert>
-            )}
-
-            {matches && matches.length > 0 && (
-              <div className="d-flex flex-column gap-2">
-                {matches.map((match) => (
-                  <MatchResultDisplay key={match.id} match={match} />
-                ))}
-              </div>
-            )}
-
-            {matches && matches.length === 0 && (
-              <Alert variant="info">
-                No matches scheduled yet for this group.
-              </Alert>
-            )}
-          </>
-        )}
+      {/* Mobile layout: 3 tabs (Results/Standings/Matches) (visible at xs only) */}
+      <div className="d-sm-none">
+        <Tab.Container defaultActiveKey="results" onSelect={() => setHighlightedMatchId(null)}>
+          <Nav variant="tabs" className="mb-2">
+            <Nav.Item>
+              <Nav.Link eventKey="results">Results</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="standings">Standings</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="matches">Matches</Nav.Link>
+            </Nav.Item>
+          </Nav>
+          <Tab.Content>
+            <Tab.Pane eventKey="results">
+              <CrossTable
+                entities={entities}
+                matches={matches}
+                isDoubles={isDoubles}
+                scoringRules={scoringRules}
+                highlightedMatchId={null}
+                onCellHover={() => {}}
+                onCellLeave={() => {}}
+                onCellClick={handleCellClick}
+              />
+            </Tab.Pane>
+            <Tab.Pane eventKey="standings">
+              {standingsContent}
+            </Tab.Pane>
+            <Tab.Pane eventKey="matches">
+              {matchListContentMobile}
+            </Tab.Pane>
+          </Tab.Content>
+        </Tab.Container>
       </div>
+
+      {/* MatchResultModal — opens when a match row or cross-table cell is tapped */}
+      {selectedMatch && (
+        <MatchResultModal
+          match={selectedMatch}
+          onClose={() => setSelectedMatch(null)}
+          isOrganizer={isOrganizer}
+          isParticipant={isMatchParticipant(selectedMatch, currentUserPlayerId)}
+          scoringRules={scoringRules}
+          mutate={() => { mutateMatches(); mutateStandings(); }}
+        />
+      )}
+
+      {/* Manual Tie Resolution Modal */}
+      <Modal show={showResolveModal} onHide={() => setShowResolveModal(false)} fullscreen="sm-down">
+        <Modal.Header closeButton>
+          <Modal.Title>Resolve Tie &mdash; Group {group.groupNumber}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {Object.keys(resolvePositions).map((entityId) => {
+            const entry = standings.find(s => s.entity.id === entityId);
+            const tieRange = entry?.tiedRange;
+            const positions = tieRange ? (() => {
+              const [start, end] = tieRange.split('-').map(Number);
+              return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+            })() : [];
+            const usedPositions = Object.entries(resolvePositions)
+              .filter(([id, pos]) => id !== entityId && pos !== '')
+              .map(([, pos]) => parseInt(pos, 10));
+            const availablePositions = positions.filter(p => !usedPositions.includes(p));
+            // Fallback: look up entity name from local entities list if not in standings
+            const entityName = entry?.entity.name ||
+              entities.find(e => e.id === entityId)?.name ||
+              entityId;
+
+            return (
+              <Form.Group key={entityId} className="mb-3">
+                <Form.Label>Position for {entityName}</Form.Label>
+                <Form.Select
+                  value={resolvePositions[entityId]}
+                  onChange={(e) => setResolvePositions(prev => ({ ...prev, [entityId]: e.target.value }))}
+                  style={{ minHeight: '44px' }}
+                >
+                  <option value="">Select position...</option>
+                  {availablePositions.map(pos => (
+                    <option key={pos} value={pos}>{pos}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            );
+          })}
+          {resolveError && (
+            <Alert variant="danger" className="mt-2">{resolveError}</Alert>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={() => setShowResolveModal(false)}>
+            Keep Standings
+          </Button>
+          <Button variant="primary" onClick={handleSaveResolution} disabled={!allPositionsAssigned || resolveSaving}>
+            {resolveSaving ? 'Saving...' : 'Save Resolution'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

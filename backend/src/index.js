@@ -21,6 +21,9 @@ import seedingPlacementRoutes from './api/routes/seedingPlacementRoutes.js';
 import pointTableRoutes from './api/routes/pointTableRoutes.js';
 import bracketRoutes from './api/routes/bracketRoutes.js';
 import matchRoutes from './api/routes/matchRoutes.js'; // Feature 01: Match result submission
+import groupDrawRoutes from './api/routes/groupDrawRoutes.js'; // Feature 27: Group draw generation
+import groupStandingsRoutes from './api/routes/groupStandingsRoutes.js'; // Feature 29: Group standings and tiebreakers
+import advancementRoutes from './api/routes/advancementRoutes.js'; // Phase 30: Advancement (preview, confirm, revert)
 import {
   tournamentRulesRouter,
   matchRulesRouter,
@@ -147,6 +150,9 @@ app.use('/api/v1/brackets', bracketRoutes); // Feature 009: Bracket generation (
 app.use('/api/v1/rounds', roundRulesRouter);
 app.use('/api/v1/matches', matchOverridesRouter);
 app.use('/api/v1/matches', matchRoutes); // Feature 01: Match result submission (PATCH /:id/result)
+app.use('/api/v1/tournaments', groupDrawRoutes); // Feature 27: Group draw generation and swap
+app.use('/api/v1/tournaments', groupStandingsRoutes); // Feature 29: Group standings and tiebreakers
+app.use('/api/v1/tournaments', advancementRoutes); // Phase 30: Advancement (preview, confirm, revert)
 
 // 404 handler - must be after all routes
 app.use(notFoundHandler);

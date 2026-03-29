@@ -620,7 +620,7 @@ export async function getFormatStructure(id) {
       break;
 
     case 'GROUP':
-      // Fetch groups with participants
+      // Fetch groups with participants (singles and doubles support)
       result.groups = await prisma.group.findMany({
         where: { tournamentId: id },
         include: {
@@ -631,6 +631,13 @@ export async function getFormatStructure(id) {
                   id: true,
                   name: true
                 }
+              },
+              pair: {
+                select: {
+                  id: true,
+                  player1: { select: { id: true, name: true } },
+                  player2: { select: { id: true, name: true } }
+                }
               }
             },
             orderBy: { seedPosition: 'asc' }
@@ -639,10 +646,11 @@ export async function getFormatStructure(id) {
         orderBy: { groupNumber: 'asc' }
       });
 
-      // Transform groupParticipants to players array for frontend
+      // Transform groupParticipants to players/pairs arrays for frontend
       result.groups = result.groups.map(group => ({
         ...group,
-        players: group.groupParticipants?.map(gp => gp.player) || []
+        players: group.groupParticipants?.filter(gp => gp.player).map(gp => gp.player) || [],
+        pairs: group.groupParticipants?.filter(gp => gp.pair).map(gp => gp.pair) || []
       }));
       break;
 
@@ -692,7 +700,7 @@ export async function getFormatStructure(id) {
     }
 
     case 'COMBINED':
-      // Fetch groups, brackets, and rounds
+      // Fetch groups, brackets, and rounds (singles and doubles support)
       result.groups = await prisma.group.findMany({
         where: { tournamentId: id },
         include: {
@@ -703,6 +711,13 @@ export async function getFormatStructure(id) {
                   id: true,
                   name: true
                 }
+              },
+              pair: {
+                select: {
+                  id: true,
+                  player1: { select: { id: true, name: true } },
+                  player2: { select: { id: true, name: true } }
+                }
               }
             },
             orderBy: { seedPosition: 'asc' }
@@ -711,10 +726,11 @@ export async function getFormatStructure(id) {
         orderBy: { groupNumber: 'asc' }
       });
 
-      // Transform groupParticipants to players array for frontend
+      // Transform groupParticipants to players/pairs arrays for frontend
       result.groups = result.groups.map(group => ({
         ...group,
-        players: group.groupParticipants?.map(gp => gp.player) || []
+        players: group.groupParticipants?.filter(gp => gp.player).map(gp => gp.player) || [],
+        pairs: group.groupParticipants?.filter(gp => gp.pair).map(gp => gp.pair) || []
       }));
 
       result.brackets = await prisma.bracket.findMany({
@@ -1197,7 +1213,8 @@ export async function revertTournament(id) {
   // SCHEDULED with no draw cannot be reverted
   if (tournament.status === 'SCHEDULED') {
     const bracketCount = await prisma.bracket.count({ where: { tournamentId: id } });
-    if (bracketCount === 0) {
+    const groupCount = await prisma.group.count({ where: { tournamentId: id } });
+    if (bracketCount === 0 && groupCount === 0) {
       throw createHttpError(409, 'Tournament has no draw to revert', {
         code: 'NO_DRAW_TO_REVERT'
       });
@@ -1209,6 +1226,14 @@ export async function revertTournament(id) {
     await tx.match.deleteMany({ where: { tournamentId: id } });
     await tx.round.deleteMany({ where: { tournamentId: id } });
     await tx.bracket.deleteMany({ where: { tournamentId: id } });
+    // Delete group data (GROUP/COMBINED formats) — participants cascade from group delete
+    const groups = await tx.group.findMany({ where: { tournamentId: id }, select: { id: true } });
+    if (groups.length > 0) {
+      const groupIds = groups.map(g => g.id);
+      await tx.groupTieResolution.deleteMany({ where: { groupId: { in: groupIds } } });
+      await tx.groupParticipant.deleteMany({ where: { groupId: { in: groupIds } } });
+      await tx.group.deleteMany({ where: { tournamentId: id } });
+    }
     return tx.tournament.update({
       where: { id },
       data: { status: 'SCHEDULED', registrationClosed: false }

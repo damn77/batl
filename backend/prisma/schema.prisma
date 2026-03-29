@@ -92,6 +92,7 @@ enum BracketType {
   MAIN
   CONSOLATION
   PLACEMENT
+  SECONDARY // Phase 30: secondary combined-format bracket
 }
 
 enum MatchGuaranteeType {
@@ -442,6 +443,7 @@ model Group {
   tournament        Tournament         @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   matches           Match[]
   groupParticipants GroupParticipant[]
+  tieResolution     GroupTieResolution?
 
   // Constraints
   @@unique([tournamentId, groupNumber])
@@ -540,22 +542,39 @@ model Match {
 }
 
 model GroupParticipant {
-  id           String @id @default(uuid())
-  groupId      String // Foreign key to Group
-  playerId     String // Foreign key to PlayerProfile
-  seedPosition Int? // Seeding position (placeholder for future)
+  id           String  @id @default(uuid())
+  groupId      String  // Foreign key to Group
+  playerId     String? // Foreign key to PlayerProfile (nullable for doubles)
+  pairId       String? // Foreign key to DoublesPair (for doubles tournaments)
+  seedPosition Int?    // Seeding position within the tournament draw
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relationships
-  group  Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  player PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  group  Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  player PlayerProfile? @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  pair   DoublesPair?   @relation(fields: [pairId], references: [id], onDelete: Cascade)
 
   // Constraints
   @@unique([groupId, playerId])
+  @@unique([groupId, pairId])
   @@index([groupId])
   @@index([playerId])
+  @@index([pairId])
+}
+
+model GroupTieResolution {
+  id               String   @id @default(uuid())
+  groupId          String   @unique // One override per group
+  positions        String   // JSON: [{ entityId: string, position: number }]
+  resultSnapshotAt DateTime // Latest match completedAt when override was saved
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
 }
 
 // Doubles Pair Management Models (006-doubles-pairs)
@@ -584,6 +603,9 @@ model DoublesPair {
 
   // Phase 5 Relationships (05-loser-routing-and-consolation-progression)
   consolationOptOuts ConsolationOptOut[]
+
+  // Group Formation Relationships (27-group-formation)
+  groupParticipants GroupParticipant[]
 
   // Constraints
   @@unique([player1Id, player2Id, categoryId]) // Prevents duplicate pairs in same category

@@ -133,6 +133,9 @@ const MatchResultModal = ({ match, onClose, isOrganizer, isParticipant: _isParti
    */
   const runDryRunIfNeeded = async (matchId, resultData, winnerChanging) => {
     if (!winnerChanging) return false;
+    // Skip dry-run for group matches — no bracket cascade exists (roundId=null),
+    // so dry-run would always return 0 impacted matches. Saves a network round-trip.
+    if (match?.groupId) return false;
 
     const dryRunResult = await submitMatchResultDryRun(matchId, resultData);
     if (dryRunResult.requiresConfirmation) {

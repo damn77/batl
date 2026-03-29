@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Table, Spinner, Alert, Card, Badge } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import NavBar from '../components/NavBar';
 import { listTournaments } from '../services/tournamentService';
 
@@ -11,6 +12,12 @@ const TournamentsListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const formatLabel = (formatType) => {
+    const key = formatType?.toLowerCase();
+    return key ? t(`tournament.formats.${key}`) : '-';
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +77,7 @@ const TournamentsListPage = () => {
                   <tr>
                     <th>Tournament</th>
                     <th>Category</th>
+                    <th>Format</th>
                     <th>End Date</th>
                   </tr>
                 </thead>
@@ -82,6 +90,7 @@ const TournamentsListPage = () => {
                         </Link>
                       </td>
                       <td>{tournament.category?.name || '-'}</td>
+                      <td>{formatLabel(tournament.formatType)}</td>
                       <td>
                         {tournament.endDate
                           ? new Date(tournament.endDate).toLocaleDateString()
@@ -105,9 +114,14 @@ const TournamentsListPage = () => {
                   <Card.Body className="py-2 px-3">
                     <div className="d-flex justify-content-between align-items-start">
                       <strong>{tournament.name}</strong>
-                      <Badge bg="secondary" className="ms-2">
-                        {tournament.category?.name || '-'}
-                      </Badge>
+                      <div className="d-flex gap-1 ms-2">
+                        <Badge bg="secondary">
+                          {tournament.category?.name || '-'}
+                        </Badge>
+                        <Badge bg="info">
+                          {formatLabel(tournament.formatType)}
+                        </Badge>
+                      </div>
                     </div>
                     <div className="text-muted small mt-1">
                       {tournament.endDate

@@ -1,5 +1,5 @@
 // T072, T088-T091: Format Visualization Wrapper - Selects correct visualization with lazy loading
-import { Alert, Spinner, Tab, Nav } from 'react-bootstrap';
+import { Alert, Spinner, Tab, Nav, Accordion, ProgressBar } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useFormatStructure, useMatches } from '../services/tournamentViewService';
 import { useAuth } from '../utils/AuthContext';
@@ -9,6 +9,7 @@ import SwissRoundPairings from './SwissRoundPairings';
 import CombinedFormatDisplay from './CombinedFormatDisplay';
 import ExpandableSection from './ExpandableSection';
 import BracketGenerationSection from './BracketGenerationSection';
+import GroupDrawGenerationSection from './GroupDrawGenerationSection';
 
 /**
  * FormatVisualization - Main wrapper that selects correct visualization based on formatType
@@ -36,19 +37,42 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
 
   // For organizer KNOCKOUT view: fetch matches from ALL brackets so BracketGenerationSection
   // slot dropdowns include both MAIN and CONSOLATION bracket rounds.
+  // Also fetch for GROUP and COMBINED formats to compute per-group progress bars and groupsComplete.
   const hasBrackets = !!(structure?.brackets && structure.brackets.length > 0);
+  const hasGroups = !!(structure?.groups && structure.groups.length > 0);
   const { matches, mutate: mutateMatches } = useMatches(
     tournament?.id,
     {},
-    hasBrackets
+    hasBrackets || hasGroups
   );
+
+  // Compute whether all group matches are COMPLETED or CANCELLED
+  const computeGroupsComplete = (allMatches, groups) => {
+    if (!allMatches || !groups || groups.length === 0) return false;
+    const groupIds = new Set(groups.map(g => g.id));
+    const groupMatches = allMatches.filter(m => m.groupId && groupIds.has(m.groupId));
+    if (groupMatches.length === 0) return false;
+    return groupMatches.every(m => m.status === 'COMPLETED' || m.status === 'CANCELLED');
+  };
+
+  // Compute completion percentage for a single group
+  const computeGroupCompletionPct = (allMatches, groupId) => {
+    if (!allMatches) return 0;
+    const groupMatches = allMatches.filter(m => m.groupId === groupId);
+    if (groupMatches.length === 0) return 0;
+    const completed = groupMatches.filter(m => m.status === 'COMPLETED' || m.status === 'CANCELLED').length;
+    return Math.round((completed / groupMatches.length) * 100);
+  };
 
   if (!tournament) return null;
 
   const formatType = tournament.formatType;
 
   const sortedBrackets = structure?.brackets
-    ? [...structure.brackets].sort((a, b) => a.bracketType === 'MAIN' ? -1 : b.bracketType === 'MAIN' ? 1 : 0)
+    ? [...structure.brackets].sort((a, b) => {
+        const order = { MAIN: 0, SECONDARY: 1, CONSOLATION: 2, PLACEMENT: 3 };
+        return (order[a.bracketType] ?? 99) - (order[b.bracketType] ?? 99);
+      })
     : [];
 
   return (
@@ -76,23 +100,60 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
         <>
           {formatType === 'GROUP' && (
             <div className="d-flex flex-column gap-4">
-              {structure.groups?.map(group => (
-                <ExpandableSection
-                  key={group.id}
-                  title={group.name || `Group ${group.groupNumber}`}
-                  badge={<span className="badge bg-secondary">{t('components.formatVisualization.playersCount', { count: group.players?.length || 0 })}</span>}
-                  defaultExpanded={false}
-                >
-                  <GroupStandingsTable
-                    tournamentId={tournament.id}
-                    group={group}
-                  />
-                </ExpandableSection>
-              ))}
-              {(!structure.groups || structure.groups.length === 0) && (
-                <Alert variant="info">
-                  {t('components.formatVisualization.emptyStates.noGroups')}
-                </Alert>
+              {isOrganizerOrAdmin && (tournament.status === 'SCHEDULED' || (tournament.status === 'IN_PROGRESS' && !(structure?.groups?.length > 0))) ? (
+                /* Organizer/Admin SCHEDULED or IN_PROGRESS-without-groups: full draw workflow */
+                <GroupDrawGenerationSection
+                  tournament={tournament}
+                  mutateTournament={mutateTournament}
+                  mutateFormatStructure={mutateFormatStructure}
+                  mutateMatches={mutateMatches}
+                  structure={structure}
+                  matches={matches}
+                  registrationVersion={registrationVersion}
+                />
+              ) : (
+                /* Everyone else (or organizer for IN_PROGRESS/COMPLETED with groups): group standings view */
+                <>
+                  {structure.groups?.length > 0 ? (
+                    <Accordion defaultActiveKey={tournament.status === 'IN_PROGRESS' ? structure.groups[0]?.id : null}>
+                      {structure.groups.map(group => (
+                        <Accordion.Item key={group.id} eventKey={group.id}>
+                          <Accordion.Header>
+                            <div style={{ flexGrow: 1, marginRight: '1rem' }}>
+                              <div className="d-flex align-items-center gap-2">
+                                <span className="fw-bold">{group.name || `Group ${group.groupNumber}`}</span>
+                                <span className="badge bg-secondary">
+                                  {group.pairs?.length > 0
+                                    ? `${group.pairs.length} pairs`
+                                    : `${group.players?.length || 0} players`}
+                                </span>
+                              </div>
+                              <ProgressBar
+                                now={computeGroupCompletionPct(matches, group.id)}
+                                variant="success"
+                                style={{ height: '4px', marginTop: '4px' }}
+                              />
+                            </div>
+                          </Accordion.Header>
+                          <Accordion.Body>
+                            <GroupStandingsTable
+                              tournamentId={tournament.id}
+                              group={group}
+                              isOrganizer={isOrganizerOrAdmin}
+                              currentUserPlayerId={currentUserPlayerId}
+                              scoringRules={tournament.defaultScoringRules}
+                              tournamentStatus={tournament.status}
+                            />
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))}
+                    </Accordion>
+                  ) : (
+                    <Alert variant="info">
+                      {t('components.formatVisualization.emptyStates.noGroups')}
+                    </Alert>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -142,7 +203,7 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
                               eventKey={bracket.id}
                               style={bracket.bracketType === 'CONSOLATION' ? { backgroundColor: '#fff8f0' } : undefined}
                             >
-                              {bracket.name || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : 'Main Bracket')}
+                              {bracket.name || bracket.placementRange || (bracket.bracketType === 'CONSOLATION' ? 'Consolation Bracket' : bracket.bracketType === 'SECONDARY' ? 'Secondary Bracket' : 'Main Bracket')}
                             </Nav.Link>
                           </Nav.Item>
                         ))}
@@ -185,12 +246,59 @@ const FormatVisualization = ({ tournament, mutateTournament, registrationVersion
           )}
 
           {formatType === 'COMBINED' && (
-            <CombinedFormatDisplay
-              tournamentId={tournament.id}
-              groups={structure.groups || []}
-              brackets={structure.brackets || []}
-              rounds={structure.rounds || []}
-            />
+            <div className="d-flex flex-column gap-4">
+              {isOrganizerOrAdmin && tournament.status === 'SCHEDULED' && !(structure?.groups?.length > 0) ? (
+                /* Organizer SCHEDULED without groups: group draw generation first */
+                <GroupDrawGenerationSection
+                  tournament={tournament}
+                  mutateTournament={mutateTournament}
+                  mutateFormatStructure={mutateFormatStructure}
+                  mutateMatches={mutateMatches}
+                  structure={structure}
+                  matches={matches}
+                  registrationVersion={registrationVersion}
+                />
+              ) : isOrganizerOrAdmin && tournament.status === 'SCHEDULED' && structure?.groups?.length > 0 ? (
+                /* Organizer SCHEDULED with groups generated: draw section (swap/regenerate) + combined view */
+                <>
+                  <GroupDrawGenerationSection
+                    tournament={tournament}
+                    mutateTournament={mutateTournament}
+                    mutateFormatStructure={mutateFormatStructure}
+                    mutateMatches={mutateMatches}
+                    structure={structure}
+                    matches={matches}
+                    registrationVersion={registrationVersion}
+                  />
+                  <CombinedFormatDisplay
+                    tournamentId={tournament.id}
+                    tournament={tournament}
+                    groups={structure.groups || []}
+                    brackets={structure.brackets || []}
+                    rounds={structure.rounds || []}
+                    isOrganizer={isOrganizerOrAdmin}
+                    currentUserPlayerId={currentUserPlayerId}
+                    scoringRules={tournament.defaultScoringRules}
+                    groupsComplete={computeGroupsComplete(matches, structure.groups)}
+                    allMatches={matches}
+                  />
+                </>
+              ) : (
+                /* Everyone else: combined format display */
+                <CombinedFormatDisplay
+                  tournamentId={tournament.id}
+                  tournament={tournament}
+                  groups={structure.groups || []}
+                  brackets={structure.brackets || []}
+                  rounds={structure.rounds || []}
+                  isOrganizer={isOrganizerOrAdmin}
+                  currentUserPlayerId={currentUserPlayerId}
+                  scoringRules={tournament.defaultScoringRules}
+                  groupsComplete={computeGroupsComplete(matches, structure.groups)}
+                  allMatches={matches}
+                />
+              )}
+            </div>
           )}
 
           {!['GROUP', 'KNOCKOUT', 'SWISS', 'COMBINED'].includes(formatType) && (

@@ -50,6 +50,7 @@ export async function startTournament(tournamentId) {
     select: {
       id: true,
       status: true,
+      formatType: true,
       categoryId: true,
       category: { select: { type: true } }
     }
@@ -67,97 +68,121 @@ export async function startTournament(tournamentId) {
     );
   }
 
-  // --- Bracket integrity check (DRAW-06) ---
   const categoryType = tournament.category?.type;
   const isDoubles = categoryType === 'DOUBLES';
 
-  // Load all registered entities for this tournament
-  let registeredIds;
-  if (isDoubles) {
-    const pairRegs = await prisma.pairRegistration.findMany({
-      where: { tournamentId, status: 'REGISTERED' },
-      select: { pairId: true }
+  // --- Format-specific readiness checks ---
+  if (tournament.formatType === 'GROUP' || tournament.formatType === 'COMBINED') {
+    // GROUP and COMBINED formats start with group stage — require groups, not brackets
+    const groupCount = await prisma.group.count({ where: { tournamentId } });
+    if (groupCount === 0) {
+      throwError(400, 'NO_GROUPS', 'No groups have been generated for this tournament. Generate the group draw first.');
+    }
+
+    // Verify group matches exist
+    const groupIds = (await prisma.group.findMany({
+      where: { tournamentId },
+      select: { id: true }
+    })).map(g => g.id);
+
+    const matchCount = await prisma.match.count({
+      where: { groupId: { in: groupIds } }
     });
-    registeredIds = pairRegs.map(r => r.pairId);
+
+    if (matchCount === 0) {
+      throwError(400, 'NO_MATCHES', 'Groups exist but no matches have been generated.');
+    }
   } else {
-    const playerRegs = await prisma.tournamentRegistration.findMany({
-      where: { tournamentId, status: 'REGISTERED' },
-      select: { playerId: true }
-    });
-    registeredIds = playerRegs.map(r => r.playerId);
-  }
+    // KNOCKOUT (and other bracket-first formats) — bracket integrity check (DRAW-06)
 
-  // Find the MAIN bracket
-  const mainBracket = await prisma.bracket.findFirst({
-    where: { tournamentId, bracketType: 'MAIN' }
-  });
-
-  if (!mainBracket) {
-    throwError(400, 'NO_BRACKET', 'No bracket has been generated for this tournament');
-  }
-
-  // Find Round 1
-  const round1 = await prisma.round.findFirst({
-    where: { bracketId: mainBracket.id, roundNumber: 1 }
-  });
-
-  if (!round1) {
-    throwError(400, 'NO_BRACKET', 'No bracket has been generated for this tournament');
-  }
-
-  // Load ALL Round 1 matches (for placed-entities check including BYE matches)
-  const allRound1Matches = await prisma.match.findMany({
-    where: { roundId: round1.id },
-    select: { player1Id: true, player2Id: true, pair1Id: true, pair2Id: true, isBye: true }
-  });
-
-  // Collect all entity IDs placed in Round 1 (both slots of all matches)
-  const placedIds = [];
-  for (const match of allRound1Matches) {
+    // Load all registered entities for this tournament
+    let registeredIds;
     if (isDoubles) {
-      if (match.pair1Id) placedIds.push(match.pair1Id);
-      if (match.pair2Id) placedIds.push(match.pair2Id);
+      const pairRegs = await prisma.pairRegistration.findMany({
+        where: { tournamentId, status: 'REGISTERED' },
+        select: { pairId: true }
+      });
+      registeredIds = pairRegs.map(r => r.pairId);
     } else {
-      if (match.player1Id) placedIds.push(match.player1Id);
-      if (match.player2Id) placedIds.push(match.player2Id);
+      const playerRegs = await prisma.tournamentRegistration.findMany({
+        where: { tournamentId, status: 'REGISTERED' },
+        select: { playerId: true }
+      });
+      registeredIds = playerRegs.map(r => r.playerId);
     }
-  }
 
-  // Check integrity: every non-BYE Round 1 slot must be filled
-  const nonByeMatches = allRound1Matches.filter(m => !m.isBye);
-  const emptySlotMatches = nonByeMatches.filter(m => {
-    if (isDoubles) return !m.pair1Id || !m.pair2Id;
-    return !m.player1Id || !m.player2Id;
-  });
+    // Find the MAIN bracket
+    const mainBracket = await prisma.bracket.findFirst({
+      where: { tournamentId, bracketType: 'MAIN' }
+    });
 
-  // Find registered entities that are NOT placed anywhere in the bracket
-  const placedSet = new Set(placedIds);
-  const unplacedList = registeredIds.filter(id => !placedSet.has(id));
-
-  // Check for duplicate placements (entity in multiple positions)
-  const seenIds = new Set();
-  const duplicateIds = [];
-  for (const id of placedIds) {
-    if (seenIds.has(id)) {
-      if (!duplicateIds.includes(id)) duplicateIds.push(id);
-    } else {
-      seenIds.add(id);
+    if (!mainBracket) {
+      throwError(400, 'NO_BRACKET', 'No bracket has been generated for this tournament');
     }
-  }
 
-  // If any integrity check fails, throw INCOMPLETE_BRACKET
-  if (emptySlotMatches.length > 0 || unplacedList.length > 0 || duplicateIds.length > 0) {
-    const err = new Error('Bracket is incomplete — not all players/pairs are placed');
-    err.statusCode = 400;
-    err.code = 'INCOMPLETE_BRACKET';
-    err.details = {
-      unplacedPlayers: unplacedList.map(id => ({ id })),
-      duplicatePlacements: duplicateIds.map(id => ({ id })),
-      emptySlotCount: emptySlotMatches.length,
-      placedCount: placedSet.size,
-      totalRequired: registeredIds.length
-    };
-    throw err;
+    // Find Round 1
+    const round1 = await prisma.round.findFirst({
+      where: { bracketId: mainBracket.id, roundNumber: 1 }
+    });
+
+    if (!round1) {
+      throwError(400, 'NO_BRACKET', 'No bracket has been generated for this tournament');
+    }
+
+    // Load ALL Round 1 matches (for placed-entities check including BYE matches)
+    const allRound1Matches = await prisma.match.findMany({
+      where: { roundId: round1.id },
+      select: { player1Id: true, player2Id: true, pair1Id: true, pair2Id: true, isBye: true }
+    });
+
+    // Collect all entity IDs placed in Round 1 (both slots of all matches)
+    const placedIds = [];
+    for (const match of allRound1Matches) {
+      if (isDoubles) {
+        if (match.pair1Id) placedIds.push(match.pair1Id);
+        if (match.pair2Id) placedIds.push(match.pair2Id);
+      } else {
+        if (match.player1Id) placedIds.push(match.player1Id);
+        if (match.player2Id) placedIds.push(match.player2Id);
+      }
+    }
+
+    // Check integrity: every non-BYE Round 1 slot must be filled
+    const nonByeMatches = allRound1Matches.filter(m => !m.isBye);
+    const emptySlotMatches = nonByeMatches.filter(m => {
+      if (isDoubles) return !m.pair1Id || !m.pair2Id;
+      return !m.player1Id || !m.player2Id;
+    });
+
+    // Find registered entities that are NOT placed anywhere in the bracket
+    const placedSet = new Set(placedIds);
+    const unplacedList = registeredIds.filter(id => !placedSet.has(id));
+
+    // Check for duplicate placements (entity in multiple positions)
+    const seenIds = new Set();
+    const duplicateIds = [];
+    for (const id of placedIds) {
+      if (seenIds.has(id)) {
+        if (!duplicateIds.includes(id)) duplicateIds.push(id);
+      } else {
+        seenIds.add(id);
+      }
+    }
+
+    // If any integrity check fails, throw INCOMPLETE_BRACKET
+    if (emptySlotMatches.length > 0 || unplacedList.length > 0 || duplicateIds.length > 0) {
+      const err = new Error('Bracket is incomplete — not all players/pairs are placed');
+      err.statusCode = 400;
+      err.code = 'INCOMPLETE_BRACKET';
+      err.details = {
+        unplacedPlayers: unplacedList.map(id => ({ id })),
+        duplicatePlacements: duplicateIds.map(id => ({ id })),
+        emptySlotCount: emptySlotMatches.length,
+        placedCount: placedSet.size,
+        totalRequired: registeredIds.length
+      };
+      throw err;
+    }
   }
 
   // All checks passed — transition to IN_PROGRESS
@@ -325,6 +350,27 @@ export async function checkAndCompleteTournament(tx, tournamentId, isOrganizer) 
   });
 
   if (incompleteCount === 0) {
+    // COMBINED format guard: if no knockout bracket exists, group stage is done
+    // but tournament must stay IN_PROGRESS until knockout is generated and played
+    const tournament = await tx.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { formatType: true }
+    });
+
+    if (tournament?.formatType === 'COMBINED') {
+      // Phase 30: multi-bracket completion guard
+      // Count all brackets for this tournament (may include MAIN + SECONDARY)
+      const bracketCount = await tx.bracket.count({
+        where: { tournamentId }
+      });
+      if (bracketCount === 0) {
+        return; // Group stage complete but knockout not yet generated -- stay IN_PROGRESS
+      }
+      // If any brackets exist, the existing incompleteCount check (above) already
+      // ensures all non-BYE matches across ALL brackets are complete before reaching here.
+      // No additional per-bracket check needed.
+    }
+
     await tx.tournament.update({
       where: { id: tournamentId },
       data: {

@@ -1,0 +1,35 @@
+/* CrossTable — N x N head-to-head match results grid styles */
+/* Phase 30.1: Group Standings Cross-Table with Match Results Grid */
+
+.cross-table {
+  font-size: 0.8125rem; /* 13px — matches --font-size-sm */
+}
+
+.cross-table-header {
+  padding: 4px 8px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.cross-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Diagonal cell — greyed out, non-interactive */
+.cross-table-diagonal {
+  background-color: #f0f0f0;
+  cursor: default !important;
+}
+
+/* Keyboard focus indicator for interactive cells */
+.cross-table-cell:focus {
+  outline: 2px solid #0d6efd;
+  outline-offset: -2px;
+}
+
+/* Cross-highlight — bidirectional hover between cell and match list row */
+.cross-highlight {
+  background-color: #e8f4fd !important;
+}

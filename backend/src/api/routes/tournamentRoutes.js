@@ -261,7 +261,9 @@ router.put(
  * T019: POST /api/v1/tournaments/:id/calculate-points
  * Calculate and award points for tournament participants
  * Authorization: ADMIN or ORGANIZER roles required
- * Body: { results: [{playerId/pairId, placement?, finalRoundReached?}] }
+ *
+ * GROUP/COMBINED format: no body required — results auto-derived from group standings
+ * KNOCKOUT format: body required { results: [{playerId/pairId, placement?, finalRoundReached?}] }
  */
 router.post(
   '/:id/calculate-points',
@@ -270,14 +272,16 @@ router.post(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { results } = req.body;
-      const { awardPointsSinglesTournament, awardPointsDoublesTournament, deriveConsolationResults } = await import('../../services/pointCalculationService.js');
-
-      if (!results || !Array.isArray(results) || results.length === 0) {
-        return res.status(400).json({
-          error: 'Results array is required and must not be empty'
-        });
-      }
+      const {
+        awardPointsSinglesTournament,
+        awardPointsDoublesTournament,
+        deriveConsolationResults,
+        deriveGroupResults,
+        deriveKnockoutResults,
+        awardGroupPointsSingles,
+        awardGroupPointsDoubles,
+        computeTierOffsets
+      } = await import('../../services/pointCalculationService.js');
 
       // Get tournament with category and point config
       const tournament = await prisma.tournament.findUnique({
@@ -298,6 +302,143 @@ router.post(
         multiplicativeValue: 2,
         doublePointsEnabled: false
       };
+
+      const formatType = tournament.formatType;
+
+      // ── GROUP / COMBINED: auto-derive results from group standings ──
+      if (formatType === 'GROUP' || formatType === 'COMBINED') {
+        const isDoubles = tournament.category.type !== 'SINGLES';
+        const awardGroupFn = isDoubles ? awardGroupPointsDoubles : awardGroupPointsSingles;
+
+        // Auto-derive group results (throws UNRESOLVED_TIES if ties remain)
+        let groupResults;
+        try {
+          groupResults = await deriveGroupResults(id);
+        } catch (err) {
+          if (err.code === 'UNRESOLVED_TIES') {
+            return res.status(400).json({
+              success: false,
+              error: {
+                code: 'UNRESOLVED_TIES',
+                message: err.message,
+                details: err.details
+              }
+            });
+          }
+          throw err;
+        }
+
+        if (formatType === 'GROUP') {
+          // GROUP-only: all participants get group placement points, no offset needed
+          const awarded = await awardGroupFn(id, groupResults, pointConfig, 0);
+          return res.json({
+            success: true,
+            data: {
+              message: 'Points calculated and awarded successfully',
+              tournamentId: id,
+              resultsCount: awarded.length,
+              calculationMethod: 'PLACEMENT'
+            }
+          });
+        }
+
+        // ── COMBINED: partition advancing vs non-advancing ──
+
+        // Get all brackets (MAIN and SECONDARY)
+        const brackets = await prisma.bracket.findMany({
+          where: { tournamentId: id },
+          select: { id: true, bracketType: true }
+        });
+
+        // Gather all entity IDs that appear in any bracket match
+        const bracketMatches = await prisma.match.findMany({
+          where: { tournamentId: id, bracketId: { not: null } },
+          select: {
+            player1Id: true,
+            player2Id: true,
+            pair1Id: true,
+            pair2Id: true,
+            bracket: { select: { bracketType: true } }
+          }
+        });
+
+        // Build sets of advancing entity IDs per bracket type
+        const advancedToMain = new Set();
+        const advancedToSecondary = new Set();
+        for (const m of bracketMatches) {
+          const ids = isDoubles
+            ? [m.pair1Id, m.pair2Id].filter(Boolean)
+            : [m.player1Id, m.player2Id].filter(Boolean);
+          if (m.bracket.bracketType === 'MAIN') ids.forEach(entityId => advancedToMain.add(entityId));
+          if (m.bracket.bracketType === 'SECONDARY') ids.forEach(entityId => advancedToSecondary.add(entityId));
+        }
+        const allAdvanced = new Set([...advancedToMain, ...advancedToSecondary]);
+
+        // Filter group results to non-advancing players only
+        const nonAdvancingGroupResults = groupResults
+          .map(gr => ({
+            ...gr,
+            results: gr.results.filter(r => {
+              const entityId = isDoubles ? r.pairId : r.playerId;
+              return !allAdvanced.has(entityId);
+            })
+          }))
+          .filter(gr => gr.results.length > 0);
+
+        // Compute tier offsets (D-07): worst main > best secondary > best group
+        const largestGroupSize = Math.max(...groupResults.map(gr => gr.groupSize));
+        const secondaryBracketSize = advancedToSecondary.size;
+        const offsets = computeTierOffsets(largestGroupSize, pointConfig, secondaryBracketSize);
+
+        const allAwarded = [];
+
+        // Award group placement points to non-advancing players (no offset)
+        if (nonAdvancingGroupResults.length > 0) {
+          const groupAwarded = await awardGroupFn(id, nonAdvancingGroupResults, pointConfig, 0);
+          allAwarded.push(...groupAwarded);
+        }
+
+        // Award knockout points to advancing players, auto-derived from bracket match records
+        for (const bracket of brackets) {
+          const bracketEntityIds = bracket.bracketType === 'MAIN' ? advancedToMain : advancedToSecondary;
+          if (bracketEntityIds.size === 0) continue;
+
+          // Auto-derive knockout results from completed bracket matches (D-05)
+          const knockoutResults = await deriveKnockoutResults(id, bracket.id, isDoubles);
+          if (knockoutResults.length === 0) continue;
+
+          const bracketParticipantCount = bracketEntityIds.size;
+          const offset = bracket.bracketType === 'MAIN' ? offsets.mainOffset : offsets.secondaryOffset;
+
+          // Wrap knockout results as a synthetic group entry to reuse awardGroupFn
+          const syntheticGroupResult = [{
+            groupId: bracket.id,
+            groupSize: bracketParticipantCount,
+            results: knockoutResults
+          }];
+          const koAwarded = await awardGroupFn(id, syntheticGroupResult, pointConfig, offset);
+          allAwarded.push(...koAwarded);
+        }
+
+        return res.json({
+          success: true,
+          data: {
+            message: 'Points calculated and awarded successfully',
+            tournamentId: id,
+            resultsCount: allAwarded.length,
+            calculationMethod: 'PLACEMENT'
+          }
+        });
+      }
+
+      // ── KNOCKOUT format: requires caller-supplied results body ──
+      const { results } = req.body;
+
+      if (!results || !Array.isArray(results) || results.length === 0) {
+        return res.status(400).json({
+          error: 'Results array is required and must not be empty'
+        });
+      }
 
       // For MATCH_2 tournaments using FINAL_ROUND method, automatically derive and
       // include consolation bracket results (server-side, appended after validation)

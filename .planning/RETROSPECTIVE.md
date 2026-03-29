@@ -249,6 +249,57 @@
 
 ---
 
+## Milestone: v1.5 — Group & Combined Tournaments
+
+**Shipped:** 2026-03-29
+**Phases:** 6 | **Plans:** 17 | **Timeline:** 14 days (2026-03-15 → 2026-03-29)
+
+### What Was Built
+
+- Group formation with snake-draft seeding, configurable group count, and round-robin schedule generation (circle method)
+- Group match play with result entry, lifecycle guards, standings tables with differential columns, and accordion visualization
+- 6-level tiebreaker chain (points → set diff → game diff → fewer sets → head-to-head → alphabetical) with Kahn's algorithm cycle detection and manual organizer resolution
+- Combined format advancement: waterfall service with 5-level cross-group ranking, atomic SECONDARY bracket generation, and revert capability
+- N×N head-to-head cross-table with perspective-correct scores, bidirectional cross-highlighting, and responsive tabbed layout
+- Group placement points with knockout supersede for advancing players, GROUP-only tournament lifecycle
+
+### What Worked
+
+- **Backend-authoritative standings**: Moving all standings computation to the backend (Phase 29) and making GroupStandingsTable a pure SWR consumer eliminated client-server divergence and simplified the component significantly
+- **Kahn's algorithm for cycle detection**: Clean topological sort approach — if all entities in a tied subset have in-degree >= 1, the cycle is detected and falls through to set difference, avoiding non-deterministic ordering
+- **Phase 30.1 insertion**: Cross-table added as decimal phase after Phase 30 without disrupting milestone flow — the pattern is well-established by now
+- **Entity abstraction for doubles/singles**: Using an `entities` array in GroupStandingsTable that unifies players and pairs avoided branching throughout the group visualization code
+- **Single audit cycle**: 53/53 requirements passed on first audit with only 1 non-critical gap (dead code) — planning quality continues to improve
+
+### What Was Inefficient
+
+- **window.location.reload() after advancement/revert**: SWR cache invalidation was too complex for format structure changes, so full page reload was used — works but is inelegant and loses scroll position
+- **deleteGroupTieOverride dead code**: The function was exported in tournamentViewService.js but never imported anywhere — the UI uses save/upsert instead. Identified by audit but accepted as tech debt
+- **Phase 30 Plan 04 required 45-minute debug session**: CombinedFormatDisplay wiring was the longest single plan execution in the milestone — complex multi-component integration with bracket display, advancement preview, and revert panel
+
+### Patterns Established
+
+- **SWR hook per domain**: `useGroupStandings` with 5s deduping for active group play — fast enough for real-time feel, low enough for server load
+- **Cross-group ranking with H2H skip**: 5-level tiebreaker for spillover ranking (wins/setDiff/gameDiff/totalGames/name) without head-to-head — players from different groups never played each other
+- **SECONDARY BracketType enum**: Distinct from CONSOLATION to prevent incorrect lifecycle/display branching — advancement brackets have different rules
+- **Symmetric matchLookup for cross-table**: Store both (A,B) and (B,A) references so perspective is determined at render time by comparing rowEntity.id — no direction storage needed
+- **advancementMap via useMemo**: Computed in GroupStandingsTable from standings + advancementConfig + match terminal state — no extra API call
+
+### Key Lessons
+
+1. **Group/round-robin is fundamentally different from knockout** — group stages have no cascading bracket advancement, making them simpler per-match but requiring standings computation, tiebreaker chains, and cross-group ranking that knockout doesn't need.
+2. **Tiebreaker chains need cycle detection from day one** — head-to-head comparison in a round-robin group creates circular relationships (A>B>C>A). Kahn's algorithm is the right tool for detecting these.
+3. **Combined format multiplies complexity** — COMBINED tournaments touch group formation, match play, standings, advancement, bracket generation, and points. Each integration point is simple individually but the total surface area is large.
+4. **Cross-table entity derivation must use match participants, not group roster** — group roster and match participants can diverge; match participants are authoritative.
+
+### Cost Observations
+
+- Model: mixed opus/sonnet (orchestration on opus, execution on sonnet)
+- Sessions: ~8 sessions across 14 days (with calendar gaps)
+- Notable: Largest milestone by requirement count (53) but cleanest audit (1 cycle, 1 non-critical gap). Planning quality matured significantly.
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Phases | Plans | Timeline | Notes |
@@ -258,3 +309,4 @@
 | v1.2 Data Seeding Update | 3 | 5 | 1 day | Data-only; 1 audit, 1 gap closure phase |
 | v1.3 Manual Draw & QoL | 7 | 12 | 2 days | Multi-feature QoL; 1 audit, 2 gap closure phases |
 | v1.4 UI Rework & Mobile Design | 7 | 11 | 10 days | Frontend-only; 1 audit, 1 gap closure phase |
+| v1.5 Group & Combined | 6 | 17 | 14 days | Full-stack; 53 requirements, 1 audit cycle, 1 non-critical gap |
